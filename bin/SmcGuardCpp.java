@@ -23,8 +23,32 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.1  2001/01/03 03:13:59  cwrapp
-// Initial revision
+// Revision 1.2  2001/04/06 19:35:39  cwrapp
+// Checking in release 1.0, beta 5: Fixed bug 412265 (see http://sourceforge.net/projects/smc).
+//
+// Revision 1.1.1.2  2001/03/26 14:41:46  cwrapp
+// Corrected Entry/Exit action semantics. Exit actions are now
+// executed only by simple transitions and pop transitions.
+// Entry actions are executed by simple transitions and push
+// transitions. Loopback transitions do not execute either Exit
+// actions or entry actions. See SMC Programmer's manual for
+// more information.
+//
+// Revision 1.1.1.1  2001/01/03 03:13:59  cwrapp
+//
+// ----------------------------------------------------------------------
+// SMC - The State Map Compiler
+// Version: 1.0, Beta 3
+//
+// SMC compiles state map descriptions into a target object oriented
+// language. Currently supported languages are: C++, Java and [incr Tcl].
+// SMC finite state machines have such features as:
+// + Entry/Exit actions for states.
+// + Transition guards
+// + Transition arguments
+// + Push and Pop transitions.
+// + Default transitions. 
+// ----------------------------------------------------------------------
 //
 // Revision 1.2  2000/09/01 15:32:07  charlesr
 // Changes for v. 1.0, Beta 2:
@@ -63,7 +87,6 @@ public final class SmcGuardCpp
                              String indent)
         throws ParseException
     {
-        int index;
         ListIterator actionIt;
         SmcAction action;
         String indent2;
@@ -77,16 +100,15 @@ public final class SmcGuardCpp
         if (_trans_type != Smc.TRANS_POP &&
             _end_state.length () > 0 &&
             _end_state.compareTo("nil") != 0 &&
-            (index = _end_state.indexOf("::")) < 0)
+            _end_state.indexOf("::") < 0)
         {
             _end_state = mapName + "::" + _end_state;
         }
 
-        // Before doing anything else, perform the current
-        // state's exit actions.
-        if (guardIndex == 0)
+        // Qualify the state name as well.
+        if (stateName.indexOf("::") < 0)
         {
-            source.println("    (s.getState()).Exit(s);");
+            stateName = mapName + "::" + stateName;
         }
 
         // The guard code generation is a bit tricky. The first
@@ -141,6 +163,21 @@ public final class SmcGuardCpp
                 indent2 = "        ";
                 source.println(")\n    {");
             }
+        }
+
+        // Before doing anything else, perform the current
+        // state's exit actions.
+        // v. 1.0, beta 3: Not any more. The exit actions are
+        // executed only if 1) this is a standard, non-loopback
+        // transition or a pop transition.
+        if (guardIndex == 0 &&
+            ((_trans_type == Smc.TRANS_SET &&
+              _end_state.compareTo("nil") != 0 &&
+              _end_state.compareTo(stateName) != 0) ||
+             _trans_type == Smc.TRANS_POP))
+        {
+            source.println(indent +
+                           "(s.getState()).Exit(s);");
         }
 
         // Now that the necessary conditions are in place, it's
@@ -255,8 +292,17 @@ public final class SmcGuardCpp
         // if it does not.
 
         // Perform the new state's entry actions.
-        source.println(indent2 +
-                       "(s.getState()).Entry(s);");
+        // v. 1.0, beta 3: Not any more. The entry actions are
+        // executed only if 1) this is a standard, non-loopback
+        // transition or a push transition.
+        if ((_trans_type == Smc.TRANS_SET &&
+              _end_state.compareTo("nil") != 0 &&
+              _end_state.compareTo(stateName) != 0) ||
+             _trans_type == Smc.TRANS_PUSH)
+        {
+            source.println(indent2 +
+                           "(s.getState()).Entry(s);");
+        }
 
         // If there is a transition associated with the pop, then
         // issue that transition here.
