@@ -23,11 +23,22 @@
 #
 # CHANGE LOG
 # $Log$
-# Revision 1.3  2002/02/19 19:52:45  cwrapp
-# Changes in release 1.3.0:
-# Add the following features:
-# + 479555: Added subroutine/method calls as argument types.
-# + 508878: Added %import keyword.
+# Revision 1.4  2002/05/07 00:29:49  cwrapp
+# Changes in release 1.3.2:
+# Add the following feature:
+# + 528321: Modified push transition syntax to be:
+#
+# 	  <transname> <state1>/push(<state2>)  {<actions>}
+#
+# 	  which means "transition to <state1> and then
+# 	  immediately push to <state2>". The current
+# 	  syntax:
+#
+# 	  <transname> push(<state2>)  {<actions>}
+#
+#           is still valid and <state1> is assumed to be "nil".
+#
+# No bug fixes.
 #
 # Revision 1.2  2001/05/09 23:40:02  cwrapp
 # Changes in release 1.0, beta 6:
@@ -66,7 +77,7 @@
 
 TARGET    = checkstring
 
-CXX       = CC
+CXX       = c++
 CPPFLAGS  = -I../../../lib
 SMC       = java -jar ../../../bin/Smc.jar
 SMCFLAGS  = -c++ -g
