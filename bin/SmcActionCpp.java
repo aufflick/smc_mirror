@@ -23,8 +23,21 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.1  2001/01/03 03:13:59  cwrapp
-// Initial revision
+// Revision 1.1.1.1  2001/01/03 03:13:59  cwrapp
+//
+// ----------------------------------------------------------------------
+// SMC - The State Map Compiler
+// Version: 1.0, Beta 3
+//
+// SMC compiles state map descriptions into a target object oriented
+// language. Currently supported languages are: C++, Java and [incr Tcl].
+// SMC finite state machines have such features as:
+// + Entry/Exit actions for states.
+// + Transition guards
+// + Transition arguments
+// + Push and Pop transitions.
+// + Default transitions. 
+// ----------------------------------------------------------------------
 //
 // Revision 1.2  2000/09/01 15:32:05  charlesr
 // Changes for v. 1.0, Beta 2:
