@@ -9,7 +9,7 @@
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
 # 
-# The Original Code is State Map Compiler (SMC).
+# The Original Code is State Machine Compiler (SMC).
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
@@ -23,6 +23,23 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2002/05/07 00:46:22  cwrapp
+# Changes in release 1.3.2:
+# Add the following feature:
+# + 528321: Modified push transition syntax to be:
+#
+# 	  <transname> <state1>/push(<state2>)  {<actions>}
+#
+# 	  which means "transition to <state1> and then
+# 	  immediately push to <state2>". The current
+# 	  syntax:
+#
+# 	  <transname> push(<state2>)  {<actions>}
+#
+#           is still valid and <state1> is assumed to be "nil".
+#
+# No bug fixes.
+#
 # Revision 1.2  2001/11/30 15:17:22  cwrapp
 # Changes in release 1.0.2:
 # + Placed the class files in Smc.jar in the net.sf.smc package.

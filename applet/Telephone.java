@@ -9,7 +9,7 @@
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
-// The Original Code is State Map Compiler (SMC).
+// The Original Code is State Machine Compiler (SMC).
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
@@ -29,6 +29,23 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2002/05/07 00:46:22  cwrapp
+// Changes in release 1.3.2:
+// Add the following feature:
+// + 528321: Modified push transition syntax to be:
+//
+// 	  <transname> <state1>/push(<state2>)  {<actions>}
+//
+// 	  which means "transition to <state1> and then
+// 	  immediately push to <state2>". The current
+// 	  syntax:
+//
+// 	  <transname> push(<state2>)  {<actions>}
+//
+//           is still valid and <state1> is assumed to be "nil".
+//
+// No bug fixes.
+//
 // Revision 1.1  2001/06/26 22:16:23  cwrapp
 // Changes in release 1.0.0:
 // Checking in code for first production release.
@@ -84,7 +101,7 @@ public final class Telephone
         _dialButtons = null;
 
         _playbackThread = null;
-        _statemap = null;
+        _fsm = null;
     }
 
     // Get this applet ready for running.
@@ -104,8 +121,8 @@ public final class Telephone
         // Load user interface.
         _loadUI();
 
-        // Create the state map to drive this object.
-        _statemap = new TelephoneContext(this);
+        // Create the state machine to drive this object.
+        _fsm = new TelephoneContext(this);
 
         return;
     }
@@ -115,7 +132,7 @@ public final class Telephone
     {
         showStatus("Running.");
 
-        _statemap.Start();
+        _fsm.Start();
         return;
     }
 
@@ -124,7 +141,7 @@ public final class Telephone
     {
         showStatus("Stopping.");
 
-        _statemap.Stop();
+        _fsm.Stop();
         return;
     }
 
@@ -138,7 +155,7 @@ public final class Telephone
         _unloadSounds();
         _unloadUI();
 
-        _statemap = null;
+        _fsm = null;
 
         return;
     }
@@ -147,23 +164,23 @@ public final class Telephone
     {
         String name = event.getTimerName();
 
-        if (_statemap != null)
+        if (_fsm != null)
         {
             if (name.compareTo("RingTimer") == 0)
             {
-                _statemap.RingTimer();
+                _fsm.RingTimer();
             }
             else if (name.compareTo("OffHookTimer") == 0)
             {
-                _statemap.OffHookTimer();
+                _fsm.OffHookTimer();
             }
             else if (name.compareTo("LoopTimer") == 0)
             {
-                _statemap.LoopTimer();
+                _fsm.LoopTimer();
             }
             else if (name.compareTo("ClockTimer") == 0)
             {
-                _statemap.ClockTimer();
+                _fsm.ClockTimer();
             }
         }
 
@@ -965,11 +982,11 @@ public final class Telephone
 
                         if (command.compareTo("off hook") == 0)
                         {
-                            _statemap.OffHook();
+                            _fsm.OffHook();
                         }
                         else if (command.compareTo("on hook") == 0)
                         {
-                            _statemap.OnHook();
+                            _fsm.OnHook();
                         }
                         else
                         {
@@ -1009,7 +1026,7 @@ public final class Telephone
                 new ActionListener() {
                     public void actionPerformed(ActionEvent e) 
                     {
-                        _statemap.Digit(e.getActionCommand());
+                        _fsm.Digit(e.getActionCommand());
                     }
                 }
             );
@@ -1240,7 +1257,7 @@ public final class Telephone
     private void _playbackDone(PlaybackThread thread)
     {
         _playbackThread = null;
-        _statemap.PlaybackDone();
+        _fsm.PlaybackDone();
     }
 
     private void _callRoute(int route)
@@ -1248,27 +1265,27 @@ public final class Telephone
         switch (route)
         {
             case EMERGENCY:
-                _statemap.Emergency();
+                _fsm.Emergency();
                 break;
 
             case NYC_TEMP:
-                _statemap.NYCTemp();
+                _fsm.NYCTemp();
                 break;
 
             case TIME:
-                _statemap.Time();
+                _fsm.Time();
                 break;
 
             case DEPOSIT_MONEY:
-                _statemap.DepositMoney();
+                _fsm.DepositMoney();
                 break;
 
             case LINE_BUSY:
-                _statemap.LineBusy();
+                _fsm.LineBusy();
                 break;
 
             case INVALID_NUMBER:
-                _statemap.InvalidNumber();
+                _fsm.InvalidNumber();
                 break;
         }
 
@@ -1278,7 +1295,7 @@ public final class Telephone
 // Member data.
 
     // The telphone state machine.
-    private TelephoneContext _statemap;
+    private TelephoneContext _fsm;
 
     // The type of call being dialed.
     private int _callType;
