@@ -28,6 +28,13 @@
 //
 // Change Log
 // $Log$
+// Revision 1.3  2001/06/16 19:52:43  cwrapp
+// Changes in release 1.0, beta 7:
+// Fixes the minor code generation bugs and introduces a new
+// example Java program (found at examples/Java/EX7). This
+// example program is also a Java applet and can be seen at
+// http://smc.sourceforge.net/SmcDemo.htm.
+//
 // Revision 1.2  2001/05/09 23:40:02  cwrapp
 // Changes in release 1.0, beta 6:
 // Fixes the four following bugs:
@@ -73,7 +80,6 @@
 
 package statemap;
 
-import java.lang.reflect.Method;
 import java.io.Serializable;
 
 // statemap.FSMContext --

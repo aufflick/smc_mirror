@@ -6,7 +6,7 @@
 
 
 + Building & Installing statemap.jar
--------------------------------
+------------------------------------
 
 1. If you have build statemap.jar previously and want to perform
    a complete build, then do

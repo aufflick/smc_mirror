@@ -23,6 +23,13 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2001/06/16 19:52:43  cwrapp
+// Changes in release 1.0, beta 7:
+// Fixes the minor code generation bugs and introduces a new
+// example Java program (found at examples/Java/EX7). This
+// example program is also a Java applet and can be seen at
+// http://smc.sourceforge.net/SmcDemo.htm.
+//
 // Revision 1.2  2001/05/09 23:40:01  cwrapp
 // Changes in release 1.0, beta 6:
 // Fixes the four following bugs:
@@ -195,7 +202,12 @@ public final class SmcTransitionJava
         // transition.
         if (guardCount > 0 && nullConditions == 0)
         {
-            source.println("}\n" +
+            if (guardCount == 1)
+            {
+                source.println("}");
+            }
+
+            source.println("\n" +
                            indent +
                            "    else");
             source.println(indent + "    {");
@@ -215,7 +227,7 @@ public final class SmcTransitionJava
             }
             
             source.println(");");
-            source.println(indent + "    }");
+            source.println(indent + "    }\n");
         }
         else if (nullConditions > 1)
         {
@@ -233,12 +245,12 @@ public final class SmcTransitionJava
             throw(e);
         }
         // Need to add a final newline after a multiguard block.
-        else if (guardCount > 0)
+        else if (guardCount > 1)
         {
-            source.println();
+            source.println("\n");
         }
 
-        source.println("\n" + indent + "    return;");
+        source.println(indent + "    return;");
         source.println(indent + "}");
 
         return;

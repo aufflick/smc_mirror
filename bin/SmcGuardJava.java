@@ -23,6 +23,13 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2001/06/16 19:52:43  cwrapp
+// Changes in release 1.0, beta 7:
+// Fixes the minor code generation bugs and introduces a new
+// example Java program (found at examples/Java/EX7). This
+// example program is also a Java applet and can be seen at
+// http://smc.sourceforge.net/SmcDemo.htm.
+//
 // Revision 1.3  2001/05/09 23:40:01  cwrapp
 // Changes in release 1.0, beta 6:
 // Fixes the four following bugs:
@@ -279,7 +286,7 @@ public final class SmcGuardJava
 
         // Print the setState() call, if necessary. Do NOT
         // generate the set state it:
-        // 1. The transition has not actions AND is a loopback OR
+        // 1. The transition has no actions AND is a loopback OR
         // 2. This is a push or pop transition.
         if (_trans_type == Smc.TRANS_SET &&
             (_actions.size() > 0 ||
@@ -334,7 +341,9 @@ public final class SmcGuardJava
               _end_state.compareTo(stateName) != 0) ||
              _trans_type == Smc.TRANS_PUSH)
         {
-            source.println(indent2 + "(s.getState()).Entry(s);");
+            source.println("\n" +
+                           indent2 +
+                           "(s.getState()).Entry(s);");
         }
 
         // If there is a transition associated with the pop, then
@@ -343,7 +352,8 @@ public final class SmcGuardJava
             _end_state.compareTo("nil") != 0 &&
             _end_state.length() > 0)
         {
-            source.println(indent2 +
+            source.println("\n" +
+                           indent2 +
                            "(s.getState())." +
                            _end_state +
                            "(s);");

@@ -26,8 +26,36 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.1  2001/01/03 03:13:59  cwrapp
-// Initial revision
+// Revision 1.2  2001/06/16 19:52:43  cwrapp
+// Changes in release 1.0, beta 7:
+// Fixes the minor code generation bugs and introduces a new
+// example Java program (found at examples/Java/EX7). This
+// example program is also a Java applet and can be seen at
+// http://smc.sourceforge.net/SmcDemo.htm.
+//
+// Revision 1.1.1.2  2001/03/26 14:41:46  cwrapp
+// Corrected Entry/Exit action semantics. Exit actions are now
+// executed only by simple transitions and pop transitions.
+// Entry actions are executed by simple transitions and push
+// transitions. Loopback transitions do not execute either Exit
+// actions or entry actions. See SMC Programmer's manual for
+// more information.
+//
+// Revision 1.1.1.1  2001/01/03 03:13:59  cwrapp
+//
+// ----------------------------------------------------------------------
+// SMC - The State Map Compiler
+// Version: 1.0, Beta 3
+//
+// SMC compiles state map descriptions into a target object oriented
+// language. Currently supported languages are: C++, Java and [incr Tcl].
+// SMC finite state machines have such features as:
+// + Entry/Exit actions for states.
+// + Transition guards
+// + Transition arguments
+// + Push and Pop transitions.
+// + Default transitions. 
+// ----------------------------------------------------------------------
 //
 // Revision 1.2  2000/09/01 15:32:10  charlesr
 // Changes for v. 1.0, Beta 2:
@@ -48,7 +76,7 @@
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.EOFException;
-// import statemap.state;
+import java.util.HashMap;
 
 public final class SmcLexer
 {
@@ -253,24 +281,15 @@ public final class SmcLexer
     // type to WORD.
     public void checkKeyword()
     {
+        Integer tokenType;
+
         _token.setValue(_token_buffer.toString());
         _stop_flag = true;
 
-        if (_token.getValue().compareTo("Entry") == 0)
+        tokenType = (Integer) _keywordMap.get(_token.getValue());
+        if (tokenType != null)
         {
-            _token.setType(SmcLexer.ENTRY);
-        }
-        else if (_token.getValue().compareTo("Exit") == 0)
-        {
-            _token.setType(SmcLexer.EXIT);
-        }
-        else if (_token.getValue().compareTo("pop") == 0)
-        {
-            _token.setType(SmcLexer.POP);
-        }
-        else if (_token.getValue().compareTo("push") == 0)
-        {
-            _token.setType(SmcLexer.PUSH);
+            _token.setType(tokenType.intValue());
         }
         else if (_token.getValue().length() > 0)
         {
@@ -458,8 +477,10 @@ public final class SmcLexer
     /* package */ static final int ASTERISK = 28;
     /* package */ static final int AMPERSAND = 29;
     /* package */ static final int TOKEN_COUNT = AMPERSAND + 1;
+    private static final int KEYWORD_COUNT = 4;
 
     private static String[] _typeName = null;
+    private static HashMap _keywordMap = null;
 
     static
     {
@@ -494,6 +515,12 @@ public final class SmcLexer
         _typeName[SmcLexer.STRING] = "STRING";
         _typeName[SmcLexer.ASTERISK] = "ASTERISK";
         _typeName[SmcLexer.AMPERSAND] = "AMPERSAND";
+
+        _keywordMap = new HashMap(KEYWORD_COUNT);
+        _keywordMap.put("Entry", new Integer(SmcLexer.ENTRY));
+        _keywordMap.put("Exit", new Integer(SmcLexer.EXIT));
+        _keywordMap.put("pop", new Integer(SmcLexer.POP));
+        _keywordMap.put("push", new Integer(SmcLexer.PUSH));
     }
 
 // INNER CLASSES

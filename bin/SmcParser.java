@@ -23,6 +23,13 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2001/06/16 19:52:43  cwrapp
+// Changes in release 1.0, beta 7:
+// Fixes the minor code generation bugs and introduces a new
+// example Java program (found at examples/Java/EX7). This
+// example program is also a Java applet and can be seen at
+// http://smc.sourceforge.net/SmcDemo.htm.
+//
 // Revision 1.2  2001/05/09 23:40:01  cwrapp
 // Changes in release 1.0, beta 6:
 // Fixes the four following bugs:
@@ -90,9 +97,10 @@ public final class SmcParser
 {
 // Member Methods
 
-    public SmcParser(SmcLexer lexer)
+    public SmcParser(SmcLexer lexer, int language)
     {
         _lexer = lexer;
+        _language = language;
         _parser_map = new SmcParserContext(this);
 
         _token = null;
@@ -113,86 +121,86 @@ public final class SmcParser
             Class[] param_types = new Class[0];
 
             _transMethod[SmcLexer.ENTRY] =
-                    _map_class.getDeclaredMethod("ENTRY",
-                                                 param_types);
+                _map_class.getDeclaredMethod("ENTRY",
+                                             param_types);
             _transMethod[SmcLexer.EXIT] =
-                    _map_class.getDeclaredMethod("EXIT",
-                                                 param_types);
+                _map_class.getDeclaredMethod("EXIT",
+                                             param_types);
             _transMethod[SmcLexer.POP] =
-                    _map_class.getDeclaredMethod("POP",
-                                                 param_types);
+                _map_class.getDeclaredMethod("POP",
+                                             param_types);
             _transMethod[SmcLexer.PUSH] =
-                    _map_class.getDeclaredMethod("PUSH",
-                                                 param_types);
+                _map_class.getDeclaredMethod("PUSH",
+                                             param_types);
             _transMethod[SmcLexer.WORD] =
-                    _map_class.getDeclaredMethod("WORD",
-                                                 param_types);
+                _map_class.getDeclaredMethod("WORD",
+                                             param_types);
             _transMethod[SmcLexer.START_STATE] =
-                    _map_class.getDeclaredMethod("START_STATE",
-                                                 param_types);
+                _map_class.getDeclaredMethod("START_STATE",
+                                             param_types);
             _transMethod[SmcLexer.MAP_NAME] =
-                    _map_class.getDeclaredMethod("MAP_NAME",
-                                                 param_types);
+                _map_class.getDeclaredMethod("MAP_NAME",
+                                             param_types);
             _transMethod[SmcLexer.CLASS_NAME] =
-                    _map_class.getDeclaredMethod("CLASS_NAME",
-                                                 param_types);
+                _map_class.getDeclaredMethod("CLASS_NAME",
+                                             param_types);
             _transMethod[SmcLexer.HEADER_FILE] =
-                    _map_class.getDeclaredMethod("HEADER_FILE",
-                                                 param_types);
+                _map_class.getDeclaredMethod("HEADER_FILE",
+                                             param_types);
             _transMethod[SmcLexer.LEFT_BRACE] =
-                    _map_class.getDeclaredMethod("LEFT_BRACE",
-                                                 param_types);
+                _map_class.getDeclaredMethod("LEFT_BRACE",
+                                             param_types);
             _transMethod[SmcLexer.RIGHT_BRACE] =
-                    _map_class.getDeclaredMethod("RIGHT_BRACE",
-                                                 param_types);
+                _map_class.getDeclaredMethod("RIGHT_BRACE",
+                                             param_types);
             _transMethod[SmcLexer.LEFT_BRACKET] =
-                    _map_class.getDeclaredMethod("LEFT_BRACKET",
-                                                 param_types);
+                _map_class.getDeclaredMethod("LEFT_BRACKET",
+                                             param_types);
             _transMethod[SmcLexer.RIGHT_BRACKET] =
-                    _map_class.getDeclaredMethod("RIGHT_BRACKET",
-                                                 param_types);
+                _map_class.getDeclaredMethod("RIGHT_BRACKET",
+                                             param_types);
             _transMethod[SmcLexer.LEFT_PAREN] =
-                    _map_class.getDeclaredMethod("LEFT_PAREN",
-                                                 param_types);
+                _map_class.getDeclaredMethod("LEFT_PAREN",
+                                             param_types);
             _transMethod[SmcLexer.RIGHT_PAREN] =
-                    _map_class.getDeclaredMethod("RIGHT_PAREN",
-                                                 param_types);
+                _map_class.getDeclaredMethod("RIGHT_PAREN",
+                                             param_types);
             _transMethod[SmcLexer.SEMICOLON] =
-                    _map_class.getDeclaredMethod("SEMICOLON",
-                                                 param_types);
+                _map_class.getDeclaredMethod("SEMICOLON",
+                                             param_types);
             _transMethod[SmcLexer.COLON] =
-                    _map_class.getDeclaredMethod("COLON",
-                                                 param_types);
+                _map_class.getDeclaredMethod("COLON",
+                                             param_types);
             _transMethod[SmcLexer.COMMA] =
-                    _map_class.getDeclaredMethod("COMMA",
-                                                 param_types);
+                _map_class.getDeclaredMethod("COMMA",
+                                             param_types);
             _transMethod[SmcLexer.EXCLAMATION] =
-                    _map_class.getDeclaredMethod("EXCLAMATION",
-                                                 param_types);
+                _map_class.getDeclaredMethod("EXCLAMATION",
+                                             param_types);
             _transMethod[SmcLexer.SOURCE] =
-                    _map_class.getDeclaredMethod("SOURCE",
-                                                 param_types);
+                _map_class.getDeclaredMethod("SOURCE",
+                                             param_types);
             _transMethod[SmcLexer.EOD] =
-                    _map_class.getDeclaredMethod("EOD",
-                                                 param_types);
+                _map_class.getDeclaredMethod("EOD",
+                                             param_types);
             _transMethod[SmcLexer.VARIABLE] =
-                    _map_class.getDeclaredMethod("VARIABLE",
-                                                 param_types);
+                _map_class.getDeclaredMethod("VARIABLE",
+                                             param_types);
             _transMethod[SmcLexer.INTEGER] =
-                    _map_class.getDeclaredMethod("INTEGER",
-                                                 param_types);
+                _map_class.getDeclaredMethod("INTEGER",
+                                             param_types);
             _transMethod[SmcLexer.FLOAT] =
-                    _map_class.getDeclaredMethod("FLOAT",
-                                                 param_types);
+                _map_class.getDeclaredMethod("FLOAT",
+                                             param_types);
             _transMethod[SmcLexer.STRING] =
-                    _map_class.getDeclaredMethod("STRING",
-                                                 param_types);
+                _map_class.getDeclaredMethod("STRING",
+                                             param_types);
             _transMethod[SmcLexer.ASTERISK] =
-                    _map_class.getDeclaredMethod("ASTERISK",
-                                                 param_types);
+                _map_class.getDeclaredMethod("ASTERISK",
+                                             param_types);
             _transMethod[SmcLexer.AMPERSAND] =
-                    _map_class.getDeclaredMethod("AMPERSAND",
-                                                 param_types);
+                _map_class.getDeclaredMethod("AMPERSAND",
+                                             param_types);
         }
         catch (NoSuchMethodException ex1)
         {
@@ -376,6 +384,21 @@ public final class SmcParser
         }
 
         return(retval);
+    }
+
+    public boolean isCpp()
+    {
+        return (_language == Smc.C_PLUS_PLUS);
+    }
+
+    public boolean isJava()
+    {
+        return (_language == Smc.JAVA);
+    }
+
+    public boolean isTcl()
+    {
+        return (_language == Smc.TCL);
     }
 
     public void setHeaderLine()
@@ -1109,6 +1132,9 @@ public final class SmcParser
 
     // Get tokens from the lexer.
     private SmcLexer _lexer;
+
+    // Will be generating code for this language.
+    private int _language;
 
     // The current token.
     SmcLexer.Token _token;

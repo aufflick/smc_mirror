@@ -23,6 +23,13 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2001/06/16 19:52:43  cwrapp
+# Changes in release 1.0, beta 7:
+# Fixes the minor code generation bugs and introduces a new
+# example Java program (found at examples/Java/EX7). This
+# example program is also a Java applet and can be seen at
+# http://smc.sourceforge.net/SmcDemo.htm.
+#
 # Revision 1.1  2001/05/13 16:18:49  cwrapp
 # Initial add to repository.
 #
@@ -44,8 +51,8 @@ STAGING_DIR =	../staging
 
 SMC_STAGING_DIR=$(STAGING_DIR)/smc
 
-TARFILE=	$(STAGING_DIR)/releases/smc_1_0b6.tar
-GZIPFILE=	$(STAGING_DIR)/releases/smc_1_0b6.tgz
+TARFILE=	$(STAGING_DIR)/releases/smc_1_0b7.tar
+GZIPFILE=	$(STAGING_DIR)/releases/smc_1_0b7.tgz
 
 # Copy all products to the staging directory.
 install : $(STAGING_DIR) $(SMC_STAGING_DIR) $(INSTALL_DIRS)
