@@ -29,8 +29,60 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.1  2001/01/03 03:14:00  cwrapp
-// Initial revision
+// Revision 1.2  2001/05/09 23:40:02  cwrapp
+// Changes in release 1.0, beta 6:
+// Fixes the four following bugs:
+// + 416011: SMC does not properly handle pop transitions which
+//           have no argument.
+// + 416013: SMC generated code does not throw a
+//           "Transition Undefined" exception as per Programmer's
+//           Manual.
+// + 416014: The initial state's Entry actions are not being
+//           executed.
+// + 416015: When a transition has both a guarded and an unguarded
+//           definition, the Exit actions are only called when the
+//           guard evaluates to true.
+// + 422795: SMC -tcl abnormally terminates.
+//
+// Revision 1.1.1.2  2001/03/26 14:41:46  cwrapp
+// Corrected Entry/Exit action semantics. Exit actions are now
+// executed only by simple transitions and pop transitions.
+// Entry actions are executed by simple transitions and push
+// transitions. Loopback transitions do not execute either Exit
+// actions or entry actions. See SMC Programmer's manual for
+// more information.
+//
+// $Log$
+// Revision 1.2  2001/05/09 23:40:02  cwrapp
+// Changes in release 1.0, beta 6:
+// Fixes the four following bugs:
+// + 416011: SMC does not properly handle pop transitions which
+//           have no argument.
+// + 416013: SMC generated code does not throw a
+//           "Transition Undefined" exception as per Programmer's
+//           Manual.
+// + 416014: The initial state's Entry actions are not being
+//           executed.
+// + 416015: When a transition has both a guarded and an unguarded
+//           definition, the Exit actions are only called when the
+//           guard evaluates to true.
+// + 422795: SMC -tcl abnormally terminates.
+//
+// Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
+//
+// ----------------------------------------------------------------------
+// SMC - The State Map Compiler
+// Version: 1.0, Beta 3
+//
+// SMC compiles state map descriptions into a target object oriented
+// language. Currently supported languages are: C++, Java and [incr Tcl].
+// SMC finite state machines have such features as:
+// + Entry/Exit actions for states.
+// + Transition guards
+// + Transition arguments
+// + Push and Pop transitions.
+// + Default transitions. 
+// ----------------------------------------------------------------------
 //
 
 #include "AppClient.h"
@@ -44,6 +96,7 @@
 #include <arpa/inet.h>
 #endif
 #include <stdlib.h>
+#include <memory.h>
 
 #if defined(WIN32)
 using namespace std;
@@ -240,16 +293,23 @@ void AppClient::transmitFailed(const char *reason, TcpConnection&)
 // receive(const char*, int, TcpConnection&) (Public)
 // Received data from far end.
 //
-void AppClient::receive(const char *data, int, TcpConnection&)
+void AppClient::receive(const char *data,
+                        int size,
+                        TcpConnection&)
 {
     const sockaddr_in& address = _client_socket->getServerAddress();
+    char *string = new char[size + 1];
+
+    // Turn the data into a string.
+    (void) memcpy(string, data, size);
+    string[size] = '\0';
 
     cout << "Received data from "
          << inet_ntoa(address.sin_addr)
          << ":"
          << ntohs(address.sin_port)
          << ": \""
-         << data
+         << string
          << "\""
          << endl;
 
@@ -339,7 +399,7 @@ void AppClient::handleTimeout(const char *name)
              << message
              << "\" ... ";
 
-        _client_socket->transmit(message, 0, (strlen(message) + 1));
+        _client_socket->transmit(message, 0, strlen(message));
     }
     else if (strcmp(name, "CLOSE_TIMER") == 0)
     {

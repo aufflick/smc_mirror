@@ -48,13 +48,13 @@ Unix:
 
 Windows:
 
-    $ java -classpath ${CLASSPATH};../../../lib/statemap.jar server <port>
+    $ java -classpath "${CLASSPATH};../../../lib/statemap.jar" server <port>
     where <port> is a valid *UDP* port number.
 
     Hit return to terminate the application. This will close all
     client connections and all clients will terminate.
 
-    $ java -classpath ${CLASSPATH};../../../lib/statemap.jar client [-h <host>] -p <port>
+    $ java -classpath "${CLASSPATH};../../../lib/statemap.jar" client [-h <host>] -p <port>
     where <host> is the host machine running the server
                  application (may be omitted if client is running
                  on the same machine).

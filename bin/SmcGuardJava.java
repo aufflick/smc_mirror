@@ -23,6 +23,21 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2001/05/09 23:40:01  cwrapp
+// Changes in release 1.0, beta 6:
+// Fixes the four following bugs:
+// + 416011: SMC does not properly handle pop transitions which
+//           have no argument.
+// + 416013: SMC generated code does not throw a
+//           "Transition Undefined" exception as per Programmer's
+//           Manual.
+// + 416014: The initial state's Entry actions are not being
+//           executed.
+// + 416015: When a transition has both a guarded and an unguarded
+//           definition, the Exit actions are only called when the
+//           guard evaluates to true.
+// + 422795: SMC -tcl abnormally terminates.
+//
 // Revision 1.2  2001/04/06 19:52:37  cwrapp
 // Checking in release 1.0, beta 5: Fixed bug 412265 (see http://sourceforge.net/projects/smc).
 //
@@ -152,7 +167,7 @@ public final class SmcGuardJava
                 // does have a condition. Use an "else if".
                 source.print("\n" +
                              indent +
-                             "     else if (");
+                             "    else if (");
                 _condition.generateCode(source, context, "");
                 source.println(")");
                 source.println(indent + "    {");
@@ -191,14 +206,13 @@ public final class SmcGuardJava
         // v. 1.0, beta 3: Not any more. The exit actions are
         // executed only if 1) this is a standard, non-loopback
         // transition or a pop transition.
-        if (guardIndex == 0 &&
-            ((_trans_type == Smc.TRANS_SET &&
+        if ((_trans_type == Smc.TRANS_SET &&
               _end_state.compareTo("nil") != 0 &&
               _end_state.compareTo(stateName) != 0) ||
-             _trans_type == Smc.TRANS_POP))
+             _trans_type == Smc.TRANS_POP)
         {
-            source.println(indent +
-                           "    (s.getState()).Exit(s);");
+            source.println(indent2 +
+                           "(s.getState()).Exit(s);");
         }
 
         // Now that the necessary conditions are in place, it's
@@ -326,7 +340,8 @@ public final class SmcGuardJava
         // If there is a transition associated with the pop, then
         // issue that transition here.
         if (_trans_type == Smc.TRANS_POP &&
-            _end_state.compareTo("nil") != 0)
+            _end_state.compareTo("nil") != 0 &&
+            _end_state.length() > 0)
         {
             source.println(indent2 +
                            "(s.getState())." +

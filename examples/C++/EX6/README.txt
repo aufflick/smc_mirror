@@ -51,10 +51,10 @@ Unix:
 Windows:
 
     1. Open a new DOS command window.
-    2. C:\> cd ...\src\examples\C++\EX6
+    2. C:\> cd ...\src\examples\C++\EX6\Debug\server
     3. C:\...\src\examples\C++\EX6> server <port #>
     4. Open a new DOS command window.
-    5. C:\> cd ...\src\examples\C++\EX6
+    5. C:\> cd ...\src\examples\C++\EX6\Debug\client
     6. C:\...\src\examples\C++\EX6> client <hostname> <port #>
        where <hostname> is the computer on which the server is
        running.

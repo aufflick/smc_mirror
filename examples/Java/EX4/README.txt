@@ -27,7 +27,7 @@ Unix:
 
 Windows:
 
-    $ java -classpath ${CLASSPATH};../../../lib/statemap.jar Traffic
+    $ java -classpath "${CLASSPATH};../../../lib/statemap.jar" Traffic
 
 Click on the "Configure..." button and modify the demo's
 settings. Increase the vehicle speed and appearance

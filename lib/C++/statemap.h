@@ -42,8 +42,36 @@
 //
 // Change Log
 // $Log$
-// Revision 1.1  2001/01/03 03:14:00  cwrapp
-// Initial revision
+// Revision 1.2  2001/05/09 23:40:02  cwrapp
+// Changes in release 1.0, beta 6:
+// Fixes the four following bugs:
+// + 416011: SMC does not properly handle pop transitions which
+//           have no argument.
+// + 416013: SMC generated code does not throw a
+//           "Transition Undefined" exception as per Programmer's
+//           Manual.
+// + 416014: The initial state's Entry actions are not being
+//           executed.
+// + 416015: When a transition has both a guarded and an unguarded
+//           definition, the Exit actions are only called when the
+//           guard evaluates to true.
+// + 422795: SMC -tcl abnormally terminates.
+//
+// Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
+//
+// ----------------------------------------------------------------------
+// SMC - The State Map Compiler
+// Version: 1.0, Beta 3
+//
+// SMC compiles state map descriptions into a target object oriented
+// language. Currently supported languages are: C++, Java and [incr Tcl].
+// SMC finite state machines have such features as:
+// + Entry/Exit actions for states.
+// + Transition guards
+// + Transition arguments
+// + Push and Pop transitions.
+// + Default transitions. 
+// ----------------------------------------------------------------------
 //
 // Revision 1.1.1.1  2000/08/02 12:50:57  charlesr
 // Initial source import, SMC v. 1.0, Beta 1.
@@ -246,6 +274,12 @@ namespace statemap
             TransEntry *transition;
 #endif
 
+            if (_transition != NULL)
+            {
+                delete[] _transition;
+                _transition = NULL;
+            }
+
             while (_state_stack != NULL)
             {
                 state = _state_stack;
@@ -292,6 +326,15 @@ namespace statemap
         void setDebugFlag(bool flag)
         {
             _debug_flag = flag;
+
+            // If debugging is now off and the transition name
+            // has been stored, then delete the transition.
+            if (_debug_flag == false && _transition != NULL)
+            {
+                delete[] _transition;
+                _transition = NULL;
+            }
+
             return;
         };
 
@@ -300,6 +343,11 @@ namespace statemap
         bool isInTransition() const
         {
             return(_state == NULL ? true : false);
+        };
+
+        char* getTransition()
+        {
+            return (_transition);
         };
 
         // Clear the current state.
@@ -422,12 +470,33 @@ namespace statemap
         FSMContext()
         : _state(NULL),
           _state_stack(NULL),
+          _transition(NULL),
 #ifdef SMC_TRANS_Q
           _trans_queue_head(NULL),
           _trans_queue_tail(NULL),
 #endif
           _debug_flag(false)
         {};
+
+        // Save away the transition name only if
+        // debugging is turned on.
+        void setTransition(const char *transition)
+        {
+            if (_debug_flag == true)
+            {
+                if (_transition != NULL)
+                {
+                    delete[] _transition;
+                    _transition = NULL;
+                }
+
+                if (transition != NULL)
+                {
+                    _transition = new char[strlen(transition) + 1];
+                    (void) strcpy(_transition, transition);
+                }
+            }
+        };
 
     private:
         // I don't believe that it makes sense to copy a
@@ -448,6 +517,10 @@ namespace statemap
         // The stack of pushed states.
         StateEntry *_state_stack;
 
+        // The current transition *name*. Use for debugging
+        // purposes.
+        char *_transition;
+
 #ifdef SMC_TRANS_Q
         // Queued transitions.
         TransEntry *_trans_queue_head;
@@ -460,6 +533,94 @@ namespace statemap
         // out debug messages.
         bool _debug_flag;
     }; // end of class FSMContext
+
+    // This class is thrown when a transition is issued
+    // but there is no current state. This happens when
+    // a transition is issued from within a transition
+    // action.
+    class StateUndefinedException
+    {
+    public:
+
+        // Default constructor.
+        StateUndefinedException() {};
+
+        // Destructor.
+        ~StateUndefinedException() {};
+    };
+
+    // This class is thrown when a transition is issued
+    // but there is no code to handle it.
+    class TransitionUndefinedException
+    {
+    public:
+
+        // Default constructor.
+        TransitionUndefinedException()
+        {
+            _state = NULL;
+            _transition = NULL;
+        };
+
+        // Construct an exception using the specified state
+        // and transition.
+        TransitionUndefinedException(const char *state,
+                                     const char *transition)
+        {
+            if (state == NULL)
+            {
+                _state = NULL;
+            }
+            else
+            {
+                _state = new char[strlen(state) + 1];
+                (void) strcpy(_state, state);
+            }
+
+            if (transition == NULL)
+            {
+                _transition = NULL;
+            }
+            else
+            {
+                _transition = new char[strlen(transition) + 1];
+                (void) strcpy(_transition, transition);
+            }
+        };
+
+        // Destructor.
+        ~TransitionUndefinedException()
+        {
+            if (_state != NULL)
+            {
+                delete[] _state;
+                _state = NULL;
+            }
+
+            if (_transition != NULL)
+            {
+                delete[] _transition;
+                _state = NULL;
+            }
+        };
+
+        // Return the state. May be NULL.
+        char* getState() const
+        {
+            return(_state);
+        };
+
+        // Return the transition. May be NULL.
+        char* getTransition() const
+        {
+            return (_transition);
+        };
+
+	// private
+
+		char *_state;
+		char *_transition;
+	};
 }
 
 #endif

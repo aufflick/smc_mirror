@@ -27,8 +27,44 @@
 #
 # CHANGE LOG
 # $Log$
-# Revision 1.1  2001/01/03 03:14:00  cwrapp
-# Initial revision
+# Revision 1.2  2001/05/09 23:40:02  cwrapp
+# Changes in release 1.0, beta 6:
+# Fixes the four following bugs:
+# + 416011: SMC does not properly handle pop transitions which
+#           have no argument.
+# + 416013: SMC generated code does not throw a
+#           "Transition Undefined" exception as per Programmer's
+#           Manual.
+# + 416014: The initial state's Entry actions are not being
+#           executed.
+# + 416015: When a transition has both a guarded and an unguarded
+#           definition, the Exit actions are only called when the
+#           guard evaluates to true.
+# + 422795: SMC -tcl abnormally terminates.
+#
+# Revision 1.1.1.2  2001/03/26 14:41:47  cwrapp
+# Corrected Entry/Exit action semantics. Exit actions are now
+# executed only by simple transitions and pop transitions.
+# Entry actions are executed by simple transitions and push
+# transitions. Loopback transitions do not execute either Exit
+# actions or entry actions. See SMC Programmer's manual for
+# more information.
+#
+# Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
+#
+# ----------------------------------------------------------------------
+# SMC - The State Map Compiler
+# Version: 1.0, Beta 3
+#
+# SMC compiles state map descriptions into a target object oriented
+# language. Currently supported languages are: C++, Java and [incr Tcl].
+# SMC finite state machines have such features as:
+# + Entry/Exit actions for states.
+# + Transition guards
+# + Transition arguments
+# + Push and Pop transitions.
+# + Default transitions. 
+# ----------------------------------------------------------------------
 #
 # Revision 1.1.1.1  2000/08/02 12:51:05  charlesr
 # Initial source import, SMC v. 1.0, Beta 1.
@@ -523,10 +559,10 @@ class Stoplight {
 		$_canvas create line $X4 $Y5 $X4 $Y4 $X5 $Y4;
 	
 		# Now draw the lane markings.
-		$_canvas create line $X1 $Y3 $X2 $Y3 -dash "-  ";
-		$_canvas create line $X3 $Y1 $X3 $Y2 -dash "-  ";
-		$_canvas create line $X4 $Y3 $X5 $Y3 -dash "-  ";
-		$_canvas create line $X3 $Y4 $X3 $Y5 -dash "-  ";
+		$_canvas create line $X1 $Y3 $X2 $Y3;
+		$_canvas create line $X3 $Y1 $X3 $Y2;
+		$_canvas create line $X4 $Y3 $X5 $Y3;
+		$_canvas create line $X3 $Y4 $X3 $Y5;
 
 		return -code ok;
     }

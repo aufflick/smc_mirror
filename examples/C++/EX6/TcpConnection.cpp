@@ -29,8 +29,36 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.1  2001/01/03 03:14:00  cwrapp
-// Initial revision
+// Revision 1.2  2001/05/09 23:40:02  cwrapp
+// Changes in release 1.0, beta 6:
+// Fixes the four following bugs:
+// + 416011: SMC does not properly handle pop transitions which
+//           have no argument.
+// + 416013: SMC generated code does not throw a
+//           "Transition Undefined" exception as per Programmer's
+//           Manual.
+// + 416014: The initial state's Entry actions are not being
+//           executed.
+// + 416015: When a transition has both a guarded and an unguarded
+//           definition, the Exit actions are only called when the
+//           guard evaluates to true.
+// + 422795: SMC -tcl abnormally terminates.
+//
+// Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
+//
+// ----------------------------------------------------------------------
+// SMC - The State Map Compiler
+// Version: 1.0, Beta 3
+//
+// SMC compiles state map descriptions into a target object oriented
+// language. Currently supported languages are: C++, Java and [incr Tcl].
+// SMC finite state machines have such features as:
+// + Entry/Exit actions for states.
+// + Transition guards
+// + Transition arguments
+// + Push and Pop transitions.
+// + Default transitions. 
+// ----------------------------------------------------------------------
 //
 
 #include "TcpConnection.h"
@@ -53,7 +81,7 @@
 #if defined(WIN32)
 // Get rid of an annoying build warning.
 #pragma warning(disable: 4355)
-#   if defined(_DEBUG)
+#   if defined(SMC_DEBUG)
 using namespace std;
 #   endif
 #endif
@@ -185,7 +213,7 @@ void TcpConnection::handleReceive(int)
                                  _buffer,
                                  totalBytesRead);
 
-#if defined(_DEBUG)
+#if defined(SMC_DEBUG)
         cout << "**** Received segment:\n" << *segment << endl;
 #endif
 
@@ -249,7 +277,7 @@ void TcpConnection::handleReceive(int)
 //
 void TcpConnection::handleTimeout(const char *name)
 {
-#if defined(_DEBUG)
+#if defined(SMC_DEBUG)
     cout << "**** Timer " << name << " has expired." << endl;
 #endif
 
@@ -870,7 +898,7 @@ void TcpConnection::doSend(unsigned short flags,
 
     if (packet != NULL && packet_size > 0)
     {
-#if defined(_DEBUG)
+#if defined(SMC_DEBUG)
         cout << "**** Transmit segment:\n" << *send_segment << endl;
 #endif
 
@@ -909,7 +937,7 @@ void TcpConnection::doSend(unsigned short flags,
 //
 void TcpConnection::startTimer(const char *name, long duration)
 {
-#if defined(_DEBUG)
+#if defined(SMC_DEBUG)
     cout << "**** Starting timer "
          << name
          << ", duration: "
@@ -928,7 +956,7 @@ void TcpConnection::startTimer(const char *name, long duration)
 //
 void TcpConnection::stopTimer(const char* name)
 {
-#if defined(_DEBUG)
+#if defined(SMC_DEBUG)
     cout << "**** Stopping timer " << name << "." << endl;
 #endif
 
@@ -1001,7 +1029,7 @@ TcpConnection::TcpConnection(TcpConnectionListener& listener)
     (void) memset(&_farAddress, 0, sizeof(_farAddress));
     expandBuffer();
 
-#if defined(_DEBUG)
+#if defined(SMC_DEBUG)
     // Turn on state map debug printout.
     _statemap.setDebugFlag(true);
 #endif
@@ -1049,7 +1077,7 @@ TcpConnection::TcpConnection(const sockaddr_in& far_address,
     // Set up the input buffer.
     expandBuffer();
 
-#if defined(_DEBUG)
+#if defined(SMC_DEBUG)
     // Uncomment to turn on state map debug printout.
     _statemap.setDebugFlag(true);
 #endif

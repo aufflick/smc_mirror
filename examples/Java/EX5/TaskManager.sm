@@ -32,8 +32,36 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.1  2001/01/03 03:14:00  cwrapp
-// Initial revision
+// Revision 1.2  2001/05/09 23:40:02  cwrapp
+// Changes in release 1.0, beta 6:
+// Fixes the four following bugs:
+// + 416011: SMC does not properly handle pop transitions which
+//           have no argument.
+// + 416013: SMC generated code does not throw a
+//           "Transition Undefined" exception as per Programmer's
+//           Manual.
+// + 416014: The initial state's Entry actions are not being
+//           executed.
+// + 416015: When a transition has both a guarded and an unguarded
+//           definition, the Exit actions are only called when the
+//           guard evaluates to true.
+// + 422795: SMC -tcl abnormally terminates.
+//
+// Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
+//
+// ----------------------------------------------------------------------
+// SMC - The State Map Compiler
+// Version: 1.0, Beta 3
+//
+// SMC compiles state map descriptions into a target object oriented
+// language. Currently supported languages are: C++, Java and [incr Tcl].
+// SMC finite state machines have such features as:
+// + Entry/Exit actions for states.
+// + Transition guards
+// + Transition arguments
+// + Push and Pop transitions.
+// + Default transitions. 
+// ----------------------------------------------------------------------
 //
 // Revision 1.1.1.1  2000/08/02 12:51:03  charlesr
 // Initial source import, SMC v. 1.0, Beta 1.
@@ -56,6 +84,10 @@ Entry {sendMessage(4, "Idle. Looking for a task to run.");
     // timer.
     RunTask        RunningTask         {startTask();}
 
+    // There is now a task a run.
+    TaskCreated    RunningTask         {startTask();}
+    TaskUnblocked  RunningTask         {startTask();}
+
     Shutdown       IdleShutdown         {sendMessage(0, "Shutdown started.");
                                          setTimer("ShutdownTimeout", 2000);
                                         }
@@ -63,7 +95,10 @@ Entry {sendMessage(4, "Idle. Looking for a task to run.");
     // It is possible for the task to complete before it
     // receives the suspend request. When this happens, handle
     // this in the same manner as above.
-    TaskDone       Idle                {stopTimer("ReplyTimeout");}
+    TaskDone [areTasksQueued();]
+                   RunningTask         {startTask();}
+
+    TaskDone       nil                 {stopTimer("ReplyTimeout");}
 
 }
 
@@ -73,10 +108,10 @@ Entry {setTimer("Slice Timeout", 3000);}
 Exit {stopTimer("Slice Timeout");}
 {
     // The time slice is up. Suspend the task.
-    SliceTimeout   SuspendingTask      {
-                                           suspendTask();
-                                           setTimer("Reply Timeout", 50);
-                                       }
+    SliceTimeout   SuspendingTask      {suspendTask();}
+
+    // The task has been suspended. Find another task to run.
+    TaskSuspended  Idle                {}
 
     // The task has been blocked. Find another task to run.
     TaskBlocked    Idle                {}
@@ -90,15 +125,17 @@ Exit {stopTimer("Slice Timeout");}
 
 // Wait here for the task to suspend.
 SuspendingTask
+Entry {setTimer("Reply Timeout", 500);}
+Exit  {stopTimer("Reply Timeout");}
 {
-    TaskSuspended  Idle                {stopTimer("Reply Timeout");}
+    TaskSuspended  Idle                {}
 
     // Wait only so long for the task to reply.
     ReplyTimeout   Idle                {}
 
     // Just in case a task completes exactly at the same time
     // as the run slice ends.
-    TaskDone       Idle                {stopTimer("Reply Timeout");}
+    TaskDone       Idle                {}
 }
 
 // Wait here while the tasks report in.
@@ -121,6 +158,10 @@ ShuttingDown
                                          deleteAllTasks();
                                          exitApplication();
                                         }
+
+    // Since we are shutting down, ignore task suspended
+    // messages.
+    TaskSuspended  nil                  {}
 
     // If another shutdown is seen, ignore it.
     Shutdown       nil                  {}
@@ -152,9 +193,7 @@ Default
                                         setTimer("ShutdownTimeout", 5000);
                                        }
 
-    // This transition does nothing. It is here to force the
-    // entry action to done. The entry action will issue a
-    // RunTask transition and so cause the new task to be run.
+    // Ignore these events if already running a task.
     TaskCreated    nil                  {}
     TaskUnblocked  nil                  {}
 }

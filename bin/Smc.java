@@ -31,8 +31,44 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.1  2001/01/03 03:13:59  cwrapp
-// Initial revision
+// Revision 1.2  2001/05/09 23:40:01  cwrapp
+// Changes in release 1.0, beta 6:
+// Fixes the four following bugs:
+// + 416011: SMC does not properly handle pop transitions which
+//           have no argument.
+// + 416013: SMC generated code does not throw a
+//           "Transition Undefined" exception as per Programmer's
+//           Manual.
+// + 416014: The initial state's Entry actions are not being
+//           executed.
+// + 416015: When a transition has both a guarded and an unguarded
+//           definition, the Exit actions are only called when the
+//           guard evaluates to true.
+// + 422795: SMC -tcl abnormally terminates.
+//
+// Revision 1.1.1.2  2001/03/26 14:41:46  cwrapp
+// Corrected Entry/Exit action semantics. Exit actions are now
+// executed only by simple transitions and pop transitions.
+// Entry actions are executed by simple transitions and push
+// transitions. Loopback transitions do not execute either Exit
+// actions or entry actions. See SMC Programmer's manual for
+// more information.
+//
+// Revision 1.1.1.1  2001/01/03 03:13:59  cwrapp
+//
+// ----------------------------------------------------------------------
+// SMC - The State Map Compiler
+// Version: 1.0, Beta 3
+//
+// SMC compiles state map descriptions into a target object oriented
+// language. Currently supported languages are: C++, Java and [incr Tcl].
+// SMC finite state machines have such features as:
+// + Entry/Exit actions for states.
+// + Transition guards
+// + Transition arguments
+// + Push and Pop transitions.
+// + Default transitions. 
+// ----------------------------------------------------------------------
 //
 // Revision 1.2  2000/09/01 15:32:03  charlesr
 // Changes for v. 1.0, Beta 2:
@@ -92,7 +128,7 @@ public final class Smc
 
         // The default smc output level is 1.
         _target_language = LANG_NOT_SET;
-        _version = "v. 1.0, beta 3";
+        _version = "v. 1.0, beta 6";
         _source_file_name = null;
         _debug = false;
         _trans_queue = false;

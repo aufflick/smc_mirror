@@ -26,7 +26,7 @@ Unix:
 
 Windows:
 
-    $ java -classpath ${CLASSPATH};../../../lib/statemap.jar Traffic
+    $ java -classpath "${CLASSPATH};../../../lib/statemap.jar" taskdemo
 
     Click on "Create Task..." button and start a new task
     running. If you want to create multiple tasks, click the

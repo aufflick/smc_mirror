@@ -23,8 +23,44 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.1  2001/01/03 03:14:00  cwrapp
-// Initial revision
+// Revision 1.2  2001/05/09 23:40:01  cwrapp
+// Changes in release 1.0, beta 6:
+// Fixes the four following bugs:
+// + 416011: SMC does not properly handle pop transitions which
+//           have no argument.
+// + 416013: SMC generated code does not throw a
+//           "Transition Undefined" exception as per Programmer's
+//           Manual.
+// + 416014: The initial state's Entry actions are not being
+//           executed.
+// + 416015: When a transition has both a guarded and an unguarded
+//           definition, the Exit actions are only called when the
+//           guard evaluates to true.
+// + 422795: SMC -tcl abnormally terminates.
+//
+// Revision 1.1.1.2  2001/03/26 14:41:46  cwrapp
+// Corrected Entry/Exit action semantics. Exit actions are now
+// executed only by simple transitions and pop transitions.
+// Entry actions are executed by simple transitions and push
+// transitions. Loopback transitions do not execute either Exit
+// actions or entry actions. See SMC Programmer's manual for
+// more information.
+//
+// Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
+//
+// ----------------------------------------------------------------------
+// SMC - The State Map Compiler
+// Version: 1.0, Beta 3
+//
+// SMC compiles state map descriptions into a target object oriented
+// language. Currently supported languages are: C++, Java and [incr Tcl].
+// SMC finite state machines have such features as:
+// + Entry/Exit actions for states.
+// + Transition guards
+// + Transition arguments
+// + Push and Pop transitions.
+// + Default transitions. 
+// ----------------------------------------------------------------------
 //
 // Revision 1.2  2000/09/01 15:32:15  charlesr
 // Changes for v. 1.0, Beta 2:
@@ -93,11 +129,15 @@ public final class SmcParseTreeCpp
 
         // If transition queuing is turned on, then #define
         // SMC_TRANS_Q to turn it on in statemap.h.
+        /*
+         * Transition queuing not supported.
+         *
         if (Smc.isTransQueue() == true)
         {
             header.println("\n// Turn on transition queuing before including statemap.h.");
             header.println("#define SMC_TRANS_Q\n");
         }
+         */
 
         // Include required standard .h files.
         header.println("#include <statemap.h>\n");
@@ -277,6 +317,9 @@ public final class SmcParseTreeCpp
         header.println("        setState(" +
                        _start_state +
                        ");");
+        header.println("        " +
+                       _start_state +
+                       ".Entry(*this);");
         header.println("    };\n");
         header.println("    " +
                        _context +
@@ -288,7 +331,10 @@ public final class SmcParseTreeCpp
                        _context +
                        "State& getState() const");
         header.println("    {");
-        header.println("        assert(_state != NULL);\n");
+        header.println("        if (_state == NULL)");
+        header.println("        {");
+        header.println("            throw StateUndefinedException();");
+        header.println("        }\n");
         header.println("        return(dynamic_cast<" +
                        _context +
                        "State&>(*_state));");
@@ -296,10 +342,13 @@ public final class SmcParseTreeCpp
 
         // If transition queuing is being done, generate a
         // dispatchTransitions() method.
+        /*
+         * Transition queuing not being done.
         if (Smc.isTransQueue() == true)
         {
             header.println("\n    void dispatchTransitions();\n");
         }
+         */
 
         // Generate a method for every transition in every map
         // *except* the default transition.
@@ -310,7 +359,7 @@ public final class SmcParseTreeCpp
             trans = (SmcTransition) transIt.next();
             if (trans.getName().compareTo("Default") != 0)
             {
-                header.print("    void " +
+                header.print("\n    void " +
                              trans.getName() +
                              "(");
                 for (paramIt = trans.getParameters().listIterator(),
@@ -326,26 +375,36 @@ public final class SmcParseTreeCpp
 
                 // If doing transition queuing, define this
                 // method in the source file.
+                /*
+                 * Transition queuing not being done.
                 if (Smc.isTransQueue() == true)
                 {
                     header.println(";");
                 }
                 else
                 {
-                    header.println("\n    {");
-                    header.print("        (getState())." +
-                                 trans.getName() +
-                                 "(*this");
-                    for (paramIt = trans.getParameters().listIterator();
-                         paramIt.hasNext() == true;
-                        )
-                    {
-                        param = (SmcParameter) paramIt.next();
-                        header.print(", " + param.getName());
-                    }
-                    header.println(");");
-                    header.println("    };");
+                */
+                header.println("\n    {");
+                header.println("        setTransition(\"" +
+                               trans.getName() +
+                               "\");");
+                header.print("        (getState())." +
+                             trans.getName() +
+                             "(*this");
+                for (paramIt = trans.getParameters().listIterator();
+                     paramIt.hasNext() == true;
+                    )
+                {
+                    param = (SmcParameter) paramIt.next();
+                    header.print(", " + param.getName());
                 }
+                header.println(");");
+                header.println("        setTransition(NULL);");
+                header.println("    };");
+                /*
+                 * Transition queuing not supported.
+                }
+                 */
             }
         }
 
@@ -357,6 +416,9 @@ public final class SmcParseTreeCpp
 
         // For transition queuing, generate an enum listing all
         // possible transitions.
+        /*
+         * Transition queuing not supported.
+         *
         if (Smc.isTransQueue() == true)
         {
             LinkedList paramList;
@@ -576,6 +638,8 @@ public final class SmcParseTreeCpp
             source.println("    return;");
             source.println("}");
         }
+         * No transition queuing.
+         */
 
         // Put the closing brace on the context class.
         header.println("};\n");

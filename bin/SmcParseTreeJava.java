@@ -23,8 +23,44 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.1  2001/01/03 03:14:00  cwrapp
-// Initial revision
+// Revision 1.2  2001/05/09 23:40:01  cwrapp
+// Changes in release 1.0, beta 6:
+// Fixes the four following bugs:
+// + 416011: SMC does not properly handle pop transitions which
+//           have no argument.
+// + 416013: SMC generated code does not throw a
+//           "Transition Undefined" exception as per Programmer's
+//           Manual.
+// + 416014: The initial state's Entry actions are not being
+//           executed.
+// + 416015: When a transition has both a guarded and an unguarded
+//           definition, the Exit actions are only called when the
+//           guard evaluates to true.
+// + 422795: SMC -tcl abnormally terminates.
+//
+// Revision 1.1.1.2  2001/03/26 14:41:46  cwrapp
+// Corrected Entry/Exit action semantics. Exit actions are now
+// executed only by simple transitions and pop transitions.
+// Entry actions are executed by simple transitions and push
+// transitions. Loopback transitions do not execute either Exit
+// actions or entry actions. See SMC Programmer's manual for
+// more information.
+//
+// Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
+//
+// ----------------------------------------------------------------------
+// SMC - The State Map Compiler
+// Version: 1.0, Beta 3
+//
+// SMC compiles state map descriptions into a target object oriented
+// language. Currently supported languages are: C++, Java and [incr Tcl].
+// SMC finite state machines have such features as:
+// + Entry/Exit actions for states.
+// + Transition guards
+// + Transition arguments
+// + Push and Pop transitions.
+// + Default transitions. 
+// ----------------------------------------------------------------------
 //
 // Revision 1.2  2000/09/01 15:32:16  charlesr
 // Changes for v. 1.0, Beta 2:
@@ -87,6 +123,7 @@ public final class SmcParseTreeJava
                        "Context");
         source.println("    extends statemap.FSMContext");
         source.println("{");
+        source.println("// Member methods.\n");
 
         // Generate the context class' constructor.
         source.println("    public " +
@@ -100,10 +137,13 @@ public final class SmcParseTreeJava
 
         // If transition queuing is being done, then allocate
         // the queue here.
+        /*
+         * Not supported as of v. 1.0, beta 3.
         if (Smc.isTransQueue() == true)
         {
             source.println("        _trans_queue = new java.util.LinkedList();");
         }
+        */
 
         // The state name "map::state" must be changed to
         // "map.state".
@@ -116,18 +156,24 @@ public final class SmcParseTreeJava
             source.println("        setState(" +
                            javaState +
                            ");");
+
+            // Execute the start state's entry actions.
+            source.println("        " +
+                           javaState +
+                           ".Entry(this);");
         }
+
         source.println("    }\n");
 
         // getState() method.
         source.println("    public " +
                        _context +
                        "State getState()");
-        source.println("        throws java.lang.NullPointerException");
+        source.println("        throws statemap.StateUndefinedException");
         source.println("    {");
         source.println("        if (_state == null)");
         source.println("        {");
-        source.println("            throw(new java.lang.NullPointerException(\"Current state not set\"));");
+        source.println("            throw(new statemap.StateUndefinedException());");
         source.println("        }\n");
         source.println("        return((" +
                        _context +
@@ -185,6 +231,15 @@ public final class SmcParseTreeJava
                 source.println(")");
                 source.println("    {");
 
+                // Save away the transition name in case it is
+                // need in an UndefinedTransitionException.
+                source.println("        _transition = \"" +
+                               trans.getName() +
+                               "\";");
+
+                /*
+                 * Transition queuing not supported.
+                 *
                 // If transition queuing, then check if _state
                 // is null. If so, enqueue the transition and its
                 // arguments for later.
@@ -311,24 +366,33 @@ public final class SmcParseTreeJava
                 }
                 else
                 {
-                    source.print("        getState()." +
-                                 trans.getName() +
-                                 "(this");
-                    for (paramIt = trans.getParameters().listIterator();
-                         paramIt.hasNext() == true;
-                        )
-                    {
-                        parameter = (SmcParameter) paramIt.next();
-                        source.print(", " + parameter.getName());
-                    }
-                    source.println(");");
+                 * transition queuing.
+                 */
+                source.print("        getState()." +
+                             trans.getName() +
+                             "(this");
+                for (paramIt = trans.getParameters().listIterator();
+                     paramIt.hasNext() == true;
+                    )
+                {
+                    parameter = (SmcParameter) paramIt.next();
+                    source.print(", " + parameter.getName());
                 }
+                source.println(");");
+                source.println("        _transition = \"\";");
 
                 source.println("        return;");
                 source.println("    }\n");
             }
+            /*
+             * End of transition queue check.
+            }
+             */
         }
 
+        /*
+         * Transition queuing not supported.
+         *
         if (Smc.isTransQueue() == true)
         {
             // The following method invokes queued transitions.
@@ -382,6 +446,8 @@ public final class SmcParseTreeJava
             source.println("        }");
             source.println("    }\n");
         }
+        * End of transition queuing code.
+        */
 
         // Declare member data.
         source.println("// Member data.\n");

@@ -28,8 +28,44 @@
 //
 // Change Log
 // $Log$
-// Revision 1.1  2001/01/03 03:14:00  cwrapp
-// Initial revision
+// Revision 1.2  2001/05/09 23:40:02  cwrapp
+// Changes in release 1.0, beta 6:
+// Fixes the four following bugs:
+// + 416011: SMC does not properly handle pop transitions which
+//           have no argument.
+// + 416013: SMC generated code does not throw a
+//           "Transition Undefined" exception as per Programmer's
+//           Manual.
+// + 416014: The initial state's Entry actions are not being
+//           executed.
+// + 416015: When a transition has both a guarded and an unguarded
+//           definition, the Exit actions are only called when the
+//           guard evaluates to true.
+// + 422795: SMC -tcl abnormally terminates.
+//
+// Revision 1.1.1.2  2001/03/26 14:41:47  cwrapp
+// Corrected Entry/Exit action semantics. Exit actions are now
+// executed only by simple transitions and pop transitions.
+// Entry actions are executed by simple transitions and push
+// transitions. Loopback transitions do not execute either Exit
+// actions or entry actions. See SMC Programmer's manual for
+// more information.
+//
+// Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
+//
+// ----------------------------------------------------------------------
+// SMC - The State Map Compiler
+// Version: 1.0, Beta 3
+//
+// SMC compiles state map descriptions into a target object oriented
+// language. Currently supported languages are: C++, Java and [incr Tcl].
+// SMC finite state machines have such features as:
+// + Entry/Exit actions for states.
+// + Transition guards
+// + Transition arguments
+// + Push and Pop transitions.
+// + Default transitions. 
+// ----------------------------------------------------------------------
 //
 // Revision 1.1.1.1  2000/08/02 12:50:57  charlesr
 // Initial source import, SMC v. 1.0, Beta 1.
@@ -58,6 +94,7 @@ public abstract class FSMContext
         // There is no state until the application explicitly
         // sets the initial state.
         _state = null;
+        _transition = "";
         _previous_state = null;
         _state_stack = new java.util.Stack();
         _debug_flag = false;
@@ -173,10 +210,16 @@ public abstract class FSMContext
         return;
     }
 
+    public String getTransition()
+    {
+        return(_transition);
+    }
+
     // Release all acquired resources.
     protected void finalize() throws java.lang.Throwable
     {
         _state = null;
+        _transition = null;
         _previous_state = null;
         _state_stack = null;
 
@@ -187,6 +230,10 @@ public abstract class FSMContext
 
     // The current state.
     protected State _state;
+
+    // The current transition *name*. Used for debugging
+    // purposes.
+    protected String _transition;
 
     // Remember what state a transition left.
     protected State _previous_state;
