@@ -1,0 +1,65 @@
+# 
+# The contents of this file are subject to the Mozilla Public
+# License Version 1.1 (the "License"); you may not use this file
+# except in compliance with the License. You may obtain a copy of
+# the License at http://www.mozilla.org/MPL/
+# 
+# Software distributed under the License is distributed on an "AS
+# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# rights and limitations under the License.
+# 
+# The Original Code is State Map Compiler (SMC).
+# 
+# The Initial Developer of the Original Code is Charles W. Rapp.
+# Portions created by Charles W. Rapp are
+# Copyright (C) 2000 Charles W. Rapp.
+# All Rights Reserved.
+# 
+# Contributor(s):
+#
+# RCS ID
+# $Id$
+#
+# CHANGE LOG
+# $Log$
+# Revision 1.1  2001/06/26 22:16:23  cwrapp
+# Changes in release 1.0.0:
+# Checking in code for first production release.
+# If SMC should crash, critical information are printed out along
+# with instructions explaining where to send that information.
+#
+
+TARGET=		Telephone
+
+SM_SOURCES=	Telephone.sm
+
+SOURCES=	$(SM_SOURCES:%.sm=%Context.java) \
+		TimerEvent.java \
+		TimerListener.java \
+		Timer.java \
+		Telephone.java
+
+FSM_DIR=	../smc/lib
+
+JAVAC=		javac
+JAVAC_FLAGS=	-g -classpath ../smc/lib/statemap.jar
+JAR=		jar
+JAR_CREATE_FLAGS=	cmf manifest.txt
+JAR_UPDATE_FLAGS=	uf
+JAR_FILE=	$(TARGET).jar
+SMC=		java -jar ../../smc/bin/Smc.jar
+SMC_FLAGS=	-java -g
+
+all :		$(TARGET)
+
+%Context.java : %.sm
+		$(SMC) $(SMC_FLAGS) $<
+
+$(TARGET) :	$(SOURCES)
+		$(JAVAC) $(JAVAC_FLAGS) $(SOURCES)
+		$(JAR) $(JAR_CREATE_FLAGS) $(JAR_FILE) *.class
+		$(JAR) $(JAR_UPDATE_FLAGS) $(JAR_FILE) -C $(FSM_DIR) statemap
+
+clean :
+		-rm -f *.class *.flc $(JAR_FILE)

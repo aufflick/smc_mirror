@@ -1,0 +1,389 @@
+//
+// The contents of this file are subject to the Mozilla Public
+// License Version 1.1 (the "License"); you may not use this file
+// except in compliance with the License. You may obtain a copy of
+// the License at http://www.mozilla.org/MPL/
+// 
+// Software distributed under the License is distributed on an "AS
+// IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+// implied. See the License for the specific language governing
+// rights and limitations under the License.
+// 
+// The Original Code is State Map Compiler (SMC).
+// 
+// The Initial Developer of the Original Code is Charles W. Rapp.
+// Portions created by Charles W. Rapp are
+// Copyright (C) 2000 Charles W. Rapp.
+// All Rights Reserved.
+// 
+// Contributor(s): 
+//
+// Name
+//  Telephone.sm
+//
+// Description
+//  Runs a plain old telphone. That means the proper sounds at
+//  the proper time.
+//
+// RCS ID
+// $Id$
+//
+// CHANGE LOG
+// $Log$
+// Revision 1.1  2001/06/26 22:16:23  cwrapp
+// Changes in release 1.0.0:
+// Checking in code for first production release.
+// If SMC should crash, critical information are printed out along
+// with instructions explaining where to send that information.
+//
+
+%class Telephone
+%start CallMap::Initialized
+
+%map CallMap
+%%
+Initialized
+{
+        Start           OnHook          {}
+
+        // Ignore all other transitions.
+        Default         nil             {}
+}
+
+OnHook
+Entry {
+          updateClock();
+          startClockTimer();
+      }
+Exit {stopTimer("ClockTimer");}
+{
+        // We are handling the caller's side of the connection.
+        OffHook         push(PhoneNumber::DialTone)
+                                        {
+                                            clearDisplay();
+                                            setReceiver("on hook", "Put down receiver");}
+                                        }
+
+        // Dialing errors.
+        LeftOffHook     LeftOffHook     {}
+        InvalidDigit    InvalidDigit    {}
+
+        // Dialing successfully completed.
+        DialingDone     Routing         {routeCall();}
+
+        // Time to update the clock's display.
+        ClockTimer      nil             {
+                                            updateClock();
+                                            startClockTimer();
+                                        }
+}
+
+// The call is now being routed.
+Routing
+{
+        Emergency       PlayingMessage  {playEmergency();}
+        NYCTemp         NYCTemp         {}
+        Time            Time            {}
+        DepositMoney    DepositMoney    {}
+
+        LineBusy        BusySignal      {}
+        InvalidNumber   PlayingMessage  {playInvalidNumber();}
+}
+
+NYCTemp
+Entry {
+          loop("ringing");
+          startTimer("RingTimer", 10000);
+      }
+Exit  {stopLoop("ringing");}
+{
+        RingTimer       PlayingMessage  {playNYCTemp();}
+}
+
+Time
+Entry {
+          loop("ringing");
+          startTimer("RingTimer", 10000);
+      }
+Exit  {stopLoop("ringing");}
+{
+        RingTimer       PlayingMessage  {playTime();}
+}
+
+DepositMoney
+Entry {
+          loop("ringing");
+          startTimer("RingTimer", 5000);
+      }
+Exit  {stopLoop("ringing");}
+{
+        RingTimer       PlayingMessage  {playDepositMoney();}
+}
+
+BusySignal
+Entry {loop("busy");}
+Exit  {stopLoop("busy");}
+{
+        // Wait for on hook only.
+}
+
+PlayingMessage
+{
+        // If caller hangs up while a message is being played,
+        // be sure to stop the playback.
+        OnHook          OnHook          {
+                                            stopPlayback();
+                                            setReceiver("off hook", "Pick up receiver");
+                                            clearDisplay();
+                                        }
+
+        Stop            Initialized     {
+                                            stopPlayback();
+                                            setReceiver("off hook", "Pick up receiver");
+                                            clearDisplay();
+                                        }
+
+        PlaybackDone    MessagePlayed   {}
+}
+
+MessagePlayed
+Entry {startTimer("OffHookTimer", 10000);}
+Exit  {stopTimer("OffHookTimer");}
+{
+        OffHookTimer    LeftOffHook     {}
+}
+
+//---------------------------------------------------------------
+// Error States.
+//
+// Let someone know the phone has been left off the hook.
+LeftOffHook
+Entry {
+          startTimer("LoopTimer", 10000);
+          loop("phone_off_hook");
+      }
+Exit  {
+          stopTimer("LoopTimer");
+          stopLoop("phone_off_hook");
+      }
+{
+        LoopTimer       WaitForOnHook   {}
+        Default         nil             {}
+}
+
+InvalidDigit
+Entry {
+          startTimer("LoopTimer", 10000);
+          loop("fast_busy");
+      }
+Exit  {
+          stopTimer("LoopTimer");
+          stopLoop("fast_busy");
+      }
+{
+        LoopTimer       WaitForOnHook   {}
+        Default         nil             {}
+}
+
+// Stay in this state until the telephone is on hook.
+WaitForOnHook
+{
+        Default         nil             {}
+}
+
+Default
+{
+        // Ignore any dialings after a phone number has been
+        // collected.
+        Digit(n : String)
+                        nil             {}
+
+        // No matter when it happens, when the phone is hung
+        // up, this call is OVER!
+        OnHook          OnHook          {
+                                            setReceiver("off hook", "Pick up receiver");
+                                            clearDisplay();
+                                        }
+
+        Stop            Initialized     {
+                                            setReceiver("off hook", "Pick up receiver");
+                                            clearDisplay();
+                                        }
+
+        // Ignore the clock timer outside of the OnHook state.
+        ClockTimer      nil             {}
+}
+
+%%
+
+// This map processes dialed digits. It either returns success
+// when 
+%map PhoneNumber
+%%
+
+DialTone
+Entry {
+          loop("dialtone");
+          startTimer("OffHookTimer", 10000);
+      }
+Exit  {
+          stopTimer("OffHookTimer");
+          stopLoop("dialtone");
+      }
+{
+        // If the first digit is 1, then this is a long distance
+        // phone call. Don't save this first digit.
+        Digit(n : String)
+            [equal(n, 1);]
+                        LongDistance    {
+                                            playTT(n);
+                                            setType(Telephone.LONG_DISTANCE);
+                                            saveAreaCode(n);
+                                            addDisplay("-");
+                                        }
+
+        // Check for 911.
+        Digit(n : String)
+            [equal(n, 9);]
+                        OneOneStart     {
+                                            playTT(n);
+                                            saveExchange(n);
+                                        }
+
+        Digit(n : String)
+                        Exchange        {
+                                            playTT(n);
+                                            setType(Telephone.LOCAL);
+                                            saveExchange(n);
+                                        }
+}
+
+// Collect the area and then move on to the local number.
+LongDistance
+Entry {startTimer("OffHookTimer", 10000);}
+Exit  {stopTimer("OffHookTimer");}
+{
+        Digit(n : String)
+            [!isCodeComplete();]
+                        nil             {
+                                            playTT(n);
+                                            saveAreaCode(n);
+                                            resetTimer("OffHookTimer");
+                                        }
+
+        Digit(n : String)
+                        Exchange        {
+                                            playTT(n);
+                                            saveAreaCode(n);
+                                            addDisplay("-");
+                                        }
+}
+
+// Check if this is a 911 call.
+OneOneStart
+Entry {startTimer("OffHookTimer", 10000);}
+Exit  {stopTimer("OffHookTimer");}
+{
+        Digit(n : String)
+            [equal(n, 1);]
+                        NineOne         {
+                                            playTT(n);
+                                            saveExchange(n);
+                                        }
+
+        Digit(n : String)
+                        Exchange        {
+                                            playTT(n);
+                                            setType(Telephone.LOCAL);
+                                            saveExchange(n);
+                                        }
+}
+
+// Almost there.
+NineOne
+Entry {startTimer("OffHookTimer", 10000);}
+Exit  {stopTimer("OffHookTimer");}
+{
+        Digit(n : String)
+            [equal(n, 1);]
+                        pop(DialingDone)
+                                        {
+                                            playTT(n);
+                                            setType(Telephone.EMERGENCY);
+                                            saveExchange(n);
+                                        }
+
+        Digit(n : String)
+                        LocalCall       {
+                                            playTT(n);
+                                            setType(Telephone.LOCAL);
+                                            saveExchange(n);
+                                            addDisplay("-");
+                                        }
+}
+
+// Collect the three digit exchange.
+Exchange
+Entry {startTimer("OffHookTimer", 10000);}
+Exit  {stopTimer("OffHookTimer");}
+{
+        Digit(n : String)
+            [!isExchangeComplete();]
+                        nil             {
+                                            playTT(n);
+                                            saveExchange(n);
+                                            resetTimer("OffHookTimer");
+                                        }
+
+        Digit(n : String)
+                        LocalCall       {
+                                            playTT(n);
+                                            saveExchange(n);
+                                            addDisplay("-");
+                                        }
+}
+
+// Process a local call.
+LocalCall
+Entry {startTimer("OffHookTimer", 10000);}
+Exit  {stopTimer("OffHookTimer");}
+{
+        Digit(n : String)
+            [!isLocalComplete();]
+                        nil             {
+                                            playTT(n);
+                                            saveLocal(n);
+                                            resetTimer("OffHookTimer");
+                                        }
+
+        Digit(n : String)
+                        pop(DialingDone)
+                                        {
+                                            playTT(n);
+                                            saveLocal(n);
+                                        }
+}
+
+Default
+{
+        // If an invalid digit is dialed, give up collecting
+        // digits immediately.
+        Digit(n : String)
+            [!isDigitValid(n);]
+                        pop(InvalidDigit)
+                                        {clearDisplay();}
+
+        // Caller has stopped dialing and left the phone
+        // off hook.
+        OffHookTimer    pop(LeftOffHook)
+                                        {clearDisplay();}
+
+        // Pass this event up.
+        OnHook          pop(OnHook)     {clearDisplay();}
+        Stop            pop(Stop)       {clearDisplay();}
+
+        // Ignore the clock timer outside of the OnHook state.
+        ClockTimer      nil             {}
+}
+
+%%
