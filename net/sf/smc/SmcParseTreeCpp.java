@@ -23,6 +23,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2002/02/13 02:45:23  cwrapp
+// Changes in release 1.2.0:
+// Added the following features:
+// + 484889: "pop" transitions can now return arguments
+//           along with a transition name.
+// + 496625: Multiple .sm files may be specified in the
+//           compile command.
+//
+// Fixed the following bugs:
+// + 496692: Fixed the %package C++ code generation.
+// + 501157: Transition debug output was still hardcoded
+//           to System.err. This has been corrected so
+//           that FSMContext._debug_stream is used.
+//
 // Revision 1.2  2001/12/14 20:10:37  cwrapp
 // Changes in release 1.1.0:
 // Add the following features:
@@ -345,11 +359,18 @@ public final class SmcParseTreeCpp
         // namespace.
         if (_package != null && _package.length() > 0)
         {
-            source.println("using namespace " + _package + ";\n");
+            source.println("namespace " + _package);
+            source.println("{");
+            indent = "    ";
+        }
+        else
+        {
+            indent = "";
         }
 
         // Statically declare all derive state classes.
-        source.println("// Static class declarations.");
+        source.println(indent +
+                       "// Static class declarations.");
         for (mapIt = _maps.listIterator();
              mapIt.hasNext() == true;
             )
@@ -361,7 +382,8 @@ public final class SmcParseTreeCpp
                 )
             {
                 state = (SmcState) stateIt.next();
-                source.println(mapName +
+                source.println(indent +
+                               mapName +
                                "_" +
                                state.getClassName() +
                                "    " +
@@ -385,7 +407,9 @@ public final class SmcParseTreeCpp
 
             if (trans.getName().compareTo("Default") != 0)
             {
-                source.print("\nvoid " +
+                source.print("\n" +
+                             indent +
+                             "void " +
                              _context +
                              "State::" +
                              trans.getName() +
@@ -403,32 +427,37 @@ public final class SmcParseTreeCpp
                 }
 
                 source.println(")");
-                source.println("{");
-                source.println("    Default(s);");
-                source.println("    return;");
-                source.println("}");
+                source.println(indent + "{");
+                source.println(indent + "    Default(s);");
+                source.println(indent + "    return;");
+                source.println(indent + "}");
             }
         }
 
         // Output the Default transition method ... almost.
         // If -g is being used, then add the "s" argname.
-        source.println("\nvoid " +
+        source.println("\n" +
+                       indent +
+                       "void " +
                        _context +
                        "State::Default(" +
                        _context +
                        "Context& s)");
-        source.println("{");
+        source.println(indent + "{");
 
         // Print the transition out to the verbose log.
         if (Smc.isDebug() == true)
         {
-            source.println("    if (s.getDebugFlag() == true)");
-            source.println("    {");
-            source.println("        ostream& str = s.getDebugStream();");
+            source.println(indent +
+                           "    if (s.getDebugFlag() == true)");
+            source.println(indent + "    {");
+            source.println(indent +
+                           "        ostream& str = s.getDebugStream();");
             source.println();
-            source.println("        str << \"TRANSITION   : Default\"");
-            source.println("            << endl;");
-            source.println("    }");
+            source.println(indent +
+                           "        str << \"TRANSITION   : Default\"");
+            source.println(indent + "            << endl;");
+            source.println(indent + "    }");
             source.println();
         }
 
@@ -436,14 +465,17 @@ public final class SmcParseTreeCpp
         // definition in the current state and there
         // is no default to cover for it. Throw an
         // exception.
-        source.println("    throw (");
-        source.println("        TransitionUndefinedException(");
-        source.println("            s.getState().getName(),");
-        source.println("            s.getTransition()));");
+        source.println(indent + "    throw (");
+        source.println(indent +
+                       "        TransitionUndefinedException(");
+        source.println(indent +
+                       "            s.getState().getName(),");
+        source.println(indent +
+                       "            s.getTransition()));");
         source.println();
 
-        source.println("    return;}");
-        source.println();
+        source.println(indent + "    return;");
+        source.println(indent + "}");
 
         // Have each map print out its source code now.
         for (mapIt = _maps.listIterator();
@@ -456,6 +488,13 @@ public final class SmcParseTreeCpp
                              _context,
                              _package,
                              indent);
+        }
+
+        // If a namespace was specified, then put an
+        // ending brace on the namespace now.
+        if (_package != null && _package.length() > 0)
+        {
+            source.println("}");
         }
 
         // Generate the context class.

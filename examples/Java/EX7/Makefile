@@ -23,6 +23,20 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2002/02/13 02:45:23  cwrapp
+# Changes in release 1.2.0:
+# Added the following features:
+# + 484889: "pop" transitions can now return arguments
+#           along with a transition name.
+# + 496625: Multiple .sm files may be specified in the
+#           compile command.
+#
+# Fixed the following bugs:
+# + 496692: Fixed the %package C++ code generation.
+# + 501157: Transition debug output was still hardcoded
+#           to System.err. This has been corrected so
+#           that FSMContext._debug_stream is used.
+#
 # Revision 1.1  2001/06/26 22:16:24  cwrapp
 # Changes in release 1.0.0:
 # Checking in code for first production release.
@@ -38,7 +52,7 @@ SOURCES=	$(SM_SOURCES:%.sm=%Context.java) \
 		Telephone.java
 
 JAVAC=		javac
-JAVAC_FLAGS=	-g -classpath ../../../lib/Java/statemap.jar
+JAVAC_FLAGS=	-g -classpath ../../../lib/statemap.jar
 SMC=		java -jar ../../../bin/Smc.jar
 SMC_FLAGS=	-java -g
 

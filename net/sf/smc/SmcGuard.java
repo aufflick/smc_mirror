@@ -23,6 +23,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2002/02/13 02:45:23  cwrapp
+// Changes in release 1.2.0:
+// Added the following features:
+// + 484889: "pop" transitions can now return arguments
+//           along with a transition name.
+// + 496625: Multiple .sm files may be specified in the
+//           compile command.
+//
+// Fixed the following bugs:
+// + 496692: Fixed the %package C++ code generation.
+// + 501157: Transition debug output was still hardcoded
+//           to System.err. This has been corrected so
+//           that FSMContext._debug_stream is used.
+//
 // Revision 1.2  2001/12/14 20:10:37  cwrapp
 // Changes in release 1.1.0:
 // Add the following features:
@@ -142,6 +156,12 @@ public abstract class SmcGuard
         return;
     }
 
+    public void setPopArgs(List argList)
+    {
+        _pop_args = (List) ((LinkedList) argList).clone();
+        return;
+    }
+
     public void addAction(SmcAction action)
     {
         _actions.add(action);
@@ -229,5 +249,6 @@ public abstract class SmcGuard
     protected int _line_number;
     protected int _trans_type;
     protected String _end_state;
+    protected List _pop_args;
     protected List _actions;
 }

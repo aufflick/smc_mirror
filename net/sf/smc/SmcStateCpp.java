@@ -23,6 +23,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2002/02/13 02:45:23  cwrapp
+// Changes in release 1.2.0:
+// Added the following features:
+// + 484889: "pop" transitions can now return arguments
+//           along with a transition name.
+// + 496625: Multiple .sm files may be specified in the
+//           compile command.
+//
+// Fixed the following bugs:
+// + 496692: Fixed the %package C++ code generation.
+// + 501157: Transition debug output was still hardcoded
+//           to System.err. This has been corrected so
+//           that FSMContext._debug_stream is used.
+//
 // Revision 1.2  2001/12/14 20:10:37  cwrapp
 // Changes in release 1.1.0:
 // Add the following features:
@@ -145,7 +159,9 @@ public final class SmcStateCpp
                            context +
                            "Context&);");
 
-            source.println("\nvoid " +
+            source.println("\n" +
+                           indent +
+                           "void " +
                            mapName +
                            "_" +
                            _class_name +
@@ -164,7 +180,8 @@ public final class SmcStateCpp
             }
 
             // End the Entry() method with a return.
-            source.println("    return;\n}");
+            source.println(indent + "    return;");
+            source.println(indent + "}");
         }
 
         if (_exitActions.size() > 0)
@@ -174,13 +191,16 @@ public final class SmcStateCpp
                            context +
                            "Context&);");
 
-            source.println("\nvoid " +
+            source.println("\n" +
+                           indent +
+                           "void " +
                            mapName +
                            "_" +
                            _class_name +
                            "::Exit(" +
                            context +
-                           "Context& s)\n{");
+                           "Context& s)");
+            source.println(indent + "{");
 
             // Generate the actions associated with this code.
             for (actionIt = _exitActions.listIterator();
@@ -193,7 +213,8 @@ public final class SmcStateCpp
             }
 
             // End the Exit() method with a return.
-            source.println("    return;\n}");
+            source.println(indent + "    return;");
+            source.println(indent + "\n}");
         }
 
         // Have the transitions generate their code.

@@ -23,6 +23,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2002/02/13 02:45:23  cwrapp
+// Changes in release 1.2.0:
+// Added the following features:
+// + 484889: "pop" transitions can now return arguments
+//           along with a transition name.
+// + 496625: Multiple .sm files may be specified in the
+//           compile command.
+//
+// Fixed the following bugs:
+// + 496692: Fixed the %package C++ code generation.
+// + 501157: Transition debug output was still hardcoded
+//           to System.err. This has been corrected so
+//           that FSMContext._debug_stream is used.
+//
 // Revision 1.2  2001/12/14 20:10:37  cwrapp
 // Changes in release 1.1.0:
 // Add the following features:
@@ -199,6 +213,7 @@ public final class SmcParser
         else
         {
             _parse_tree = createTargetTree();
+            _argList = (List) new LinkedList();
 
             // If the token collection was successful,
             // start parsing.
@@ -874,16 +889,7 @@ public final class SmcParser
     // Add an argument to the current action.
     /* package */ void addArgument(SmcLexer.Token token)
     {
-        if (_action_in_progress == null)
-        {
-            error("There is no in-progress action to which to add the argument.",
-                  false);
-        }
-        else
-        {
-            _action_in_progress.addArgument(token.getValue());
-        }
-
+        _argList.add(token.getValue());
         return;
     }
 
@@ -910,8 +916,46 @@ public final class SmcParser
         }
         else
         {
-            _action_in_progress.addArgument(_variable_in_progress);
+            _argList.add(_variable_in_progress);
             _variable_in_progress = null;
+        }
+
+        return;
+    }
+
+    /* package */ void setPopArgs()
+    {
+        if (_guard_in_progress == null)
+        {
+            error("There is no in-progress guard to which to add the action.",
+                  false);
+        }
+        else
+        {
+            _guard_in_progress.setPopArgs(_argList);
+
+            // Clear out the argument list in preparation of
+            // the next action/pop.
+            _argList.clear();
+        }
+
+        return;
+    }
+
+    /* package */ void setActionArgs()
+    {
+        if (_action_in_progress == null)
+        {
+            error("There is no in-progress action to which to add the argument.",
+                  false);
+        }
+        else
+        {
+            _action_in_progress.setArguments(_argList);
+
+            // Clear out the argument list in preparation for
+            // the next pop/action.
+            _argList.clear();
         }
 
         return;
@@ -1110,6 +1154,10 @@ public final class SmcParser
     // Read all the tokens into this list first and then
     // pass them to the parser map.
     List _tokenList;
+
+    // Store arguments in this list until they can be associated
+    // with a pop or an action.
+    List _argList;
 
     // Will be generating code for this language.
     private int _language;

@@ -23,6 +23,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2002/02/13 02:45:23  cwrapp
+// Changes in release 1.2.0:
+// Added the following features:
+// + 484889: "pop" transitions can now return arguments
+//           along with a transition name.
+// + 496625: Multiple .sm files may be specified in the
+//           compile command.
+//
+// Fixed the following bugs:
+// + 496692: Fixed the %package C++ code generation.
+// + 501157: Transition debug output was still hardcoded
+//           to System.err. This has been corrected so
+//           that FSMContext._debug_stream is used.
+//
 // Revision 1.2  2001/12/14 20:10:37  cwrapp
 // Changes in release 1.1.0:
 // Add the following features:
@@ -172,7 +186,9 @@ public final class SmcTransitionCpp
                      context +
                      "Context& s");
 
-        source.print("\nvoid " +
+        source.print("\n" +
+                     indent +
+                     "void " +
                      mapName +
                      "_" +
                      stateName +
@@ -196,16 +212,20 @@ public final class SmcTransitionCpp
             parameter.generateCode(source);
         }
         header.println(");");
-        source.println(")\n{");
+        source.println(")");
+        source.println(indent + "{");
 
         // Print the transition to the verbose log.
         if (Smc.isDebug() == true)
         {
-            source.println("    if (s.getDebugFlag() == true)");
-            source.println("    {");
-            source.println("        ostream& str = s.getDebugStream();");
+            source.println(indent +
+                           "    if (s.getDebugFlag() == true)");
+            source.println(indent + "    {");
+            source.println(indent +
+                           "        ostream& str = s.getDebugStream();");
             source.println();
-            source.print("        str << \"TRANSITION   : " +
+            source.print(indent +
+                         "        str << \"TRANSITION   : " +
                          mapName +
                          " " +
                          _name);
@@ -226,8 +246,8 @@ public final class SmcTransitionCpp
                 source.print(")");
             }
             source.println("\"");
-            source.println("        << endl;");
-            source.println("    }\n");
+            source.println(indent + "        << endl;");
+            source.println(indent + "    }\n");
         }
 
         // Loop through the guards and print each one.
@@ -263,12 +283,13 @@ public final class SmcTransitionCpp
         {
             if (guardCount == 1)
             {
-                source.println("    }");
+                source.println(indent + "    }");
             }
 
-            source.println("    else");
-            source.println("    {");
-            source.print("         " +
+            source.println(indent + "    else");
+            source.println(indent + "    {");
+            source.print(indent +
+                         "         " +
                          mapName +
                          "_Default::" +
                          _name +
@@ -282,7 +303,7 @@ public final class SmcTransitionCpp
                 source.print(", " + parameter.getName());
             }
             source.println(");");
-            source.println("    }");
+            source.println(indent + "    }");
             source.println();
         }
         else if (nullConditions > 1)
@@ -313,8 +334,8 @@ public final class SmcTransitionCpp
             source.println();
         }
 
-        source.println("    return;");
-        source.println("}");
+        source.println(indent + "    return;");
+        source.println(indent + "}");
 
         return;
     }

@@ -15,8 +15,7 @@ timeouts).
 NOTE: Smc.jar must be built and installed.
 
 Unix & Windows:
-    $ java -jar ../../../bin/Smc.jar -tcl [-g] Stoplight.sm
-    $ java -jar ../../../bin/Smc.jar -tcl [-g] Vehicle.sm
+    $ java -jar ../../../bin/Smc.jar -tcl [-g] Stoplight.sm Vehicle.sm
 
 (Note: -g is optional and needed only for observing the FSM
        debug output.)

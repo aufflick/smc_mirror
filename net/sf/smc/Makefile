@@ -23,6 +23,20 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2002/02/13 02:45:23  cwrapp
+# Changes in release 1.2.0:
+# Added the following features:
+# + 484889: "pop" transitions can now return arguments
+#           along with a transition name.
+# + 496625: Multiple .sm files may be specified in the
+#           compile command.
+#
+# Fixed the following bugs:
+# + 496692: Fixed the %package C++ code generation.
+# + 501157: Transition debug output was still hardcoded
+#           to System.err. This has been corrected so
+#           that FSMContext._debug_stream is used.
+#
 # Revision 1.2  2001/12/14 20:10:37  cwrapp
 # Changes in release 1.1.0:
 # Add the following features:
@@ -140,13 +154,13 @@ PACKAGE_NAME=	net.sf.smc
 PACKAGE_DIR=	net/sf/smc
 
 STATEMAP_LIB_DIR=	../../../lib/Java
-APP_CLASSPATH=	"$(CLASSPATH);$(STATEMAP_LIB_DIR)/statemap.jar"
+APP_CLASSPATH=	"$(CLASSPATH):$(STATEMAP_LIB_DIR)/statemap.jar"
 
 INSTALL_DIR=	../../../../staging/smc/bin
 
 JAVAC=		javac
 JAVAC_FLAGS=	-d . -g -classpath $(APP_CLASSPATH)
-SMC=		java -jar /Java/Smc/bin/Smc.jar
+SMC=		java -jar /Applications/smc/bin/Smc.jar
 SMC_FLAGS=	-java
 # SMC_FLAGS=	-java -g
 JAR=		jar
@@ -187,4 +201,4 @@ clean :
 			$(JAR_FILE)
 
 realclean :	clean
-		-rm -fr ./net $(TAG_FILE)
+		-rm -fr ./net $(TAG_FILE) *.flc *~

@@ -33,6 +33,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2002/02/13 02:45:22  cwrapp
+// Changes in release 1.2.0:
+// Added the following features:
+// + 484889: "pop" transitions can now return arguments
+//           along with a transition name.
+// + 496625: Multiple .sm files may be specified in the
+//           compile command.
+//
+// Fixed the following bugs:
+// + 496692: Fixed the %package C++ code generation.
+// + 501157: Transition debug output was still hardcoded
+//           to System.err. This has been corrected so
+//           that FSMContext._debug_stream is used.
+//
 // Revision 1.2  2001/12/14 20:10:36  cwrapp
 // Changes in release 1.1.0:
 // Add the following features:
@@ -86,98 +100,99 @@
 
 const static char _rcs_id[] = "$Id$";
 
-using namespace cpp_ex4;
-
 extern int NSGreenTimer;
 extern int EWGreenTimer;
 #ifdef WIN32
 extern DWORD Gtimeout;
 #endif
 
-Stoplight::Stoplight()
-: _state_map(*this)
+namespace cpp_ex4
 {
-	Initialize(NORTH_SOUTH);
+    Stoplight::Stoplight()
+        : _state_map(*this)
+    {
+        Initialize(NORTH_SOUTH);
 
         // Uncomment to see debug messages.
         // _state_map.setDebugFlag(true);
-}
+    }
 
-Stoplight::Stoplight(Directions direction)
-: _state_map(*this)
-{
-	Initialize(direction);
-}
+    Stoplight::Stoplight(Directions direction)
+        : _state_map(*this)
+    {
+        Initialize(direction);
+    }
 
-void Stoplight::TurnLight(StopLights light, LightColors color)
-{
-	cout << "Turning the ";
+    void Stoplight::TurnLight(StopLights light, LightColors color)
+    {
+        cout << "Turning the ";
 
-	switch(light)
-	{
-	case EWLIGHT:
-		cout << "east-west lights ";
-		break;
+        switch(light)
+        {
+            case EWLIGHT:
+                cout << "east-west lights ";
+                break;
 
-	case NSLIGHT:
-		cout << "north-south lights ";
-		break;
-	}
+            case NSLIGHT:
+                cout << "north-south lights ";
+                break;
+        }
 
-	switch(color)
-	{
-	case GREEN:
-		cout << "green." << endl;
-		break;
+        switch(color)
+        {
+            case GREEN:
+                cout << "green." << endl;
+                break;
 
-	case YELLOW:
-		cout << "yellow." << endl;
-		break;
+            case YELLOW:
+                cout << "yellow." << endl;
+                break;
 
-	case RED:
-		cout << "red." << endl;
-		break;
-	}
+            case RED:
+                cout << "red." << endl;
+                break;
+        }
 
-	return;
-}
+        return;
+    }
 
-void Stoplight::SetTimer(int seconds)
-{
+    void Stoplight::SetTimer(int seconds)
+    {
 #ifdef WIN32
-	Gtimeout = seconds * 1000;
+        Gtimeout = seconds * 1000;
 #else
-	itimerval timeout;
+        itimerval timeout;
 
-	timeout.it_value.tv_sec = seconds;
-	timeout.it_value.tv_usec = 0;
-	timeout.it_interval.tv_sec = 0;
-	timeout.it_interval.tv_usec = 0;
+        timeout.it_value.tv_sec = seconds;
+        timeout.it_value.tv_usec = 0;
+        timeout.it_interval.tv_sec = 0;
+        timeout.it_interval.tv_usec = 0;
 
-	if (setitimer(ITIMER_REAL, &timeout, (itimerval *) NULL) < 0)
-	{
-		cerr << "Failed to set timer. Quitting application." << endl;
-		exit(1);
-	}
+        if (setitimer(ITIMER_REAL, &timeout, (itimerval *) NULL) < 0)
+        {
+            cerr << "Failed to set timer. Quitting application." << endl;
+            exit(1);
+        }
 #endif
 
-	return;
-}
+        return;
+    }
 
-void Stoplight::Initialize(Directions direction)
-{
-	switch(direction)
-	{
-	case NORTH_SOUTH:
-		cout << "Turning the north-south lights green." << endl;
-		_state_map.setState(StopMap::NorthSouthGreen);
-		SetTimer(NSGreenTimer);
-		break;
+    void Stoplight::Initialize(Directions direction)
+    {
+        switch(direction)
+        {
+            case NORTH_SOUTH:
+                cout << "Turning the north-south lights green." << endl;
+                _state_map.setState(StopMap::NorthSouthGreen);
+                SetTimer(NSGreenTimer);
+                break;
 
-	case EAST_WEST:
-		cout << "Turning the east-west lights green." << endl;
-		_state_map.setState(StopMap::EastWestGreen);
-		SetTimer(EWGreenTimer);
-		break;
-	}
+            case EAST_WEST:
+                cout << "Turning the east-west lights green." << endl;
+                _state_map.setState(StopMap::EastWestGreen);
+                SetTimer(EWGreenTimer);
+                break;
+        }
+    }
 }

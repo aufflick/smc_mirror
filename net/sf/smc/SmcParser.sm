@@ -29,6 +29,20 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.3  2002/02/13 02:45:23  cwrapp
+ * Changes in release 1.2.0:
+ * Added the following features:
+ * + 484889: "pop" transitions can now return arguments
+ *           along with a transition name.
+ * + 496625: Multiple .sm files may be specified in the
+ *           compile command.
+ *
+ * Fixed the following bugs:
+ * + 496692: Fixed the %package C++ code generation.
+ * + 501157: Transition debug output was still hardcoded
+ *           to System.err. This has been corrected so
+ *           that FSMContext._debug_stream is used.
+ *
  * Revision 1.2  2001/12/14 20:10:37  cwrapp
  * Changes in release 1.1.0:
  * Add the following features:
@@ -969,15 +983,24 @@ PopAction
                     ActionStart         {}
 
     WORD(token : SmcLexer.Token)
-                    PopEnd              {setEndState(token);}
+                    PopArgs             {setEndState(token);}
 
     Default         PopError            {error("Expecting either a pop transition or ')'.", false);}
 }
 
-PopEnd
+PopArgs
 {
+    // No more pop arguments. Start collecting the actions.
     RIGHT_PAREN(token : SmcLexer.Token)
                     ActionStart         {}
+
+    // A comma signifies there are more arguments
+    // in this transition.
+    COMMA(token : SmcLexer.Token)
+                    push(ArgMap::ArgsStart)
+                                        {}
+    ArgsDone        ActionStart         {setPopArgs();}
+    ArgsError       ActionStart         {}
 
     Default         PopError            {error("Expecting ')' to end the pop transition.", false);}
 }
@@ -1020,9 +1043,10 @@ ActionStartError
 
 %%
 
-//=========================================================================
+//===============================================================
 // ActionMap
-// This map is used to parse a single action. Actions are of the form:
+// This map is used to parse a single action. Actions are of the
+// form:
 // WORD '(' {args} ')' ';'
 //
 %map ActionMap
@@ -1066,7 +1090,7 @@ ActionStartError
                                          setActionNegation();}
 
     LEFT_PAREN(token : SmcLexer.Token)
-                    FirstArgument       {createAction(token);}
+                    ArgsStart           {createAction(token);}
 
     RIGHT_PAREN(token : SmcLexer.Token)
                     ArgsEnd             {}
@@ -1083,7 +1107,10 @@ ActionStartError
 ArgsStart
 {
     LEFT_PAREN(token : SmcLexer.Token)
-                    FirstArgument       {}
+                    push(ArgMap::ArgsStart)
+                                        {}
+    ArgsDone        ArgsEnd             {setActionArgs();}
+    ArgsError       ArgsEndError        {}
 
     // Error transitions.
     RIGHT_PAREN(token : SmcLexer.Token)
@@ -1099,107 +1126,17 @@ ArgsStart
 ArgsStartError
 {
     LEFT_PAREN(token : SmcLexer.Token)
-                    FirstArgument       {}
+                    push(ArgMap::ArgsStart)
+                                        {}
+    ArgsDone        ArgsEnd             {setActionArgs();}
+    ArgsError       ArgsEndError        {}
+
     RIGHT_PAREN(token : SmcLexer.Token)
                     ArgsEnd             {}
     SEMICOLON(token : SmcLexer.Token)
                     pop(action_done)    {}
-    COMMA(token : SmcLexer.Token)
-                    Argument2           {}
-
-    VARIABLE(token : SmcLexer.Token)
-                    NextArgument        {addArgument(token);}
-    WORD(token : SmcLexer.Token)
-                    NextArgument        {addArgument(token);}
-    INTEGER(token : SmcLexer.Token)
-                    NextArgument        {addArgument(token);}
-    FLOAT(token : SmcLexer.Token)
-                    NextArgument        {addArgument(token);}
-    STRING(token : SmcLexer.Token)
-                    NextArgument        {addArgument(token);}
 
     Default         nil                 {}
-}
-
-FirstArgument
-{
-    RIGHT_PAREN(token : SmcLexer.Token)
-                    ArgsEnd             {}
-
-    // Look for scoped variable names.
-    WORD(token : SmcLexer.Token)
-                    VarArg1             {createVariable(token);}
-
-    VARIABLE(token : SmcLexer.Token)
-                    NextArgument        {addArgument(token);}
-    INTEGER(token : SmcLexer.Token)
-                    NextArgument        {addArgument(token);}
-    FLOAT(token : SmcLexer.Token)
-                    NextArgument        {addArgument(token);}
-    STRING(token : SmcLexer.Token)
-                    NextArgument        {addArgument(token);}
-
-    Default         ArgsEndError        {error("Expecting either a valid argument or a ')'.", false);}
-}
-
-VarArg1
-{
-    COLON(token : SmcLexer.Token)
-                    VarArg2             {appendVariable(token);}
-
-    RIGHT_PAREN(token : SmcLexer.Token)
-                    ArgsEnd             {addVariable();}
-
-    COMMA(token : SmcLexer.Token)
-                    Argument2           {addVariable();}
-
-    Default         ArgsEndError        {error("Expecting either ',' or ')'.", false);}
-}
-
-VarArg2
-{
-    COLON(token : SmcLexer.Token)
-                    VarArgEnd           {appendVariable(token);}
-
-    Default         ArgsEndError        {error("Expecting ':' after first ':'.", false);}
-}
-
-VarArgEnd
-{
-    // Handle multiply scoped variables.
-    WORD(token : SmcLexer.Token)
-                    VarArg1             {appendVariable(token);}
-}
-
-NextArgument
-{
-    RIGHT_PAREN(token : SmcLexer.Token)
-                    ArgsEnd             {}
-
-    COMMA(token : SmcLexer.Token)
-                    Argument2           {}
-
-    Default         ArgsEndError        {error("Expecting either ',' or ')'.", false);}
-}
-
-Argument2
-{
-    WORD(token : SmcLexer.Token)
-                    VarArg1             {createVariable(token);}
-
-    VARIABLE(token : SmcLexer.Token)
-                    NextArgument        {addArgument(token);}
-
-    INTEGER(token : SmcLexer.Token)
-                    NextArgument        {addArgument(token);}
-
-    FLOAT(token : SmcLexer.Token)
-                    NextArgument        {addArgument(token);}
-
-    STRING(token : SmcLexer.Token)
-                    NextArgument        {addArgument(token);}
-
-    Default         ArgsEndError        {error("An argument must either a variable, word, integer, float or a string.", false);}
 }
 
 ArgsEnd
@@ -1220,6 +1157,88 @@ ArgsEndError
 
 %%
 
+//===============================================================
+// Argument Map
+// This map is used to collect action and pop arguments.
+//
+%map ArgMap
+%%
+ArgsStart
+{
+    // Look for scoped variable names.
+    WORD(token : SmcLexer.Token)
+                    VarArg1             {createVariable(token);}
+
+    VARIABLE(token : SmcLexer.Token)
+                    NextArgument        {addArgument(token);}
+    INTEGER(token : SmcLexer.Token)
+                    NextArgument        {addArgument(token);}
+    FLOAT(token : SmcLexer.Token)
+                    NextArgument        {addArgument(token);}
+    STRING(token : SmcLexer.Token)
+                    NextArgument        {addArgument(token);}
+
+    // There are no arguments.
+    RIGHT_PAREN(token : SmcLexer.Token)
+                    pop(ArgsDone)       {}
+
+    Default         ArgsError           {error("Expecting either a valid argument or a ')'.", false);}
+}
+
+VarArg1
+{
+    COLON(token : SmcLexer.Token)
+                    VarArg2             {appendVariable(token);}
+
+    RIGHT_PAREN(token : SmcLexer.Token)
+                    pop(ArgsDone)       {addVariable();}
+
+    COMMA(token : SmcLexer.Token)
+                    ArgsStart           {addVariable();}
+
+    Default         ArgsError           {error("Expecting either ',' or ')'.", false);}
+}
+
+VarArg2
+{
+    COLON(token : SmcLexer.Token)
+                    VarArgEnd           {appendVariable(token);}
+
+    Default         ArgsError           {error("Expecting ':' after first ':'.", false);}
+}
+
+VarArgEnd
+{
+    // Handle multiply scoped variables.
+    WORD(token : SmcLexer.Token)
+                    VarArg1             {appendVariable(token);}
+}
+
+NextArgument
+{
+    RIGHT_PAREN(token : SmcLexer.Token)
+                    pop(ArgsDone)       {}
+
+    COMMA(token : SmcLexer.Token)
+                    ArgsStart           {}
+
+    Default         ArgsError           {error("Expecting either ',' or ')'.", false);}
+}
+
+ArgsError
+{
+    RIGHT_PAREN(token : SmcLexer.Token)
+                    pop(ArgsError)      {}
+
+    Default         nil                 {}
+}
+
+%%
+
+//===============================================================
+// Name Map
+// This map parses fully qualified class names.
+//
 %map NameMap
 %%
 // Get the owning object's class name.

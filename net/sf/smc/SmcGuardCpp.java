@@ -23,6 +23,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2002/02/13 02:45:23  cwrapp
+// Changes in release 1.2.0:
+// Added the following features:
+// + 484889: "pop" transitions can now return arguments
+//           along with a transition name.
+// + 496625: Multiple .sm files may be specified in the
+//           compile command.
+//
+// Fixed the following bugs:
+// + 496692: Fixed the %package C++ code generation.
+// + 501157: Transition debug output was still hardcoded
+//           to System.err. This has been corrected so
+//           that FSMContext._debug_stream is used.
+//
 // Revision 1.2  2001/12/14 20:10:37  cwrapp
 // Changes in release 1.1.0:
 // Add the following features:
@@ -156,35 +170,37 @@ public final class SmcGuardCpp
         // proper "if-then-else" code.
         if (guardCount > 1)
         {
-            indent2 = "        ";
+            indent2 = indent + "        ";
 
             // More than one guard. Is this the first guard?
             if (guardIndex == 0 && _condition != null)
             {
                 // Yes, this is the first. This means an
                 // "if" should be used for this condition.
-                source.print("    if (");
+                source.print(indent + "    if (");
                 _condition.generateCode(source, context, "");
                 source.println(")");
-                source.println("    {");
+                source.println(indent + "    {");
             }
             else if (_condition != null)
             {
                 // No, this is not the first transition but it
                 // does have a condition. Use an "else if" for
                 // the condition.
-                source.print("\n    else if (");
+                source.print("\n" +
+                             indent +
+                             "    else if (");
                 _condition.generateCode(source, context, "");
                 source.println(")");
-                source.println("    {");
+                source.println(indent + "    {");
             }
             else
             {
                 // This is not the first transition and it has
                 // no condition.
                 source.println();
-                source.println("    else");
-                source.println("    {");
+                source.println(indent + "    else");
+                source.println(indent + "    {");
             }
         }
         else
@@ -195,15 +211,16 @@ public final class SmcGuardCpp
             {
                 // Actually, this is a plain, old, vaniila
                 // transition.
-                indent2 = "    ";
+                indent2 = indent + "    ";
             }
             else
             {
                 // Yes, there is a condition.
-                source.print("    if (");
+                source.print(indent + "    if (");
                 _condition.generateCode(source, context, "");
-                indent2 = "        ";
-                source.println(")\n    {");
+                source.println(")");
+                source.println(indent + "    {");
+                indent2 = indent + "        ";
             }
         }
 
@@ -367,7 +384,7 @@ public final class SmcGuardCpp
         // generator whether all clauses have been done.
         if (guardCount > 1)
         {
-            source.print("    }");
+            source.print(indent + "    }");
         }
 
         return;

@@ -28,6 +28,20 @@
 //
 // Change Log
 // $Log$
+// Revision 1.4  2002/02/13 02:45:23  cwrapp
+// Changes in release 1.2.0:
+// Added the following features:
+// + 484889: "pop" transitions can now return arguments
+//           along with a transition name.
+// + 496625: Multiple .sm files may be specified in the
+//           compile command.
+//
+// Fixed the following bugs:
+// + 496692: Fixed the %package C++ code generation.
+// + 501157: Transition debug output was still hardcoded
+//           to System.err. This has been corrected so
+//           that FSMContext._debug_stream is used.
+//
 // Revision 1.3  2001/06/16 19:52:43  cwrapp
 // Changes in release 1.0, beta 7:
 // Fixes the minor code generation bugs and introduces a new
@@ -80,6 +94,7 @@
 
 package statemap;
 
+import java.io.PrintStream;
 import java.io.Serializable;
 
 // statemap.FSMContext --
@@ -104,6 +119,7 @@ public abstract class FSMContext
         _previous_state = null;
         _state_stack = new java.util.Stack();
         _debug_flag = false;
+        _debug_stream = System.err;
     }
 
     // When debug is set to true, the state map
@@ -119,6 +135,18 @@ public abstract class FSMContext
         return;
     }
 
+    // Write the debug output to this stream.
+    public PrintStream getDebugStream()
+    {
+        return (_debug_stream);
+    }
+
+    public void setDebugStream(PrintStream stream)
+    {
+        _debug_stream = stream;
+        return;
+    }
+
     // Is this state map in a transition? If state is null, then
     // true; otherwise, false.
     public boolean isInTransition()
@@ -130,8 +158,8 @@ public abstract class FSMContext
     {
         if (_debug_flag == true)
         {
-            System.err.println("NEW STATE    : " +
-                               state.getName());
+            _debug_stream.println("NEW STATE    : " +
+                                  state.getName());
         }
 
         // Should this be done?
@@ -165,8 +193,8 @@ public abstract class FSMContext
     {
         if (_debug_flag == true)
         {
-            System.out.println("PUSH TO STATE: " +
-                               state.getName());
+            _debug_stream.println("PUSH TO STATE: " +
+                                  state.getName());
         }
 
         if (_state != null)
@@ -185,7 +213,7 @@ public abstract class FSMContext
         {
             if (_debug_flag == true)
             {
-                System.out.println("POPPING ON EMPTY STATE STACK.");
+                _debug_stream.println("POPPING ON EMPTY STATE STACK.");
             }
 
             throw new java.util.EmptyStackException();
@@ -198,8 +226,8 @@ public abstract class FSMContext
 
             if (_debug_flag == true)
             {
-                System.out.println("POP TO STATE : " +
-                                   _state.getName());
+                _debug_stream.println("POP TO STATE : " +
+                                      _state.getName());
             }
         }
 
@@ -250,6 +278,9 @@ public abstract class FSMContext
     // When this flag is set to true, this class will print
     // out debug messages.
     protected boolean _debug_flag;
+
+    // Write debug output to this stream.
+    protected PrintStream _debug_stream;
 
 // Inner classes
 

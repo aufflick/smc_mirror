@@ -2,17 +2,28 @@
 
                                SMC
                      The State Map Compiler
-                     (Version: 1.0.2)
+                     (Version: 1.2.0)
 
 
 
 0. What's New?
 --------------
 
-No new features or bug fixes. Instead, the classes in the
-Smc executable JAR file (Smc.jar) are now in package net.sf.smc.
-This was done so that Smc.jar could be more easily added to IDEs
-like NetBeans.
+This point release contains two new features
+
++ 484889: "pop" transitions can now return arguments
+          along with a transition name.
+
++ 496625: Multiple .sm files may be specified in the
+          compile command.
+
+Two minor bugs where fixed:
+
++ 496692: Cleaned up %package C++ code generation.
+
++ 501157: Transition debug output was still hardcoded
+          to System.err. This has been corrected so
+          that FSMContext._debug_stream is used.
 
 
 

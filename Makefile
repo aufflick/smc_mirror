@@ -23,6 +23,20 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.4  2002/02/13 02:45:22  cwrapp
+# Changes in release 1.2.0:
+# Added the following features:
+# + 484889: "pop" transitions can now return arguments
+#           along with a transition name.
+# + 496625: Multiple .sm files may be specified in the
+#           compile command.
+#
+# Fixed the following bugs:
+# + 496692: Fixed the %package C++ code generation.
+# + 501157: Transition debug output was still hardcoded
+#           to System.err. This has been corrected so
+#           that FSMContext._debug_stream is used.
+#
 # Revision 1.3  2001/11/30 15:17:22  cwrapp
 # Changes in release 1.0.2:
 # + Placed the class files in Smc.jar in the net.sf.smc package.
@@ -41,7 +55,7 @@
 # Initial add to repository.
 #
 
-VERSION=	1_0_2
+VERSION=	1_2_0
 
 STAGING_DIR=	../staging
 SMC_STAGING_DIR=$(STAGING_DIR)/smc

@@ -31,6 +31,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2002/02/13 02:45:23  cwrapp
+// Changes in release 1.2.0:
+// Added the following features:
+// + 484889: "pop" transitions can now return arguments
+//           along with a transition name.
+// + 496625: Multiple .sm files may be specified in the
+//           compile command.
+//
+// Fixed the following bugs:
+// + 496692: Fixed the %package C++ code generation.
+// + 501157: Transition debug output was still hardcoded
+//           to System.err. This has been corrected so
+//           that FSMContext._debug_stream is used.
+//
 // Revision 1.2  2001/12/14 20:10:37  cwrapp
 // Changes in release 1.1.0:
 // Add the following features:
@@ -171,10 +185,10 @@ public final class Smc
         // The default smc output level is 1.
         _target_language = LANG_NOT_SET;
         _version = "v. 1.1.0";
-        _source_file_name = null;
         _debug = false;
         _sync = false;
         _trans_queue = false;
+        _source_file_list = (List) new LinkedList();
 
         // Process the command line.
         if (parseArgs(args) == false)
@@ -185,83 +199,98 @@ public final class Smc
         // Arguments check out - start compiling..
         else
         {
-            SmcLexer lexer = new SmcLexer(_source_file_stream);
-            SmcParser parser = new SmcParser(lexer, _target_language);
+            SmcLexer lexer;
+            SmcParser parser;
             SmcParseTree parse_tree;
+            ListIterator sit;
+            FileInputStream srcFileStream;
 
             try
             {
-                // First - do the parsing
-                if ((parse_tree = parser.parse()) == null ||
-                    parse_tree.check() == false)
+                for (sit = _source_file_list.listIterator();
+                     sit.hasNext() == true;
+                    )
                 {
-                    retcode = 1;
-                }
-                else
-                {
-                    // Second - do the code generation.
-                    // Open the output files. The file names
-                    // are based on the input file name.
-                    // Strip the ".sm" from the source file's name.
-                    int endIndex = _source_file_name.length() - 3;
-                    String srcFileBase =
+                    _source_file_name = (String) sit.next();
+                    srcFileStream =
+                        new FileInputStream(_source_file_name);
+
+                    lexer = new SmcLexer(srcFileStream);
+                    parser = new SmcParser(lexer, _target_language);
+
+                    // First - do the parsing
+                    if ((parse_tree = parser.parse()) == null ||
+                        parse_tree.check() == false)
+                    {
+                        retcode = 1;
+                    }
+                    else
+                    {
+                        // Second - do the code generation.
+                        // Open the output files. The file names
+                        // are based on the input file name.
+                        // Strip the ".sm" from the source file's name.
+                        int endIndex =
+                            _source_file_name.length() - 3;
+                        String srcFileBase =
                             _source_file_name.substring(0, endIndex);
-                    String headerFileName;
-                    String srcFileName = "";
-                    FileOutputStream headerFileStream;
-                    FileOutputStream sourceFileStream;
-                    PrintStream headerStream = null;
-                    PrintStream sourceStream;
+                        String headerFileName;
+                        String srcFileName = "";
+                        FileOutputStream headerFileStream;
+                        FileOutputStream sourceFileStream;
+                        PrintStream headerStream = null;
+                        PrintStream sourceStream;
 
-                    // For some strange reason I get the wrong
-                    // line separator character when I use Java
-                    // on Windows. Set the line separator to "\n"
-                    // and all is well.
-                    System.setProperty("line.separator", "\n");
+                        // For some strange reason I get the wrong
+                        // line separator character when I use Java
+                        // on Windows. Set the line separator to "\n"
+                        // and all is well.
+                        System.setProperty("line.separator", "\n");
 
-                    // Strip away any preceding directories from
-                    // the source file name.
-                    srcFileBase =
+                        // Strip away any preceding directories from
+                        // the source file name.
+                        srcFileBase =
                             srcFileBase.substring(srcFileBase.lastIndexOf(File.separatorChar) + 1);
 
-                    switch (_target_language)
-                    {
-                        case C_PLUS_PLUS:
-                            headerFileName = srcFileBase + "_sm.h";
-                            srcFileName = srcFileBase +
-                                    "_sm." +
-                                    _suffix;
+                        switch (_target_language)
+                        {
+                            case C_PLUS_PLUS:
+                                headerFileName = srcFileBase + "_sm.h";
+                                srcFileName = srcFileBase +
+                                              "_sm." +
+                                              _suffix;
 
-                            // Create the header output streams.
-                            headerFileStream =
+                                // Create the header output streams.
+                                headerFileStream =
                                     new FileOutputStream(headerFileName);
-                            headerStream =
+                                headerStream =
                                     new PrintStream(headerFileStream);
-                            break;
+                                break;
 
-                        case JAVA:
-                            srcFileName = srcFileBase +
-                                          "Context." +
-                                          _suffix;
-                            break;
+                            case JAVA:
+                                srcFileName = srcFileBase +
+                                              "Context." +
+                                              _suffix;
+                                break;
 
-                        case TCL:
-                            srcFileName = srcFileBase +
-                                          "_sm." +
-                                          _suffix;
-                            break;
+                            case TCL:
+                                srcFileName = srcFileBase +
+                                              "_sm." +
+                                              _suffix;
+                                break;
+                        }
+
+                        // Open the source output stream.
+                        sourceFileStream = new FileOutputStream(srcFileName);
+                        sourceStream = new PrintStream(sourceFileStream);
+
+                        parse_tree.generateCode(headerStream,
+                                                sourceStream,
+                                                srcFileBase);
+
+                        sourceFileStream.flush();
+                        sourceFileStream.close();
                     }
-
-                    // Open the source output stream.
-                    sourceFileStream = new FileOutputStream(srcFileName);
-                    sourceStream = new PrintStream(sourceFileStream);
-
-                    parse_tree.generateCode(headerStream,
-                                            sourceStream,
-                                            srcFileBase);
-
-                    sourceFileStream.flush();
-                    sourceFileStream.close();
                 }
             }
             catch (Exception e)
@@ -537,52 +566,46 @@ public final class Smc
         // last argument in the list.
         if (retcode == true)
         {
-            if ((i + 1) < args.length)
-            {
-                retcode = false;
-                _error_msg = "Extra arguments beyond source file";
-            }
-            else if (i == args.length)
+            if (i == args.length)
             {
                 retcode = false;
                 _error_msg = "Missing source file";
             }
-            // The file name must end in ".sm".
-            else if (args[i].endsWith(".sm") == false)
-            {
-                retcode = false;
-                _error_msg = "Source file name must end in \".sm\" (" +
-                             args[i] +
-                             ")";
-            }
             else
             {
-                _source_file_name = args[i];
-                File source_file = new File(args[i]);
-                if (source_file.exists() == false)
+                File source_file;
+
+                for (; i < args.length && retcode == true; ++i)
                 {
-                    retcode = false;
-                    _error_msg = "No such file named \"" +
-                                 args[i] +
-                                 "\"";
-                }
-                else if (source_file.canRead() == false)
-                {
-                    retcode = false;
-                    _error_msg = "Source file \"" +
-                                 args[i] +
-                                 "\" is not readable";
-                }
-                else
-                {
-                    try
+                    // The file name must end in ".sm".
+                    if (args[i].endsWith(".sm") == false)
                     {
-                        _source_file_stream =
-                                new FileInputStream(source_file);
+                        retcode = false;
+                        _error_msg = "Source file name must end in \".sm\" (" +
+                                     args[i] +
+                                     ")";
                     }
-                    catch (FileNotFoundException e)
+                    else
                     {
-                        // Ignore.
+                        source_file = new File(args[i]);
+                        if (source_file.exists() == false)
+                        {
+                            retcode = false;
+                            _error_msg = "No such file named \"" +
+                                         args[i] +
+                                         "\"";
+                        }
+                        else if (source_file.canRead() == false)
+                        {
+                            retcode = false;
+                            _error_msg = "Source file \"" +
+                                         args[i] +
+                                         "\" is not readable";
+                        }
+                        else
+                        {
+                            _source_file_list.add(args[i]);
+                        }
                     }
                 }
             }
@@ -617,9 +640,11 @@ public final class Smc
 
     private static String _app_name;
 
-    // The state map source code to be compiled.
+    // The source file currently being compiled.
     private static String _source_file_name;
-    private static FileInputStream _source_file_stream;
+
+    // The state map source code to be compiled.
+    private static List _source_file_list;
 
     // Append this suffix to the end of the output file.
     private static String _suffix;

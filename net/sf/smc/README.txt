@@ -43,6 +43,7 @@ SMC's command line options are:
     -g       : Add debugging to generated code.
     -version : Print SMC version to standard out and exit.
     -help    : Print this message to standard out and exit.
+    -sync    : Synchronize generated Java code (use with -java only).
     -c++     : Generate C++ code.
     -java    : Generate Java code.
     -tcl     : Generate [incr Tcl] code.

@@ -14,8 +14,7 @@ Demonstrates state Entry actions.
 NOTE: Smc.jar must be built and installed.
 
 Unix & Windows:
-    $ java -jar ../../../bin/Smc.jar -tcl task.sm
-    $ java -jar ../../../bin/Smc.jar -tcl taskManager.sm
+    $ java -jar ../../../bin/Smc.jar -tcl task.sm taskManager.sm
 
 
 + Executing
