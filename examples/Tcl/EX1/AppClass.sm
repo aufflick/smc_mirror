@@ -27,8 +27,32 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.1  2001/01/03 03:14:00  cwrapp
-// Initial revision
+// Revision 1.2  2001/04/09 13:29:14  cwrapp
+// Updated to test rel. 1.0, beta 5.
+//
+// Revision 1.1.1.2  2001/03/26 14:41:47  cwrapp
+// Corrected Entry/Exit action semantics. Exit actions are now
+// executed only by simple transitions and pop transitions.
+// Entry actions are executed by simple transitions and push
+// transitions. Loopback transitions do not execute either Exit
+// actions or entry actions. See SMC Programmer's manual for
+// more information.
+//
+// Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
+//
+// ----------------------------------------------------------------------
+// SMC - The State Map Compiler
+// Version: 1.0, Beta 3
+//
+// SMC compiles state map descriptions into a target object oriented
+// language. Currently supported languages are: C++, Java and [incr Tcl].
+// SMC finite state machines have such features as:
+// + Entry/Exit actions for states.
+// + Transition guards
+// + Transition arguments
+// + Push and Pop transitions.
+// + Default transitions. 
+// ----------------------------------------------------------------------
 //
 // Revision 1.1.1.1  2000/08/02 12:51:04  charlesr
 // Initial source import, SMC v. 1.0, Beta 1.
@@ -48,7 +72,7 @@ Start {
 }
 
 Zeros {
-				Zero			nil				{}
+				Zero			Zeros			{}
 				One				Ones			{}
 				Unknown			Error			{}
 				EOS				OK				{Acceptable();}
@@ -56,7 +80,7 @@ Zeros {
 
 Ones {
 				Zero			Error			{}
-				One				nil				{}
+				One				Ones			{}
 				Unknown			Error			{}
 				EOS				OK				{Acceptable();}
 }
