@@ -23,11 +23,22 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.4  2002/02/19 19:52:49  cwrapp
-// Changes in release 1.3.0:
-// Add the following features:
-// + 479555: Added subroutine/method calls as argument types.
-// + 508878: Added %import keyword.
+// Revision 1.5  2002/05/07 00:10:20  cwrapp
+// Changes in release 1.3.2:
+// Add the following feature:
+// + 528321: Modified push transition syntax to be:
+//
+// 	  <transname> <state1>/push(<state2>)  {<actions>}
+//
+// 	  which means "transition to <state1> and then
+// 	  immediately push to <state2>". The current
+// 	  syntax:
+//
+// 	  <transname> push(<state2>)  {<actions>}
+//
+//           is still valid and <state1> is assumed to be "nil".
+//
+// No bug fixes.
 //
 // Revision 1.2  2001/12/14 20:10:37  cwrapp
 // Changes in release 1.1.0:
@@ -107,6 +118,7 @@ public abstract class SmcGuard
         _condition = condition;
         _line_number = line_number;
         _end_state = "";
+        _push_state = "";
         _actions = (List) new LinkedList();
         _pop_args = (List) new LinkedList();
     }
@@ -149,23 +161,25 @@ public abstract class SmcGuard
         return;
     }
 
+    public String getPushState()
+    {
+        return (_push_state);
+    }
+
+    public void setPushState(String state)
+    {
+        _push_state = state;
+        return;
+    }
+
+    public void appendPushState(String token)
+    {
+        _push_state += token;
+        return;
+    }
+
     public void setPopArgs(List argList)
     {
-        // DEBUG
-//          ListIterator ait;
-//          SmcArgument arg;
-//          String separator;
-//          System.out.print("argList: {");
-//          for (ait = argList.listIterator(), separator = "";
-//               ait.hasNext() == true;
-//               separator = ", ")
-//          {
-//              arg = (SmcArgument) ait.next();
-//              System.out.print(separator);
-//              arg.generateCode(System.out);
-//          }
-//          System.out.println("}");
-
         _pop_args = (List) ((LinkedList) argList).clone();
         return;
     }
@@ -179,7 +193,8 @@ public abstract class SmcGuard
     // Return true if this transition is a loopback.
     public boolean isLoopback(String stateName)
     {
-        return (_trans_type == Smc.TRANS_SET &&
+        return ((_trans_type == Smc.TRANS_SET ||
+                 _trans_type == Smc.TRANS_PUSH) &&
                 (_end_state.compareTo("nil") == 0 ||
                  _end_state.compareTo(stateName) == 0));
     }
@@ -213,11 +228,8 @@ public abstract class SmcGuard
                 break;
 
             case Smc.TRANS_SET:
-                retval += " set";
-                break;
-
             case Smc.TRANS_PUSH:
-                retval += " push";
+                retval += " set";
                 break;
 
             case Smc.TRANS_POP:
@@ -226,6 +238,14 @@ public abstract class SmcGuard
         }
 
         retval += " " + _end_state;
+
+        if (_trans_type == Smc.TRANS_PUSH)
+        {
+            retval += "/";
+            retval += " push(";
+            retval += _push_state;
+            retval += ")";
+        }
 
         retval += " {";
         for (action_it = _actions.listIterator(),
@@ -257,6 +277,7 @@ public abstract class SmcGuard
     protected int _line_number;
     protected int _trans_type;
     protected String _end_state;
+    protected String _push_state;
     protected List _pop_args;
     protected List _actions;
 }

@@ -31,11 +31,22 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.4  2002/02/19 19:52:49  cwrapp
-// Changes in release 1.3.0:
-// Add the following features:
-// + 479555: Added subroutine/method calls as argument types.
-// + 508878: Added %import keyword.
+// Revision 1.5  2002/05/07 00:10:20  cwrapp
+// Changes in release 1.3.2:
+// Add the following feature:
+// + 528321: Modified push transition syntax to be:
+//
+// 	  <transname> <state1>/push(<state2>)  {<actions>}
+//
+// 	  which means "transition to <state1> and then
+// 	  immediately push to <state2>". The current
+// 	  syntax:
+//
+// 	  <transname> push(<state2>)  {<actions>}
+//
+//           is still valid and <state1> is assumed to be "nil".
+//
+// No bug fixes.
 //
 // Revision 1.2  2001/12/14 20:10:37  cwrapp
 // Changes in release 1.1.0:
@@ -160,15 +171,17 @@ public final class Smc
                            " [-version]" +
                            " [-help]" +
                            " [-sync]" +
+                           " [-noex]" +
                            " {-c++ | -java | -tcl}" +
                            " statemap_file\n" +
                            "    where:\n" +
                            "\t-suffix   Add this suffix to output file\n" +
                            "\t-g        Add debugging to generated code\n" +
-                           "\t-tq       Add transition queue support\n" +
+                           // "\t-tq       Add transition queue support\n" +
                            "\t-version  Print smc version information to standard out and exit\n" +
                            "\t-help     Print this message to standard out and exit\n" +
                            "\t-sync     Synchronize generated Java code (use with -java only)\n" +
+                           "\t-noex     Do not generate C++ exception throws (use with -c++ only)\n" +
                            "\t-c++      Generate C++ code\n" +
                            "\t-java     Generate Java code\n" +
                            "\t-tcl      Generate [incr Tcl] code\n" +
@@ -176,10 +189,11 @@ public final class Smc
 
         // The default smc output level is 1.
         _target_language = LANG_NOT_SET;
-        _version = "v. 1.3.0";
+        _version = "v. 1.3.2";
         _debug = false;
         _sync = false;
-        _trans_queue = false;
+        _noex = false;
+        // _trans_queue = false;
         _source_file_list = (List) new LinkedList();
 
         // Process the command line.
@@ -327,6 +341,11 @@ public final class Smc
         return (_sync);
     }
 
+    public static boolean isNoExceptions()
+    {
+        return (_noex);
+    }
+
     public static boolean isTransQueue()
     {
         /* Transition queuing is now turned off. This method
@@ -454,6 +473,12 @@ public final class Smc
             else if (args[i].startsWith("-g") == true)
             {
                 _debug = true;
+                args_consumed = 1;
+            }
+            else if (args[i].startsWith("-n") == true)
+            {
+                // -noex is a flag.
+                _noex = true;
                 args_consumed = 1;
             }
             /* Transition queuing (particularly when transition
@@ -610,7 +635,7 @@ public final class Smc
             retcode = false;
             _error_msg = "Target language was not specified.";
         }
-        // Also verify that the if the sync flag was given, then
+        // Also verify that if the sync flag was given, then
         // the target language is Java.
         else if (retcode == true &&
                  _sync == true &&
@@ -618,6 +643,14 @@ public final class Smc
         {
             retcode = false;
             _error_msg = "-sync can only be used with -java.";
+        }
+        // Verify that the -noex flag is used only with -c++.
+        else if (retcode == true &&
+                 _noex == true &&
+                 _target_language != C_PLUS_PLUS)
+        {
+            retcode = false;
+            _error_msg = "-noex can only be used with -c++.";
         }
 
         return (retcode);
@@ -647,11 +680,14 @@ public final class Smc
     // If true, then generate thread-safe Java code.
     private static boolean _sync;
 
+    // If true, then do *not* generate C++ exception throws.
+    private static boolean _noex;
+
     // If true, then add transition queue support to
     // generated code.
     // Transition queuing will not be released!!!!
     // This member data will always be false.
-    private static boolean _trans_queue;
+    // private static boolean _trans_queue;
 
     private static String _error_msg;
 

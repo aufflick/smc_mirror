@@ -23,11 +23,22 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.4  2002/02/19 19:52:49  cwrapp
-// Changes in release 1.3.0:
-// Add the following features:
-// + 479555: Added subroutine/method calls as argument types.
-// + 508878: Added %import keyword.
+// Revision 1.5  2002/05/07 00:10:20  cwrapp
+// Changes in release 1.3.2:
+// Add the following feature:
+// + 528321: Modified push transition syntax to be:
+//
+// 	  <transname> <state1>/push(<state2>)  {<actions>}
+//
+// 	  which means "transition to <state1> and then
+// 	  immediately push to <state2>". The current
+// 	  syntax:
+//
+// 	  <transname> push(<state2>)  {<actions>}
+//
+//           is still valid and <state1> is assumed to be "nil".
+//
+// No bug fixes.
 //
 // Revision 1.2  2001/12/14 20:10:37  cwrapp
 // Changes in release 1.1.0:
@@ -132,10 +143,18 @@ public final class SmcGuardCpp
                              String indent)
         throws ParseException
     {
+        boolean defaultFlag = false;
         ListIterator actionIt;
         SmcAction action;
         String indent2;
         String endStateName = "";
+
+        // Set a flag to denote if this is a Default state
+        // transition.
+        if (stateName.compareTo("Default") == 0)
+        {
+            defaultFlag = true;
+        }
 
         // If this guard's end state is not of the form
         // "map::state", then prepend the map name to the state
@@ -216,19 +235,6 @@ public final class SmcGuardCpp
             }
         }
 
-        // Before doing anything else, perform the current
-        // state's exit actions.
-        // v. 1.0, beta 3: Not any more. The exit actions are
-        // executed only if 1) this is a standard, non-loopback
-        // transition or a pop transition.
-        if ((_trans_type == Smc.TRANS_SET &&
-             isLoopback(stateName) == false) ||
-            _trans_type == Smc.TRANS_POP)
-        {
-            source.println(indent2 +
-                           "(context.getState()).Exit(context);");
-        }
-
         // Now that the necessary conditions are in place, it's
         // time to dump out the transitions actions. First, do
         // the proper handling of the state change. If this
@@ -257,26 +263,63 @@ public final class SmcGuardCpp
                                endStateName +
                                " = context.getState();\n");
             }
-            else if (_trans_type == Smc.TRANS_PUSH)
-            {
-                // If this is a push transition, then remember
-                // the current state as well. This will have to
-                // be reset before the push is done otherwise the
-                // push will not work because it won't know what
-                // state to put on the stack.
-                endStateName = _end_state;
-                source.println("\n" +
-                               indent2 +
-                               context +
-                               "State& CurrentState = context.getState();\n");
-            }
             else
             {
                 endStateName = _end_state;
             }
+        }
 
+        // Decide if runtime loopback checking must be done.
+        if (defaultFlag == true &&
+            _trans_type == Smc.TRANS_SET &&
+            isLoopback(stateName) == false)
+        {
+            source.println(indent +
+                           "    if (strcmp(context.getState().getName(), ");
+            source.println(indent +
+                           "               " +
+                           endStateName +
+                           ".getName())");
+            source.println(indent +
+                           "           == 0)");
+            source.println(indent + "    {");
+            source.println(indent + "        loopbackFlag = true;");
+            source.println(indent + "    }\n");
+        }
+
+        // Before doing anything else, perform the current
+        // state's exit actions.
+        // v. 1.0, beta 3: Not any more. The exit actions are
+        // executed only if 1) this is a standard, non-loopback
+        // transition or a pop transition.
+        if (_trans_type == Smc.TRANS_POP ||
+            isLoopback(stateName) == false)
+        {
+            String indent3 = indent2;
+
+            // If this is a non-loopback, generic transition,
+            // do runtime loopback checking.
+            if (_trans_type == Smc.TRANS_SET && defaultFlag == true)
+            {
+                indent3 = indent2 + "    ";
+                source.println(indent2 +
+                               "if (loopbackFlag == false)");
+                source.println(indent2 + "{");
+            }
+
+            source.println(indent3 +
+                           "(context.getState()).Exit(context);");
+
+            if (_trans_type == Smc.TRANS_SET && defaultFlag == true)
+            {
+                source.println(indent2 + "}\n");
+            }
+        }
+
+        if (_actions.size() > 0)
+        {
             // Now that we are in the transition, clear the
-            // current state since we are no longer in a state.
+            // current state.
             source.println(indent2 + "context.clearState();");
         }
 
@@ -312,38 +355,55 @@ public final class SmcGuardCpp
         }
         else if (_trans_type == Smc.TRANS_PUSH)
         {
-            // Reset the current state so that it can be pushed
+            // Set the end state so that it can be pushed
             // onto the state stack. But only do so if a clear
             // state was done.
-            if (_actions.size() > 0)
+            if (isLoopback(stateName) == false ||
+                _actions.size() > 0)
             {
                 source.println(indent2 +
-                               "context.setState(CurrentState);");
-            }
-
-            // If pushing to the "nil" state, then use the
-            // current state.
-            if (endStateName.compareTo("nil") == 0)
-            {
-                source.println(indent2 +
-                               "context.pushState(currentState);");
-            }
-            else
-            {
-                source.println(indent2 +
-                               "context.pushState(" +
+                               "context.setState(" +
                                endStateName +
                                ");");
             }
+
+            // Before doing the push, execute the end state's
+            // entry actions (if any) if this is not a loopback.
+            if (isLoopback(stateName) == false)
+            {
+                String indent3 = indent2;
+
+                if (defaultFlag == true)
+                {
+                    indent3 = indent2 + "    ";
+                    source.println("\n" +
+                                   indent2 +
+                                   "if (loopbackFlag == false)");
+                    source.println(indent2 + "{");
+                }
+                else
+                {
+                    source.println();
+                }
+
+                source.println(indent3 +
+                               "(context.getState()).Entry(context);");
+
+                if (defaultFlag == true)
+                {
+                    source.println(indent2 + "}");
+                }
+            }
+
+            source.println(indent2 +
+                           "context.pushState(" +
+                           _push_state +
+                           ");");
         }
         else if (_trans_type == Smc.TRANS_POP)
         {
             source.println(indent2 + "context.popState();");
         }
-
-        // TODO
-        // Check if the end state exists. Signal an error
-        // if it does not.
 
         // Perform the new state's entry actions.
         // v. 1.0, beta 3: Not any more. The entry actions are
@@ -353,8 +413,26 @@ public final class SmcGuardCpp
              isLoopback(stateName) == false) ||
              _trans_type == Smc.TRANS_PUSH)
         {
-            source.println(indent2 +
+            String indent3 = indent2;
+
+            // If this is a non-loopback, generic transition,
+            // do runtime loopback checking.
+            if (_trans_type == Smc.TRANS_SET && defaultFlag == true)
+            {
+                indent3 = indent2 + "    ";
+                source.println("\n" +
+                               indent2 +
+                               "if (loopbackFlag == false)");
+                source.println(indent2 + "{");
+            }
+
+            source.println(indent3 +
                            "(context.getState()).Entry(context);");
+
+            if (_trans_type == Smc.TRANS_SET && defaultFlag == true)
+            {
+                source.println(indent2 + "}");
+            }
         }
 
         // If there is a transition associated with the pop, then

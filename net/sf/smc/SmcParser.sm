@@ -1,4 +1,4 @@
-// -*- mode: text; tab-width: 4; mode: auto-fill -*-
+// -*- mode: text; tab-width: 4; -*-
 %{
 /*
  * The contents of this file are subject to the Mozilla Public
@@ -29,11 +29,22 @@
  *
  * CHANGE LOG
  * $Log$
- * Revision 1.4  2002/02/19 19:52:49  cwrapp
- * Changes in release 1.3.0:
- * Add the following features:
- * + 479555: Added subroutine/method calls as argument types.
- * + 508878: Added %import keyword.
+ * Revision 1.5  2002/05/07 00:10:20  cwrapp
+ * Changes in release 1.3.2:
+ * Add the following feature:
+ * + 528321: Modified push transition syntax to be:
+ *
+ * 	  <transname> <state1>/push(<state2>)  {<actions>}
+ *
+ * 	  which means "transition to <state1> and then
+ * 	  immediately push to <state2>". The current
+ * 	  syntax:
+ *
+ * 	  <transname> push(<state2>)  {<actions>}
+ *
+ *           is still valid and <state1> is assumed to be "nil".
+ *
+ * No bug fixes.
  *
  * Revision 1.2  2001/12/14 20:10:37  cwrapp
  * Changes in release 1.1.0:
@@ -521,37 +532,39 @@ TransStart
                     PushStart           {error("Duplicate transition - duplicate ignored.", false);
                                          createTransition();
                                          createGuard();
-                                         setTransType("TRANS_PUSH");}
+                                         setTransType(Smc.TRANS_PUSH);
+										 setEndState("nil");}
 
     POP(token : SmcLexer.Token) [isDuplicateGuard();]
                     PopStart            {error("Duplicate transition - duplicate ignored.", false);
                                          createTransition();
                                          createGuard();
-                                         setTransType("TRANS_POP");}
+                                         setTransType(Smc.TRANS_POP);}
 
     WORD(token : SmcLexer.Token) [isDuplicateGuard();]
                     EndState1           {error("Duplicate transition - duplicate ignored.", false);
                                          createTransition();
                                          createGuard();
-                                         setTransType("TRANS_SET");
+                                         setTransType(Smc.TRANS_SET);
                                          setEndState(token);}
 
     PUSH(token : SmcLexer.Token)
                     PushStart           {createTransition();
                                          createGuard();
-                                         setTransType("TRANS_PUSH");}
+                                         setTransType(Smc.TRANS_PUSH);
+										 setEndState("nil");}
 
     POP(token : SmcLexer.Token)
                     PopStart            {createTransition();
                                          createGuard();
-                                         setTransType("TRANS_POP");}
+                                         setTransType(Smc.TRANS_POP);}
 
     // This word is the end state. Go to EndState1 in case this
     // is a fully qualified state name.
     WORD(token : SmcLexer.Token)
                     EndState1           {createTransition();
                                          createGuard();
-                                         setTransType("TRANS_SET");
+                                         setTransType(Smc.TRANS_SET);
                                          setEndState(token);}
 
     Default         TransStartError     {error("Expecting either a guard, push, pop or end state.", false);}
@@ -571,15 +584,16 @@ TransStartError
 
     PUSH(token : SmcLexer.Token)
                     PushStart           {createGuard();
-                                         setTransType("TRANS_PUSH");}
+                                         setTransType(Smc.TRANS_PUSH);
+										 setEndState("nil");}
 
     POP(token : SmcLexer.Token)
                     PopStart            {createGuard();
-                                         setTransType("TRANS_POP");}
+                                         setTransType(Smc.TRANS_POP);}
 
     WORD(token : SmcLexer.Token)
                     EndState1           {createGuard();
-                                         setTransType("TRANS_SET");
+                                         setTransType(Smc.TRANS_SET);
                                          setEndState(token);}
 
     Default         nil                 {}
@@ -604,32 +618,34 @@ TransNext
     PUSH(token : SmcLexer.Token) [isDuplicateGuard();]
                     PushStart           {error("Duplicate transition - duplicate ignored.", false);
                                          createGuard();
-                                         setTransType("TRANS_PUSH");}
+                                         setTransType(Smc.TRANS_PUSH);
+										 setEndState("nil");}
 
     POP(token : SmcLexer.Token) [isDuplicateGuard();]
                     PopStart            {error("Duplicate transition - duplicate ignored.", false);
                                          createGuard();
-                                         setTransType("TRANS_POP");}
+                                         setTransType(Smc.TRANS_POP);}
 
     WORD(token : SmcLexer.Token) [isDuplicateGuard();]
                     EndState1           {error("Duplicate transition - duplicate ignored.", false);
                                          createGuard();
-                                         setTransType("TRANS_SET");
+                                         setTransType(Smc.TRANS_SET);
                                          setEndState(token);}
 
     PUSH(token : SmcLexer.Token)
                     PushStart           {createGuard();
-                                         setTransType("TRANS_PUSH");}
+                                         setTransType(Smc.TRANS_PUSH);
+										 setEndState("nil");}
 
     POP(token : SmcLexer.Token)
                     PopStart            {createGuard();
-                                         setTransType("TRANS_POP");}
+                                         setTransType(Smc.TRANS_POP);}
 
     // This word is the end state. Go to EndState1 in case this
     // is a fully qualified state name.
     WORD(token : SmcLexer.Token)
                     EndState1           {createGuard();
-                                         setTransType("TRANS_SET");
+                                         setTransType(Smc.TRANS_SET);
                                          setEndState(token);}
 
     Default         TransNextError      {error("Expecting either a guard, push, pop or end state.", false);}
@@ -649,15 +665,16 @@ TransNextError
 
     PUSH(token : SmcLexer.Token)
                     PushStart           {createGuard();
-                                         setTransType("TRANS_PUSH");}
+                                         setTransType(Smc.TRANS_PUSH);
+										 setEndState("nil");}
 
     POP(token : SmcLexer.Token)
                     PopStart            {createGuard();
-                                         setTransType("TRANS_POP");}
+                                         setTransType(Smc.TRANS_POP);}
 
     WORD(token : SmcLexer.Token)
                     EndState1           {createGuard();
-                                         setTransType("TRANS_SET");
+                                         setTransType(Smc.TRANS_SET);
                                          setEndState(token);}
 
     Default         nil                 {}
@@ -788,30 +805,32 @@ EndState
     PUSH(token : SmcLexer.Token) [isDuplicateGuard();]
                     PushStart           {error("Duplicate transition - duplicate ignored.", false);
                                          createGuard();
-                                         setTransType("TRANS_PUSH");}
+                                         setTransType(Smc.TRANS_PUSH);
+										 setEndState("nil");}
 
     POP(token : SmcLexer.Token) [isDuplicateGuard();]
                     PopStart            {error("Duplicate transition - duplicate ignored.", false);
                                          createGuard();
-                                         setTransType("TRANS_POP");}
+                                         setTransType(Smc.TRANS_POP);}
 
     WORD(token : SmcLexer.Token) [isDuplicateGuard();]
                     EndState1           {error("Duplicate transition - duplicate ignored.", false);
                                          createGuard();
-                                         setTransType("TRANS_SET");
+                                         setTransType(Smc.TRANS_SET);
                                          setEndState(token);}
 
     PUSH(token : SmcLexer.Token)
                     PushStart           {createGuard();
-                                         setTransType("TRANS_PUSH");}
+                                         setTransType(Smc.TRANS_PUSH);
+										 setEndState("nil");}
 
     POP(token : SmcLexer.Token)
                     PopStart            {createGuard();
-                                         setTransType("TRANS_POP");}
+                                         setTransType(Smc.TRANS_POP);}
 
     WORD(token : SmcLexer.Token)
                     EndState1           {createGuard();
-                                         setTransType("TRANS_SET");
+                                         setTransType(Smc.TRANS_SET);
                                          setEndState(token);}
 
     Default         EndStateError       {error("Expecting either \"push\", \"pop\" or end state.", false);}
@@ -839,6 +858,19 @@ EndState1
     // This must be a fully qualified state name.
     COLON(token : SmcLexer.Token)
                     EndState2           {appendEndState(token);}
+
+    // v. 1.3.2
+    // A push transition may now be specified using the form
+    //   <state1>/push(<state2>)
+	// which means: this transition ends at <state1> but then
+    // pushes to <state2>. This syntax change is necessary if
+    // two different transitions need to push the <state2>
+    // and then need to process the pop differently. Without this
+    // new syntax, there is no way to distinguish between pops
+    // and their respective pushes from transitions from the same
+    // state.
+    SLASH(token : SmcLexer.Token)
+				    PushTransition		{setTransType(Smc.TRANS_PUSH);}
 
     // A brace denotes the start of the actions.
     LEFT_BRACE(token : SmcLexer.Token)
@@ -873,12 +905,22 @@ EndState3
     Default         EndStateError       {error("Expecting a state name (as in map::state)", false);}
 }
 
+// This is the push part of a "<state1>/push(<state2>)" end statefd
+// <state1> has been parse, now look for the push.
+PushTransition
+{
+    PUSH(token : SmcLexer.Token)
+				    PushStart			{}
+
+    Default			PushError			{error("\"push\" must follow a '/'.", false);}
+}
+
 PushStart
 {
     LEFT_PAREN(token : SmcLexer.Token)
                     PushMap             {}
 
-    Default         PushError           {error("push must be followed by a '('.", false);}
+    Default         PushError           {error("\"push\" must be followed by a '\'.", false);}
 }
 
 PushError
@@ -904,7 +946,7 @@ PushMap
 {
     // Is this a map name or a state name?
     WORD(token : SmcLexer.Token)
-                    PushState1          {setEndState(token);}
+                    PushState1          {setPushState(token);}
 
     Default         PushError           {error("Expecting a state name.", false);}
 }
@@ -917,7 +959,7 @@ PushState1
 
     // We have seen the map name. Now we are looking for the state.
     COLON(token : SmcLexer.Token)
-                    PushState2          {appendEndState(token);}
+                    PushState2          {appendPushState(token);}
 
     Default         PushError           {error("Expecting either ')' or ':' (as in map::state).", false);}
 }
@@ -925,7 +967,7 @@ PushState1
 PushState2
 {
     COLON(token : SmcLexer.Token)
-                    PushState3          {appendEndState(token);}
+                    PushState3          {appendPushState(token);}
 
     Default         PushError           {error("Expecting ':' (as in map::state).", false);}
 }
@@ -933,7 +975,7 @@ PushState2
 PushState3
 {
     WORD(token : SmcLexer.Token)
-                    PushEnd             {appendEndState(token);}
+                    PushEnd             {appendPushState(token);}
 
     Default         PushError           {error("Expecting a state name (as in map::state).", false);}
 }

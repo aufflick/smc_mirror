@@ -26,11 +26,22 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.3  2002/02/19 19:52:49  cwrapp
-// Changes in release 1.3.0:
-// Add the following features:
-// + 479555: Added subroutine/method calls as argument types.
-// + 508878: Added %import keyword.
+// Revision 1.4  2002/05/07 00:10:20  cwrapp
+// Changes in release 1.3.2:
+// Add the following feature:
+// + 528321: Modified push transition syntax to be:
+//
+// 	  <transname> <state1>/push(<state2>)  {<actions>}
+//
+// 	  which means "transition to <state1> and then
+// 	  immediately push to <state2>". The current
+// 	  syntax:
+//
+// 	  <transname> push(<state2>)  {<actions>}
+//
+//           is still valid and <state1> is assumed to be "nil".
+//
+// No bug fixes.
 //
 // Revision 1.2  2001/12/14 20:10:37  cwrapp
 // Changes in release 1.1.0:
@@ -524,7 +535,8 @@ public final class SmcLexer
     /* package */ static final int STRING = 29;
     /* package */ static final int ASTERISK = 30;
     /* package */ static final int AMPERSAND = 31;
-    /* package */ static final int TOKEN_COUNT = AMPERSAND + 1;
+    /* package */ static final int SLASH = 32;
+    /* package */ static final int TOKEN_COUNT = SLASH + 1;
     private static final int KEYWORD_COUNT = 4;
 
     private static String[] _typeName = null;
@@ -565,6 +577,7 @@ public final class SmcLexer
         _typeName[SmcLexer.STRING] = "STRING";
         _typeName[SmcLexer.ASTERISK] = "ASTERISK";
         _typeName[SmcLexer.AMPERSAND] = "AMPERSAND";
+        _typeName[SmcLexer.SLASH] = "SLASH";
 
         _keywordMap = new HashMap(KEYWORD_COUNT);
         _keywordMap.put("Entry", new Integer(SmcLexer.ENTRY));

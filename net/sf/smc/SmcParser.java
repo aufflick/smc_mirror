@@ -23,11 +23,22 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.4  2002/02/19 19:52:49  cwrapp
-// Changes in release 1.3.0:
-// Add the following features:
-// + 479555: Added subroutine/method calls as argument types.
-// + 508878: Added %import keyword.
+// Revision 1.5  2002/05/07 00:10:20  cwrapp
+// Changes in release 1.3.2:
+// Add the following feature:
+// + 528321: Modified push transition syntax to be:
+//
+// 	  <transname> <state1>/push(<state2>)  {<actions>}
+//
+// 	  which means "transition to <state1> and then
+// 	  immediately push to <state2>". The current
+// 	  syntax:
+//
+// 	  <transname> push(<state2>)  {<actions>}
+//
+//           is still valid and <state1> is assumed to be "nil".
+//
+// No bug fixes.
 //
 // Revision 1.2  2001/12/14 20:10:37  cwrapp
 // Changes in release 1.1.0:
@@ -772,29 +783,28 @@ public final class SmcParser
 
     // Set the in-progress guard's transtion type (set, push or
     // pop).
-    /* package */ void setTransType(String trans_type)
+    /* package */ void setTransType(int  trans_type)
     {
         if (_guard_in_progress == null)
         {
             error("There is no in-progress guard to which to set the transition type.",
                   false);
         }
-        else if (trans_type.compareTo("TRANS_SET") == 0)
-        {
-            _guard_in_progress.setTransType(Smc.TRANS_SET);
-        }
-        else if (trans_type.compareTo("TRANS_PUSH") == 0)
-        {
-            _guard_in_progress.setTransType(Smc.TRANS_PUSH);
-        }
-        else if (trans_type.compareTo("TRANS_POP") == 0)
-        {
-            _guard_in_progress.setTransType(Smc.TRANS_POP);
-        }
         else
         {
-            error("Transition type must be either \"TRANS_SET\", \"TRANS_PUSH\" or \"TRANS_POP\".",
-                  false);
+            switch (trans_type)
+            {
+                case Smc.TRANS_SET:
+                case Smc.TRANS_PUSH:
+                case Smc.TRANS_POP:
+                    _guard_in_progress.setTransType(trans_type);
+                    break;
+
+                default:
+                    error("Transition type must be either \"TRANS_SET\", \"TRANS_PUSH\" or \"TRANS_POP\".",
+                          false);
+                    break;
+            }
         }
 
         return;
@@ -816,6 +826,22 @@ public final class SmcParser
         return;
     }
 
+    // Set the in-progress guard's end state.
+    /* package */ void setEndState(String state)
+    {
+        if (_guard_in_progress == null)
+        {
+            error("There is no in-progress guard to which to add the end state.",
+                  false);
+        }
+        else
+        {
+            _guard_in_progress.setEndState(state);
+        }
+
+        return;
+    }
+
     // Append the current token to the end state.
     /* package */ void appendEndState(SmcLexer.Token token)
     {
@@ -827,6 +853,52 @@ public final class SmcParser
         else
         {
             _guard_in_progress.appendEndState(token.getValue());
+        }
+
+        return;
+    }
+
+    // Set the in-progress guard's push state.
+    /* package */ void setPushState(SmcLexer.Token token)
+    {
+        if (_guard_in_progress == null)
+        {
+            error("There is no in-progress guard to which to add the end state.",
+                  false);
+        }
+        else if (_guard_in_progress.getTransType() != Smc.TRANS_PUSH)
+        {
+            error("Cannot set push state on a non-push transition.",
+                  false);
+        }
+        else if (token.getValue().equals("nil") == true)
+        {
+            error("Cannot push to \"nil\" state.", false);
+        }
+        else
+        {
+            _guard_in_progress.setPushState(token.getValue());
+        }
+
+        return;
+    }
+
+    // Append the current token to the push state.
+    /* package */ void appendPushState(SmcLexer.Token token)
+    {
+        if (_guard_in_progress == null)
+        {
+            error("There is no in-progress guard to which to append to the end state.",
+                  false);
+        }
+        else if (_guard_in_progress.getTransType() != Smc.TRANS_PUSH)
+        {
+            error("Cannot append push state on a non-push transition.",
+                  false);
+        }
+        else
+        {
+            _guard_in_progress.appendPushState(token.getValue());
         }
 
         return;
@@ -1411,6 +1483,9 @@ public final class SmcParser
                                              param_types);
             _TransMethod[SmcLexer.AMPERSAND] =
                 _map_class.getDeclaredMethod("AMPERSAND",
+                                             param_types);
+            _TransMethod[SmcLexer.SLASH] =
+                _map_class.getDeclaredMethod("SLASH",
                                              param_types);
         }
         catch (NoSuchMethodException ex1)

@@ -23,11 +23,22 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.4  2002/02/19 19:52:49  cwrapp
-// Changes in release 1.3.0:
-// Add the following features:
-// + 479555: Added subroutine/method calls as argument types.
-// + 508878: Added %import keyword.
+// Revision 1.5  2002/05/07 00:10:20  cwrapp
+// Changes in release 1.3.2:
+// Add the following feature:
+// + 528321: Modified push transition syntax to be:
+//
+// 	  <transname> <state1>/push(<state2>)  {<actions>}
+//
+// 	  which means "transition to <state1> and then
+// 	  immediately push to <state2>". The current
+// 	  syntax:
+//
+// 	  <transname> push(<state2>)  {<actions>}
+//
+//           is still valid and <state1> is assumed to be "nil".
+//
+// No bug fixes.
 //
 // Revision 1.2  2001/12/14 20:10:37  cwrapp
 // Changes in release 1.1.0:
@@ -174,6 +185,13 @@ public final class SmcParseTreeCpp
             header.println("#define SMC_TRANS_Q\n");
         }
          */
+
+        // If exception throwing is not being down, then use
+        // asserts.
+        if (Smc.isNoExceptions() == true)
+        {
+            header.println("#include <assert.h>");
+        }
 
         // Include required standard .h files.
         header.println("#include <statemap.h>\n");
@@ -470,14 +488,23 @@ public final class SmcParseTreeCpp
         // definition in the current state and there
         // is no default to cover for it. Throw an
         // exception.
-        source.println(indent + "    throw (");
-        source.println(indent +
-                       "        TransitionUndefinedException(");
-        source.println(indent +
-                       "            context.getState().getName(),");
-        source.println(indent +
-                       "            context.getTransition()));");
-        source.println();
+        // v. 1.3.1: But only if -noex was not specified.
+        if (Smc.isNoExceptions() == false)
+        {
+            source.println(indent + "    throw (");
+            source.println(indent +
+                           "        TransitionUndefinedException(");
+            source.println(indent +
+                           "            context.getState().getName(),");
+            source.println(indent +
+                           "            context.getTransition()));");
+            source.println();
+        }
+        else
+        {
+            // Otherwise, generate an assert.
+            source.println(indent + "    assert(1==0);\n");
+        }
 
         source.println(indent + "    return;");
         source.println(indent + "}");
@@ -540,8 +567,20 @@ public final class SmcParseTreeCpp
         header.println(indent + "    {");
         header.println(indent + "        if (_state == NULL)");
         header.println(indent + "        {");
-        header.println(indent +
-                       "            throw StateUndefinedException();");
+
+        // v. 1.3.1: If -noex was specified, then don't throw
+        // exceptions.
+        if (Smc.isNoExceptions() == false)
+        {
+            header.println(indent +
+                           "            throw StateUndefinedException();");
+        }
+        else
+        {
+            header.println(indent +
+                           "            assert(1 == 0);");
+        }
+
         header.println(indent + "        }\n");
         header.println(indent +
                        "        return(dynamic_cast<" +
