@@ -23,6 +23,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2001/12/14 20:10:37  cwrapp
+// Changes in release 1.1.0:
+// Add the following features:
+// + 486786: Added the %package keyword which specifies the
+//           Java package/C++ namespace/Tcl namespace
+//           the SMC-generated classes will be placed.
+// + 486471: The %class keyword accepts fully qualified
+//           class names.
+// + 491135: Add FSMContext methods getDebugStream and
+//           setDebugStream.
+// + 492165: Added -sync command line option which causes
+//           the transition methods to be synchronized
+//           (this option may only be used with -java).
+//
 // Revision 1.1  2001/12/03 14:14:03  cwrapp
 // Changes in release 1.0.2:
 // + Placed the class files in Smc.jar in the net.sf.smc package.
@@ -113,6 +127,7 @@ public final class SmcGuardJava
                              int guardIndex,
                              int guardCount,
                              String context,
+                             String pkg,
                              String mapName,
                              String stateName,
                              String indent)
@@ -255,10 +270,11 @@ public final class SmcGuardJava
                  _end_state.compareTo(stateName) == 0))
             {
                 endStateName = "endState";
-                source.println("\n" +
-                               indent2 +
+                source.println(indent2 +
                                context +
-                               "State endState = s.getState();\n");
+                               "State " +
+                               endStateName +
+                               " = s.getState();\n");
             }
             else if (_trans_type == Smc.TRANS_PUSH)
             {
@@ -284,13 +300,20 @@ public final class SmcGuardJava
         }
 
         // Dump out this transition's actions.
-        for (actionIt = _actions.listIterator();
-             actionIt.hasNext() == true;
-            )
+        if (_actions.size() == 0 && _condition != null)
         {
-            action = (SmcAction) actionIt.next();
-            action.generateCode(source, context, indent2);
-            source.println(";");
+            source.println(indent2 + "// No actions.");
+        }
+        else
+        {
+            for (actionIt = _actions.listIterator();
+                 actionIt.hasNext() == true;
+                )
+            {
+                action = (SmcAction) actionIt.next();
+                action.generateCode(source, context, indent2);
+                source.println(";");
+            }
         }
 
         // Print the setState() call, if necessary. Do NOT

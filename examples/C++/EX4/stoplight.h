@@ -33,8 +33,43 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.1  2001/01/03 03:14:00  cwrapp
-// Initial revision
+// Revision 1.2  2001/12/14 20:10:36  cwrapp
+// Changes in release 1.1.0:
+// Add the following features:
+// + 486786: Added the %package keyword which specifies the
+//           Java package/C++ namespace/Tcl namespace
+//           the SMC-generated classes will be placed.
+// + 486471: The %class keyword accepts fully qualified
+//           class names.
+// + 491135: Add FSMContext methods getDebugStream and
+//           setDebugStream.
+// + 492165: Added -sync command line option which causes
+//           the transition methods to be synchronized
+//           (this option may only be used with -java).
+//
+// Revision 1.1.1.2  2001/03/26 14:41:46  cwrapp
+// Corrected Entry/Exit action semantics. Exit actions are now
+// executed only by simple transitions and pop transitions.
+// Entry actions are executed by simple transitions and push
+// transitions. Loopback transitions do not execute either Exit
+// actions or entry actions. See SMC Programmer's manual for
+// more information.
+//
+// Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
+//
+// ----------------------------------------------------------------------
+// SMC - The State Map Compiler
+// Version: 1.0, Beta 3
+//
+// SMC compiles state map descriptions into a target object oriented
+// language. Currently supported languages are: C++, Java and [incr Tcl].
+// SMC finite state machines have such features as:
+// + Entry/Exit actions for states.
+// + Transition guards
+// + Transition arguments
+// + Push and Pop transitions.
+// + Default transitions. 
+// ----------------------------------------------------------------------
 //
 // Revision 1.1.1.1  2000/08/02 12:51:00  charlesr
 // Initial source import, SMC v. 1.0, Beta 1.
@@ -43,42 +78,46 @@
 #include "stoplightdefs.h"
 #include "stoplight_sm.h"
 
-class Stoplight
+namespace cpp_ex4
 {
-// Member data.
-public:
-protected:
-private:
-    StoplightContext _state_map;
+    class Stoplight
+    {
+    // Member data.
+    public:
+    protected:
+    private:
+        StoplightContext _state_map;
 
-// Member functions.
-public:
-	Stoplight();
-		// Default constructor. North-south road has the
-		// initial green by default.
+    // Member functions.
+    public:
+        // Default constructor. North-south road has the
+        // initial green by default.
+        Stoplight();
 
-	Stoplight(Directions direction);
-		// Specify the initial direction with
-		// the green light.
+        // Specify the initial direction with
+        // the green light.
+        Stoplight(Directions direction);
 
-	inline ~Stoplight() {};
-		// Destructor.
+        // Destructor.
+        inline ~Stoplight() {};
 
-	void TurnLight(StopLights light, LightColors color);
-		// Change a stoplight's color.
+        // Change a stoplight's color.
+        void TurnLight(StopLights light, LightColors color);
 
-	void SetTimer(int time);
-		// Set a timer for the specified number of seconds.
+        // Set a timer for the specified number of seconds.
+        void SetTimer(int time);
 
-	inline void Timeout()
-	{ _state_map.Timeout(); };
-		// This routine is called by SigalmHandler()
-		// when a timer expires.
+        // This routine is called by SigalmHandler()
+        // when a timer expires.
+        inline void Timeout()
+            { _state_map.Timeout(); };
 
-private:
-	void Initialize(Directions direction);
-		// Sets the initial state of the state map and the initial
-		// timer.
-};
+    private:
+        // Sets the initial state of the state map and the initial
+        // timer.
+        void Initialize(Directions direction);
+
+    }; // end of class Stoplight
+}; // end of namespace cpp_ex4
 
 #endif

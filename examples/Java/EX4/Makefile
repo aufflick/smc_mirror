@@ -23,6 +23,20 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2001/12/14 20:10:37  cwrapp
+# Changes in release 1.1.0:
+# Add the following features:
+# + 486786: Added the %package keyword which specifies the
+#           Java package/C++ namespace/Tcl namespace
+#           the SMC-generated classes will be placed.
+# + 486471: The %class keyword accepts fully qualified
+#           class names.
+# + 491135: Add FSMContext methods getDebugStream and
+#           setDebugStream.
+# + 492165: Added -sync command line option which causes
+#           the transition methods to be synchronized
+#           (this option may only be used with -java).
+#
 # Revision 1.2  2001/05/09 23:40:02  cwrapp
 # Changes in release 1.0, beta 6:
 # Fixes the four following bugs:
@@ -66,7 +80,7 @@
 # Initial source import, SMC v. 1.0, Beta 1.
 #
 
-TARGET=		Traffic
+TARGET=		Traffic.jar
 
 SM_SOURCES=	Vehicle.sm \
 		Stoplight.sm
@@ -77,18 +91,30 @@ SOURCES=	$(SM_SOURCES:%.sm=%Context.java) \
 		ConfigDialog.java \
 		Traffic.java
 
-JAVAC=		javac
-JAVAC_FLAGS=	-g -classpath ../../../lib/statemap.jar
-SMC=		java -jar ../../../bin/Smc.jar
-SMC_FLAGS=	-java -g
+PACKAGE_DIR=	smc_ex4
 
-all :		Traffic
+STATEMAP_LIB_DIR=	../../../lib
+
+JAVAC=		javac
+JAVAC_FLAGS=	-d . -g -classpath $(STATEMAP_LIB_DIR)
+SMC=		java -jar ../../../bin/Smc.jar
+SMC_FLAGS=	-java -g -sync
+JAR=		jar
+JAR_CREATE_FLAGS=	cmf manifest.txt
+JAR_UPDATE_FLAGS=	uf
+
+
+all :		$(TARGET)
 
 %Context.java : %.sm
 		$(SMC) $(SMC_FLAGS) $<
 
 $(TARGET) :	$(SOURCES)
 		$(JAVAC) $(JAVAC_FLAGS) $(SOURCES)
+		$(JAR) $(JAR_CREATE_FLAGS) $(TARGET) \
+			$(PACKAGE_DIR)/*.class
+		$(JAR) $(JAR_UPDATE_FLAGS) $(TARGET) \
+			-C $(STATEMAP_LIB_DIR) statemap
 
 clean :
-		-rm -f *.class *Context.java
+		-rm -f *Context.java $(PACKAGE_DIR)/*.class

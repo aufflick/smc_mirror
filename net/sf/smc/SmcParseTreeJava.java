@@ -23,6 +23,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2001/12/14 20:10:37  cwrapp
+// Changes in release 1.1.0:
+// Add the following features:
+// + 486786: Added the %package keyword which specifies the
+//           Java package/C++ namespace/Tcl namespace
+//           the SMC-generated classes will be placed.
+// + 486471: The %class keyword accepts fully qualified
+//           class names.
+// + 491135: Add FSMContext methods getDebugStream and
+//           setDebugStream.
+// + 492165: Added -sync command line option which causes
+//           the transition methods to be synchronized
+//           (this option may only be used with -java).
+//
 // Revision 1.1  2001/12/03 14:14:03  cwrapp
 // Changes in release 1.0.2:
 // + Placed the class files in Smc.jar in the net.sf.smc package.
@@ -94,6 +108,7 @@ import java.io.PrintStream;
 import java.text.ParseException;
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 
 public final class SmcParseTreeJava
@@ -118,13 +133,29 @@ public final class SmcParseTreeJava
         String javaState;
         String separator;
         int index;
-        LinkedList params;
-        LinkedList prev_params;
+        List params;
+        List prev_params;
 
         // Dump out the raw source code, if any.
         if (_source != null && _source.length () > 0)
         {
-            source.println (_source + "\n");
+            source.println(_source + "\n");
+        }
+
+        // If a package has been specified, generate the
+        // package statement now.
+        if (_package != null && _package.length() > 0)
+        {
+            source.println("package " + _package + ";");
+            source.println();
+        }
+
+        // If the -g option was specified, then import the
+        // PrintStream class.
+        if (Smc.isDebug() == true)
+        {
+            source.println("import java.io.PrintStream;");
+            source.println();
         }
 
         // The context clas contains all the state classes as
@@ -179,7 +210,7 @@ public final class SmcParseTreeJava
 
         // Generate the default transition methods.
         // Get the transition list.
-        LinkedList transList = new LinkedList();
+        List transList = (List) new LinkedList();
         for (mapIt = _maps.listIterator();
              mapIt.hasNext() == true;
             )
@@ -205,7 +236,16 @@ public final class SmcParseTreeJava
             trans = (SmcTransition) transIt.next();
             if (trans.getName().compareTo("Default") != 0)
             {
-                source.print("    public synchronized void " +
+                source.print("    public ");
+
+                // If the -sync flag was specified, then output
+                // the "synchronized" keyword.
+                if (Smc.isSynchronized() == true)
+                {
+                    source.print("synchronized ");
+                }
+
+                source.print("void " +
                              trans.getName() +
                              "(");
                 for (paramIt = trans.getParameters().listIterator(),
@@ -471,7 +511,7 @@ public final class SmcParseTreeJava
         // data.
         if (Smc.isTransQueue() == true)
         {
-            source.println("    private java.util.LinkedList _trans_queue;");
+            source.println("    private java.util.List _trans_queue;");
         }
 
         // Declare the inner state class.
@@ -519,7 +559,8 @@ public final class SmcParseTreeJava
                     parameter.generateCode(source);
                 }
 
-                source.println(")\n        {");
+                source.println(")");
+                source.println("        {");
 
                 // If this method is reached, that means that this
                 // transition was passed to a state which does not
@@ -527,7 +568,8 @@ public final class SmcParseTreeJava
                 // transition method.
                 source.println("            Default(s);");
 
-                source.println("        }\n");
+                source.println("        }");
+                source.println();
             }
         }
 
@@ -541,8 +583,11 @@ public final class SmcParseTreeJava
         {
             source.println("            if (s.getDebugFlag() == true)");
             source.println("            {");
-            source.println("                System.err.println(\"TRANSITION   : Default\");");
-            source.println("            }\n");
+            source.println("                PrintStream str = s.getDebugStream();");
+            source.println();
+            source.println("                str.println(\"TRANSITION   : Default\");");
+            source.println("            }");
+            source.println();
         }
 
         source.println("            throw (new statemap.TransitionUndefinedException(\"State: \" +");
@@ -560,7 +605,11 @@ public final class SmcParseTreeJava
             )
         {
             map = (SmcMap) mapIt.next();
-            map.generateCode(header, source, _context);
+            map.generateCode(header,
+                             source,
+                             _context,
+                             _package,
+                             null);
         }
 
         // End of context class.

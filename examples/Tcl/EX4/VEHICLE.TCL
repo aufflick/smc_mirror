@@ -28,8 +28,43 @@
 #
 # CHANGE LOG
 # $Log$
-# Revision 1.1  2001/01/03 03:14:00  cwrapp
-# Initial revision
+# Revision 1.2  2001/12/14 20:10:37  cwrapp
+# Changes in release 1.1.0:
+# Add the following features:
+# + 486786: Added the %package keyword which specifies the
+#           Java package/C++ namespace/Tcl namespace
+#           the SMC-generated classes will be placed.
+# + 486471: The %class keyword accepts fully qualified
+#           class names.
+# + 491135: Add FSMContext methods getDebugStream and
+#           setDebugStream.
+# + 492165: Added -sync command line option which causes
+#           the transition methods to be synchronized
+#           (this option may only be used with -java).
+#
+# Revision 1.1.1.2  2001/03/26 14:41:47  cwrapp
+# Corrected Entry/Exit action semantics. Exit actions are now
+# executed only by simple transitions and pop transitions.
+# Entry actions are executed by simple transitions and push
+# transitions. Loopback transitions do not execute either Exit
+# actions or entry actions. See SMC Programmer's manual for
+# more information.
+#
+# Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
+#
+# ----------------------------------------------------------------------
+# SMC - The State Map Compiler
+# Version: 1.0, Beta 3
+#
+# SMC compiles state map descriptions into a target object oriented
+# language. Currently supported languages are: C++, Java and [incr Tcl].
+# SMC finite state machines have such features as:
+# + Entry/Exit actions for states.
+# + Transition guards
+# + Transition arguments
+# + Push and Pop transitions.
+# + Default transitions. 
+# ----------------------------------------------------------------------
 #
 # Revision 1.1.1.1  2000/08/02 12:51:05  charlesr
 # Initial source import, SMC v. 1.0, Beta 1.
@@ -39,346 +74,352 @@ package require statemap;
 
 source ./Vehicle_sm.tcl;
 
-class Vehicle {
-# Member data.
-    private variable _statemap;
+namespace eval ::tcl_ex4 {
+    class Vehicle {
+    # Member data.
+        private variable _statemap;
 
-    # The canvas to draw on and the direction this vehicle is
-    # moving.
-    private variable _canvas;
-    private variable _direction;
+        # The canvas to draw on and the direction this vehicle is
+        # moving.
+        private variable _canvas;
+        private variable _direction;
 
-    # The stoplight object is responsible knowing the road
-    # layout. Ask it for all relevant information.
-    private variable _stoplight;
+        # The stoplight object is responsible knowing the road
+        # layout. Ask it for all relevant information.
+        private variable _stoplight;
 
-    # The canvas' identifier for this square.
-    private variable _canvasID -1;
+        # The canvas' identifier for this square.
+        private variable _canvasID -1;
 
-    # The vehicle is 12 pixels x 12 pixels.
-    private variable _vehicleSize 6;
+        # The vehicle is 12 pixels x 12 pixels.
+        private variable _vehicleSize 6;
 
-    # A 3 pixel separation is to be maintained between vehicles.
-    private variable _vehicleSeparation 3;
+        # A 3 pixel separation is to be maintained between vehicles.
+        private variable _vehicleSeparation 3;
 
-    # The vehicle's current canvas location. This is the
-    # square's upper left hand corner.
-    private variable _xpos;
-    private variable _ypos;
+        # The vehicle's current canvas location. This is the
+        # square's upper left hand corner.
+        private variable _xpos;
+        private variable _ypos;
 
-    # How far this vehicle moves each timeout in pixels.
-    private common _speed 2;
+        # How far this vehicle moves each timeout in pixels.
+        private common _speed 2;
 
-    # Move this vehicle along at near movie-refresh rate.
-    private variable _redrawRate [expr 1000 / 60];
+        # Move this vehicle along at near movie-refresh rate.
+        private variable _redrawRate [expr 1000 / 60];
 
-    # Store the after's timer ID here.
-    private variable _timerID -1;
+        # Store the after's timer ID here.
+        private variable _timerID -1;
 
-    # Set this flag to true when the vehicle has
-    # completed its trip.
-    private variable _isDoneFlag;
+        # Set this flag to true when the vehicle has
+        # completed its trip.
+        private variable _isDoneFlag;
 
-# Member functions.
-    constructor {stoplight direction canvas} {
-        set _statemap [VehicleContext #auto $this];
+    # Member functions.
+        constructor {stoplight direction canvas} {
+            set _statemap [::tcl_ex4::VehicleContext #auto $this];
 
-        set _canvas $canvas;
-        set _direction $direction;
-        set _stoplight $stoplight
+            set _canvas $canvas;
+            set _direction $direction;
+            set _stoplight $stoplight
 
-        # This vehicle is initially at the road's outside edge.
-        # Figure out the road's length.
-        set XLength [$_stoplight getRoadLengthX];
-        set YLength [$_stoplight getRoadLengthY];
-        set LaneWidth [expr [$_stoplight getRoadWidth] / 2];
+            # This vehicle is initially at the road's outside edge.
+            # Figure out the road's length.
+            set XLength [$_stoplight getRoadLengthX];
+            set YLength [$_stoplight getRoadLengthY];
+            set LaneWidth [expr [$_stoplight getRoadWidth] / 2];
 
-        set _isDoneFlag false;
+            set _isDoneFlag false;
 
-        # How far away the vehicle is from the curb.
-        set CurbOffset [expr [expr $LaneWidth - $_vehicleSize] / 2];
+            # How far away the vehicle is from the curb.
+            set CurbOffset [expr [expr $LaneWidth - $_vehicleSize] / 2];
 
-        switch -exact -- $direction {
-            north {
-                set _xpos [expr [expr $XLength / 2] + $CurbOffset];
-                set _ypos [expr $YLength - $_vehicleSize];
+            switch -exact -- $direction {
+                north {
+                    set _xpos [expr [expr $XLength / 2] + $CurbOffset];
+                    set _ypos [expr $YLength - $_vehicleSize];
+                }
+                south {
+                    set _xpos \
+                            [expr [expr $XLength / 2] - \
+                            $LaneWidth + $CurbOffset];
+                    set _ypos 0;
+                }
+                east {
+                    set _xpos 0;
+                    set _ypos [expr [expr $YLength / 2] + $CurbOffset];
+                }
+                west {
+                    set _xpos [expr $XLength - $_vehicleSize];
+                    set _ypos [expr [expr $YLength / 2]  - \
+                            $LaneWidth + $CurbOffset];
+                }
             }
-            south {
-                set _xpos \
-                        [expr [expr $XLength / 2] - \
-                              $LaneWidth + $CurbOffset];
-                set _ypos 0;
-            }
-            east {
-                set _xpos 0;
-                set _ypos [expr [expr $YLength / 2] + $CurbOffset];
-            }
-            west {
-                set _xpos [expr $XLength - $_vehicleSize];
-                set _ypos [expr [expr $YLength / 2]  - \
-                        $LaneWidth + $CurbOffset];
-            }
+
+            # Put the vehicle on display.
+            set _canvasID \
+                    [$_canvas create rect $_xpos \
+                    $_ypos \
+                    [expr $_xpos + $_vehicleSize] \
+                    [expr $_ypos + $_vehicleSize] \
+                    -fill black \
+                    -outline white];
+
+            # DEBUG
+            # Uncomment the following line so that
+            # FSM debug output may be seen.
+            # $_statemap setDebugFlag 1;
         }
 
-        # Put the vehicle on display.
-        set _canvasID \
-                [$_canvas create rect $_xpos \
-                                      $_ypos \
-                                      [expr $_xpos + $_vehicleSize] \
-                                      [expr $_ypos + $_vehicleSize] \
-                                      -fill black \
-                                      -outline white];
-    }
+        destructor {
+            if {$_timerID >= 0} {
+                after cancel $_timerID;
+                set _timerID -1;
+            }
 
-    destructor {
-		if {$_timerID >= 0} {
-			after cancel $_timerID;
-			set _timerID -1;
-		}
-
-		$_canvas delete $_canvasID;
-    }
-
-    # timeout --
-    #
-    #   If the vehicle has driven off the canvas, then
-    #   delete the vehicle.
-    #   Check if the vehicle is at the intersection and the
-    #   light is either yellow or red. If yes, then issue a
-    #   "LightRed" transition. If all is go, then keep on
-    #   truckin.
-    #
-    # Arugments:
-    #   None.
-    #
-    # Results:
-    #   None.
-
-    public method timeout {} {
-        set _timerID -1;
-
-        if [OffCanvas] {
-            $_statemap TripDone;
-        } elseif {[AtIntersection] && \
-                [string compare [$_stoplight getLight $_direction] "green"] != 0} {
-            $_statemap LightRed;
-        } else {
-            $_statemap KeepGoing;
+            $_canvas delete $_canvasID;
         }
 
-        return -code ok;
-    }
+        # timeout --
+        #
+        #   If the vehicle has driven off the canvas, then
+        #   delete the vehicle.
+        #   Check if the vehicle is at the intersection and the
+        #   light is either yellow or red. If yes, then issue a
+        #   "LightRed" transition. If all is go, then keep on
+        #   truckin.
+        #
+        # Arugments:
+        #   None.
+        #
+        # Results:
+        #   None.
 
-    # lightGreen --
-    #
-    #   The light has turned green. Time to get moving again.
-    #
-    # Arguments:
-    #   None
-    #
-    # Results:
-    #   ok
-
-    public method lightGreen {} {
-        $_statemap LightGreen;
-
-        return -code ok;
-    }
-
-    # setSpeed --
-    #
-    #   Set speed for all vehicles.
-    #
-    # Arguments:
-    #   speed   In pixels.
-    #
-    # Results:
-    #   ok if the set was successful; error otherwise.
-
-    public proc setSpeed {speed} {
-        if {$speed < 1 || $speed > 10} {
-            set Retcode error;
-            set Retval "Invalid speed ($speed).";
-        } else {
-            set _speed $speed;
-
-            set Retcode ok;
-            set Retval "";
-        }
-
-        return -code $Retcode $Retval;
-    }
-
-    # isDone --
-    #
-    #   Has this vehicle completed its trip?
-    #
-    # Arguments:
-    #   None.
-    #
-    # Results:
-    #   Returns true if the trip is done and false
-    #   otherwise.
-
-    public method isDone {} {
-        return -code ok $_isDoneFlag;
-    }
-
-    # start --
-    #
-    #   Start this vehicle running.
-    #
-    # Arguments:
-    #   None.
-    #
-    # Results:
-    #   ok
-
-    public method start {} {
-        $_statemap Start;
-        return -code ok;
-    }
-
-    # pause --
-    #
-    #   Pause this vehicles' running.
-    #
-    # Arguments:
-    #   None.
-    #
-    # Results:
-    #   ok
-
-    public method pause {} {
-        $_statemap Pause;
-        return -code ok;
-    }
-
-    # continue --
-    #
-    #   Continue this vehicles' running.
-    #
-    # Arguments:
-    #   None.
-    #
-    # Results:
-    #   ok
-
-    public method continue {} {
-        $_statemap Continue;
-        return -code ok;
-    }
-
-    # stop --
-    #
-    #   Stop this vehicles' running.
-    #
-    # Arguments:
-    #   None.
-    #
-    # Results:
-    #   ok
-
-    public method stop {} {
-        $_statemap Stop;
-        return -code ok;
-    }
-
-    # State Map Actions
-    #
-    # The following methods are called by the state map.
-
-    # SetTimer --
-    #
-    #   Set the timer for the next move.
-    #
-    # Arguments:
-    #   None.
-    #
-    # Results:
-    #   ok
-
-    public method SetTimer {} {
-        set _timerID [after $_redrawRate [list $this timeout]];
-
-        return -code ok;
-    }
-
-    # StopTimer --
-    #
-    #   Stop the vehicle's timer.
-    #
-    # Arguments:
-    #   None.
-    #
-    # Results:
-    #   ok
-
-    public method StopTimer {} {
-        if {$_timerID >= 0} {
-            after cancel $_timerID;
+        public method timeout {} {
             set _timerID -1;
+
+            if [OffCanvas] {
+                $_statemap TripDone;
+            } elseif {[AtIntersection] && \
+                    [string compare [$_stoplight getLight $_direction] "green"] != 0} {
+                $_statemap LightRed;
+            } else {
+                $_statemap KeepGoing;
+            }
+
+            return -code ok;
         }
 
-        return -code ok;
-    }
+        # lightGreen --
+        #
+        #   The light has turned green. Time to get moving again.
+        #
+        # Arguments:
+        #   None
+        #
+        # Results:
+        #   ok
 
-    # Move --
-    #
-    #   1. Calculate the vehicle's new position.
-    #   2. Remove the vehicle from the canvas.
-    #   3. Draw the vehicles new position.
-    #
-    # Arguments:
-    #   None.
-    #
-    # Results:
-    #   None returned. Side affect of redrawing vehicle.
-    
-    public method Move {} {
-        switch -exact -- $_direction {
-            north {
-                set Xmove 0;
-                set Ymove -$_speed;
-            }
-            south {
-                set Xmove 0;
-                set Ymove $_speed;
-            }
-            east {
-                set Xmove $_speed;
-                set Ymove 0;
-            }
-            west {
-                set Xmove -$_speed;
-                set Ymove 0;
-            }
+        public method lightGreen {} {
+            $_statemap LightGreen;
+
+            return -code ok;
         }
 
-        # Erase the vehicle's current position by drawing it white.
-        $_canvas move $_canvasID $Xmove $Ymove;
+        # setSpeed --
+        #
+        #   Set speed for all vehicles.
+        #
+        # Arguments:
+        #   speed   In pixels.
+        #
+        # Results:
+        #   ok if the set was successful; error otherwise.
 
-        incr _xpos $Xmove;
-        incr _ypos $Ymove;
+        public proc setSpeed {speed} {
+            if {$speed < 1 || $speed > 10} {
+                set Retcode error;
+                set Retval "Invalid speed ($speed).";
+            } else {
+                set _speed $speed;
 
-        return -code ok;
-    }
+                set Retcode ok;
+                set Retval "";
+            }
 
-    # RegisterWithLight --
-    #
-    #   When the light turns green, it will inform us.
-    #
-    # Arguments:
-    #   None.
-    #
-    # Results:
-    #   ok
+            return -code $Retcode $Retval;
+        }
 
-    public method RegisterWithLight {} {
-		$_stoplight registerVehicle $this $_direction;
+        # isDone --
+        #
+        #   Has this vehicle completed its trip?
+        #
+        # Arguments:
+        #   None.
+        #
+        # Results:
+        #   Returns true if the trip is done and false
+        #   otherwise.
 
-		return -code ok;
-    }
+        public method isDone {} {
+            return -code ok $_isDoneFlag;
+        }
+
+        # start --
+        #
+        #   Start this vehicle running.
+        #
+        # Arguments:
+        #   None.
+        #
+        # Results:
+        #   ok
+
+        public method start {} {
+            $_statemap Start;
+            return -code ok;
+        }
+
+        # pause --
+        #
+        #   Pause this vehicles' running.
+        #
+        # Arguments:
+        #   None.
+        #
+        # Results:
+        #   ok
+
+        public method pause {} {
+            $_statemap Pause;
+            return -code ok;
+        }
+
+        # continue --
+        #
+        #   Continue this vehicles' running.
+        #
+        # Arguments:
+        #   None.
+        #
+        # Results:
+        #   ok
+
+        public method continue {} {
+            $_statemap Continue;
+            return -code ok;
+        }
+
+        # stop --
+        #
+        #   Stop this vehicles' running.
+        #
+        # Arguments:
+        #   None.
+        #
+        # Results:
+        #   ok
+
+        public method stop {} {
+            $_statemap Stop;
+            return -code ok;
+        }
+
+        # State Map Actions
+        #
+        # The following methods are called by the state map.
+
+        # SetTimer --
+        #
+        #   Set the timer for the next move.
+        #
+        # Arguments:
+        #   None.
+        #
+        # Results:
+        #   ok
+
+        public method SetTimer {} {
+            set _timerID [after $_redrawRate [list $this timeout]];
+
+            return -code ok;
+        }
+
+        # StopTimer --
+        #
+        #   Stop the vehicle's timer.
+        #
+        # Arguments:
+        #   None.
+        #
+        # Results:
+        #   ok
+
+        public method StopTimer {} {
+            if {$_timerID >= 0} {
+                after cancel $_timerID;
+                set _timerID -1;
+            }
+
+            return -code ok;
+        }
+
+        # Move --
+        #
+        #   1. Calculate the vehicle's new position.
+        #   2. Remove the vehicle from the canvas.
+        #   3. Draw the vehicles new position.
+        #
+        # Arguments:
+        #   None.
+        #
+        # Results:
+        #   None returned. Side affect of redrawing vehicle.
+        
+        public method Move {} {
+            switch -exact -- $_direction {
+                north {
+                    set Xmove 0;
+                    set Ymove -$_speed;
+                }
+                south {
+                    set Xmove 0;
+                    set Ymove $_speed;
+                }
+                east {
+                    set Xmove $_speed;
+                    set Ymove 0;
+                }
+                west {
+                    set Xmove -$_speed;
+                    set Ymove 0;
+                }
+            }
+
+            # Erase the vehicle's current position by drawing it white.
+            $_canvas move $_canvasID $Xmove $Ymove;
+
+            incr _xpos $Xmove;
+            incr _ypos $Ymove;
+
+            return -code ok;
+        }
+
+        # RegisterWithLight --
+        #
+        #   When the light turns green, it will inform us.
+        #
+        # Arguments:
+        #   None.
+        #
+        # Results:
+        #   ok
+
+        public method RegisterWithLight {} {
+            $_stoplight registerVehicle $this $_direction;
+
+            return -code ok;
+        }
 
 	# SelfDestruct --
 	#
@@ -391,140 +432,141 @@ class Vehicle {
 	#   ok
 
 	public method SelfDestruct {} {
-		$_canvas delete $_canvasID;
-        set $_canvasID -1;
-        set $_isDoneFlag true;
+            $_canvas delete $_canvasID;
+            set $_canvasID -1;
+            set $_isDoneFlag true;
 
-		return -code ok;
+            return -code ok;
 	}
 
-    # OffCanvas --
-    #
-    #   Figure out if the vehicle has driven off the map.
-    #
-    # Arguments:
-    #   None.
-    #
-    # Results:
-    #   Returns true if the vehicle is off the map; otherwise
-    #   false.
+        # OffCanvas --
+        #
+        #   Figure out if the vehicle has driven off the map.
+        #
+        # Arguments:
+        #   None.
+        #
+        # Results:
+        #   Returns true if the vehicle is off the map; otherwise
+        #   false.
 
-    private method OffCanvas {} {
-        set Retval 0;
+        private method OffCanvas {} {
+            set Retval 0;
 
-        set XLength [$_stoplight getRoadLengthX];
-        set YLength [$_stoplight getRoadLengthY];
+            set XLength [$_stoplight getRoadLengthX];
+            set YLength [$_stoplight getRoadLengthY];
 
-        switch -exact -- $_direction {
-            north {
-                if {[expr $_ypos - $_speed] <= 0} {
-                    set Retval 1;
+            switch -exact -- $_direction {
+                north {
+                    if {[expr $_ypos - $_speed] <= 0} {
+                        set Retval 1;
+                    }
+                }
+                south {
+                    if {[expr $_ypos + $_speed] >= $YLength} {
+                        set Retval 1;
+                    }
+                }
+                east {
+                    if {[expr $_xpos + $_speed] >= $XLength} {
+                        set Retval 1;
+                    }
+                }
+                west {
+                    if {[expr $_xpos - $_speed] <= 0} {
+                        set Retval 1;
+                    }
                 }
             }
-            south {
-                if {[expr $_ypos + $_speed] >= $YLength} {
-                    set Retval 1;
-                }
-            }
-            east {
-                if {[expr $_xpos + $_speed] >= $XLength} {
-                    set Retval 1;
-                }
-            }
-            west {
-                if {[expr $_xpos - $_speed] <= 0} {
-                    set Retval 1;
-                }
-            }
+
+            return -code ok $Retval;
         }
 
-        return -code ok $Retval;
-    }
+        # AtIntersection --
+        #
+        #   Figure out whether this vehicile is at the intersection
+        #   or not.
+        #
+        # Arguments:
+        #   None.
+        #
+        # Results:
+        #   Returns true if the vehicle is at the intersection;
+        #   otherwise, false.
 
-    # AtIntersection --
-    #
-    #   Figure out whether this vehicile is at the intersection
-    #   or not.
-    #
-    # Arguments:
-    #   None.
-    #
-    # Results:
-    #   Returns true if the vehicle is at the intersection;
-    #   otherwise, false.
-
-    private method AtIntersection {} {	
+        private method AtIntersection {} {	
 	    # The vehicle is not at the intersection until proven
 	    # otherwise.
 	    set Retval 0;
 
-        set XLength [$_stoplight getRoadLengthX];
-        set YLength [$_stoplight getRoadLengthY];
-        set LaneWidth [expr [$_stoplight getRoadWidth] / 2];
+            set XLength [$_stoplight getRoadLengthX];
+            set YLength [$_stoplight getRoadLengthY];
+            set LaneWidth [expr [$_stoplight getRoadWidth] / 2];
 
-        # Calculate the intersections coordinates based on
-        # the vehicle's direction. Then calculate where the
-        # vehicle will end up this move. If the vehicle will
-        # move beyond the intersection stop line, then the
-        # vehicle is at the intersection.
-        #
-        # Also take into account the vehicles already waiting
-        # at the intersection.
-        #
-        # By the way, once the vehicle moves past the intersection,
-        # ignore the light.
-        set NumVehicles [$_stoplight getQueueSize $_direction];
-        switch -exact -- $_direction {
-            north {
-                set YIntersection \
-                        [expr [expr $YLength / 2] + \
-                         $LaneWidth + \
-                         [expr $_vehicleSize / 2] + \
-                         [expr $NumVehicles * $_vehicleSize] + \
-                         [expr $NumVehicles * $_vehicleSeparation]];
-                if {$_ypos > $YIntersection && \
-                        [expr $_ypos - $_speed] <= $YIntersection} {
-                    set Retval 1;
+            # Calculate the intersections coordinates based on
+            # the vehicle's direction. Then calculate where the
+            # vehicle will end up this move. If the vehicle will
+            # move beyond the intersection stop line, then the
+            # vehicle is at the intersection.
+            #
+            # Also take into account the vehicles already waiting
+            # at the intersection.
+            #
+            # By the way, once the vehicle moves past the intersection,
+            # ignore the light.
+            set NumVehicles [$_stoplight getQueueSize $_direction];
+            switch -exact -- $_direction {
+                north {
+                    set YIntersection \
+                            [expr [expr $YLength / 2] + \
+                            $LaneWidth + \
+                            [expr $_vehicleSize / 2] + \
+                            [expr $NumVehicles * $_vehicleSize] + \
+                            [expr $NumVehicles * $_vehicleSeparation]];
+                    if {$_ypos > $YIntersection && \
+                            [expr $_ypos - $_speed] <= $YIntersection} {
+                        set Retval 1;
+                    }
+                }
+                south {
+                    set YIntersection \
+                            [expr [expr $YLength / 2] - \
+                            $LaneWidth - \
+                            [expr $_vehicleSize / 2] - \
+                            [expr $NumVehicles * $_vehicleSize] - \
+                            [expr $NumVehicles * $_vehicleSeparation]];
+                    if {$_ypos < $YIntersection && \
+                            [expr $_ypos + $_speed] >= $YIntersection} {
+                        set Retval 1;
+                    }
+                }
+                east {
+                    set XIntersection \
+                            [expr [expr $XLength / 2] - \
+                            $LaneWidth - \
+                            [expr $_vehicleSize / 2] - \
+                            [expr $NumVehicles * $_vehicleSize] - \
+                            [expr $NumVehicles * $_vehicleSeparation]];
+                    if {$_xpos < $XIntersection && \
+                            [expr $_xpos + $_speed] >= $XIntersection} {
+                        set Retval 1;
+                    }
+                }
+                west {
+                    set XIntersection \
+                            [expr [expr $XLength / 2] + \
+                            $LaneWidth + \
+                            [expr $_vehicleSize / 2] + \
+                            [expr $NumVehicles * $_vehicleSize] + \
+                            [expr $NumVehicles * $_vehicleSeparation]];
+                    if {$_xpos > $XIntersection && \
+                            [expr $_xpos - $_speed] <= $XIntersection} {
+                        set Retval 1;
+                    }
                 }
             }
-            south {
-                set YIntersection \
-                        [expr [expr $YLength / 2] - \
-                         $LaneWidth - \
-                         [expr $_vehicleSize / 2] - \
-                         [expr $NumVehicles * $_vehicleSize] - \
-                         [expr $NumVehicles * $_vehicleSeparation]];
-                if {$_ypos < $YIntersection && \
-                        [expr $_ypos + $_speed] >= $YIntersection} {
-                    set Retval 1;
-                }
-            }
-            east {
-                set XIntersection \
-                        [expr [expr $XLength / 2] - \
-                         $LaneWidth - \
-                         [expr $_vehicleSize / 2] - \
-                         [expr $NumVehicles * $_vehicleSize] - \
-                         [expr $NumVehicles * $_vehicleSeparation]];
-                if {$_xpos < $XIntersection && \
-                        [expr $_xpos + $_speed] >= $XIntersection} {
-                    set Retval 1;
-                }
-            }
-            west {
-                set XIntersection \
-                        [expr [expr $XLength / 2] + \
-                         $LaneWidth + \
-                         [expr $_vehicleSize / 2] + \
-                         [expr $NumVehicles * $_vehicleSize] + \
-                         [expr $NumVehicles * $_vehicleSeparation]];
-                if {$_xpos > $XIntersection && \
-                        [expr $_xpos - $_speed] <= $XIntersection} {
-                    set Retval 1;
-                }
-            }
+
+            return -code ok $Retval;
         }
-
-        return -code ok $Retval;
     }
 }

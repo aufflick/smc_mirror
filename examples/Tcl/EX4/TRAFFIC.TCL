@@ -32,8 +32,43 @@ exec wish8.2 -f "$0" "$@"
 #
 # CHANGE LOG
 # $Log$
-# Revision 1.1  2001/01/03 03:14:00  cwrapp
-# Initial revision
+# Revision 1.2  2001/12/14 20:10:37  cwrapp
+# Changes in release 1.1.0:
+# Add the following features:
+# + 486786: Added the %package keyword which specifies the
+#           Java package/C++ namespace/Tcl namespace
+#           the SMC-generated classes will be placed.
+# + 486471: The %class keyword accepts fully qualified
+#           class names.
+# + 491135: Add FSMContext methods getDebugStream and
+#           setDebugStream.
+# + 492165: Added -sync command line option which causes
+#           the transition methods to be synchronized
+#           (this option may only be used with -java).
+#
+# Revision 1.1.1.2  2001/03/26 14:41:47  cwrapp
+# Corrected Entry/Exit action semantics. Exit actions are now
+# executed only by simple transitions and pop transitions.
+# Entry actions are executed by simple transitions and push
+# transitions. Loopback transitions do not execute either Exit
+# actions or entry actions. See SMC Programmer's manual for
+# more information.
+#
+# Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
+#
+# ----------------------------------------------------------------------
+# SMC - The State Map Compiler
+# Version: 1.0, Beta 3
+#
+# SMC compiles state map descriptions into a target object oriented
+# language. Currently supported languages are: C++, Java and [incr Tcl].
+# SMC finite state machines have such features as:
+# + Entry/Exit actions for states.
+# + Transition guards
+# + Transition arguments
+# + Push and Pop transitions.
+# + Default transitions. 
+# ----------------------------------------------------------------------
 #
 # Revision 1.1.1.1  2000/08/02 12:51:05  charlesr
 # Initial source import, SMC v. 1.0, Beta 1.
@@ -48,9 +83,11 @@ namespace import ::statemap::*;
 # Load in the stoplight and vehicles classes.
 source ./Stoplight.tcl;
 source ./Vehicle.tcl;
+namespace import ::tcl_ex4::*;
 
-# Display the console so debug logs can be seen.
-#console show;
+# DEBUG
+# Uncomment next line so debug logs can be seen.
+# console show;
 
 # DisplaySliders --
 #
@@ -82,64 +119,64 @@ proc DisplaySliders {} {
     # vehicles appear and how fast vehicles move.
     set NSGreenSlider \
             [scale $SliderFrame.nsGreenSlider \
-                   -from 5 \
-                   -to 20 \
-                   -variable NSGreenTime \
-                   -label "North/South green light timer (in seconds)" \
-                   -orient horizontal \
-                   -tickinterval 5 \
-                   -showvalue false \
-                   -sliderrelief sunken \
-                   -length 250 \
-                   -command [list $Stoplight setLightTimer NSGreenTimer]];
+            -from 5 \
+            -to 20 \
+            -variable NSGreenTime \
+            -label "North/South green light timer (in seconds)" \
+            -orient horizontal \
+            -tickinterval 5 \
+            -showvalue false \
+            -sliderrelief sunken \
+            -length 250 \
+            -command [list $Stoplight setLightTimer NSGreenTimer]];
     set EWGreenSlider \
             [scale $SliderFrame.ewGreenSlider \
-                   -from 5 \
-                   -to 20 \
-                   -variable EWGreenTime \
-                   -label "East/West green light timer (in seconds)" \
-                   -orient horizontal \
-                   -tickinterval 5 \
-                   -showvalue false \
-                   -sliderrelief sunken \
-                   -length 250 \
-                   -command [list $Stoplight setLightTimer EWGreenTimer]];
+            -from 5 \
+            -to 20 \
+            -variable EWGreenTime \
+            -label "East/West green light timer (in seconds)" \
+            -orient horizontal \
+            -tickinterval 5 \
+            -showvalue false \
+            -sliderrelief sunken \
+            -length 250 \
+            -command [list $Stoplight setLightTimer EWGreenTimer]];
     set YellowSlider \
             [scale $SliderFrame.yellowSlider \
-                   -from 2 \
-                   -to 8 \
-                   -variable YellowTime \
-                   -label "Yellow light timer (in seconds)" \
-                   -orient horizontal \
-                   -tickinterval 2 \
-                   -showvalue false \
-                   -sliderrelief sunken \
-                   -length 250 \
-                   -command [list $Stoplight setLightTimer YellowTimer]];
+            -from 2 \
+            -to 8 \
+            -variable YellowTime \
+            -label "Yellow light timer (in seconds)" \
+            -orient horizontal \
+            -tickinterval 2 \
+            -showvalue false \
+            -sliderrelief sunken \
+            -length 250 \
+            -command [list $Stoplight setLightTimer YellowTimer]];
     set AppearanceSlider \
             [scale $SliderFrame.vehicleSlider \
-                   -from 5 \
-                   -to 15 \
-                   -variable AppearanceRate \
-                   -label "Vehicle appearance rate (in seconds)" \
-                   -orient horizontal \
-                   -tickinterval 2 \
-                   -showvalue false \
-                   -sliderrelief sunken \
-                   -length 250 \
-                   -command [list setAppearanceRate]];
+            -from 5 \
+            -to 15 \
+            -variable AppearanceRate \
+            -label "Vehicle appearance rate (in seconds)" \
+            -orient horizontal \
+            -tickinterval 2 \
+            -showvalue false \
+            -sliderrelief sunken \
+            -length 250 \
+            -command [list setAppearanceRate]];
     set SpeedSlider \
             [scale $SliderFrame.speedSlider \
-                   -from 1 \
-                   -to 5 \
-                   -variable VehicleSpeed \
-                   -label "Vehicle speed (in seconds)" \
-                   -orient horizontal \
-                   -tickinterval 1 \
-                   -showvalue false \
-                   -sliderrelief sunken \
-                   -length 250 \
-                   -command [list Vehicle::setSpeed]];
+            -from 1 \
+            -to 5 \
+            -variable VehicleSpeed \
+            -label "Vehicle speed (in seconds)" \
+            -orient horizontal \
+            -tickinterval 1 \
+            -showvalue false \
+            -sliderrelief sunken \
+            -length 250 \
+            -command [list ::tcl_ex4::Vehicle::setSpeed]];
     pack $NSGreenSlider $EWGreenSlider $YellowSlider -side top;
     pack $AppearanceSlider $SpeedSlider -side top;
 
@@ -326,11 +363,11 @@ proc makeVehicles {} {
     if {$PauseFlag == "true"} {
         set AppearanceTimerID -2;
     } else {
-        lappend VehicleList [Vehicle #auto $Stoplight north $Canvas];
-        lappend VehicleList [Vehicle #auto $Stoplight south $Canvas];
-        lappend VehicleList [Vehicle #auto $Stoplight east $Canvas];
-        lappend VehicleList [Vehicle #auto $Stoplight west $Canvas];
-    
+        lappend VehicleList [::tcl_ex4::Vehicle #auto $Stoplight north $Canvas];
+        lappend VehicleList [::tcl_ex4::Vehicle #auto $Stoplight south $Canvas];
+        lappend VehicleList [::tcl_ex4::Vehicle #auto $Stoplight east $Canvas];
+        lappend VehicleList [::tcl_ex4::Vehicle #auto $Stoplight west $Canvas];
+        
         # Gentlemen, start your engines.
         foreach Vehicle $VehicleList {
             $Vehicle start;
@@ -414,32 +451,32 @@ set ConfigFrame [frame .configure -borderwidth 4 \
         -height 15 \
         -width 250];
 set MainFrame [frame .main -borderwidth 4 \
-		                   -relief flat \
-						   -height 250 \
-						   -width 250];
+        -relief flat \
+        -height 250 \
+        -width 250];
 set ButtonFrame [frame .buttons -borderwidth 4 \
-                                -relief flat \
-                                -height 15 \
-                                -width 250];
+        -relief flat \
+        -height 15 \
+        -width 250];
 pack $ConfigFrame $MainFrame $ButtonFrame -side top -fill both;
 
 # Put a single button in the configure frame which causes the
 # slider window to pop up.
 set ConfigButton [button $ConfigFrame.configButton -text "Configure..." \
-		                                       -command "DisplaySliders"];
+        -command "DisplaySliders"];
 pack $ConfigButton -side right;
 
 # Create a canvas in which the stop light graphics will appear.
 set Canvas [canvas $MainFrame.graphicFrame -borderwidth 2 \
-		                                   -background white \
-										   -relief raised \
-										   -height 250 \
-										   -width 250];
+        -background white \
+        -relief raised \
+        -height 250 \
+        -width 250];
 pack $Canvas -side top -fill both;
 
 # Create the stoplight and specify which direction initially has
 # the green light.
-set Stoplight [Stoplight TheLight $Canvas];
+set Stoplight [::tcl_ex4::Stoplight TheLight $Canvas];
 
 # Add a button which allows the demo to be started, paused, continued
 # and stopped.

@@ -31,6 +31,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2001/12/14 20:10:37  cwrapp
+// Changes in release 1.1.0:
+// Add the following features:
+// + 486786: Added the %package keyword which specifies the
+//           Java package/C++ namespace/Tcl namespace
+//           the SMC-generated classes will be placed.
+// + 486471: The %class keyword accepts fully qualified
+//           class names.
+// + 491135: Add FSMContext methods getDebugStream and
+//           setDebugStream.
+// + 492165: Added -sync command line option which causes
+//           the transition methods to be synchronized
+//           (this option may only be used with -java).
+//
 // Revision 1.1  2001/12/03 14:14:03  cwrapp
 // Changes in release 1.0.2:
 // + Placed the class files in Smc.jar in the net.sf.smc package.
@@ -119,6 +133,7 @@ import java.io.PrintStream;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 
 public final class Smc
@@ -138,6 +153,7 @@ public final class Smc
                            " [-g]" +
                            " [-version]" +
                            " [-help]" +
+                           " [-sync]" +
                            " {-c++ | -java | -tcl}" +
                            " statemap_file\n" +
                            "    where:\n" +
@@ -146,6 +162,7 @@ public final class Smc
                            "\t-tq       Add transition queue support\n" +
                            "\t-version  Print smc version information to standard out and exit\n" +
                            "\t-help     Print this message to standard out and exit\n" +
+                           "\t-sync     Synchronize generated Java code (use with -java only)\n" +
                            "\t-c++      Generate C++ code\n" +
                            "\t-java     Generate Java code\n" +
                            "\t-tcl      Generate [incr Tcl] code\n" +
@@ -153,9 +170,10 @@ public final class Smc
 
         // The default smc output level is 1.
         _target_language = LANG_NOT_SET;
-        _version = "v. 1.0.1";
+        _version = "v. 1.1.0";
         _source_file_name = null;
         _debug = false;
+        _sync = false;
         _trans_queue = false;
 
         // Process the command line.
@@ -280,30 +298,33 @@ public final class Smc
 
     public static boolean isDebug()
     {
-        return(_debug);
+        return (_debug);
+    }
+
+    public static boolean isSynchronized()
+    {
+        return (_sync);
     }
 
     public static boolean isTransQueue()
     {
         /* Transition queuing is now turned off. This method
          * will always return false.
-        return(_trans_queue);
+        return (_trans_queue);
          */
-        return(false);
+        return (false);
     }
 
     // Merge two lists together, returning an ordered list with
     // no multiple entries.
-    public static LinkedList merge(LinkedList l1,
-                                   LinkedList l2,
-                                   Comparator c)
+    public static List merge(List l1, List l2, Comparator c)
     {
         int result;
         ListIterator it1;
         ListIterator it2;
         Object e1;
         Object e2;
-        LinkedList retval = new LinkedList();
+        List retval = (List) new LinkedList();
 
         // First, make certain that both lists are sorted.
         Collections.sort(l1, c);
@@ -330,17 +351,17 @@ public final class Smc
 
             if ((result = c.compare(e1, e2)) < 0)
             {
-                retval.addLast(e1);
+                retval.add(e1);
                 e1 = null;
             }
             else if (result > 0)
             {
-                retval.addLast(e2);
+                retval.add(e2);
                 e2 = null;
             }
             else
             {
-                retval.addLast(e1);
+                retval.add(e1);
                 e1 = null;
                 e2 = null;
             }
@@ -351,28 +372,28 @@ public final class Smc
         {
             if (e1 != null)
             {
-                retval.addLast(e1);
+                retval.add(e1);
             }
 
             for (; it1.hasNext() == true;)
             {
-                retval.addLast(it1.next());
+                retval.add(it1.next());
             }
         }
         else if (it2.hasNext() == true || e2 != null)
         {
             if (e2 != null)
             {
-                retval.addLast(e2);
+                retval.add(e2);
             }
 
             for (; it2.hasNext() == true;)
             {
-                retval.addLast(it2.next());
+                retval.add(it2.next());
             }
         }
 
-        return(retval);
+        return (retval);
     }
 
     private static boolean parseArgs(String[] args)
@@ -389,7 +410,12 @@ public final class Smc
                      args[i].startsWith("-") == true;
              i += args_consumed, args_consumed = 0)
         {
-            if (args[i].startsWith("-s") == true)
+            if (args[i].startsWith("-sy") == true)
+            {
+                _sync = true;
+                args_consumed = 1;
+            }
+            else if (args[i].startsWith("-s") == true)
             {
                 // -suffix should be followed by a suffix.
                 if ((i + 1) == args.length ||
@@ -569,13 +595,22 @@ public final class Smc
             retcode = false;
             _error_msg = "Target language was not specified.";
         }
+        // Also verify that the if the sync flag was given, then
+        // the target language is Java.
+        else if (retcode == true &&
+                 _sync == true &&
+                 _target_language != JAVA)
+        {
+            retcode = false;
+            _error_msg = "-sync can only be used with -java.";
+        }
 
-        return(retcode);
+        return (retcode);
     }
 
     public static String getSourceFileName()
     {
-        return(_source_file_name);
+        return (_source_file_name);
     }
 
 // Member Data
@@ -591,6 +626,9 @@ public final class Smc
 
     // If true, then generate verbose information.
     private static boolean _debug;
+
+    // If true, then generate thread-safe Java code.
+    private static boolean _sync;
 
     // If true, then add transition queue support to
     // generated code.

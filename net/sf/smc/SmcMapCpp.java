@@ -23,6 +23,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2001/12/14 20:10:37  cwrapp
+// Changes in release 1.1.0:
+// Add the following features:
+// + 486786: Added the %package keyword which specifies the
+//           Java package/C++ namespace/Tcl namespace
+//           the SMC-generated classes will be placed.
+// + 486471: The %class keyword accepts fully qualified
+//           class names.
+// + 491135: Add FSMContext methods getDebugStream and
+//           setDebugStream.
+// + 492165: Added -sync command line option which causes
+//           the transition methods to be synchronized
+//           (this option may only be used with -java).
+//
 // Revision 1.1  2001/12/03 14:14:03  cwrapp
 // Changes in release 1.0.2:
 // + Placed the class files in Smc.jar in the net.sf.smc package.
@@ -95,6 +109,7 @@ import java.text.ParseException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 
 public final class SmcMapCpp
@@ -107,18 +122,20 @@ public final class SmcMapCpp
 
     public void generateCode(PrintStream header,
                              PrintStream source,
-                             String context)
+                             String context,
+                             String pkg,
+                             String indent)
         throws ParseException
     {
-        LinkedList definedDefaultTransitions = null;
-        LinkedList transList;
+        List definedDefaultTransitions = null;
+        List transList;
         ListIterator stateIt;
         ListIterator transIt;
         ListIterator paramIt;
         SmcState state;
         SmcTransition defaultTransition =
                 new SmcTransitionCpp("Default",
-                                     new LinkedList(),
+                                     (List) new LinkedList(),
                                      _line_number);
         SmcTransition transition;
         SmcParameter parameter;
@@ -133,7 +150,8 @@ public final class SmcMapCpp
         }
         else
         {
-            definedDefaultTransitions = new LinkedList();
+            definedDefaultTransitions =
+                (List) new LinkedList();
         }
 
         // Get map's entire list of transitions (the returned
@@ -141,10 +159,11 @@ public final class SmcMapCpp
         transList = getTransitions();
 
         // Declare the map class.
-        header.println("class " +
+        header.println(indent +
+                       "class " +
                        _name);
-        header.println("{");
-        header.println("public:");
+        header.println(indent + "{");
+        header.println(indent + "public:");
 
         //  Declare the derived state classes as static.
         for (stateIt = _states.listIterator();
@@ -152,7 +171,8 @@ public final class SmcMapCpp
             )
         {
             state = (SmcState) stateIt.next();
-            header.println("    static " +
+            header.println(indent +
+                           "    static " +
                            _name +
                            "_" +
                            state.getClassName() +
@@ -182,27 +202,30 @@ public final class SmcMapCpp
 
         // Declare the default constructor as private to prevent
         // its instantiation.
-        header.println("\nprivate:");
-        header.println("    " + _name + "() {};");
-        header.println("};\n");
+        header.println("\n" + indent + "private:");
+        header.println(indent + "    " + _name + "() {};");
+        header.println(indent + "};\n");
 
         // Declare the map default state class.
-        header.println("class " +
+        header.println(indent +
+                       "class " +
                        _name +
                        "_Default : public " +
                        context +
                        "State");
-        header.println("{");
-        header.println("public:");
+        header.println(indent + "{");
+        header.println(indent + "public:");
 
         // Default state's constructor.
-        header.println("    " +
+        header.println(indent +
+                       "    " +
                        _name +
                        "_Default(const char *name)");
-        header.println("    : " +
+        header.println(indent +
+                       "    : " +
                        context +
                        "State(name)");
-        header.println("    {};\n");
+        header.println(indent + "    {};\n");
 
         // Declare the user-defined default transitions first.
         if (_default_state != null)
@@ -219,9 +242,10 @@ public final class SmcMapCpp
                 transition.generateCode(header,
                                         source,
                                         context,
+                                        pkg,
                                         _name,
                                         "Default",
-                                        null);
+                                        indent);
             }
         }
 
@@ -317,7 +341,7 @@ public final class SmcMapCpp
 //          }
 
         // The map class has been defined.
-        header.println("};");
+        header.println(indent + "};");
 
         // Have each state now generate its code.
         for (stateIt = _states.listIterator();
@@ -325,10 +349,15 @@ public final class SmcMapCpp
             )
         {
             state = (SmcState) stateIt.next();
-            state.generateCode(header, source, _name, context);
+            state.generateCode(header,
+                               source,
+                               _name,
+                               context,
+                               pkg,
+                               indent);
         }
 
-        header.println("");
+        header.println();
 
         return;
     }

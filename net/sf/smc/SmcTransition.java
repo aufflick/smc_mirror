@@ -23,6 +23,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2001/12/14 20:10:37  cwrapp
+// Changes in release 1.1.0:
+// Add the following features:
+// + 486786: Added the %package keyword which specifies the
+//           Java package/C++ namespace/Tcl namespace
+//           the SMC-generated classes will be placed.
+// + 486471: The %class keyword accepts fully qualified
+//           class names.
+// + 491135: Add FSMContext methods getDebugStream and
+//           setDebugStream.
+// + 492165: Added -sync command line option which causes
+//           the transition methods to be synchronized
+//           (this option may only be used with -java).
+//
 // Revision 1.1  2001/12/03 14:14:03  cwrapp
 // Changes in release 1.0.2:
 // + Placed the class files in Smc.jar in the net.sf.smc package.
@@ -75,6 +89,7 @@ package net.sf.smc;
 import java.io.PrintStream;
 import java.text.ParseException;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 
 public abstract class SmcTransition
@@ -82,13 +97,13 @@ public abstract class SmcTransition
 // Member Methods
 
     public SmcTransition(String name,
-                         LinkedList parameters,
+                         List parameters,
                          int line_number)
     {
         _name = name;
         _parameters = parameters;
         _line_number = line_number;
-        _guards = new LinkedList();
+        _guards = (List) new LinkedList();
     }
 
     public boolean equals(Object obj)
@@ -168,7 +183,7 @@ public abstract class SmcTransition
         return(_name);
     }
 
-    public LinkedList getParameters()
+    public List getParameters()
     {
         return(_parameters);
     }
@@ -184,7 +199,7 @@ public abstract class SmcTransition
         return;
     }
 
-    public LinkedList getGuards()
+    public List getGuards()
     {
         return(_guards);
     }
@@ -232,6 +247,7 @@ public abstract class SmcTransition
     public abstract void generateCode(PrintStream header,
                                       PrintStream source,
                                       String context,
+                                      String pkg,
                                       String mapName,
                                       String stateName,
                                       String indent)
@@ -241,6 +257,6 @@ public abstract class SmcTransition
 
     protected String _name;
     protected int _line_number;
-    protected LinkedList _parameters;
-    protected LinkedList _guards;
+    protected List _parameters;
+    protected List _guards;
 }

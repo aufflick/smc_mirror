@@ -24,6 +24,20 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2001/12/14 20:10:37  cwrapp
+# Changes in release 1.1.0:
+# Add the following features:
+# + 486786: Added the %package keyword which specifies the
+#           Java package/C++ namespace/Tcl namespace
+#           the SMC-generated classes will be placed.
+# + 486471: The %class keyword accepts fully qualified
+#           class names.
+# + 491135: Add FSMContext methods getDebugStream and
+#           setDebugStream.
+# + 492165: Added -sync command line option which causes
+#           the transition methods to be synchronized
+#           (this option may only be used with -java).
+#
 # Revision 1.2  2001/05/09 23:40:02  cwrapp
 # Changes in release 1.0, beta 6:
 # Fixes the four following bugs:
@@ -64,5 +78,4 @@
 # ----------------------------------------------------------------------
 #
 
-export APP_CLASSPATH="${CLASSPATH};../../../lib/statemap.jar"
-java -classpath ${APP_CLASSPATH} Traffic
+java -jar Traffic.jar

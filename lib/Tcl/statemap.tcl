@@ -28,6 +28,20 @@
 #
 # Change Log
 # $Log$
+# Revision 1.4  2001/12/14 20:10:37  cwrapp
+# Changes in release 1.1.0:
+# Add the following features:
+# + 486786: Added the %package keyword which specifies the
+#           Java package/C++ namespace/Tcl namespace
+#           the SMC-generated classes will be placed.
+# + 486471: The %class keyword accepts fully qualified
+#           class names.
+# + 491135: Add FSMContext methods getDebugStream and
+#           setDebugStream.
+# + 492165: Added -sync command line option which causes
+#           the transition methods to be synchronized
+#           (this option may only be used with -java).
+#
 # Revision 1.3  2001/10/12 14:28:04  cwrapp
 # SMC v. 1.0.1
 #
@@ -97,6 +111,7 @@ namespace eval ::statemap:: {
     private variable _state_stack {};
     private variable _transition;
     private variable _debug_flag;
+    private variable _debug_stream;
 
 # Member functions.
 
@@ -106,6 +121,7 @@ namespace eval ::statemap:: {
         set _state_stack {};
         set _transition "";
         set _debug_flag 0;
+        set _debug_stream stderr;
     }
 
     public method getDebugFlag {} {
@@ -119,6 +135,15 @@ namespace eval ::statemap:: {
             set _debug_flag 0;
         }
 
+        return -code ok;
+    }
+
+    public method getDebugStream {} {
+        return -code ok $_debug_stream;
+    }
+
+    public method setDebugStream {stream} {
+        set _debug_stream $stream;
         return -code ok;
     }
 
@@ -146,7 +171,7 @@ namespace eval ::statemap:: {
 
     public method setState {state_name} {
         if {$_debug_flag == 1} {
-            puts stderr "NEW STATE     : [$state_name getName]";
+            puts $_debug_stream "NEW STATE     : [$state_name getName]";
         }
 
         set _state $state_name;
@@ -171,7 +196,7 @@ namespace eval ::statemap:: {
 
     public method pushState {state_name} {
         if {$_debug_flag == 1} {
-            puts stderr "PUSH TO STATE : [$state_name getName]";
+            puts $_debug_stream "PUSH TO STATE : [$state_name getName]";
         }
 
         if {[string compare $_state ""] != 0} {
@@ -192,12 +217,12 @@ namespace eval ::statemap:: {
             set Retval "";
 
             if {$_debug_flag == 1} {
-                puts stderr "POP TO STATE  : [$_state getName]";
+                puts $_debug_stream "POP TO STATE  : [$_state getName]";
             }
         } else {
             # Tried to pop on an empty state stack.
             if {$_debug_flag == 1} {
-                puts stderr "POPPING ON EMPTY STATE STACK.";
+                puts $_debug_stream "POPPING ON EMPTY STATE STACK.";
             }
 
             set Retcode error;

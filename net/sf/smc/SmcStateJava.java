@@ -23,6 +23,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2001/12/14 20:10:37  cwrapp
+// Changes in release 1.1.0:
+// Add the following features:
+// + 486786: Added the %package keyword which specifies the
+//           Java package/C++ namespace/Tcl namespace
+//           the SMC-generated classes will be placed.
+// + 486471: The %class keyword accepts fully qualified
+//           class names.
+// + 491135: Add FSMContext methods getDebugStream and
+//           setDebugStream.
+// + 492165: Added -sync command line option which causes
+//           the transition methods to be synchronized
+//           (this option may only be used with -java).
+//
 // Revision 1.1  2001/12/03 14:14:03  cwrapp
 // Changes in release 1.0.2:
 // + Placed the class files in Smc.jar in the net.sf.smc package.
@@ -102,7 +116,9 @@ public final class SmcStateJava
     public void generateCode(PrintStream header,
                              PrintStream source,
                              String mapName,
-                             String context)
+                             String context,
+                             String pkg,
+                             String indent)
         throws ParseException
     {
         ListIterator actionIt;
@@ -189,6 +205,7 @@ public final class SmcStateJava
             transition.generateCode(header,
                                     source,
                                     context,
+                                    pkg,
                                     mapName,
                                     _class_name,
                                     "            ");

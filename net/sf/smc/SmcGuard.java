@@ -23,6 +23,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2001/12/14 20:10:37  cwrapp
+// Changes in release 1.1.0:
+// Add the following features:
+// + 486786: Added the %package keyword which specifies the
+//           Java package/C++ namespace/Tcl namespace
+//           the SMC-generated classes will be placed.
+// + 486471: The %class keyword accepts fully qualified
+//           class names.
+// + 491135: Add FSMContext methods getDebugStream and
+//           setDebugStream.
+// + 492165: Added -sync command line option which causes
+//           the transition methods to be synchronized
+//           (this option may only be used with -java).
+//
 // Revision 1.1  2001/12/03 14:14:03  cwrapp
 // Changes in release 1.0.2:
 // + Placed the class files in Smc.jar in the net.sf.smc package.
@@ -75,6 +89,7 @@ package net.sf.smc;
 import java.io.PrintStream;
 import java.text.ParseException;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 
 public abstract class SmcGuard
@@ -86,7 +101,7 @@ public abstract class SmcGuard
         _condition = condition;
         _line_number = line_number;
         _end_state = "";
-        _actions = new LinkedList();
+        _actions = (List) new LinkedList();
     }
 
     public SmcAction getCondition()
@@ -131,6 +146,20 @@ public abstract class SmcGuard
     {
         _actions.add(action);
         return;
+    }
+
+    // Return true if this transition is a loopback.
+    public boolean isLoopback(String stateName)
+    {
+        return (_trans_type == Smc.TRANS_SET &&
+                (_end_state.compareTo("nil") == 0 ||
+                 _end_state.compareTo(stateName) == 0));
+    }
+
+    // Return the number of actions.
+    public int getActionCount()
+    {
+        return (_actions.size());
     }
 
     public String toString()
@@ -188,6 +217,7 @@ public abstract class SmcGuard
                                       int guardIndex,
                                       int guardCount,
                                       String context,
+                                      String pkg,
                                       String mapName,
                                       String stateName,
                                       String indent)
@@ -199,5 +229,5 @@ public abstract class SmcGuard
     protected int _line_number;
     protected int _trans_type;
     protected String _end_state;
-    protected LinkedList _actions;
+    protected List _actions;
 }

@@ -29,6 +29,20 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.2  2001/12/14 20:10:37  cwrapp
+ * Changes in release 1.1.0:
+ * Add the following features:
+ * + 486786: Added the %package keyword which specifies the
+ *           Java package/C++ namespace/Tcl namespace
+ *           the SMC-generated classes will be placed.
+ * + 486471: The %class keyword accepts fully qualified
+ *           class names.
+ * + 491135: Add FSMContext methods getDebugStream and
+ *           setDebugStream.
+ * + 492165: Added -sync command line option which causes
+ *           the transition methods to be synchronized
+ *           (this option may only be used with -java).
+ *
  * Revision 1.1  2001/12/03 14:14:03  cwrapp
  * Changes in release 1.0.2:
  * + Placed the class files in Smc.jar in the net.sf.smc package.
@@ -47,15 +61,15 @@
  * Changes in release 1.0, beta 6:
  * Fixes the four following bugs:
  * + 416011: SMC does not properly handle pop transitions which
- *           have no argument.
+ *       have no argument.
  * + 416013: SMC generated code does not throw a
- *           "Transition Undefined" exception as per Programmer's
- *           Manual.
+ *       "Transition Undefined" exception as per Programmer's
+ *       Manual.
  * + 416014: The initial state's Entry actions are not being
- *           executed.
+ *       executed.
  * + 416015: When a transition has both a guarded and an unguarded
- *           definition, the Exit actions are only called when the
- *           guard evaluates to true.
+ *       definition, the Exit actions are only called when the
+ *       guard evaluates to true.
  * + 422795: SMC -tcl abnormally terminates.
  *
  * Revision 1.1.1.2  2001/03/26 14:41:46  cwrapp
@@ -110,9 +124,10 @@ package net.sf.smc;
 %%
 Start
 {
-	// The statemap can start with an optional raw source code section or
-	// go straight to the map definitions.
-	SOURCE			Start2    			{addSource();
+    // The statemap can start with an optional raw source code section or
+    // go straight to the map definitions.
+    SOURCE(token : SmcLexer.Token)
+                    Start2              {addSource(token);
                                          setHeaderLine();}
 
     // The state map's start state and class name must be
@@ -120,31 +135,68 @@ Start
     // The header file is optional since its name can be
     // deduced from the class name (maybe). The class name
     // and header file are ignored when generating Tcl code.
-    START_STATE     StateNameStart      {setHeaderLine();}
-    CLASS_NAME      ClassName           {setHeaderLine();}
-    HEADER_FILE     HeaderFile          {setHeaderLine();}
+    START_STATE(token : SmcLexer.Token)
+                    StateNameStart      {setHeaderLine();}
+    CLASS_NAME(token : SmcLexer.Token)
+                    push(NameMap::FQName)
+                                        {setHeaderLine();
+                                         setNameFlag(true);}
+    HEADER_FILE(token : SmcLexer.Token)
+                    HeaderFile          {setHeaderLine();}
+    PACKAGE_NAME(token : SmcLexer.Token)
+                    push(NameMap::FQName)
+                                        {setNameFlag(false);}
 
-    MAP_NAME        MapName             {error("%map not preceded by %start or %class.", false);
-                                         setHeaderLine();}
+    // These transitions are issued when the FQName has been
+    // parsed.
+    FQNameDone      Start2              {setClassName();}
+    FQNameError     Start2              {}
 
-	Default			StartError			{error("Excpecting \"%{ source %}\", %start, or %class.", false);}
+    MAP_NAME(token : SmcLexer.Token)
+                    MapName             {error("%map not preceded by %start or %class.", false);}
+
+    Default         StartError          {error("Expecting \"%{ source %}\", %start, or %class.", false);}
 }
 
 // Remain in this start until a known good token is found.
 StartError
 {
     // Do error checks first.
-    START_STATE [isStartStateSet();]
-                    nil                 {setHeaderLine();}
-    CLASS_NAME [isClassSet();]
-                    nil                 {setHeaderLine();}
-    HEADER_FILE [isHeaderSet();]
+    START_STATE(token : SmcLexer.Token) [isStartStateSet();]
                     nil                 {setHeaderLine();}
 
-    START_STATE     StateNameStart      {setHeaderLine();}
-    CLASS_NAME      ClassName           {setHeaderLine();}
-    HEADER_FILE     HeaderFile          {setHeaderLine();}
-    MAP_NAME        MapName             {setHeaderLine();}
+    CLASS_NAME(token : SmcLexer.Token) [isClassSet();]
+                    nil                 {setHeaderLine();}
+
+    HEADER_FILE(token : SmcLexer.Token) [isHeaderSet();]
+                    nil                 {setHeaderLine();}
+
+    PACKAGE_NAME(token : SmcLexer.Token) [isPackageSet();]
+                    StartError          {}
+
+    // Everything is OK.
+    START_STATE(token : SmcLexer.Token)
+                    StateNameStart      {setHeaderLine();}
+
+    CLASS_NAME(token : SmcLexer.Token)
+                    push(NameMap::FQName)
+                                        {setHeaderLine();
+                                         setNameFlag(true);}
+
+    HEADER_FILE(token : SmcLexer.Token)
+                    HeaderFile          {setHeaderLine();}
+
+    PACKAGE_NAME(token : SmcLexer.Token)
+                    push(NameMap::FQName)
+                                        {setNameFlag(false);}
+
+    MAP_NAME(token : SmcLexer.Token)
+                    MapName             {}
+
+    // These transitions are issued when the FQName has been
+    // parsed.
+    FQNameDone      Start2              {setClassName();}
+    FQNameError     Start2              {}
 
     Default         nil                 {}
 }
@@ -152,220 +204,279 @@ StartError
 Start2
 {
     // Do error checks first.
-    START_STATE [isStartStateSet();]
+    START_STATE(token : SmcLexer.Token) [isStartStateSet();]
                     StartError          {warning("Start state already set - ignoring this %start.");
                                          setHeaderLine();}
-    CLASS_NAME [isClassSet();]
+
+    CLASS_NAME(token : SmcLexer.Token) [isClassSet();]
                     StartError          {warning("Class already set - ignoring this %class.");
                                          setHeaderLine();}
-    HEADER_FILE [isHeaderSet();]
+
+    HEADER_FILE(token : SmcLexer.Token) [isHeaderSet();]
                     StartError          {warning("Header already set - ignoring this %header.");
                                          setHeaderLine();}
 
-    START_STATE     StateNameStart      {setHeaderLine();}
-    CLASS_NAME      ClassName           {setHeaderLine();}
-    HEADER_FILE     HeaderFile          {setHeaderLine();}
+    PACKAGE_NAME(token : SmcLexer.Token) [isPackageSet();]
+                    StartError          {warning("Package already set - ignoring this %package.");
+                                         setHeaderLine();}
 
-	MAP_NAME		MapName				{setHeaderLine();}
+    START_STATE(token : SmcLexer.Token)
+                    StateNameStart      {setHeaderLine();}
 
-	Default			nil					{error("Expecting \"%start\", \"%class\" or \"%map\".", false);}
+    CLASS_NAME(token : SmcLexer.Token)
+                    push(NameMap::FQName)
+                                        {setHeaderLine();
+                                         setNameFlag(true);}
+
+    HEADER_FILE(token : SmcLexer.Token)
+                    HeaderFile          {setHeaderLine();}
+
+    PACKAGE_NAME(token : SmcLexer.Token)
+                    push(NameMap::FQName)
+                                        {setHeaderLine();
+                                         setNameFlag(false);}
+
+    MAP_NAME(token : SmcLexer.Token)
+                    MapName             {setHeaderLine();}
+
+    // These transitions are issued when the FQName has been
+    // parsed.
+    FQNameDone      Start2              {setClassName();}
+    FQNameError     Start2              {}
+
+    Default         nil                 {error("Expecting \"%start\", \"%class\", \"%header\", \"%package\" or \"%map\".", false);}
 }
 
 // The state name must be of the form "map::state".
 StateNameStart
 {
-    WORD            StateName1          {appendStartState();}
+    WORD(token : SmcLexer.Token)
+                    StateName1          {appendStartState(token);}
 
     Default         StartError          {error("Missing state after %start.", false);}
 }
 
 StateName1
 {
-    COLON           StateName2          {appendStartState();}
+    COLON(token : SmcLexer.Token)
+                    StateName2          {appendStartState(token);}
 
     Default         StartError          {error("%start must use a fully qualified state name.", false);}
 }
 
 StateName2
 {
-    COLON           StateName3          {appendStartState();}
+    COLON(token : SmcLexer.Token)
+                    StateName3          {appendStartState(token);}
 
     Default         StartError          {error("%start must use a fully qualified state name.", false);}
 }
 
 StateName3
 {
-    WORD            Start2              {appendStartState();
+    WORD(token : SmcLexer.Token)
+                    Start2              {appendStartState(token);
                                          setStartState();}
 
     Default         StartError          {error("%start must use a fully qualified state name.", false);}
 }
 
-// Get the owning object's class name.
-ClassName
-{
-    // The next token must be the class name.
-    WORD            Start2              {setClassName();}
-
-    Default         Start2              {error("Missing class name after %class.", false);}
-}
-
 HeaderFile
 {
-    WORD            Start2              {setHeader();}
+    WORD(token : SmcLexer.Token)
+                    Start2              {setHeader(token);}
 
     Default         Start2              {error("Missing header file after %header.", false);}
 }
 
 MapStart
 {
-	MAP_NAME		MapName				{}
+    MAP_NAME(token : SmcLexer.Token)
+                    MapName             {}
 
-	Default			MapStartError		{error("Expecting %map.", false);}
+    Default         MapStartError       {error("Expecting %map.", false);}
 }
 
 MapStartError
 {
-    MAP_NAME        MapName             {}
+    MAP_NAME(token : SmcLexer.Token)
+                    MapName             {}
+
     Default         nil                 {}
 }
 
 MapName
 {
-    WORD [isDuplicateMap();]
+    WORD(token : SmcLexer.Token) [isDuplicateMap(token);]
                     MapStates           {error("Duplicate map name.", false);
-                                         createMap();}
+                                         createMap(token);}
 
-	// The next word transition is the map's name.
-	WORD			MapStates			{createMap();}
+    // The next word transition is the map's name.
+    WORD(token : SmcLexer.Token)
+                    MapStates           {createMap(token);}
 
-    EOD             States              {error("Name expected after \"%map\".", false);
-                                         createMap();}
-	Default			nil					{error("Name expected after \"%map\".", false);}
+    EOD(token : SmcLexer.Token)
+                    States              {error("Name expected after \"%map\".", false);
+                                         createMap(token);}
+    Default         nil                 {error("Name expected after \"%map\".", false);}
 }
 
 MapStates
 {
-	// %% marks the start of the map states.
-	EOD				States				{}
+    // %% marks the start of the map states.
+    EOD(token : SmcLexer.Token)
+                    States              {}
 
-    WORD            StateStart          {error("Expecting %% after \"%map mapname\".", false);
-                                         createState();}
+    WORD(token : SmcLexer.Token)
+                    StateStart          {error("Expecting %% after \"%map mapname\".", false);
+                                         createState(token);}
 
-	Default			MapStatesError		{error("Expecting %% after \"%map mapname\".", false);}
+    Default         MapStatesError      {error("Expecting %% after \"%map mapname\".", false);}
 }
 
 MapStatesError
 {
-    EOD             States              {}
-    MAP_NAME        MapName             {addMap();}
-    WORD            StateStart          {createState();}
+    EOD(token : SmcLexer.Token)
+                    States              {}
+
+    MAP_NAME(token : SmcLexer.Token)
+                    MapName             {addMap();}
+    WORD(token : SmcLexer.Token)
+                    StateStart          {createState(token);}
 
     Default         nil                 {}
 }
 
 States
 {
-	// The "%%" means we have reached the end of this map's definition.
-	EOD				MapStart			{addMap();}
+    // The "%%" means we have reached the end of this map's definition.
+    EOD(token : SmcLexer.Token)
+                    MapStart            {addMap();}
 
-	// A word is the next state's name.
-    WORD [isDuplicateState();]
+    // A word is the next state's name.
+    WORD(token : SmcLexer.Token) [isDuplicateState(token);]
                     StateStart          {error("Duplicate state name.", false);
-                                         createState();}
-	WORD			StateStart			{createState();}
+                                         createState(token);}
+
+    WORD(token : SmcLexer.Token)
+                    StateStart          {createState(token);}
 
     // Error transitions.
-    ENTRY           EntryStart          {error("Expecting either a new state definition or end of map (%%).", false);
-                                         createState();}
-    EXIT            ExitStart           {error("Expecting either a new state definition or end of map (%%).", false);
-                                         createState();}
-    LEFT_BRACE      Transitions         {error("Expecting either a new state definition or end of map (%%).", false);
-                                         createState();}
-    MAP_NAME        MapName             {error("Expecting \"%%\" before another \"%map\".", false);
+    ENTRY(token : SmcLexer.Token)
+                    EntryStart          {error("Expecting either a new state definition or end of map (%%).", false);
+                                         createState(token);}
+
+    EXIT(token : SmcLexer.Token)
+                    ExitStart           {error("Expecting either a new state definition or end of map (%%).", false);
+                                         createState(token);}
+
+    LEFT_BRACE(token : SmcLexer.Token)
+                    Transitions         {error("Expecting either a new state definition or end of map (%%).", false);
+                                         createState(token);}
+    MAP_NAME(token : SmcLexer.Token)
+                    MapName             {error("Expecting \"%%\" before another \"%map\".", false);
                                          addMap();}
 
-	Default			nil					{error("Expecting either a new state definition or end of map (%%).", false);}
+    Default         nil                 {error("Expecting either a new state definition or end of map (%%).", false);}
 }
 
 StateStart
 {
     // Check for repeat errors.
-    ENTRY [isEntrySet();]
+    ENTRY(token : SmcLexer.Token) [isEntrySet();]
                     StateStartError     {warning("This state already has an entry action defined - ignoring this entry action.");}
-    EXIT [isExitSet();]
+
+    EXIT(token : SmcLexer.Token) [isExitSet();]
                     StateStartError     {warning("This state already has an exit action defined - ignoring this exit action.");}
 
-	// This state has an entry actions.
-	ENTRY			EntryStart			{}
+    // This state has an entry actions.
+    ENTRY(token : SmcLexer.Token)
+                    EntryStart          {}
 
-	// This state has an exit action.
-	EXIT			ExitStart			{}
+    // This state has an exit action.
+    EXIT(token : SmcLexer.Token)
+                    ExitStart           {}
 
-	// The left brace marks the start of the transitions.
-	LEFT_BRACE		Transitions			{}
+    // The left brace marks the start of the transitions.
+    LEFT_BRACE(token : SmcLexer.Token)
+                    Transitions         {}
 
-	Default			StateStartError		{error("After the state name is given, then either an entry action, exit action or '{' is expected.", false);}
+    Default         StateStartError     {error("After the state name is given, then either an entry action, exit action or '{' is expected.", false);}
 }
 
 StateStartError
 {
-    ENTRY [isEntrySet();]
+    ENTRY(token : SmcLexer.Token) [isEntrySet();]
                     StateStartError     {}
-    EXIT [isExitSet();]
+    EXIT(token : SmcLexer.Token) [isExitSet();]
                     StateStartError     {}
 
-    ENTRY           EntryStart          {}
-    EXIT            ExitStart           {}
-    LEFT_BRACE      Transitions         {}
+    ENTRY(token : SmcLexer.Token)
+                    EntryStart          {}
 
-    Default         nil                 {}
+    EXIT(token : SmcLexer.Token)
+                    ExitStart           {}
+
+    LEFT_BRACE(token : SmcLexer.Token)
+                    Transitions         {}
+
+    Default     nil         {}
 }
 
 EntryStart
 {
-	LEFT_BRACE		push(ActionMap::MultiStart)	{}
+    LEFT_BRACE(token : SmcLexer.Token)
+                    push(ActionMap::MultiStart)
+                                        {}
 
     // One entry action has been found. Check for more.
-	action_done		push(ActionMap::MultiStart)	{addEntryAction();}
+    action_done     push(ActionMap::MultiStart)
+                                        {addEntryAction();}
 
     // All actions have been found. Now go parse the
     // state's transitions.
     actions_done    StateStart          {}
 
-	Default			StateStartError		{error("A '{' is expected after Entry.", false);}
+    Default         StateStartError     {error("A '{' is expected after Entry.", false);}
 }
 
 ExitStart
 {
-	LEFT_BRACE		push(ActionMap::MultiStart) {}
+    LEFT_BRACE(token : SmcLexer.Token)
+                    push(ActionMap::MultiStart)
+                                        {}
 
     // One exit action has been found. Check for others.
-	action_done		push(ActionMap::MultiStart)	{addExitAction();}
+    action_done     push(ActionMap::MultiStart)
+                                        {addExitAction();}
 
     // All exit actions have been found. Now parse the rest
     // of the state.
     actions_done    StateStart          {}
 
-	Default			StateStartError    	{error("A '{' is expected after Exit.", false);}
+    Default         StateStartError     {error("A '{' is expected after Exit.", false);}
 }
 
 Transitions
 {
-	// A '}' is the end of the transitions.
-	// Look for the next state.
-	RIGHT_BRACE		States				{addState();}
+    // A '}' is the end of the transitions.
+    // Look for the next state.
+    RIGHT_BRACE(token : SmcLexer.Token)
+                    States              {addState();}
 
-	// This is the transition name.
-	WORD			TransStart			{storeTransitionName();}
+    // This is the transition name.
+    WORD(token : SmcLexer.Token)
+                    TransStart          {storeTransitionName(token);}
 
-	Default			TransError			{error("Expecting either a new transition or a '}'.", false);}
+    Default         TransError          {error("Expecting either a new transition or a '}'.", false);}
 }
 
 TransError
 {
-    RIGHT_BRACE     States              {addState();}
-	WORD			TransStart			{storeTransitionName();}
+    RIGHT_BRACE(token : SmcLexer.Token)
+                    States              {addState();}
+    WORD(token : SmcLexer.Token)
+                    TransStart          {storeTransitionName(token);}
 
     Default         nil                 {}
 }
@@ -373,145 +484,180 @@ TransError
 TransStart
 {
     // A '(' means this transition has parameters.
-    LEFT_PAREN      TransParams         {createParameterList();}
+    LEFT_PAREN(token : SmcLexer.Token)
+                    TransParams         {createParameterList();}
 
-	// A '[' denotes a guard.
-	LEFT_BRACKET	push(ActionMap::Start) {createTransition();}
+    // A '[' denotes a guard.
+    LEFT_BRACKET(token : SmcLexer.Token)
+                    push(ActionMap::Start)
+                                        {createTransition();}
 
-	// The guard's condition has been found.
-	// Create a new guard object.
-	action_done		GuardEnd			{}
+    // The guard's condition has been found.
+    action_done     GuardEnd            {}
 
     // Check for duplicate transitions.
-    PUSH [isDuplicateGuard();]
+    PUSH(token : SmcLexer.Token) [isDuplicateGuard();]
                     PushStart           {error("Duplicate transition - duplicate ignored.", false);
                                          createTransition();
                                          createGuard();
                                          setTransType("TRANS_PUSH");}
-    POP [isDuplicateGuard();]
+
+    POP(token : SmcLexer.Token) [isDuplicateGuard();]
                     PopStart            {error("Duplicate transition - duplicate ignored.", false);
                                          createTransition();
                                          createGuard();
                                          setTransType("TRANS_POP");}
-    WORD [isDuplicateGuard();]
+
+    WORD(token : SmcLexer.Token) [isDuplicateGuard();]
                     EndState1           {error("Duplicate transition - duplicate ignored.", false);
                                          createTransition();
                                          createGuard();
                                          setTransType("TRANS_SET");
-                                         setEndState();}
+                                         setEndState(token);}
 
-	PUSH			PushStart			{createTransition();
+    PUSH(token : SmcLexer.Token)
+                    PushStart           {createTransition();
                                          createGuard();
-										 setTransType("TRANS_PUSH");}
-	POP				PopStart			{createTransition();
-                                         createGuard();
-										 setTransType("TRANS_POP");}
+                                         setTransType("TRANS_PUSH");}
 
-	// This word is the end state. Go to EndState1 in case this
+    POP(token : SmcLexer.Token)
+                    PopStart            {createTransition();
+                                         createGuard();
+                                         setTransType("TRANS_POP");}
+
+    // This word is the end state. Go to EndState1 in case this
     // is a fully qualified state name.
-    WORD            EndState1           {createTransition();
+    WORD(token : SmcLexer.Token)
+                    EndState1           {createTransition();
                                          createGuard();
-										 setTransType("TRANS_SET");
-										 setEndState();}
+                                         setTransType("TRANS_SET");
+                                         setEndState(token);}
 
-	Default			TransStartError		{error("Expecting either a guard, push, pop or end state.", false);}
+    Default         TransStartError     {error("Expecting either a guard, push, pop or end state.", false);}
 }
 
 TransStartError
 {
     // A '(' means this transition has parameters.
-    LEFT_PAREN      TransParams         {createParameterList();}
+    LEFT_PAREN(token : SmcLexer.Token)
+                    TransParams         {createParameterList();}
 
     // A '[' means this transition is guarded.
-    LEFT_BRACKET    push(ActionMap::Start) {}
+    LEFT_BRACKET(token : SmcLexer.Token)
+                    push(ActionMap::Start)
+                                        {}
     action_done     GuardEnd            {}
 
-    PUSH            PushStart           {createGuard();
+    PUSH(token : SmcLexer.Token)
+                    PushStart           {createGuard();
                                          setTransType("TRANS_PUSH");}
-    POP             PopStart            {createGuard();
+
+    POP(token : SmcLexer.Token)
+                    PopStart            {createGuard();
                                          setTransType("TRANS_POP");}
-    WORD            EndState1           {createGuard();
-										 setTransType("TRANS_SET");
-										 setEndState();}
+
+    WORD(token : SmcLexer.Token)
+                    EndState1           {createGuard();
+                                         setTransType("TRANS_SET");
+                                         setEndState(token);}
 
     Default         nil                 {}
 }
 
 TransNext
 {
-    // A '(' means this transition has parameters.
-    LEFT_PAREN
-                    TransNextError     {error("Transition parameters previously defined.", false);}
+    // A parethesis means this transition has parameters.
+    LEFT_PAREN(token : SmcLexer.Token)
+                    TransNextError      {error("Transition parameters previously defined.", false);}
 
-	// A '[' denotes a guard.
-	LEFT_BRACKET	push(ActionMap::Start) {}
+    // A bracket denotes a guard.
+    LEFT_BRACKET(token : SmcLexer.Token)
+                    push(ActionMap::Start)
+                                        {}
 
-	// The guard's condition has been found.
-	// Create a new guard object.
-	action_done		GuardEnd			{}
+    // The guard's condition has been found.
+    // Create a new guard object.
+    action_done     GuardEnd            {}
 
     // Check for duplicate transitions.
-    PUSH [isDuplicateGuard();]
+    PUSH(token : SmcLexer.Token) [isDuplicateGuard();]
                     PushStart           {error("Duplicate transition - duplicate ignored.", false);
                                          createGuard();
                                          setTransType("TRANS_PUSH");}
-    POP [isDuplicateGuard();]
+
+    POP(token : SmcLexer.Token) [isDuplicateGuard();]
                     PopStart            {error("Duplicate transition - duplicate ignored.", false);
                                          createGuard();
                                          setTransType("TRANS_POP");}
-    WORD [isDuplicateGuard();]
+
+    WORD(token : SmcLexer.Token) [isDuplicateGuard();]
                     EndState1           {error("Duplicate transition - duplicate ignored.", false);
                                          createGuard();
                                          setTransType("TRANS_SET");
-                                         setEndState();}
+                                         setEndState(token);}
 
-	PUSH			PushStart			{createGuard();
-										 setTransType("TRANS_PUSH");}
-	POP				PopStart			{createGuard();
-										 setTransType("TRANS_POP");}
+    PUSH(token : SmcLexer.Token)
+                    PushStart           {createGuard();
+                                         setTransType("TRANS_PUSH");}
 
-	// This word is the end state. Go to EndState1 in case this
+    POP(token : SmcLexer.Token)
+                    PopStart            {createGuard();
+                                         setTransType("TRANS_POP");}
+
+    // This word is the end state. Go to EndState1 in case this
     // is a fully qualified state name.
-    WORD            EndState1           {createGuard();
-										 setTransType("TRANS_SET");
-										 setEndState();}
+    WORD(token : SmcLexer.Token)
+                    EndState1           {createGuard();
+                                         setTransType("TRANS_SET");
+                                         setEndState(token);}
 
-	Default			TransNextError		{error("Expecting either a guard, push, pop or end state.", false);}
+    Default         TransNextError      {error("Expecting either a guard, push, pop or end state.", false);}
 }
 
 TransNextError
 {
     // Transition parameters have already been defined.
-    LEFT_PAREN      nil                 {}
+    LEFT_PAREN(token : SmcLexer.Token)
+                    nil                 {}
 
-    // A '[' means this transition is guarded.
-    LEFT_BRACKET    push(ActionMap::Start) {}
+    // A bracket means this transition is guarded.
+    LEFT_BRACKET(token : SmcLexer.Token)
+                    push(ActionMap::Start)
+                                        {}
     action_done     GuardEnd            {}
 
-    PUSH            PushStart           {createGuard();
+    PUSH(token : SmcLexer.Token)
+                    PushStart           {createGuard();
                                          setTransType("TRANS_PUSH");}
-    POP             PopStart            {createGuard();
+
+    POP(token : SmcLexer.Token)
+                    PopStart            {createGuard();
                                          setTransType("TRANS_POP");}
-    WORD            EndState1           {createGuard();
-										 setTransType("TRANS_SET");
-										 setEndState();}
+
+    WORD(token : SmcLexer.Token)
+                    EndState1           {createGuard();
+                                         setTransType("TRANS_SET");
+                                         setEndState(token);}
 
     Default         nil                 {}
 }
 
 TransParams
 {
-    // A ')' marks the end of the parameters. This only
+    // A parethesis marks the end of the parameters. This only
     // acceptable here if the parameter list is empty. Otherwise
     // we are expecting more parameters.
-    RIGHT_PAREN [isTransParametersEmpty();]
+    RIGHT_PAREN(token : SmcLexer.Token)
+        [isTransParametersEmpty();]
                     TransNext           {createTransition();
                                          createGuard();}
-    RIGHT_PAREN     TransNext           {error("Expecting parameter name.", false);
+    RIGHT_PAREN(token : SmcLexer.Token)
+                    TransNext           {error("Expecting parameter name.", false);
                                          createTransition();
                                          createGuard();}
 
-    WORD            TransParamName      {createParameter();}
+    WORD(token : SmcLexer.Token)
+                    TransParamName      {createParameter(token);}
 
     Default         TransParamsError    {error("Expecting parameter name.", false);}
 }
@@ -519,14 +665,16 @@ TransParams
 TransParamName
 {
     // Parameter name must be followed by a ':'.
-    COLON           TransParamType      {}
+    COLON(token : SmcLexer.Token)
+                    TransParamType      {}
 
     Default         TransParamsError    {error("A ':' must follow a paramater name.", false);}
 }
 
 TransParamType
 {
-    WORD            TransParamType2     {appendParameterType("");}
+    WORD(token : SmcLexer.Token)
+                    TransParamType2     {appendParameterType(token, "");}
 
     // Have to see at least one type name before a ')' or a ','.
     Default         TransParamsError    {error("Expecting type name.", false);}
@@ -534,19 +682,27 @@ TransParamType
 
 TransParamType2
 {
-    // A ')' marks the end of the parameters.
-    RIGHT_PAREN     TransNext           {addTransitionParameter();
+    // A parenthesis marks the end of the parameters.
+    RIGHT_PAREN(token : SmcLexer.Token)
+                    TransNext           {addTransitionParameter();
                                          createTransition();}
 
     // A ',' marks the end of this parameter, to be followed by others.
-    COMMA           TransParams         {addTransitionParameter();}
+    COMMA(token : SmcLexer.Token)
+                    TransParams         {addTransitionParameter();}
 
-    WORD            TransParamType2     {appendParameterType(" ");}
+    WORD(token : SmcLexer.Token)
+                    TransParamType2     {appendParameterType(token, " ");}
 
     // Non-word symbols may be appended only to the last type.
-    LEFT_BRACKET    TransParamType3     {appendParameterType("");}
-    ASTERISK        TransParamType3     {appendParameterType("");}
-    AMPERSAND       TransParamType3     {appendParameterType("");}
+    LEFT_BRACKET(token : SmcLexer.Token)
+                    TransParamType3     {appendParameterType(token, "");}
+
+    ASTERISK(token : SmcLexer.Token)
+                    TransParamType3     {appendParameterType(token, "");}
+
+    AMPERSAND(token : SmcLexer.Token)
+                    TransParamType3     {appendParameterType(token, "");}
 
     Default         TransParamsError    {error("Invalid type.", false);}
 }
@@ -555,22 +711,34 @@ TransParamType3
 {
     // At this point, only other non-word symbols or an
     // end-of-type terminator will be accepted.
-    RIGHT_PAREN     TransNext           {addTransitionParameter();
+    RIGHT_PAREN(token : SmcLexer.Token)
+                    TransNext           {addTransitionParameter();
                                          createTransition();}
-    COMMA           TransParams         {addTransitionParameter();}
 
-    RIGHT_BRACKET   nil                 {appendParameterType("");}
-    ASTERISK        nil                 {appendParameterType("");}
-    AMPERSAND       nil                 {appendParameterType("");}
+    COMMA(token : SmcLexer.Token)
+                    TransParams         {addTransitionParameter();}
+
+    RIGHT_BRACKET(token : SmcLexer.Token)
+                    nil                 {appendParameterType(token, "");}
+
+    ASTERISK(token : SmcLexer.Token)
+                    nil                 {appendParameterType(token, "");}
+
+    AMPERSAND(token : SmcLexer.Token)
+                    nil                 {appendParameterType(token, "");}
 
     Default         TransParamsError    {error("Invalid type.", false);}
 }
 
 TransParamsError
 {
-    RIGHT_PAREN     TransNext           {addTransitionParameter();
+    RIGHT_PAREN(token : SmcLexer.Token)
+                    TransNext           {addTransitionParameter();
                                          createTransition();}
-    LEFT_BRACKET    push(ActionMap::Start) {addTransitionParameter();}
+
+    LEFT_BRACKET(token : SmcLexer.Token)
+                    push(ActionMap::Start)
+                                        {addTransitionParameter();}
     action_done     GuardEnd            {}
 
     Default         nil                 {}
@@ -578,54 +746,68 @@ TransParamsError
 
 GuardEnd
 {
-	// A ']' denotes the end of the guard condition.
-	RIGHT_BRACKET	EndState			{}
+    // A backet denotes the end of the guard condition.
+    RIGHT_BRACKET(token : SmcLexer.Token)
+                    EndState            {}
 
-	Default			GuardEndError		{error("A ']' must terminate a transition guard", false);}
+    Default         GuardEndError       {error("A ']' must terminate a transition guard", false);}
 }
 
 GuardEndError
 {
-	RIGHT_BRACKET	EndState			{}
+    RIGHT_BRACKET(token : SmcLexer.Token)
+                    EndState            {}
 
-	Default			nil                 {}
+    Default         nil                 {}
 }
 
 EndState
 {
     // Check for a duplicate guard.
-    PUSH [isDuplicateGuard();]
+    PUSH(token : SmcLexer.Token) [isDuplicateGuard();]
                     PushStart           {error("Duplicate transition - duplicate ignored.", false);
                                          createGuard();
                                          setTransType("TRANS_PUSH");}
-    POP [isDuplicateGuard();]
+
+    POP(token : SmcLexer.Token) [isDuplicateGuard();]
                     PopStart            {error("Duplicate transition - duplicate ignored.", false);
                                          createGuard();
                                          setTransType("TRANS_POP");}
-    WORD [isDuplicateGuard();]
+
+    WORD(token : SmcLexer.Token) [isDuplicateGuard();]
                     EndState1           {error("Duplicate transition - duplicate ignored.", false);
                                          createGuard();
                                          setTransType("TRANS_SET");
-                                         setEndState();}
+                                         setEndState(token);}
 
-	PUSH			PushStart			{createGuard();
+    PUSH(token : SmcLexer.Token)
+                    PushStart           {createGuard();
                                          setTransType("TRANS_PUSH");}
-	POP				PopStart			{createGuard();
-                                         setTransType("TRANS_POP");}
-	WORD			EndState1			{createGuard();
-										 setTransType("TRANS_SET");
-										 setEndState();}
 
-	Default			EndStateError		{error("Expecting either \"push\", \"pop\" or end state.", false);}
+    POP(token : SmcLexer.Token)
+                    PopStart            {createGuard();
+                                         setTransType("TRANS_POP");}
+
+    WORD(token : SmcLexer.Token)
+                    EndState1           {createGuard();
+                                         setTransType("TRANS_SET");
+                                         setEndState(token);}
+
+    Default         EndStateError       {error("Expecting either \"push\", \"pop\" or end state.", false);}
 }
 
 EndStateError
 {
-    LEFT_BRACE      push(ActionMap::MultiStart) {}
-    action_done     push(ActionMap::MultiStart) {addAction();}
+    LEFT_BRACE(token : SmcLexer.Token)
+                    push(ActionMap::MultiStart)
+                                        {}
+    action_done     push(ActionMap::MultiStart)
+                                        {addAction();}
     actions_done    Transitions         {addGuard();
                                          addTransition();}
-    RIGHT_BRACE     Transitions         {addGuard();
+
+    RIGHT_BRACE(token : SmcLexer.Token)
+                    Transitions         {addGuard();
                                          addTransition();}
 
     Default         nil                 {}
@@ -633,52 +815,65 @@ EndStateError
 
 EndState1
 {
-	// This must be a fully qualified state name.
-	COLON			EndState2			{appendEndState();}
+    // This must be a fully qualified state name.
+    COLON(token : SmcLexer.Token)
+                    EndState2           {appendEndState(token);}
 
-	// A '{' denotes the start of the actions.
-	LEFT_BRACE		push(ActionMap::MultiStart)	{}
+    // A brace denotes the start of the actions.
+    LEFT_BRACE(token : SmcLexer.Token)
+                    push(ActionMap::MultiStart)
+                                        {}
 
-	// There are still more actions to parse. Add this action to
-	// the in-progress guard's list.
-	action_done		push(ActionMap::MultiStart) {addAction();}
+    // There are still more actions to parse. Add this action to
+    // the in-progress guard's list.
+    action_done     push(ActionMap::MultiStart)
+                                        {addAction();}
 
-	// All actions have been parsed. Go on to the next transition.
-	actions_done	Transitions			{addGuard();
-										 addTransition();}
+    // All actions have been parsed. Go on to the next transition.
+    actions_done    Transitions         {addGuard();
+                                         addTransition();}
 
-	Default			EndStateError		{error("Expecting a '{'.", false);}
+    Default         EndStateError       {error("Expecting a '{'.", false);}
 }
 
 EndState2
 {
-	COLON			EndState3			{appendEndState();}
+    COLON(token : SmcLexer.Token)
+                    EndState3           {appendEndState(token);}
 
-	Default			EndStateError		{error("Expecting another ':' (as in map::state).", false);}
+    Default         EndStateError       {error("Expecting another ':' (as in map::state).", false);}
 }
 
 EndState3
 {
-	WORD			ActionStart			{appendEndState();}
+    WORD(token : SmcLexer.Token)
+                    ActionStart         {appendEndState(token);}
 
-	Default			EndStateError		{error("Expecting a state name (as in map::state)", false);}
+    Default         EndStateError       {error("Expecting a state name (as in map::state)", false);}
 }
 
 PushStart
 {
-	LEFT_PAREN		PushMap				{}
+    LEFT_PAREN(token : SmcLexer.Token)
+                    PushMap             {}
 
-	Default			PushError			{error("push must be followed by a '('.", false);}
+    Default         PushError           {error("push must be followed by a '('.", false);}
 }
 
 PushError
 {
-    RIGHT_PAREN     ActionStart         {}
-    LEFT_BRACE      push(ActionMap::MultiStart) {}
-    action_done     push(ActionMap::MultiStart) {addAction();}
+    RIGHT_PAREN(token : SmcLexer.Token)
+                    ActionStart         {}
+    LEFT_BRACE(token : SmcLexer.Token)
+                    push(ActionMap::MultiStart)
+                                        {}
+    action_done     push(ActionMap::MultiStart)
+                                        {addAction();}
     actions_done    Transitions         {addGuard();
                                          addTransition();}
-    RIGHT_BRACE     Transitions         {addGuard();
+
+    RIGHT_BRACE(token : SmcLexer.Token)
+                    Transitions         {addGuard();
                                          addTransition();}
 
     Default         nil                 {}
@@ -686,66 +881,83 @@ PushError
 
 PushMap
 {
-	// Is this a map name or a state name?
-	WORD			PushState1			{setEndState();}
+    // Is this a map name or a state name?
+    WORD(token : SmcLexer.Token)
+                    PushState1          {setEndState(token);}
 
-	Default			PushError			{error("Expecting a state name.", false);}
+    Default         PushError           {error("Expecting a state name.", false);}
 }
 
 PushState1
 {
-	// Just the state name was provided.
-	RIGHT_PAREN		ActionStart			{}
+    // Just the state name was provided.
+    RIGHT_PAREN(token : SmcLexer.Token)
+                    ActionStart         {}
 
-	// We have seen the map name. Now we are looking for the state.
-	COLON			PushState2			{appendEndState();}
+    // We have seen the map name. Now we are looking for the state.
+    COLON(token : SmcLexer.Token)
+                    PushState2          {appendEndState(token);}
 
-	Default			PushError   		{error("Expecting either ')' or ':' (as in map::state).", false);}
+    Default         PushError           {error("Expecting either ')' or ':' (as in map::state).", false);}
 }
 
 PushState2
 {
-	COLON			PushState3			{appendEndState();}
+    COLON(token : SmcLexer.Token)
+                    PushState3          {appendEndState(token);}
 
-	Default			PushError			{error("Expecting ':' (as in map::state).", false);}
+    Default         PushError           {error("Expecting ':' (as in map::state).", false);}
 }
 
 PushState3
 {
-	WORD			PushEnd				{appendEndState();}
+    WORD(token : SmcLexer.Token)
+                    PushEnd             {appendEndState(token);}
 
-	Default			PushError			{error("Expecting a state name (as in map::state).", false);}
+    Default         PushError           {error("Expecting a state name (as in map::state).", false);}
 }
 
 PushEnd
 {
-	RIGHT_PAREN		ActionStart			{}
+    RIGHT_PAREN(token : SmcLexer.Token)
+                    ActionStart         {}
 
-	Default			PushError			{error("push transition must end in ')' (push(state)).", false);}
+    Default         PushError           {error("push transition must end in ')' (push(state)).", false);}
 }
 
 PopStart
 {
-	LEFT_PAREN		PopAction			{}
+    LEFT_PAREN(token : SmcLexer.Token)
+                    PopAction           {}
 
-	// A '{' denotes the start of the actions.
+    // A brace denotes the start of the actions.
     // It is acceptable not to provide a pop transition.
-	LEFT_BRACE		push(ActionMap::MultiStart)	{}
-    action_done     push(ActionMap::MultiStart) {addAction();}
+    LEFT_BRACE(token : SmcLexer.Token)
+                    push(ActionMap::MultiStart)
+                                        {}
+    action_done     push(ActionMap::MultiStart)
+                                        {addAction();}
     actions_done    Transitions         {addGuard();
                                          addTransition();}
 
-	Default			PopError			{error("Expecting '(trans)' or '{' after pop.", false);}
+    Default         PopError            {error("Expecting '(trans)' or '{' after pop.", false);}
 }
 
 PopError
 {
-    RIGHT_PAREN     ActionStart         {}
-    LEFT_BRACE      push(ActionMap::MultiStart) {}
-    action_done     push(ActionMap::MultiStart) {addAction();}
+    RIGHT_PAREN(token : SmcLexer.Token)
+                    ActionStart         {}
+
+    LEFT_BRACE(token : SmcLexer.Token)
+                    push(ActionMap::MultiStart)
+                                        {}
+    action_done     push(ActionMap::MultiStart)
+                                        {addAction();}
     actions_done    Transitions         {addGuard();
                                          addTransition();}
-    RIGHT_BRACE     Transitions         {addGuard();
+
+    RIGHT_BRACE(token : SmcLexer.Token)
+                    Transitions         {addGuard();
                                          addTransition();}
 
     Default         nil                 {}
@@ -753,54 +965,65 @@ PopError
 
 PopAction
 {
-	RIGHT_PAREN		ActionStart			{}
+    RIGHT_PAREN(token : SmcLexer.Token)
+                    ActionStart         {}
 
-	WORD			PopEnd				{setEndState();}
+    WORD(token : SmcLexer.Token)
+                    PopEnd              {setEndState(token);}
 
-	Default			PopError			{error("Expecting either a pop transition or ')'.", false);}
+    Default         PopError            {error("Expecting either a pop transition or ')'.", false);}
 }
 
 PopEnd
 {
-	RIGHT_PAREN		ActionStart			{}
+    RIGHT_PAREN(token : SmcLexer.Token)
+                    ActionStart         {}
 
-	Default			PopError			{error("Expecting ')' to end the pop transition.", false);}
+    Default         PopError            {error("Expecting ')' to end the pop transition.", false);}
 }
 
 ActionStart
 {
-	// A '{' denotes the start of the actions.
-	LEFT_BRACE		push(ActionMap::MultiStart)	{}
+    // A brace denotes the start of the actions.
+    LEFT_BRACE(token : SmcLexer.Token)
+                    push(ActionMap::MultiStart)
+                                        {}
 
-	// There are still more actions to parse. Add this action to
-	// the in-progress guard's list.
-	action_done		push(ActionMap::MultiStart) {addAction();}
+    // There are still more actions to parse. Add this action to
+    // the in-progress guard's list.
+    action_done     push(ActionMap::MultiStart)
+                                        {addAction();}
 
-	// All actions have been parsed. Go on to the next transition.
-	actions_done	Transitions			{addGuard();
-										 addTransition();}
+    // All actions have been parsed. Go on to the next transition.
+    actions_done    Transitions         {addGuard();
+                                         addTransition();}
 
-	Default			ActionStartError	{error("A '{' must proceed any action definitions.", false);}
+    Default         ActionStartError    {error("A '{' must proceed any action definitions.", false);}
 }
 
 ActionStartError
 {
-	LEFT_BRACE		push(ActionMap::MultiStart)	{}
-	action_done		push(ActionMap::MultiStart) {addAction();}
-	actions_done	Transitions			{addGuard();
-										 addTransition();}
-    RIGHT_BRACE     Transitions			{addGuard();
-										 addTransition();}
+    LEFT_BRACE(token : SmcLexer.Token)
+                    push(ActionMap::MultiStart)
+                                        {}
+    action_done     push(ActionMap::MultiStart)
+                                        {addAction();}
+    actions_done    Transitions         {addGuard();
+                                         addTransition();}
 
-	Default			nil                 {}
+    RIGHT_BRACE(token : SmcLexer.Token)
+                    Transitions         {addGuard();
+                                         addTransition();}
+
+    Default         nil                 {}
 }
 
 %%
 
 //=========================================================================
 // ActionMap
-//	This map is used to parse a single action. Actions are of the form:
-//	WORD '(' {args} ')' ';'
+// This map is used to parse a single action. Actions are of the form:
+// WORD '(' {args} ')' ';'
 //
 %map ActionMap
 %%
@@ -808,96 +1031,135 @@ ActionStartError
 // Start here if you are looking for muliple actions.
 MultiStart
 {
-	RIGHT_BRACE		pop(actions_done)	{}
+    RIGHT_BRACE(token : SmcLexer.Token)
+                    pop(actions_done)   {}
 
-	// This word is the action name.
-	WORD			ArgsStart			{createAction();}
+    // This word is the action name.
+    WORD(token : SmcLexer.Token)
+                    ArgsStart           {createAction(token);}
 
-	Default			ActionStartError	{error("Expecting either a new action or a '}'.", false);}
+    Default         ActionStartError    {error("Expecting either a new action or a '}'.", false);}
 }
 
 // Start here if you are looking for a single action.
 Start
 {
-	// This word is the action name.
-	WORD			ArgsStart			{createAction();}
+    // This word is the action name.
+    WORD(token : SmcLexer.Token)
+                    ArgsStart           {createAction(token);}
 
     // A "!" means that this action is being negated.
     // Probably being used as a guard.
-    EXCLAMATION     nil                 {setActionNegation();}
+    EXCLAMATION(token : SmcLexer.Token)
+                    nil                 {setActionNegation();}
 
-	Default			ActionStartError	{error("Expecting action name.", false);}
+    Default         ActionStartError    {error("Expecting action name.", false);}
 }
 
 ActionStartError
 {
-	WORD			ArgsStart			{createAction();}
-    EXCLAMATION     Start               {createAction();
+    WORD(token : SmcLexer.Token)
+                    ArgsStart           {createAction(token);}
+
+    EXCLAMATION(token : SmcLexer.Token)
+                    Start               {createAction(token);
                                          setActionNegation();}
-    LEFT_PAREN      FirstArgument       {createAction();}
-	RIGHT_PAREN		ArgsEnd				{}
-    SEMICOLON       pop(action_done)    {}
-	RIGHT_BRACE		pop(actions_done)	{}
+
+    LEFT_PAREN(token : SmcLexer.Token)
+                    FirstArgument       {createAction(token);}
+
+    RIGHT_PAREN(token : SmcLexer.Token)
+                    ArgsEnd             {}
+
+    SEMICOLON(token : SmcLexer.Token)
+                    pop(action_done)    {}
+
+    RIGHT_BRACE(token : SmcLexer.Token)
+                    pop(actions_done)   {}
 
     Default         nil                 {}
 }
 
 ArgsStart
 {
-	LEFT_PAREN		FirstArgument		{}
+    LEFT_PAREN(token : SmcLexer.Token)
+                    FirstArgument       {}
 
     // Error transitions.
-    RIGHT_PAREN     ArgsEnd             {error("Expecting '(' after the action name.", false);}
-    SEMICOLON       pop(action_done)    {error("Expecting '(' after the action name.", false);}
-    RIGHT_BRACE     pop(actions_done)   {error("Expecting '(' after the action name.", false);}
+    RIGHT_PAREN(token : SmcLexer.Token)
+                    ArgsEnd             {error("Expecting '(' after the action name.", false);}
+    SEMICOLON(token : SmcLexer.Token)
+                    pop(action_done)    {error("Expecting '(' after the action name.", false);}
+    RIGHT_BRACE(token : SmcLexer.Token)
+                    pop(actions_done)   {error("Expecting '(' after the action name.", false);}
 
-	Default			ArgsStartError		{error("Expecting '(' after the action name.", false);}
+    Default         ArgsStartError      {error("Expecting '(' after the action name.", false);}
 }
 
 ArgsStartError
 {
-	LEFT_PAREN		FirstArgument		{}
-	RIGHT_PAREN		ArgsEnd				{}
-	SEMICOLON		pop(action_done)	{}
-	COMMA			Argument2			{}
+    LEFT_PAREN(token : SmcLexer.Token)
+                    FirstArgument       {}
+    RIGHT_PAREN(token : SmcLexer.Token)
+                    ArgsEnd             {}
+    SEMICOLON(token : SmcLexer.Token)
+                    pop(action_done)    {}
+    COMMA(token : SmcLexer.Token)
+                    Argument2           {}
 
-	VARIABLE		NextArgument		{addArgument();}
-	WORD			NextArgument		{addArgument();}
-	INTEGER			NextArgument		{addArgument();}
-	FLOAT			NextArgument		{addArgument();}
-	STRING			NextArgument		{addArgument();}
+    VARIABLE(token : SmcLexer.Token)
+                    NextArgument        {addArgument(token);}
+    WORD(token : SmcLexer.Token)
+                    NextArgument        {addArgument(token);}
+    INTEGER(token : SmcLexer.Token)
+                    NextArgument        {addArgument(token);}
+    FLOAT(token : SmcLexer.Token)
+                    NextArgument        {addArgument(token);}
+    STRING(token : SmcLexer.Token)
+                    NextArgument        {addArgument(token);}
 
     Default         nil                 {}
 }
 
 FirstArgument
 {
-	RIGHT_PAREN		ArgsEnd				{}
+    RIGHT_PAREN(token : SmcLexer.Token)
+                    ArgsEnd             {}
 
     // Look for scoped variable names.
-	WORD			VarArg1        	    {createVariable();}
+    WORD(token : SmcLexer.Token)
+                    VarArg1             {createVariable(token);}
 
-	VARIABLE		NextArgument		{addArgument();}
-	INTEGER			NextArgument		{addArgument();}
-	FLOAT			NextArgument		{addArgument();}
-	STRING			NextArgument		{addArgument();}
+    VARIABLE(token : SmcLexer.Token)
+                    NextArgument        {addArgument(token);}
+    INTEGER(token : SmcLexer.Token)
+                    NextArgument        {addArgument(token);}
+    FLOAT(token : SmcLexer.Token)
+                    NextArgument        {addArgument(token);}
+    STRING(token : SmcLexer.Token)
+                    NextArgument        {addArgument(token);}
 
-	Default			ArgsEndError		{error("Expecting either a valid argument or a ')'.", false);}
+    Default         ArgsEndError        {error("Expecting either a valid argument or a ')'.", false);}
 }
 
 VarArg1
 {
-    COLON           VarArg2             {appendVariable();}
+    COLON(token : SmcLexer.Token)
+                    VarArg2             {appendVariable(token);}
 
-    RIGHT_PAREN     ArgsEnd             {addVariable();}
-    COMMA           Argument2           {addVariable();}
+    RIGHT_PAREN(token : SmcLexer.Token)
+                    ArgsEnd             {addVariable();}
+
+    COMMA(token : SmcLexer.Token)
+                    Argument2           {addVariable();}
 
     Default         ArgsEndError        {error("Expecting either ',' or ')'.", false);}
 }
 
 VarArg2
 {
-    COLON           VarArgEnd           {appendVariable();}
+    COLON(token : SmcLexer.Token)
+                    VarArgEnd           {appendVariable(token);}
 
     Default         ArgsEndError        {error("Expecting ':' after first ':'.", false);}
 }
@@ -905,41 +1167,119 @@ VarArg2
 VarArgEnd
 {
     // Handle multiply scoped variables.
-    WORD            VarArg1            {appendVariable();}
+    WORD(token : SmcLexer.Token)
+                    VarArg1             {appendVariable(token);}
 }
 
 NextArgument
 {
-	RIGHT_PAREN		ArgsEnd				{}
+    RIGHT_PAREN(token : SmcLexer.Token)
+                    ArgsEnd             {}
 
-	COMMA			Argument2			{}
+    COMMA(token : SmcLexer.Token)
+                    Argument2           {}
 
-	Default			ArgsEndError		{error("Expecting either ',' or ')'.", false);}
+    Default         ArgsEndError        {error("Expecting either ',' or ')'.", false);}
 }
 
 Argument2
 {
-	WORD			VarArg1     		{createVariable();}
-	VARIABLE		NextArgument		{addArgument();}
-	INTEGER			NextArgument		{addArgument();}
-	FLOAT			NextArgument		{addArgument();}
-	STRING			NextArgument		{addArgument();}
+    WORD(token : SmcLexer.Token)
+                    VarArg1             {createVariable(token);}
 
-	Default			ArgsEndError		{error("An argument must either a variable, word, integer, float or a string.", false);}
+    VARIABLE(token : SmcLexer.Token)
+                    NextArgument        {addArgument(token);}
+
+    INTEGER(token : SmcLexer.Token)
+                    NextArgument        {addArgument(token);}
+
+    FLOAT(token : SmcLexer.Token)
+                    NextArgument        {addArgument(token);}
+
+    STRING(token : SmcLexer.Token)
+                    NextArgument        {addArgument(token);}
+
+    Default         ArgsEndError        {error("An argument must either a variable, word, integer, float or a string.", false);}
 }
 
 ArgsEnd
 {
-	SEMICOLON		pop(action_done)	{}
+    SEMICOLON(token : SmcLexer.Token)
+                    pop(action_done)    {}
 
-	Default			ArgsEndError		{error("Actions must be terminated with a ';'.", false);}
+    Default         ArgsEndError        {error("Actions must be terminated with a ';'.", false);}
 }
 
 ArgsEndError
 {
-    SEMICOLON		pop(action_done)	{}
+    SEMICOLON(token : SmcLexer.Token)
+                    pop(action_done)    {}
 
     Default         nil                 {}
+}
+
+%%
+
+%map NameMap
+%%
+// Get the owning object's class name.
+FQName
+{
+    // The next token must be the class name. The class name may
+    // begin with a colon.
+    COLON(token : SmcLexer.Token)
+                Colon1          {appendClassName(token);}
+    WORD(token : SmcLexer.Token)
+                ClassName       {appendClassName(token);}
+
+    Default     pop(FQNameError)
+                                {error("Missing class name after %class.", false);}
+}
+
+ClassName
+{
+    // If there is a ':', then this is a FQ name.
+    COLON(token : SmcLexer.Token)
+                    Colon1              {appendClassName(token);}
+
+    // Look for a '%' keyword to mark the end of the class name.
+    START_STATE(token : SmcLexer.Token)
+                    pop(FQNameDone)     {pushBack(token);}
+
+    HEADER_FILE(token : SmcLexer.Token)
+                    pop(FQNameDone)     {pushBack(token);}
+
+    PACKAGE_NAME(token : SmcLexer.Token)
+                    pop(FQNameDone)     {pushBack(token);}
+
+    MAP_NAME(token : SmcLexer.Token)
+                    pop(FQNameDone)     {pushBack(token);}
+
+    Default         nil                 {error("Expecting \"%start\", \"%header\", \"%package\" or \"%map\".", false);}
+}
+
+// Each part of the class name is separated by two (or more)
+// colons.
+Colon1
+{
+    COLON(token : SmcLexer.Token)
+                    Colon2              {appendClassName(token);}
+
+    // Anything else is an error.
+    Default         nil                 {error("Expecting \"::\" in fully qualified class name.", false);}
+}
+
+// A word *may* follow the two colons.
+Colon2
+{
+    WORD(token : SmcLexer.Token)
+                    ClassName           {appendClassName(token);}
+
+    // Ignore excess colons.
+    COLON(token : SmcLexer.Token)
+                    nil                 {}
+
+    Default         nil                 {error("Expecting a string after \"::\" in fully qualified class name.", false);}
 }
 
 %%

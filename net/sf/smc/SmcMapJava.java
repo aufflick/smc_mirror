@@ -23,6 +23,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2001/12/14 20:10:37  cwrapp
+// Changes in release 1.1.0:
+// Add the following features:
+// + 486786: Added the %package keyword which specifies the
+//           Java package/C++ namespace/Tcl namespace
+//           the SMC-generated classes will be placed.
+// + 486471: The %class keyword accepts fully qualified
+//           class names.
+// + 491135: Add FSMContext methods getDebugStream and
+//           setDebugStream.
+// + 492165: Added -sync command line option which causes
+//           the transition methods to be synchronized
+//           (this option may only be used with -java).
+//
 // Revision 1.1  2001/12/03 14:14:03  cwrapp
 // Changes in release 1.0.2:
 // + Placed the class files in Smc.jar in the net.sf.smc package.
@@ -95,6 +109,7 @@ import java.text.ParseException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 
 public final class SmcMapJava
@@ -107,18 +122,20 @@ public final class SmcMapJava
 
     public void generateCode(PrintStream header,
                              PrintStream source,
-                             String context)
+                             String context,
+                             String pkg,
+                             String indent)
         throws ParseException
     {
-        LinkedList definedDefaultTransitions;
-        LinkedList transList;
+        List definedDefaultTransitions;
+        List transList;
         ListIterator stateIt;
         ListIterator transIt;
         ListIterator paramIt;
         SmcState state;
         SmcTransition defaultTransition =
                 new SmcTransitionJava("Default",
-                                      new LinkedList(),
+                                      (List) new LinkedList(),
                                       _line_number);
         SmcTransition transition;
         SmcParameter parameter;
@@ -133,7 +150,8 @@ public final class SmcMapJava
         }
         else
         {
-            definedDefaultTransitions = new LinkedList();
+            definedDefaultTransitions =
+                (List) new LinkedList();
         }
 
         // Get map's entire list of transitions (the returned
@@ -256,6 +274,7 @@ public final class SmcMapJava
             transition.generateCode(header,
                                     source,
                                     context,
+                                    pkg,
                                     _name,
                                     "Default",
                                     "        ");
@@ -339,7 +358,12 @@ public final class SmcMapJava
             )
         {
             state = (SmcState) stateIt.next();
-            state.generateCode(header, source, _name, context);
+            state.generateCode(header,
+                               source,
+                               _name,
+                               context,
+                               pkg,
+                               indent);
         }
 
         // The map class has been defined.

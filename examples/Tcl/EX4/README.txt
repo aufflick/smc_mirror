@@ -15,8 +15,24 @@ timeouts).
 NOTE: Smc.jar must be built and installed.
 
 Unix & Windows:
-    $ java -jar ../../../bin/Smc.jar Stoplight.sm
-    $ java -jar ../../../bin/Smc.jar Vehicle.sm
+    $ java -jar ../../../bin/Smc.jar -tcl [-g] Stoplight.sm
+    $ java -jar ../../../bin/Smc.jar -tcl [-g] Vehicle.sm
+
+(Note: -g is optional and needed only for observing the FSM
+       debug output.)
+
+To turn on the debug output, do the following:
+
+    1. Compile Stoplight.sm and Vehicle.sm with the -g command
+       line option.
+
+    2. In Traffic.tcl, Vehicle.tcl and Stoplight.tcl, find
+       the comment "# DEBUG". The comments following this
+       line explain which line to uncomment to cause the
+       SMC-generated code to output the debug messages.
+
+       You may not want to turn on the Vehicle.sm debug output
+       since it is quite verbose.
 
 
 + Executing

@@ -23,6 +23,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2001/12/14 20:10:37  cwrapp
+// Changes in release 1.1.0:
+// Add the following features:
+// + 486786: Added the %package keyword which specifies the
+//           Java package/C++ namespace/Tcl namespace
+//           the SMC-generated classes will be placed.
+// + 486471: The %class keyword accepts fully qualified
+//           class names.
+// + 491135: Add FSMContext methods getDebugStream and
+//           setDebugStream.
+// + 492165: Added -sync command line option which causes
+//           the transition methods to be synchronized
+//           (this option may only be used with -java).
+//
 // Revision 1.1  2001/12/03 14:14:03  cwrapp
 // Changes in release 1.0.2:
 // + Placed the class files in Smc.jar in the net.sf.smc package.
@@ -94,6 +108,7 @@ import java.io.PrintStream;
 import java.text.ParseException;
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 
 public final class SmcParseTreeCpp
@@ -112,6 +127,7 @@ public final class SmcParseTreeCpp
         String srcfileCaps;
         String mapName;
         String separator;
+        String indent;
         ListIterator mapIt;
         ListIterator stateIt;
         ListIterator transIt;
@@ -155,22 +171,42 @@ public final class SmcParseTreeCpp
         header.println("#include <statemap.h>\n");
 
         // Dump out the raw source code, if any.
-        if (_source != null && _source.length () > 0)
+        if (_source != null && _source.length() > 0)
         {
             source.println (_source + "\n");
         }
-
+                
         // Import the statemap namespace symbols into the main
         // namespace.
         header.println("using namespace statemap;\n");
 
+        // If a namespace was specified, then output that
+        // namespace now.
+        if (_package != null && _package.length() > 0)
+        {
+            header.println("namespace " + _package);
+            header.println("{");
+            indent = "    ";
+        }
+        else
+        {
+            indent = "";
+        }
+
         // Forward declare all the state classes in all the maps.
-        header.println("// Forward declarations.");
+        header.println(indent + "// Forward declarations.");
+
         for (mapIt = _maps.listIterator();
              mapIt.hasNext() == true;
             )
         {
             map = (SmcMap) mapIt.next();
+
+            // Forward declare the map.
+            header.println(indent +
+                           "class " +
+                           map.getName() +
+                           ";");
 
             // Iterate over the map's states.
             for (stateIt = map.getStates().listIterator();
@@ -178,44 +214,60 @@ public final class SmcParseTreeCpp
                 )
             {
                 state = (SmcState) stateIt.next();
-                header.println("class " +
+                header.println(indent +
+                               "class " +
                                map.getName() +
                                "_" +
                                state.getClassName() +
                                ";");
             }
+
+            // Forward declare the default state as well.
+            header.println(indent +
+                           "class " +
+                           map.getName() +
+                           "_Default;");
         }
 
-        // Forward declare the application class and its
+        // Forward declare the state class and its
         // context as well.
-        header.println("class " + _context + ";");
-        header.println("class " + _context + "Context;\n");
+        header.println(indent + "class " + _context + "State;");
+        header.println(indent +
+                       "class " +
+                       _context +
+                       "Context;");
+
+        // Forward declare the application class.
+        header.println(indent + "class " + _context + ";\n");
 
         // Declare user's base state class.
-        header.println("class " +
+        header.println(indent +
+                       "class " +
                        _context +
-                       "State : public State\n{");
-        header.println("public:");
+                       "State : public State");
+        header.println(indent + "{");
+        header.println(indent + "public:");
 
         // Constructor.
-        header.println("    " +
+        header.println(indent +
+                       "    " +
                        _context +
                        "State(const char *name)");
-        header.println("    : State(name)");
-        header.println("    {};\n");
+        header.println(indent + "    : State(name)");
+        header.println(indent + "    {};\n");
 
 
         // Add the default Entry() and Exit() definitions.
-        header.println("    virtual void Entry(" +
+        header.println(indent + "    virtual void Entry(" +
                        _context +
                        "Context&) {};");
-        header.println("    virtual void Exit(" +
+        header.println(indent + "    virtual void Exit(" +
                        _context +
                        "Context&) {};\n");
 
         // Print out the default definitions for all the
         // transitions. First, get the transitions list.
-        LinkedList transList = new LinkedList();
+        List transList = (List) new LinkedList();
         for (mapIt = _maps.listIterator();
              mapIt.hasNext() == true;
             )
@@ -243,7 +295,8 @@ public final class SmcParseTreeCpp
 
             if (trans.getName().compareTo("Default") != 0)
             {
-                header.print("    virtual void " +
+                header.print(indent +
+                             "    virtual void " +
                              trans.getName() +
                              "(" +
                              _context +
@@ -263,13 +316,14 @@ public final class SmcParseTreeCpp
         }
 
         // Declare the global Default transition.
-        header.println("\nprotected:");
-        header.println("    virtual void Default(" +
+        header.println("\n" + indent + "protected:");
+        header.println(indent +
+                       "    virtual void Default(" +
                        _context +
                        "Context& s);");
 
         // The base class has been defined.
-        header.println("};\n");
+        header.println(indent + "};\n");
 
         // Begin the source file with the appropriate headers.
         source.println("#include \"" +
@@ -286,6 +340,13 @@ public final class SmcParseTreeCpp
         source.println("#include \"" +
                        _header +
                        "\"\n");
+
+        // Import the user-defined namespace into the main
+        // namespace.
+        if (_package != null && _package.length() > 0)
+        {
+            source.println("using namespace " + _package + ";\n");
+        }
 
         // Statically declare all derive state classes.
         source.println("// Static class declarations.");
@@ -341,7 +402,8 @@ public final class SmcParseTreeCpp
                     param.generateCode(source);
                 }
 
-                source.println(")\n{");
+                source.println(")");
+                source.println("{");
                 source.println("    Default(s);");
                 source.println("    return;");
                 source.println("}");
@@ -354,25 +416,34 @@ public final class SmcParseTreeCpp
                        _context +
                        "State::Default(" +
                        _context +
-                       "Context& s)\n{");
+                       "Context& s)");
+        source.println("{");
 
         // Print the transition out to the verbose log.
         if (Smc.isDebug() == true)
         {
             source.println("    if (s.getDebugFlag() == true)");
             source.println("    {");
-            source.println("        fprintf(stderr, \"TRANSITION   : Default\\n\");");
-            source.println("    }\n");
+            source.println("        ostream& str = s.getDebugStream();");
+            source.println();
+            source.println("        str << \"TRANSITION   : Default\"");
+            source.println("            << endl;");
+            source.println("    }");
+            source.println();
         }
 
         // A transition has been issued which has no
         // definition in the current state and there
         // is no default to cover for it. Throw an
         // exception.
-        source.println("    throw TransitionUndefinedException(s.getState().getName(),");
-        source.println("                                       s.getTransition());\n");
+        source.println("    throw (");
+        source.println("        TransitionUndefinedException(");
+        source.println("            s.getState().getName(),");
+        source.println("            s.getTransition()));");
+        source.println();
 
-        source.println("    return;\n}");
+        source.println("    return;}");
+        source.println();
 
         // Have each map print out its source code now.
         for (mapIt = _maps.listIterator();
@@ -380,47 +451,59 @@ public final class SmcParseTreeCpp
             )
         {
             map = (SmcMap) mapIt.next();
-            map.generateCode(header, source, _context);
+            map.generateCode(header,
+                             source,
+                             _context,
+                             _package,
+                             indent);
         }
 
         // Generate the context class.
-        header.println("class " +
+        header.println(indent +
+                       "class " +
                        _context +
                        "Context : public FSMContext");
-        header.println("{");
-        header.println("public:");
-        header.println("    " +
+        header.println(indent + "{");
+        header.println(indent + "public:");
+        header.println(indent +
+                       "    " +
                        _context +
                        "Context(" +
                        _context +
                        "& owner)");
-        header.println("    : _owner(owner)");
-        header.println("    {");
-        header.println("        setState(" +
+        header.println(indent + "    : _owner(owner)");
+        header.println(indent + "    {");
+        header.println(indent +
+                       "        setState(" +
                        _start_state +
                        ");");
-        header.println("        " +
+        header.println(indent +
+                       "        " +
                        _start_state +
                        ".Entry(*this);");
-        header.println("    };\n");
-        header.println("    " +
+        header.println(indent + "    };\n");
+        header.println(indent +
+                       "    " +
                        _context +
                        "& getOwner() const");
-        header.println("    {");
-        header.println("        return(_owner);");
-        header.println("    };\n");
-        header.println("    " +
+        header.println(indent + "    {");
+        header.println(indent + "        return(_owner);");
+        header.println(indent + "    };\n");
+        header.println(indent +
+                       "    " +
                        _context +
                        "State& getState() const");
-        header.println("    {");
-        header.println("        if (_state == NULL)");
-        header.println("        {");
-        header.println("            throw StateUndefinedException();");
-        header.println("        }\n");
-        header.println("        return(dynamic_cast<" +
+        header.println(indent + "    {");
+        header.println(indent + "        if (_state == NULL)");
+        header.println(indent + "        {");
+        header.println(indent +
+                       "            throw StateUndefinedException();");
+        header.println(indent + "        }\n");
+        header.println(indent +
+                       "        return(dynamic_cast<" +
                        _context +
                        "State&>(*_state));");
-        header.println("    };");
+        header.println(indent + "    };");
 
         // If transition queuing is being done, generate a
         // dispatchTransitions() method.
@@ -441,7 +524,9 @@ public final class SmcParseTreeCpp
             trans = (SmcTransition) transIt.next();
             if (trans.getName().compareTo("Default") != 0)
             {
-                header.print("\n    void " +
+                header.print("\n" +
+                             indent +
+                             "    void " +
                              trans.getName() +
                              "(");
                 for (paramIt = trans.getParameters().listIterator(),
@@ -466,11 +551,14 @@ public final class SmcParseTreeCpp
                 else
                 {
                 */
-                header.println("\n    {");
-                header.println("        setTransition(\"" +
+                header.println("\n" +
+                               indent +
+                               "    {");
+                header.println(indent + "        setTransition(\"" +
                                trans.getName() +
                                "\");");
-                header.print("        (getState())." +
+                header.print(indent +
+                             "        (getState())." +
                              trans.getName() +
                              "(*this");
                 for (paramIt = trans.getParameters().listIterator();
@@ -481,8 +569,9 @@ public final class SmcParseTreeCpp
                     header.print(", " + param.getName());
                 }
                 header.println(");");
-                header.println("        setTransition(NULL);");
-                header.println("    };");
+                header.println(indent +
+                               "        setTransition(NULL);");
+                header.println(indent + "    };");
                 /*
                  * Transition queuing not supported.
                 }
@@ -491,10 +580,11 @@ public final class SmcParseTreeCpp
         }
 
         // Member data.
-        header.println("\nprivate:");
-        header.println("    " +
+        header.println("\n" + indent + "private:");
+        header.println(indent +
+                       "    " +
                        _context +
-                       "& _owner;\n");
+                       "& _owner;");
 
         // For transition queuing, generate an enum listing all
         // possible transitions.
@@ -503,7 +593,7 @@ public final class SmcParseTreeCpp
          *
         if (Smc.isTransQueue() == true)
         {
-            LinkedList paramList;
+            List paramList;
             int i;
             int j;
 
@@ -724,7 +814,17 @@ public final class SmcParseTreeCpp
          */
 
         // Put the closing brace on the context class.
-        header.println("};\n");
+        header.println(indent + "};");
+
+        // If necessary, place an end brace for the namespace.
+        if (_package != null && _package.length() > 0)
+        {
+            header.println("};\n");
+        }
+        else
+        {
+            header.println();
+        }
 
         header.println("#endif");
 

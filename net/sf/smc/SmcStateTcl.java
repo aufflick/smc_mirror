@@ -23,6 +23,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2001/12/14 20:10:37  cwrapp
+// Changes in release 1.1.0:
+// Add the following features:
+// + 486786: Added the %package keyword which specifies the
+//           Java package/C++ namespace/Tcl namespace
+//           the SMC-generated classes will be placed.
+// + 486471: The %class keyword accepts fully qualified
+//           class names.
+// + 491135: Add FSMContext methods getDebugStream and
+//           setDebugStream.
+// + 492165: Added -sync command line option which causes
+//           the transition methods to be synchronized
+//           (this option may only be used with -java).
+//
 // Revision 1.1  2001/12/03 14:14:03  cwrapp
 // Changes in release 1.0.2:
 // + Placed the class files in Smc.jar in the net.sf.smc package.
@@ -87,7 +101,9 @@ public final class SmcStateTcl
     public void generateCode(PrintStream header,
                              PrintStream source,
                              String mapName,
-                             String context)
+                             String context,
+                             String pkg,
+                             String indent)
         throws ParseException
     {
         ListIterator transIt;
@@ -95,23 +111,30 @@ public final class SmcStateTcl
         SmcTransition transition;
         SmcAction action;
 
-        source.println("class " +
+        source.println(indent +
+                       "class " +
                        mapName +
                        "_" +
                        _class_name +
                        " {");
-        source.println("    inherit " + mapName + "_Default;\n");
-        source.println("    constructor {name} {");
-        source.println("        ::" +
+        source.println(indent +
+                       "    inherit " +
+                       mapName +
+                       "_Default;\n");
+        source.println(indent + "    constructor {name} {");
+        source.println(indent +
+                       "        " +
                        mapName +
                        "_Default::constructor $name;");
-        source.println("    } {}");
+        source.println(indent + "    } {}");
 
         // Add the Entry() and Exit() member functions if this
         // state defines them.
         if (_entryActions.size() > 0)
         {
-            source.println("\n    public method Entry {context} {");
+            source.println();
+            source.println(indent +
+                           "    public method Entry {context} {");
 
             // Generate the actions associated with this code.
             for (actionIt = _entryActions.listIterator();
@@ -119,18 +142,23 @@ public final class SmcStateTcl
                 )
             {
                 action = (SmcAction) actionIt.next();
-                action.generateCode(source, context, "        ");
+                action.generateCode(source,
+                                    context,
+                                    indent + "        ");
                 source.println(";");
             }
 
             //` End the Entry() method with a return.
-            source.println("\n        return -code ok;");
-            source.println("    }");
+            source.println();
+            source.println(indent + "        return -code ok;");
+            source.println(indent + "    }");
         }
 
         if (_exitActions.size() > 0)
         {
-            source.println("\n    public method Exit {context} {");
+            source.println();
+            source.println(indent +
+                           "    public method Exit {context} {");
 
             // Generate the actions associated with this code.
             for (actionIt = _exitActions.listIterator();
@@ -138,13 +166,15 @@ public final class SmcStateTcl
                 )
             {
                 action = (SmcAction) actionIt.next();
-                action.generateCode(source, context, "        ");
+                action.generateCode(source,
+                                    context,
+                                    indent + "        ");
                 source.println(";");
             }
 
             // End the Exit() method with a return.
-            source.println("        return -code ok;");
-            source.println("    }");
+            source.println(indent + "        return -code ok;");
+            source.println(indent + "    }");
         }
 
         // Have the transitions generate their code.
@@ -156,13 +186,14 @@ public final class SmcStateTcl
             transition.generateCode(header,
                                     source,
                                     context,
+                                    pkg,
                                     mapName,
                                     _class_name,
-                                    null);
+                                    indent);
         }
 
         // End of the state class declaration.
-        source.println("}\n");
+        source.println(indent + "}\n");
 
         return;
     }

@@ -23,6 +23,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2001/12/14 20:10:37  cwrapp
+// Changes in release 1.1.0:
+// Add the following features:
+// + 486786: Added the %package keyword which specifies the
+//           Java package/C++ namespace/Tcl namespace
+//           the SMC-generated classes will be placed.
+// + 486471: The %class keyword accepts fully qualified
+//           class names.
+// + 491135: Add FSMContext methods getDebugStream and
+//           setDebugStream.
+// + 492165: Added -sync command line option which causes
+//           the transition methods to be synchronized
+//           (this option may only be used with -java).
+//
 // Revision 1.1  2001/12/03 14:14:03  cwrapp
 // Changes in release 1.0.2:
 // + Placed the class files in Smc.jar in the net.sf.smc package.
@@ -77,6 +91,7 @@ import java.text.ParseException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 
 public abstract class SmcMap
@@ -88,7 +103,7 @@ public abstract class SmcMap
         _name = name;
         _line_number = line_number;
         _default_state = null;
-        _states = new LinkedList();
+        _states = (List) new LinkedList();
     }
 
     public String getName()
@@ -101,7 +116,7 @@ public abstract class SmcMap
         return(_line_number);
     }
 
-    public LinkedList getStates()
+    public List getStates()
     {
         return(_states);
     }
@@ -114,7 +129,7 @@ public abstract class SmcMap
         }
         else
         {
-            _states.addLast(state);
+            _states.add(state);
         }
 
         return;
@@ -171,23 +186,24 @@ public abstract class SmcMap
     }
 
     // Return all transitions appearing in this map.
-    public LinkedList getTransitions()
+    public List getTransitions()
     {
         SmcState state;
         ListIterator stateIt;
-        LinkedList trans_list;
-        LinkedList retval;
+        List trans_list;
+        List retval;
 
         // If this map has a default state, then initialize the
         // transition list to the default state's transitions.
         // Otherwise, set it to the empty list.
         if (_default_state != null)
         {
-            retval = new LinkedList(_default_state.getTransitions());
+            retval =
+                (List) new LinkedList(_default_state.getTransitions());
         }
         else
         {
-            retval = new LinkedList();
+            retval = (List) new LinkedList();
         }
 
         // Get each state's transition list and merge it into the
@@ -211,10 +227,10 @@ public abstract class SmcMap
         return(retval);
     }
 
-    public LinkedList getUndefinedDefaultTransitions()
+    public List getUndefinedDefaultTransitions()
     {
-        LinkedList retval = new LinkedList();
-        LinkedList definedDefaultTransitions;
+        List retval = (List) new LinkedList();
+        List definedDefaultTransitions;
         ListIterator stateIt;
         ListIterator transIt;
         SmcTransition transition;
@@ -222,7 +238,7 @@ public abstract class SmcMap
 
         if (_default_state == null)
         {
-            definedDefaultTransitions = new LinkedList();
+            definedDefaultTransitions = (List) new LinkedList();
         }
         else
         {
@@ -291,13 +307,15 @@ public abstract class SmcMap
 
     public abstract void generateCode(PrintStream header,
                                       PrintStream source,
-                                      String context)
+                                      String context,
+                                      String pkg,
+                                      String indent)
         throws ParseException;
 
 // Member Data
 
     protected String _name;
     protected int _line_number;
-    protected LinkedList _states;
+    protected List _states;
     protected SmcState _default_state;
 }

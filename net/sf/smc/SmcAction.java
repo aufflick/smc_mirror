@@ -28,6 +28,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2001/12/14 20:10:37  cwrapp
+// Changes in release 1.1.0:
+// Add the following features:
+// + 486786: Added the %package keyword which specifies the
+//           Java package/C++ namespace/Tcl namespace
+//           the SMC-generated classes will be placed.
+// + 486471: The %class keyword accepts fully qualified
+//           class names.
+// + 491135: Add FSMContext methods getDebugStream and
+//           setDebugStream.
+// + 492165: Added -sync command line option which causes
+//           the transition methods to be synchronized
+//           (this option may only be used with -java).
+//
 // Revision 1.1  2001/12/03 14:14:03  cwrapp
 // Changes in release 1.0.2:
 // + Placed the class files in Smc.jar in the net.sf.smc package.
@@ -79,6 +93,7 @@ package net.sf.smc;
 
 import java.io.PrintStream;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 
 public abstract class SmcAction
@@ -102,7 +117,7 @@ public abstract class SmcAction
             _negation = "";
         }
 
-        _arguments = new LinkedList();
+        _arguments = (List) new LinkedList();
     }
 
     public String getName()
@@ -126,7 +141,7 @@ public abstract class SmcAction
         return;
     }
 
-    public LinkedList getArguments()
+    public List getArguments()
     {
         return(_arguments);
     }
@@ -204,7 +219,7 @@ public abstract class SmcAction
     protected int _line_number;
 
     // The action's argument list.
-    protected LinkedList _arguments;
+    protected List _arguments;
 
     // true if the action's result is to be negated.
     protected String _negation;

@@ -23,6 +23,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2001/12/14 20:10:37  cwrapp
+// Changes in release 1.1.0:
+// Add the following features:
+// + 486786: Added the %package keyword which specifies the
+//           Java package/C++ namespace/Tcl namespace
+//           the SMC-generated classes will be placed.
+// + 486471: The %class keyword accepts fully qualified
+//           class names.
+// + 491135: Add FSMContext methods getDebugStream and
+//           setDebugStream.
+// + 492165: Added -sync command line option which causes
+//           the transition methods to be synchronized
+//           (this option may only be used with -java).
+//
 // Revision 1.1  2001/12/03 14:14:03  cwrapp
 // Changes in release 1.0.2:
 // + Placed the class files in Smc.jar in the net.sf.smc package.
@@ -75,6 +89,7 @@ package net.sf.smc;
 import java.io.PrintStream;
 import java.text.ParseException;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 
 public abstract class SmcState
@@ -101,9 +116,9 @@ public abstract class SmcState
 
         _class_name = first_letter.toUpperCase() + remainder;
 
-        _entryActions = new LinkedList();
-        _exitActions = new LinkedList();
-        _transitions = new LinkedList();
+        _entryActions = (List) new LinkedList();
+        _exitActions = (List) new LinkedList();
+        _transitions = (List) new LinkedList();
     }
 
     public String getName()
@@ -126,12 +141,12 @@ public abstract class SmcState
         return(_instance_name);
     }
 
-    public LinkedList getEntryActions()
+    public List getEntryActions()
     {
         return(_entryActions);
     }
 
-    public LinkedList getExitActions()
+    public List getExitActions()
     {
         return(_exitActions);
     }
@@ -148,13 +163,13 @@ public abstract class SmcState
         return;
     }
 
-    public LinkedList getTransitions()
+    public List getTransitions()
     {
         return(_transitions);
     }
 
     public SmcTransition findTransition(String name,
-                                        LinkedList parameters)
+                                        List parameters)
     {
         SmcTransition retval;
         boolean match;
@@ -260,7 +275,9 @@ public abstract class SmcState
     public abstract void generateCode(PrintStream header,
                                       PrintStream stream,
                                       String mapName,
-                                      String context)
+                                      String context,
+                                      String pkg,
+                                      String indent)
         throws ParseException;;
 
 // Member Data
@@ -268,7 +285,7 @@ public abstract class SmcState
     protected int _line_number;
     protected String _class_name;
     protected String _instance_name;
-    protected LinkedList _entryActions;
-    protected LinkedList _exitActions;
-    protected LinkedList _transitions;
+    protected List _entryActions;
+    protected List _exitActions;
+    protected List _transitions;
 }

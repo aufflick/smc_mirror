@@ -42,6 +42,20 @@
 //
 // Change Log
 // $Log$
+// Revision 1.3  2001/12/14 20:10:37  cwrapp
+// Changes in release 1.1.0:
+// Add the following features:
+// + 486786: Added the %package keyword which specifies the
+//           Java package/C++ namespace/Tcl namespace
+//           the SMC-generated classes will be placed.
+// + 486471: The %class keyword accepts fully qualified
+//           class names.
+// + 491135: Add FSMContext methods getDebugStream and
+//           setDebugStream.
+// + 492165: Added -sync command line option which causes
+//           the transition methods to be synchronized
+//           (this option may only be used with -java).
+//
 // Revision 1.2  2001/05/09 23:40:02  cwrapp
 // Changes in release 1.0, beta 6:
 // Fixes the four following bugs:
@@ -338,6 +352,17 @@ namespace statemap
             return;
         };
 
+        ostream& getDebugStream()
+        {
+            return (*_debug_stream);
+        };
+
+        void setDebugStream(ostream& debug_stream)
+        {
+            _debug_stream = &debug_stream;
+            return;
+        }
+
         // Is this state map already inside a transition?
         // Yes if state is null.
         bool isInTransition() const
@@ -361,9 +386,9 @@ namespace statemap
 
             if (_debug_flag == true)
             {
-                cerr << "NEW STATE    : "
-                     << _state->getName()
-                     << endl;
+                *_debug_stream << "NEW STATE    : "
+                               << _state->getName()
+                               << endl;
             }
         };
 
@@ -385,9 +410,9 @@ namespace statemap
 
             if (_debug_flag == true)
             {
-                cerr << "PUSH TO STATE: "
-                     << _state->getName()
-                     << endl;
+                *_debug_stream << "PUSH TO STATE: "
+                               << _state->getName()
+                               << endl;
             }
         };
 
@@ -407,9 +432,9 @@ namespace statemap
 
             if (_debug_flag == true)
             {
-                cerr << "POP TO STATE : "
-                     << _state->getName()
-                     << endl;
+                *_debug_stream << "POP TO STATE : "
+                               << _state->getName()
+                               << endl;
             }
         };
 
@@ -475,7 +500,8 @@ namespace statemap
           _trans_queue_head(NULL),
           _trans_queue_tail(NULL),
 #endif
-          _debug_flag(false)
+          _debug_flag(false),
+          _debug_stream(&cerr)
         {};
 
         // Save away the transition name only if
@@ -532,6 +558,12 @@ namespace statemap
         // When this flag is set to true, this class will print
         // out debug messages.
         bool _debug_flag;
+
+        // When FSM debugging is on, debug messages will be
+        // written to this output stream. This stream is set to
+        // standard error by default.
+        ostream *_debug_stream;
+
     }; // end of class FSMContext
 
     // This class is thrown when a transition is issued

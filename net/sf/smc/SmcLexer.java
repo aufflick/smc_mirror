@@ -26,6 +26,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2001/12/14 20:10:37  cwrapp
+// Changes in release 1.1.0:
+// Add the following features:
+// + 486786: Added the %package keyword which specifies the
+//           Java package/C++ namespace/Tcl namespace
+//           the SMC-generated classes will be placed.
+// + 486471: The %class keyword accepts fully qualified
+//           class names.
+// + 491135: Add FSMContext methods getDebugStream and
+//           setDebugStream.
+// + 492165: Added -sync command line option which causes
+//           the transition methods to be synchronized
+//           (this option may only be used with -java).
+//
 // Revision 1.1  2001/12/03 14:14:03  cwrapp
 // Changes in release 1.0.2:
 // + Placed the class files in Smc.jar in the net.sf.smc package.
@@ -247,26 +261,26 @@ public final class SmcLexer
     // State Map Actions
     // The following methods are actions in the state map.
     //
-    public void startToken()
+    /* package */ void startToken()
     {
         _token.reset();
         _token_buffer.delete(0, _token_buffer.length());
         return;
     }
 
-    public void addCurrentCharToToken()
+    /* package */ void addCurrentCharToToken()
     {
         _token_buffer.append(_current_char);
         return;
     }
 
-    public void addCharToToken(String character)
+    /* package */ void addCharToToken(String character)
     {
         _token_buffer.append(character);
         return;
     }
 
-    public void endToken(int type)
+    /* package */ void endToken(int type)
     {
         _token.setType(type);
         _token.setValue(_token_buffer.toString());
@@ -275,7 +289,7 @@ public final class SmcLexer
     }
 
     // A malformed token has been detected.
-    public void badToken(String error_msg)
+    /* package */ void badToken(String error_msg)
     {
         _token.setType(DONE_FAILED);
         _token.setValue(error_msg +
@@ -288,7 +302,7 @@ public final class SmcLexer
 
     // Check if the token is a keyword. Otherwise, set the token
     // type to WORD.
-    public void checkKeyword()
+    /* package */ void checkKeyword()
     {
         Integer tokenType;
 
@@ -312,28 +326,35 @@ public final class SmcLexer
         return;
     }
 
-    public void checkPercentKeyword()
+    /* package */ void checkPercentKeyword()
     {
-        _token.setValue(_token_buffer.toString());
+        String tokenStr = _token_buffer.toString();
 
-        if (_token.getValue().compareTo("%start") == 0)
+        _token.setValue(tokenStr);
+
+        if (tokenStr.compareTo("%start") == 0)
         {
             _token.setType(SmcLexer.START_STATE);
             _stop_flag = true;
         }
-        else if (_token.getValue().compareTo("%map") == 0)
+        else if (tokenStr.compareTo("%map") == 0)
         {
             _token.setType(SmcLexer.MAP_NAME);
             _stop_flag = true;
         }
-        else if (_token.getValue().compareTo("%class") == 0)
+        else if (tokenStr.compareTo("%class") == 0)
         {
             _token.setType(SmcLexer.CLASS_NAME);
             _stop_flag = true;
         }
-        else if (_token.getValue().compareTo("%header") == 0)
+        else if (tokenStr.compareTo("%header") == 0)
         {
             _token.setType(SmcLexer.HEADER_FILE);
+            _stop_flag = true;
+        }
+        else if (tokenStr.compareTo("%package") == 0)
+        {
+            _token.setType(SmcLexer.PACKAGE_NAME);
             _stop_flag = true;
         }
         else
@@ -347,7 +368,7 @@ public final class SmcLexer
     // Back up one character in the file so that the character
     // will be read again when nextToken() is called. This is
     // usually done when one token is terminated by another.
-    public void ungetChar()
+    /* package */ void ungetChar()
     {
         --_read_index;
         return;
@@ -467,24 +488,25 @@ public final class SmcLexer
     /* package */ static final int MAP_NAME = 9;
     /* package */ static final int CLASS_NAME = 10;
     /* package */ static final int HEADER_FILE = 11;
-    /* package */ static final int LEFT_BRACE = 12;
-    /* package */ static final int RIGHT_BRACE = 13;
-    /* package */ static final int LEFT_BRACKET = 14;
-    /* package */ static final int RIGHT_BRACKET = 15;
-    /* package */ static final int LEFT_PAREN = 16;
-    /* package */ static final int RIGHT_PAREN = 17;
-    /* package */ static final int SEMICOLON = 18;
-    /* package */ static final int COLON = 19;
-    /* package */ static final int COMMA = 20;
-    /* package */ static final int EXCLAMATION = 21;
-    /* package */ static final int SOURCE = 22;
-    /* package */ static final int EOD = 23;
-    /* package */ static final int VARIABLE = 24;
-    /* package */ static final int INTEGER = 25;
-    /* package */ static final int FLOAT = 26;
-    /* package */ static final int STRING = 27;
-    /* package */ static final int ASTERISK = 28;
-    /* package */ static final int AMPERSAND = 29;
+    /* package */ static final int PACKAGE_NAME = 12;
+    /* package */ static final int LEFT_BRACE = 13;
+    /* package */ static final int RIGHT_BRACE = 14;
+    /* package */ static final int LEFT_BRACKET = 15;
+    /* package */ static final int RIGHT_BRACKET = 16;
+    /* package */ static final int LEFT_PAREN = 17;
+    /* package */ static final int RIGHT_PAREN = 18;
+    /* package */ static final int SEMICOLON = 19;
+    /* package */ static final int COLON = 20;
+    /* package */ static final int COMMA = 21;
+    /* package */ static final int EXCLAMATION = 22;
+    /* package */ static final int SOURCE = 23;
+    /* package */ static final int EOD = 24;
+    /* package */ static final int VARIABLE = 25;
+    /* package */ static final int INTEGER = 26;
+    /* package */ static final int FLOAT = 27;
+    /* package */ static final int STRING = 28;
+    /* package */ static final int ASTERISK = 29;
+    /* package */ static final int AMPERSAND = 30;
     /* package */ static final int TOKEN_COUNT = AMPERSAND + 1;
     private static final int KEYWORD_COUNT = 4;
 
@@ -506,6 +528,7 @@ public final class SmcLexer
         _typeName[SmcLexer.MAP_NAME] = "MAP_NAME";
         _typeName[SmcLexer.CLASS_NAME] = "CLASS_NAME";
         _typeName[SmcLexer.HEADER_FILE] = "HEADER_FILE";
+        _typeName[SmcLexer.PACKAGE_NAME] = "PACKAGE_NAME";
         _typeName[SmcLexer.LEFT_BRACE] = "LEFT_BRACE";
         _typeName[SmcLexer.RIGHT_BRACE] = "RIGHT_BRACE";
         _typeName[SmcLexer.LEFT_BRACKET] = "LEFT_BRACKET";
@@ -561,6 +584,16 @@ public final class SmcLexer
         /* package */ void setValue(String value)
         {
             _value = value;
+        }
+
+        /* package */ Token copy()
+        {
+            Token retval = new Token();
+
+            retval.setType(_type);
+            retval.setValue(_value);
+
+            return (retval);
         }
 
         public String toString()

@@ -23,6 +23,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2001/12/14 20:10:37  cwrapp
+// Changes in release 1.1.0:
+// Add the following features:
+// + 486786: Added the %package keyword which specifies the
+//           Java package/C++ namespace/Tcl namespace
+//           the SMC-generated classes will be placed.
+// + 486471: The %class keyword accepts fully qualified
+//           class names.
+// + 491135: Add FSMContext methods getDebugStream and
+//           setDebugStream.
+// + 492165: Added -sync command line option which causes
+//           the transition methods to be synchronized
+//           (this option may only be used with -java).
+//
 // Revision 1.1  2001/12/03 14:14:03  cwrapp
 // Changes in release 1.0.2:
 // + Placed the class files in Smc.jar in the net.sf.smc package.
@@ -106,6 +120,7 @@ public final class SmcGuardTcl
                              int guardIndex,
                              int guardCount,
                              String context,
+                             String pkg,
                              String mapName,
                              String stateName,
                              String indent)
@@ -146,7 +161,7 @@ public final class SmcGuardTcl
             {
                 // Yes, this is the first. This means an "if"
                 // should be used for this condition.
-                source.print("        if {[");
+                source.print(indent + "        if {[");
                 _condition.generateCode(source, context, "");
                 source.println("]} {");
             }
@@ -166,7 +181,7 @@ public final class SmcGuardTcl
                 source.println(" else {");
             }
 
-            indent2 = "            ";
+            indent2 = indent + "            ";
         }
         else
         {
@@ -176,14 +191,14 @@ public final class SmcGuardTcl
             {
                 // Actually, this is a plain, old, vaniila
                 // transition.
-                indent2 = "        ";
+                indent2 = indent + "        ";
             }
             else
             {
-                indent2 = "            ";
+                indent2 = indent + "            ";
 
                 // Yes, there is a condition.
-                source.print("        if (");
+                source.print(indent + "        if (");
                 _condition.generateCode(source, context, "");
                 source.println(") {");
             }
@@ -194,8 +209,7 @@ public final class SmcGuardTcl
         // executed only if 1) this is a standard, non-loopback
         // transition or a pop transition.
         if ((_trans_type == Smc.TRANS_SET &&
-              _end_state.compareTo("nil") != 0 &&
-              _end_state.compareTo(stateName) != 0) ||
+             isLoopback(stateName) == false) ||
              _trans_type == Smc.TRANS_POP)
         {
             source.println(indent2 +
@@ -211,7 +225,7 @@ public final class SmcGuardTcl
         // fail.
         if (_actions.size() == 0 && _end_state.length() != 0)
         {
-            endStateName = "${" + _end_state + "}";
+            endStateName = "${" + pkg + _end_state + "}";
         }
         else if (_actions.size() > 0)
         {
@@ -222,8 +236,7 @@ public final class SmcGuardTcl
             // issue transitions and clearing the current state
             // prevents them from doing so.
             if (_trans_type == Smc.TRANS_SET &&
-                (_end_state.compareTo("nil") == 0 ||
-                 _end_state.compareTo(stateName) == 0))
+                isLoopback(stateName) == true)
             {
                 endStateName = "${EndStateName}";
                 source.println(indent2 +
@@ -242,14 +255,14 @@ public final class SmcGuardTcl
                 }
                 else
                 {
-                    endStateName = "${" + _end_state + "}";
+                    endStateName = "${" + pkg + _end_state + "}";
                 }
                 source.println(indent2 +
                                "set CurrentState [$context getState];");
             }
             else
             {
-                endStateName = "${" + _end_state + "}";
+                endStateName = "${" + pkg + _end_state + "}";
             }
 
             // Now that we are in the transition, clear the
@@ -258,13 +271,20 @@ public final class SmcGuardTcl
         }
 
         // Dump out this transition's actions.
-        for (actionIt = _actions.listIterator();
-             actionIt.hasNext() == true;
-            )
+        if (_actions.size() == 0 && _condition != null)
         {
-            action = (SmcAction) actionIt.next();
-            action.generateCode(source, context, indent2);
-            source.println(";");
+            source.println(indent + "# No actions.");
+        }
+        else
+        {
+            for (actionIt = _actions.listIterator();
+                 actionIt.hasNext() == true;
+                )
+            {
+                action = (SmcAction) actionIt.next();
+                action.generateCode(source, context, indent2);
+                source.println(";");
+            }
         }
 
         // Print the setState() call, if necessary. Do NOT
@@ -273,8 +293,7 @@ public final class SmcGuardTcl
         // 2. This is a push or pop transition.
         if (_trans_type == Smc.TRANS_SET &&
             (_actions.size() > 0 ||
-             (_end_state.compareTo("nil") != 0 &&
-              _end_state.compareTo(stateName) != 0)))
+             isLoopback(stateName) == false))
         {
             source.println(indent2 +
                            "$context setState " +
@@ -317,8 +336,7 @@ public final class SmcGuardTcl
         // executed only if 1) this is a standard, non-loopback
         // transition or a push transition.
         if ((_trans_type == Smc.TRANS_SET &&
-              _end_state.compareTo("nil") != 0 &&
-              _end_state.compareTo(stateName) != 0) ||
+             isLoopback(stateName) == false) ||
              _trans_type == Smc.TRANS_PUSH)
         {
             source.println(indent2 +
@@ -344,7 +362,7 @@ public final class SmcGuardTcl
         // whether all clauses have been done.
         if (guardCount > 1)
         {
-            source.print("        }");
+            source.print(indent + "        }");
         }
 
         return;

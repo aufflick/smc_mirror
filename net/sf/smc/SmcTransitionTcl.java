@@ -23,6 +23,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2001/12/14 20:10:37  cwrapp
+// Changes in release 1.1.0:
+// Add the following features:
+// + 486786: Added the %package keyword which specifies the
+//           Java package/C++ namespace/Tcl namespace
+//           the SMC-generated classes will be placed.
+// + 486471: The %class keyword accepts fully qualified
+//           class names.
+// + 491135: Add FSMContext methods getDebugStream and
+//           setDebugStream.
+// + 492165: Added -sync command line option which causes
+//           the transition methods to be synchronized
+//           (this option may only be used with -java).
+//
 // Revision 1.1  2001/12/03 14:14:03  cwrapp
 // Changes in release 1.0.2:
 // + Placed the class files in Smc.jar in the net.sf.smc package.
@@ -81,14 +95,14 @@ package net.sf.smc;
 
 import java.io.PrintStream;
 import java.text.ParseException;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 
 public final class SmcTransitionTcl
     extends SmcTransition
 {
     public SmcTransitionTcl(String name,
-                            LinkedList parameters,
+                            List parameters,
                             int line_number)
     {
         super(name, parameters, line_number);
@@ -97,6 +111,7 @@ public final class SmcTransitionTcl
     public void generateCode(PrintStream header,
                              PrintStream source,
                              String context,
+                             String pkg,
                              String mapName,
                              String stateName,
                              String indent)
@@ -110,7 +125,9 @@ public final class SmcTransitionTcl
         ListIterator guardIt;
         SmcGuard guard;
 
-        source.print("\n    public method " +
+        source.println();
+        source.print(indent +
+                     "    public method " +
                      _name +
                      " {context");
 
@@ -130,7 +147,8 @@ public final class SmcTransitionTcl
         // but not if it is the default transition.
         if (_name.compareTo("Default") != 0)
         {
-            source.println("        set _transition \"" +
+            source.println(indent +
+                           "        set _transition \"" +
                            _name +
                            "\";");
         }
@@ -138,8 +156,14 @@ public final class SmcTransitionTcl
         // If verbose is turned on, then put the logging code in.
         if (Smc.isDebug() == true)
         {
-            source.println("\n        if {[$context getDebugFlag] != 0} {");
-            source.print("            puts stderr \"TRANSITION    : " +
+            source.println();
+            source.println(indent +
+                           "        if {[$context getDebugFlag] != 0} {");
+            source.println(indent +
+                           "            set str [$context getDebugStream];");
+            source.println();
+            source.print(indent +
+                         "            puts $str \"TRANSITION    : " +
                          mapName +
                          "::" +
                          stateName +
@@ -162,7 +186,7 @@ public final class SmcTransitionTcl
                 source.print("}");
             }
             source.println("\";");
-            source.println("        }\n");
+            source.println(indent + "        }\n");
         }
 
         guardIndex = 0;
@@ -182,9 +206,10 @@ public final class SmcTransitionTcl
                                guardIndex,
                                guardCount,
                                context,
+                               pkg,
                                mapName,
                                stateName,
-                               "");
+                               indent);
         }
 
         // What if all the guards have a condition? There will be
@@ -196,16 +221,17 @@ public final class SmcTransitionTcl
         {
             if (guardCount == 1)
             {
-                source.print("}");
+                source.print(indent + "}");
             }
 
             source.println(" else {");
-            source.println("            " +
+            source.println(indent +
+                           "            " +
                            mapName +
                            "_Default " +
                            _name +
                            " $context;");
-            source.println("        }\n");
+            source.println(indent + "        }\n");
         }
         else if (nullConditions > 1)
         {
@@ -224,11 +250,11 @@ public final class SmcTransitionTcl
         }
         else
         {
-            source.println("");
+            source.println();
         }
 
-        source.println("        return -code ok;");
-        source.println("    }");
+        source.println(indent + "        return -code ok;");
+        source.println(indent + "    }");
 
         return;
     }

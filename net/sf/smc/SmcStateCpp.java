@@ -23,6 +23,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2001/12/14 20:10:37  cwrapp
+// Changes in release 1.1.0:
+// Add the following features:
+// + 486786: Added the %package keyword which specifies the
+//           Java package/C++ namespace/Tcl namespace
+//           the SMC-generated classes will be placed.
+// + 486471: The %class keyword accepts fully qualified
+//           class names.
+// + 491135: Add FSMContext methods getDebugStream and
+//           setDebugStream.
+// + 492165: Added -sync command line option which causes
+//           the transition methods to be synchronized
+//           (this option may only be used with -java).
+//
 // Revision 1.1  2001/12/03 14:14:03  cwrapp
 // Changes in release 1.0.2:
 // + Placed the class files in Smc.jar in the net.sf.smc package.
@@ -87,7 +101,9 @@ public final class SmcStateCpp
     public void generateCode(PrintStream header,
                              PrintStream source,
                              String mapName,
-                             String context)
+                             String context,
+                             String pkg,
+                             String indent)
         throws ParseException
     {
         ListIterator transIt;
@@ -95,31 +111,37 @@ public final class SmcStateCpp
         SmcTransition transition;
         SmcAction action;
 
-        header.println("\nclass " +
+        header.println("\n" +
+                       indent +
+                       "class " +
                        mapName +
                        "_" +
                        _class_name +
                        " : public " +
                        mapName +
-                       "_Default\n{");
-        header.println("public:");
+                       "_Default");
+        header.println(indent + "{");
+        header.println(indent + "public:");
 
         // Add the required getName() method.
-        header.println("    " +
+        header.println(indent +
+                       "    " +
                        mapName +
                        "_" +
                        _class_name +
                        "(const char *name)");
-        header.println("    : " +
+        header.println(indent +
+                       "    : " +
                        mapName +
                        "_Default(name)");
-        header.println("    {};\n");
+        header.println(indent + "    {};\n");
 
         // Add the Entry() and Exit() methods if this state
         // defines them.
         if (_entryActions.size() > 0)
         {
-            header.println("    void Entry(" +
+            header.println(indent +
+                           "    void Entry(" +
                            context +
                            "Context&);");
 
@@ -147,7 +169,8 @@ public final class SmcStateCpp
 
         if (_exitActions.size() > 0)
         {
-            header.println("    void Exit(" +
+            header.println(indent +
+                           "    void Exit(" +
                            context +
                            "Context&);");
 
@@ -182,13 +205,14 @@ public final class SmcStateCpp
             transition.generateCode(header,
                                     source,
                                     context,
+                                    pkg,
                                     mapName,
                                     _class_name,
-                                    null);
+                                    indent);
         }
 
         // End of the state class declaration.
-        header.println("};");
+        header.println(indent + "};");
 
         return;
     }

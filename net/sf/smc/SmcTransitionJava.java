@@ -23,6 +23,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2001/12/14 20:10:37  cwrapp
+// Changes in release 1.1.0:
+// Add the following features:
+// + 486786: Added the %package keyword which specifies the
+//           Java package/C++ namespace/Tcl namespace
+//           the SMC-generated classes will be placed.
+// + 486471: The %class keyword accepts fully qualified
+//           class names.
+// + 491135: Add FSMContext methods getDebugStream and
+//           setDebugStream.
+// + 492165: Added -sync command line option which causes
+//           the transition methods to be synchronized
+//           (this option may only be used with -java).
+//
 // Revision 1.1  2001/12/03 14:14:03  cwrapp
 // Changes in release 1.0.2:
 // + Placed the class files in Smc.jar in the net.sf.smc package.
@@ -96,14 +110,14 @@ package net.sf.smc;
 
 import java.io.PrintStream;
 import java.text.ParseException;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 
 public final class SmcTransitionJava
     extends SmcTransition
 {
     public SmcTransitionJava(String name,
-                             LinkedList parameters,
+                             List parameters,
                              int line_number)
     {
         super(name, parameters, line_number);
@@ -112,6 +126,7 @@ public final class SmcTransitionJava
     public void generateCode(PrintStream header,
                              PrintStream source,
                              String context,
+                             String pkg,
                              String mapName,
                              String stateName,
                              String indent)
@@ -153,8 +168,10 @@ public final class SmcTransitionJava
             source.println(indent +
                            "    if (s.getDebugFlag() == true)");
             source.println(indent + "    {");
+            source.println(indent + "        PrintStream str = s.getDebugStream();");
+            source.println();
             source.print(indent +
-                         "        System.err.println(\"TRANSITION   : " +
+                         "        str.println(\"TRANSITION   : " +
                          mapName +
                          "." +
                          stateName +
@@ -177,7 +194,8 @@ public final class SmcTransitionJava
                 source.print(")");
             }
             source.println("\");");
-            source.println(indent + "    }\n");
+            source.println(indent + "    }");
+            source.println();
         }
 
         // Loop through the guards and print each one.
@@ -200,6 +218,7 @@ public final class SmcTransitionJava
                                guardIndex,
                                guardCount,
                                context,
+                               pkg,
                                mapName,
                                stateName,
                                indent);

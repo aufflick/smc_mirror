@@ -23,6 +23,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2001/12/14 20:10:37  cwrapp
+// Changes in release 1.1.0:
+// Add the following features:
+// + 486786: Added the %package keyword which specifies the
+//           Java package/C++ namespace/Tcl namespace
+//           the SMC-generated classes will be placed.
+// + 486471: The %class keyword accepts fully qualified
+//           class names.
+// + 491135: Add FSMContext methods getDebugStream and
+//           setDebugStream.
+// + 492165: Added -sync command line option which causes
+//           the transition methods to be synchronized
+//           (this option may only be used with -java).
+//
 // Revision 1.1  2001/12/03 14:14:03  cwrapp
 // Changes in release 1.0.2:
 // + Placed the class files in Smc.jar in the net.sf.smc package.
@@ -96,14 +110,14 @@ package net.sf.smc;
 
 import java.io.PrintStream;
 import java.text.ParseException;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 
 public final class SmcTransitionCpp
     extends SmcTransition
 {
     public SmcTransitionCpp(String name,
-                            LinkedList parameters,
+                            List parameters,
                             int line_number)
     {
         super(name, parameters, line_number);
@@ -112,6 +126,7 @@ public final class SmcTransitionCpp
     public void generateCode(PrintStream header,
                              PrintStream source,
                              String context,
+                             String pkg,
                              String mapName,
                              String stateName,
                              String indent)
@@ -125,6 +140,17 @@ public final class SmcTransitionCpp
         ListIterator guardIt;
         SmcGuard guard;
         String virtual;
+        String fqStateName;
+
+        // Qualify the state name as well.
+        if (stateName.indexOf("::") < 0)
+        {
+            fqStateName = mapName + "::" + stateName;
+        }
+        else
+        {
+            fqStateName = stateName;
+        }
 
         // If this transition is in the default state, then
         // precede the method with "virtual".
@@ -137,7 +163,8 @@ public final class SmcTransitionCpp
             virtual = "";
         }
 
-        header.print("    " +
+        header.print(indent +
+                     "    " +
                      virtual +
                      "void " +
                      _name +
@@ -176,7 +203,9 @@ public final class SmcTransitionCpp
         {
             source.println("    if (s.getDebugFlag() == true)");
             source.println("    {");
-            source.print("        fprintf(stderr, \"TRANSITION   : " +
+            source.println("        ostream& str = s.getDebugStream();");
+            source.println();
+            source.print("        str << \"TRANSITION   : " +
                          mapName +
                          " " +
                          _name);
@@ -196,7 +225,8 @@ public final class SmcTransitionCpp
                 }
                 source.print(")");
             }
-            source.println("\\n\");");
+            source.println("\"");
+            source.println("        << endl;");
             source.println("    }\n");
         }
 
@@ -220,6 +250,7 @@ public final class SmcTransitionCpp
                                guardIndex,
                                guardCount,
                                context,
+                               pkg,
                                mapName,
                                stateName,
                                "    ");
@@ -252,6 +283,7 @@ public final class SmcTransitionCpp
             }
             source.println(");");
             source.println("    }");
+            source.println();
         }
         else if (nullConditions > 1)
         {
@@ -268,13 +300,20 @@ public final class SmcTransitionCpp
                                        0);
             throw(e);
         }
-        else if (guardCount > 0)
+        else if (guardCount > 1)
+        {
+            source.println("\n");
+        }
+        else if (guardCount == 1 &&
+                 ((guard = ((SmcGuard) _guards.get(0))).isLoopback(fqStateName)
+                     == false ||
+                  guard.getActionCount() > 0))
         {
             // Add a newline to the end of the if/then/else body.
             source.println();
         }
 
-        source.println("\n    return;");
+        source.println("    return;");
         source.println("}");
 
         return;

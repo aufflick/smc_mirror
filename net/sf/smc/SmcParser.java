@@ -23,6 +23,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2001/12/14 20:10:37  cwrapp
+// Changes in release 1.1.0:
+// Add the following features:
+// + 486786: Added the %package keyword which specifies the
+//           Java package/C++ namespace/Tcl namespace
+//           the SMC-generated classes will be placed.
+// + 486471: The %class keyword accepts fully qualified
+//           class names.
+// + 491135: Add FSMContext methods getDebugStream and
+//           setDebugStream.
+// + 492165: Added -sync command line option which causes
+//           the transition methods to be synchronized
+//           (this option may only be used with -java).
+//
 // Revision 1.1  2001/12/03 14:14:03  cwrapp
 // Changes in release 1.0.2:
 // + Placed the class files in Smc.jar in the net.sf.smc package.
@@ -98,8 +112,10 @@
 package net.sf.smc;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 
 public final class SmcParser
@@ -112,125 +128,25 @@ public final class SmcParser
         _language = language;
         _parser_map = new SmcParserContext(this);
 
-        _token = null;
         _start_state = "";
+        _className = "";
         _context = "";
         _header = "";
 
         _action_negation = false;
-
-        // Create a hashmap which associates token names with
-        // parser transitions. When a token is received, use this
-        // hashmap to get the appropriate transition method and
-        // invoke that method.
-        _transMethod = new Method[SmcLexer.TOKEN_COUNT];
-        try
-        {
-            Class _map_class = _parser_map.getClass();
-            Class[] param_types = new Class[0];
-
-            _transMethod[SmcLexer.ENTRY] =
-                _map_class.getDeclaredMethod("ENTRY",
-                                             param_types);
-            _transMethod[SmcLexer.EXIT] =
-                _map_class.getDeclaredMethod("EXIT",
-                                             param_types);
-            _transMethod[SmcLexer.POP] =
-                _map_class.getDeclaredMethod("POP",
-                                             param_types);
-            _transMethod[SmcLexer.PUSH] =
-                _map_class.getDeclaredMethod("PUSH",
-                                             param_types);
-            _transMethod[SmcLexer.WORD] =
-                _map_class.getDeclaredMethod("WORD",
-                                             param_types);
-            _transMethod[SmcLexer.START_STATE] =
-                _map_class.getDeclaredMethod("START_STATE",
-                                             param_types);
-            _transMethod[SmcLexer.MAP_NAME] =
-                _map_class.getDeclaredMethod("MAP_NAME",
-                                             param_types);
-            _transMethod[SmcLexer.CLASS_NAME] =
-                _map_class.getDeclaredMethod("CLASS_NAME",
-                                             param_types);
-            _transMethod[SmcLexer.HEADER_FILE] =
-                _map_class.getDeclaredMethod("HEADER_FILE",
-                                             param_types);
-            _transMethod[SmcLexer.LEFT_BRACE] =
-                _map_class.getDeclaredMethod("LEFT_BRACE",
-                                             param_types);
-            _transMethod[SmcLexer.RIGHT_BRACE] =
-                _map_class.getDeclaredMethod("RIGHT_BRACE",
-                                             param_types);
-            _transMethod[SmcLexer.LEFT_BRACKET] =
-                _map_class.getDeclaredMethod("LEFT_BRACKET",
-                                             param_types);
-            _transMethod[SmcLexer.RIGHT_BRACKET] =
-                _map_class.getDeclaredMethod("RIGHT_BRACKET",
-                                             param_types);
-            _transMethod[SmcLexer.LEFT_PAREN] =
-                _map_class.getDeclaredMethod("LEFT_PAREN",
-                                             param_types);
-            _transMethod[SmcLexer.RIGHT_PAREN] =
-                _map_class.getDeclaredMethod("RIGHT_PAREN",
-                                             param_types);
-            _transMethod[SmcLexer.SEMICOLON] =
-                _map_class.getDeclaredMethod("SEMICOLON",
-                                             param_types);
-            _transMethod[SmcLexer.COLON] =
-                _map_class.getDeclaredMethod("COLON",
-                                             param_types);
-            _transMethod[SmcLexer.COMMA] =
-                _map_class.getDeclaredMethod("COMMA",
-                                             param_types);
-            _transMethod[SmcLexer.EXCLAMATION] =
-                _map_class.getDeclaredMethod("EXCLAMATION",
-                                             param_types);
-            _transMethod[SmcLexer.SOURCE] =
-                _map_class.getDeclaredMethod("SOURCE",
-                                             param_types);
-            _transMethod[SmcLexer.EOD] =
-                _map_class.getDeclaredMethod("EOD",
-                                             param_types);
-            _transMethod[SmcLexer.VARIABLE] =
-                _map_class.getDeclaredMethod("VARIABLE",
-                                             param_types);
-            _transMethod[SmcLexer.INTEGER] =
-                _map_class.getDeclaredMethod("INTEGER",
-                                             param_types);
-            _transMethod[SmcLexer.FLOAT] =
-                _map_class.getDeclaredMethod("FLOAT",
-                                             param_types);
-            _transMethod[SmcLexer.STRING] =
-                _map_class.getDeclaredMethod("STRING",
-                                             param_types);
-            _transMethod[SmcLexer.ASTERISK] =
-                _map_class.getDeclaredMethod("ASTERISK",
-                                             param_types);
-            _transMethod[SmcLexer.AMPERSAND] =
-                _map_class.getDeclaredMethod("AMPERSAND",
-                                             param_types);
-        }
-        catch (NoSuchMethodException ex1)
-        {
-            System.err.println("INITIALIZATION ERROR! " + ex1);
-            System.exit(1);
-        }
-        catch (SecurityException ex2)
-        {
-            System.err.println("INITIALIZATION ERROR! " + ex2);
-            System.exit(1);
-        }
+        
     }
 
     public SmcParseTree parse()
-        throws IOException
+        throws IOException,
+               IllegalAccessException,
+               InvocationTargetException
     {
+        SmcLexer.Token token = null;
         int token_type;
-        Object[] params = new Object[0];
+        Object[] params = new Object[1];
 
-        _parse_tree = createTargetTree();
-
+        _name_in_progress = "";
         _map_in_progress = null;
         _state_in_progress = null;
         _transition_name = null;
@@ -245,10 +161,13 @@ public final class SmcParser
 
         _parse_status = true;
         _quit_flag = false;
-        token_type = -1;
+
+        // Read all the tokens into a list.
+        _tokenList = (List) new LinkedList();
+        token_type = SmcLexer.TOKEN_NOT_SET;
         while (_quit_flag == false &&
-               (_token = _lexer.nextToken()) != null &&
-               (token_type = _token.getType()) != SmcLexer.DONE_SUCCESS &&
+               (token = _lexer.nextToken()) != null &&
+               (token_type = token.getType()) != SmcLexer.DONE_SUCCESS &&
                token_type != SmcLexer.DONE_FAILED &&
                token_type != SmcLexer.TOKEN_NOT_SET)
         {
@@ -256,22 +175,8 @@ public final class SmcParser
             if (token_type > SmcLexer.TOKEN_NOT_SET &&
                 token_type < SmcLexer.TOKEN_COUNT)
             {
-                try
-                {
-                    _transMethod[token_type].invoke(_parser_map,
-                                                    params);
-                }
-                catch (Exception ex)
-                {
-                    System.err.println("TRANSITION EXCEPTION - " +
-                                       ex +
-                                       (ex.getMessage() == null ?
-                                        ", token " :
-                                        "\"" + ex.getMessage() + "\", token ") +
-                                       _token);
-                    ex.printStackTrace();
-                    System.exit(1);
-                }
+                // Yes. Add it to the list.
+                _tokenList.add(token.copy());
             }
             else
             {
@@ -279,26 +184,49 @@ public final class SmcParser
                       Integer.toString(token_type) +
                       ")",
                       true);
+
+                _quit_flag = true;
+                _parse_status = false;
             }
         }
 
-        if (token_type == SmcLexer.DONE_FAILED)
+        // If the last token as a failure, don't go on.
+        if (token_type == SmcLexer.DONE_FAILED ||
+            token_type == SmcLexer.TOKEN_NOT_SET)
         {
-            error(_token.getValue(), true);
+            error(token.getValue(), true);
         }
-        else if (_parse_status == false)
+        else
         {
-            _parse_tree = null;
+            _parse_tree = createTargetTree();
+
+            // If the token collection was successful,
+            // start parsing.
+            while (_quit_flag == false &&
+                   _tokenList.isEmpty() == false)
+            {
+                token = (SmcLexer.Token) _tokenList.remove(0);
+                token_type = token.getType();
+
+                params[0] = token;
+                _TransMethod[token_type].invoke(_parser_map,
+                                                params);
+            }
+
+            if (_parse_status == false)
+            {
+                _parse_tree = null;
+            }
         }
 
-        return(_parse_tree);
+        return (_parse_tree);
     }
 
     //----------------------------------------
     // State Map Actions
     //
 
-    public void warning(String error_msg)
+    /* package */ void warning(String error_msg)
     {
         System.err.println(Smc.getSourceFileName() +
                            ":" +
@@ -308,7 +236,7 @@ public final class SmcParser
         return;
     }
 
-    public void error(String error_msg, boolean quitFlag)
+    /* package */ void error(String error_msg, boolean quitFlag)
     {
         System.err.println(Smc.getSourceFileName() +
                            ":" +
@@ -324,42 +252,49 @@ public final class SmcParser
         return;
     }
 
-    public boolean isStartStateSet()
+    /* package */ boolean isStartStateSet()
     {
-        return(_parse_tree.getStartState().length() == 0 ? false : true);
+        return (_parse_tree.getStartState().length() == 0 ? false : true);
     }
 
-    public boolean isClassSet()
+    /* package */ boolean isClassSet()
     {
-        return(_parse_tree.getContext().length() == 0 ? false : true);
+        return (_parse_tree.getContext().length() == 0 ? false : true);
     }
 
-    public boolean isHeaderSet()
+    /* package */ boolean isHeaderSet()
     {
-        return(_parse_tree.getHeader().length() == 0 ? false : true);
+        return (_parse_tree.getHeader().length() == 0 ? false : true);
     }
 
-    public boolean isDuplicateMap()
+    /* package */ boolean isPackageSet()
     {
-        return(_parse_tree.findMap(_token.getValue()) == null ? false : true);
+        String pkg = _parse_tree.getPackage();
+
+        return (pkg != null && pkg.length() > 0);
     }
 
-    public boolean isDuplicateState()
+    /* package */ boolean isDuplicateMap(SmcLexer.Token token)
     {
-        return(_map_in_progress.findState(_token.getValue()));
+        return (_parse_tree.findMap(token.getValue()) == null ? false : true);
     }
 
-    public boolean isEntrySet()
+    /* package */ boolean isDuplicateState(SmcLexer.Token token)
     {
-        return(_state_in_progress.getEntryActions().size() == 0 ? false : true);
+        return (_map_in_progress.findState(token.getValue()));
     }
 
-    public boolean isExitSet()
+    /* package */ boolean isEntrySet()
     {
-        return(_state_in_progress.getExitActions().size() == 0 ? false : true);
+        return (_state_in_progress.getEntryActions().size() == 0 ? false : true);
     }
 
-    public boolean isDuplicateGuard()
+    /* package */ boolean isExitSet()
+    {
+        return (_state_in_progress.getExitActions().size() == 0 ? false : true);
+    }
+
+    /* package */ boolean isDuplicateGuard()
     {
         ListIterator guardIt;
         SmcGuard guard;
@@ -392,61 +327,99 @@ public final class SmcParser
             }
         }
 
-        return(retval);
+        return (retval);
     }
 
-    public boolean isCpp()
+    /* package */ boolean isCpp()
     {
         return (_language == Smc.C_PLUS_PLUS);
     }
 
-    public boolean isJava()
+    /* package */ boolean isJava()
     {
         return (_language == Smc.JAVA);
     }
 
-    public boolean isTcl()
+    /* package */ boolean isTcl()
     {
         return (_language == Smc.TCL);
     }
 
-    public void setHeaderLine()
+    /* package */ boolean isTransParametersEmpty()
+    {
+        return ((_transition_parameters == null ||
+                 _transition_parameters.size() == 0)
+                ? true : false);
+    }
+
+    // Push a token back on the front of the token list.
+    /* package */ void pushBack(SmcLexer.Token token)
+    {
+        _tokenList.add(0, token);
+        return;
+    }
+
+    /* package */ void setHeaderLine()
     {
         _parse_tree.setHeaderLine(_lexer.getLineNumber());
         return;
     }
 
-    public void addSource()
+    /* package */ void addSource(SmcLexer.Token token)
     {
-        _parse_tree.setSource(_token.getValue());
+        _parse_tree.setSource(token.getValue());
         return;
     }
 
-    public void appendStartState()
+    /* package */ void appendStartState(SmcLexer.Token token)
     {
-        _start_state += _token.getValue();
+        _start_state += token.getValue();
         return;
     }
 
-    public void setStartState()
+    /* package */ void setStartState()
     {
         _parse_tree.setStartState(_start_state);
         return;
     }
 
-    public void setClassName()
+    // If true, then the class name is for %class.
+    // If false, then the class name is for %package.
+    /* package */ void setNameFlag(boolean flag)
     {
-        _parse_tree.setContext(_token.getValue());
+        _nameFlag = flag;
         return;
     }
 
-    public void setHeader()
+    /* package */ void appendClassName(SmcLexer.Token token)
     {
-        _parse_tree.setHeader(_token.getValue());
+        _className += token.getValue();
         return;
     }
 
-    public void addMap()
+    /* package */ void setClassName()
+    {
+        if (_nameFlag == true)
+        {
+            _parse_tree.setContext(_className);
+        }
+        else
+        {
+            _parse_tree.setPackage(_className);
+        }
+
+        _className = "";
+
+        return;
+    }
+
+    /* package */ void setHeader(SmcLexer.Token token)
+    {
+        _parse_tree.setHeader(token.getValue());
+        return;
+    }
+
+    /* package */ void addMap()
     {
         if (_map_in_progress == null)
         {
@@ -471,7 +444,7 @@ public final class SmcParser
         return;
     }
 
-    public void createMap()
+    /* package */ void createMap(SmcLexer.Token token)
     {
         if (_map_in_progress != null)
         {
@@ -482,13 +455,13 @@ public final class SmcParser
         }
         else
         {
-            _map_in_progress = createTargetMap(_token.getValue());
+            _map_in_progress = createTargetMap(token.getValue());
         }
 
         return;
     }
 
-    public void addState()
+    /* package */ void addState()
     {
         if (_map_in_progress == null)
         {
@@ -509,7 +482,7 @@ public final class SmcParser
         return;
     }
 
-    public void createState()
+    /* package */ void createState(SmcLexer.Token token)
     {
         SmcState retval;
 
@@ -522,13 +495,14 @@ public final class SmcParser
         }
         else
         {
-            _state_in_progress = createTargetState(_token.getValue());
+            _state_in_progress =
+                createTargetState(token.getValue());
         }
 
         return;
     }
 
-    public void addEntryAction()
+    /* package */ void addEntryAction()
     {
         // First verify there is an in-progress action.
         if (_action_in_progress == null)
@@ -551,7 +525,7 @@ public final class SmcParser
         return;
     }
 
-    public void addExitAction()
+    /* package */ void addExitAction()
     {
         // First verify there is an in-progress action.
         if (_action_in_progress == null)
@@ -576,7 +550,7 @@ public final class SmcParser
 
     // Append the in-progress transition to the in-progress
     // state's transition list.
-    public void addTransition()
+    /* package */ void addTransition()
     {
         if (_state_in_progress == null)
         {
@@ -599,7 +573,7 @@ public final class SmcParser
 
     // Store away the transition's name for later use in
     // creating the transition.
-    public void storeTransitionName()
+    /* package */ void storeTransitionName(SmcLexer.Token token)
     {
         if (_transition_name != null)
         {
@@ -610,14 +584,14 @@ public final class SmcParser
         }
         else
         {
-            _transition_name = _token.getValue();
+            _transition_name = token.getValue();
         }
 
         return;
     }
 
     // Create a transition parameter list.
-    public void createParameterList()
+    /* package */ void createParameterList()
     {
         if (_transition_parameters != null)
         {
@@ -625,22 +599,15 @@ public final class SmcParser
         }
         else
         {
-            _transition_parameters = new LinkedList();
+            _transition_parameters = (List) new LinkedList();
         }
 
         return;
     }
 
-    public boolean isTransParametersEmpty()
-    {
-        return((_transition_parameters == null ||
-                _transition_parameters.size() == 0)
-               ? true : false);
-    }
-
     // Create a parameter object with the current token as its
     // name.
-    public void createParameter()
+    /* package */ void createParameter(SmcLexer.Token token)
     {
         if (_parameter_in_progress != null)
         {
@@ -652,13 +619,14 @@ public final class SmcParser
         else
         {
             _parameter_in_progress =
-                    createTargetParameter(_token.getValue());
+                    createTargetParameter(token.getValue());
         }
 
         return;
     }
 
-    public void appendParameterType(String separator)
+    /* package */ void appendParameterType(SmcLexer.Token token,
+                                    String separator)
     {
         if (_parameter_in_progress == null)
         {
@@ -666,14 +634,14 @@ public final class SmcParser
         }
         else
         {
-            _parameter_in_progress.appendType(_token.getValue(),
+            _parameter_in_progress.appendType(token.getValue(),
                                               separator);
         }
 
         return;
     }
 
-    public void addTransitionParameter()
+    /* package */ void addTransitionParameter()
     {
         if (_parameter_in_progress == null)
         {
@@ -694,7 +662,7 @@ public final class SmcParser
 
     // Create a transition object with the current token as its
     // name.
-    public void createTransition()
+    /* package */ void createTransition()
     {
         if (_transition_in_progress != null)
         {
@@ -718,7 +686,7 @@ public final class SmcParser
 
             if (_transition_parameters == null)
             {
-                _transition_parameters = new LinkedList();
+                _transition_parameters = (List) new LinkedList();
             }
 
             // Check if this state already has a transition with
@@ -738,7 +706,7 @@ public final class SmcParser
         return;
     }
 
-    public void addGuard()
+    /* package */ void addGuard()
     {
         if (_transition_in_progress == null)
         {
@@ -763,7 +731,7 @@ public final class SmcParser
 
     // Create a guard object with the in-progress action as its
     // condition.
-    public void createGuard()
+    /* package */ void createGuard()
     {
         if (_guard_in_progress != null)
         {
@@ -782,7 +750,7 @@ public final class SmcParser
 
     // Set the in-progress guard's transtion type (set, push or
     // pop).
-    public void setTransType(String trans_type)
+    /* package */ void setTransType(String trans_type)
     {
         if (_guard_in_progress == null)
         {
@@ -811,7 +779,7 @@ public final class SmcParser
     }
 
     // Set the in-progress guard's end state.
-    public void setEndState()
+    /* package */ void setEndState(SmcLexer.Token token)
     {
         if (_guard_in_progress == null)
         {
@@ -820,14 +788,14 @@ public final class SmcParser
         }
         else
         {
-            _guard_in_progress.setEndState(_token.getValue());
+            _guard_in_progress.setEndState(token.getValue());
         }
 
         return;
     }
 
     // Append the current token to the end state.
-    public void appendEndState()
+    /* package */ void appendEndState(SmcLexer.Token token)
     {
         if (_guard_in_progress == null)
         {
@@ -836,14 +804,14 @@ public final class SmcParser
         }
         else
         {
-            _guard_in_progress.appendEndState(_token.getValue());
+            _guard_in_progress.appendEndState(token.getValue());
         }
 
         return;
     }
 
     // Append the in-progress action to the guard's list.
-    public void addAction()
+    /* package */ void addAction()
     {
         if (_guard_in_progress == null)
         {
@@ -864,13 +832,13 @@ public final class SmcParser
         return;
     }
 
-    public void setActionNegation()
+    /* package */ void setActionNegation()
     {
         _action_negation = true;
         return;
     }
 
-    public void createAction()
+    /* package */ void createAction(SmcLexer.Token token)
     {
         if (_action_in_progress != null)
         {
@@ -880,7 +848,7 @@ public final class SmcParser
         else
         {
             _action_in_progress =
-                    createTargetAction(_token.getValue(),
+                    createTargetAction(token.getValue(),
                                        _action_negation);
             _action_negation = false;
         }
@@ -888,7 +856,7 @@ public final class SmcParser
         return;
     }
 
-    public void createVariable()
+    /* package */ void createVariable(SmcLexer.Token token)
     {
         if (_variable_in_progress != null)
         {
@@ -897,14 +865,14 @@ public final class SmcParser
         }
         else
         {
-            _variable_in_progress = new String(_token.getValue());
+            _variable_in_progress = new String(token.getValue());
         }
 
         return;
     }
 
     // Add an argument to the current action.
-    public void addArgument()
+    /* package */ void addArgument(SmcLexer.Token token)
     {
         if (_action_in_progress == null)
         {
@@ -913,13 +881,13 @@ public final class SmcParser
         }
         else
         {
-            _action_in_progress.addArgument(_token.getValue());
+            _action_in_progress.addArgument(token.getValue());
         }
 
         return;
     }
 
-    public void appendVariable()
+    /* package */ void appendVariable(SmcLexer.Token token)
     {
         if (_variable_in_progress == null)
         {
@@ -928,13 +896,13 @@ public final class SmcParser
         }
         else
         {
-            _variable_in_progress += _token.getValue();
+            _variable_in_progress += token.getValue();
         }
 
         return;
     }
 
-    public void addVariable()
+    /* package */ void addVariable()
     {
         if (_variable_in_progress == null)
         {
@@ -968,7 +936,7 @@ public final class SmcParser
                 break;
         }
 
-        return(retval);
+        return (retval);
     }
 
     // Create a map object that is language-specific.
@@ -994,7 +962,7 @@ public final class SmcParser
                 break;
         }
 
-        return(retval);
+        return (retval);
     }
 
     // Create a state object that is language-specific.
@@ -1020,11 +988,11 @@ public final class SmcParser
                 break;
         }
 
-        return(retval);
+        return (retval);
     }
 
     private SmcTransition createTargetTransition(String name,
-                                                 LinkedList parameters)
+                                                 List parameters)
     {
         SmcTransition retval = null;
 
@@ -1049,7 +1017,7 @@ public final class SmcParser
                 break;
         }
 
-        return(retval);
+        return (retval);
     }
 
     private SmcParameter createTargetParameter(String name)
@@ -1074,7 +1042,7 @@ public final class SmcParser
                 break;
         }
 
-        return(retval);
+        return (retval);
     }
 
     private SmcGuard createTargetGuard(SmcAction condition)
@@ -1099,7 +1067,7 @@ public final class SmcParser
                 break;
         }
 
-        return(retval);
+        return (retval);
     }
 
     private SmcAction createTargetAction(String name,
@@ -1128,7 +1096,7 @@ public final class SmcParser
                 break;
         }
 
-        return(retval);
+        return (retval);
     }
 
 // Member Data
@@ -1136,36 +1104,155 @@ public final class SmcParser
     // The parse state map.
     private SmcParserContext _parser_map;
 
-    // Legal token transitions.
-    private Method[] _transMethod;
-
     // Get tokens from the lexer.
     private SmcLexer _lexer;
 
+    // Read all the tokens into this list first and then
+    // pass them to the parser map.
+    List _tokenList;
+
     // Will be generating code for this language.
     private int _language;
-
-    // The current token.
-    SmcLexer.Token _token;
 
     // Keep track of errors.
     String _error_message;
     boolean _parse_status;
     boolean _quit_flag;
 
+    // Keep track whether we are parsing a class name or package.
+    boolean _nameFlag;
+
     private SmcParseTree _parse_tree;
     private String _start_state;
+    private String _className;
     private String _context;
     private String _header;
     private boolean _action_negation;
 
+    private String _name_in_progress;
     private SmcMap _map_in_progress;
     private SmcState _state_in_progress;
     private String _transition_name;
-    private LinkedList _transition_parameters;
+    private List _transition_parameters;
     private SmcParameter _parameter_in_progress;
     private SmcTransition _transition_in_progress;
     private SmcGuard _guard_in_progress;
     private SmcAction _action_in_progress;
     private String _variable_in_progress;
+
+    // Statics.
+
+    // Create a hashmap which associates token names with
+    // parser transitions. When a token is received, use this
+    // table to get the appropriate transition method and
+    // invoke that method.
+    private static Method[] _TransMethod;
+
+    static
+    {
+        _TransMethod = new Method[SmcLexer.TOKEN_COUNT];
+
+        try
+        {
+            Class _map_class = SmcParserContext.class;
+            Class[] param_types = new Class[1];
+
+            param_types[0] = SmcLexer.Token.class;
+
+            _TransMethod[SmcLexer.ENTRY] =
+                _map_class.getDeclaredMethod("ENTRY",
+                                             param_types);
+            _TransMethod[SmcLexer.EXIT] =
+                _map_class.getDeclaredMethod("EXIT",
+                                             param_types);
+            _TransMethod[SmcLexer.POP] =
+                _map_class.getDeclaredMethod("POP",
+                                             param_types);
+            _TransMethod[SmcLexer.PUSH] =
+                _map_class.getDeclaredMethod("PUSH",
+                                             param_types);
+            _TransMethod[SmcLexer.WORD] =
+                _map_class.getDeclaredMethod("WORD",
+                                             param_types);
+            _TransMethod[SmcLexer.START_STATE] =
+                _map_class.getDeclaredMethod("START_STATE",
+                                             param_types);
+            _TransMethod[SmcLexer.MAP_NAME] =
+                _map_class.getDeclaredMethod("MAP_NAME",
+                                             param_types);
+            _TransMethod[SmcLexer.CLASS_NAME] =
+                _map_class.getDeclaredMethod("CLASS_NAME",
+                                             param_types);
+            _TransMethod[SmcLexer.HEADER_FILE] =
+                _map_class.getDeclaredMethod("HEADER_FILE",
+                                             param_types);
+            _TransMethod[SmcLexer.PACKAGE_NAME] =
+                _map_class.getDeclaredMethod("PACKAGE_NAME",
+                                             param_types);
+            _TransMethod[SmcLexer.LEFT_BRACE] =
+                _map_class.getDeclaredMethod("LEFT_BRACE",
+                                             param_types);
+            _TransMethod[SmcLexer.RIGHT_BRACE] =
+                _map_class.getDeclaredMethod("RIGHT_BRACE",
+                                             param_types);
+            _TransMethod[SmcLexer.LEFT_BRACKET] =
+                _map_class.getDeclaredMethod("LEFT_BRACKET",
+                                             param_types);
+            _TransMethod[SmcLexer.RIGHT_BRACKET] =
+                _map_class.getDeclaredMethod("RIGHT_BRACKET",
+                                             param_types);
+            _TransMethod[SmcLexer.LEFT_PAREN] =
+                _map_class.getDeclaredMethod("LEFT_PAREN",
+                                             param_types);
+            _TransMethod[SmcLexer.RIGHT_PAREN] =
+                _map_class.getDeclaredMethod("RIGHT_PAREN",
+                                             param_types);
+            _TransMethod[SmcLexer.SEMICOLON] =
+                _map_class.getDeclaredMethod("SEMICOLON",
+                                             param_types);
+            _TransMethod[SmcLexer.COLON] =
+                _map_class.getDeclaredMethod("COLON",
+                                             param_types);
+            _TransMethod[SmcLexer.COMMA] =
+                _map_class.getDeclaredMethod("COMMA",
+                                             param_types);
+            _TransMethod[SmcLexer.EXCLAMATION] =
+                _map_class.getDeclaredMethod("EXCLAMATION",
+                                             param_types);
+            _TransMethod[SmcLexer.SOURCE] =
+                _map_class.getDeclaredMethod("SOURCE",
+                                             param_types);
+            _TransMethod[SmcLexer.EOD] =
+                _map_class.getDeclaredMethod("EOD",
+                                             param_types);
+            _TransMethod[SmcLexer.VARIABLE] =
+                _map_class.getDeclaredMethod("VARIABLE",
+                                             param_types);
+            _TransMethod[SmcLexer.INTEGER] =
+                _map_class.getDeclaredMethod("INTEGER",
+                                             param_types);
+            _TransMethod[SmcLexer.FLOAT] =
+                _map_class.getDeclaredMethod("FLOAT",
+                                             param_types);
+            _TransMethod[SmcLexer.STRING] =
+                _map_class.getDeclaredMethod("STRING",
+                                             param_types);
+            _TransMethod[SmcLexer.ASTERISK] =
+                _map_class.getDeclaredMethod("ASTERISK",
+                                             param_types);
+            _TransMethod[SmcLexer.AMPERSAND] =
+                _map_class.getDeclaredMethod("AMPERSAND",
+                                             param_types);
+        }
+        catch (NoSuchMethodException ex1)
+        {
+            System.err.println("INITIALIZATION ERROR! " + ex1);
+            System.exit(1);
+        }
+        catch (SecurityException ex2)
+        {
+            System.err.println("INITIALIZATION ERROR! " + ex2);
+            System.exit(1);
+        }
+    }
 }

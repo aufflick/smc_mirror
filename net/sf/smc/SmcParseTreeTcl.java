@@ -23,6 +23,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2001/12/14 20:10:37  cwrapp
+// Changes in release 1.1.0:
+// Add the following features:
+// + 486786: Added the %package keyword which specifies the
+//           Java package/C++ namespace/Tcl namespace
+//           the SMC-generated classes will be placed.
+// + 486471: The %class keyword accepts fully qualified
+//           class names.
+// + 491135: Add FSMContext methods getDebugStream and
+//           setDebugStream.
+// + 492165: Added -sync command line option which causes
+//           the transition methods to be synchronized
+//           (this option may only be used with -java).
+//
 // Revision 1.1  2001/12/03 14:14:03  cwrapp
 // Changes in release 1.0.2:
 // + Placed the class files in Smc.jar in the net.sf.smc package.
@@ -94,6 +108,7 @@ import java.io.PrintStream;
 import java.text.ParseException;
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 
 public final class SmcParseTreeTcl
@@ -109,6 +124,7 @@ public final class SmcParseTreeTcl
                              String srcfileBase)
         throws ParseException
     {
+        String pkgScope;
         ListIterator mapIt;
         ListIterator transIt;
         ListIterator paramIt;
@@ -116,6 +132,7 @@ public final class SmcParseTreeTcl
         SmcTransition trans;
         SmcParameter parameter;
         String separator;
+        String indent;
 
         // Now dump out the raw source code, if any.
         if (_source != null && _source.length() > 0)
@@ -123,20 +140,45 @@ public final class SmcParseTreeTcl
             source.println(_source + "\n");
         }
 
+        // If a namespace was specified, then output that
+        // namespace now.
+        if (_package != null && _package.length() > 0)
+        {
+            source.println("namespace eval " + _package + " {");
+            source.println();
+            indent = "    ";
+
+            pkgScope = "::" + _package + "::";
+        }
+        else
+        {
+            indent = "";
+            pkgScope = "";
+        }
+
         // Generate the context.
-        source.println("class " +
+        source.println(indent +
+                       "class " +
                        _context +
                        "Context {");
-        source.println("    inherit ::statemap::FSMContext;\n");
-        source.println("# Member functions.\n");
-        source.println("    constructor {owner} {");
-        source.println("        ::statemap::FSMContext::constructor;");
-        source.println("    } {");
-        source.println("        set _owner $owner;");
-        source.println("        setState ${" +
+        source.println(indent +
+                       "    inherit ::statemap::FSMContext;\n");
+        source.println(indent +
+                       "# Member functions.\n");
+        source.println(indent +
+                       "    constructor {owner} {");
+        source.println(indent +
+                       "        ::statemap::FSMContext::constructor;");
+        source.println(indent + "    } {");
+        source.println(indent + "        set _owner $owner;");
+        source.println(indent +
+                       "        setState ${" +
+                       pkgScope +
                        _start_state +
                        "};");
-        source.println("        ${" +
+        source.println(indent +
+                       "        ${" +
+                       pkgScope +
                        _start_state +
                        "} Entry $this;");
 
@@ -147,12 +189,12 @@ public final class SmcParseTreeTcl
 //              source.println("        set _trans_queue {};");
 //          }
 
-        source.println("    }");
+        source.println(indent + "    }");
 
         // For every possible transition in every state map,
         // create a method.
         // First, get the transitions list.
-        LinkedList transList = new LinkedList();
+        List transList = (List) new LinkedList();
         for (mapIt = _maps.listIterator();
              mapIt.hasNext() == true;
             )
@@ -180,7 +222,9 @@ public final class SmcParseTreeTcl
             // Don't do the Default transition.
             if (trans.getName().compareTo("Default") != 0)
             {
-                source.print("\n    public method " +
+                source.print("\n" +
+                             indent +
+                             "    public method " +
                              trans.getName() +
                              " {");
                 for (paramIt = trans.getParameters().listIterator(),
@@ -216,10 +260,12 @@ public final class SmcParseTreeTcl
 //              }
 //              else
 //              {
-                source.println("        set _transition \"" +
+                source.println(indent +
+                               "        set _transition \"" +
                                trans.getName() +
                                "\";");
-                source.print("        [getState] " +
+                source.print(indent +
+                             "        [getState] " +
                              trans.getName() +
                              " $this");
                 for (paramIt = trans.getParameters().listIterator();
@@ -230,9 +276,11 @@ public final class SmcParseTreeTcl
                     source.print(" $" + parameter.getName());
                 }
                 source.println(";");
-                source.println("        set _transition \"\";");
-                source.println("        return -code ok;");
-                source.println("    }");
+                source.println(indent +
+                               "        set _transition \"\";");
+                source.println(indent +
+                               "        return -code ok;");
+                source.println(indent + "    }");
 //              }
             }
         }
@@ -248,12 +296,17 @@ public final class SmcParseTreeTcl
 //              source.println("    }");
 //          }
 
-        source.println("\n    public method getOwner {} {");
-        source.println("        return -code ok $_owner;");
-        source.println("    }");
+        source.println("\n" +
+                       indent +
+                       "    public method getOwner {} {");
+        source.println(indent +
+                       "        return -code ok $_owner;");
+        source.println(indent + "    }");
 
-        source.println("\n# Member data.\n");
-        source.println("    private variable _owner;");
+        source.println("\n" +
+                       indent +
+                       "# Member data.\n");
+        source.println(indent + "    private variable _owner;");
 
         // If transition queuing, declare the necessary data.
 //          if (Smc.isTransQueue() == true)
@@ -262,22 +315,26 @@ public final class SmcParseTreeTcl
 //          }
 
         // Put the closing brace on the context class.
-        source.println("}\n");
+        source.println(indent + "}\n");
 
         //
         // Now output the application's state class.
-        source.println("class " +
+        source.println(indent + "class " +
                        _context +
                        "State {");
-        source.println("    inherit ::statemap::State;\n");
-        source.println("# Member functions.\n");
-        source.println("    constructor {name} {");
-        source.println("        ::statemap::State::constructor $name;");
-        source.println("    } {}\n");
+        source.println(indent + "    inherit ::statemap::State;\n");
+        source.println(indent + "# Member functions.\n");
+        source.println(indent + "    constructor {name} {");
+        source.println(indent +
+                       "        ::statemap::State::constructor $name;");
+        source.println(indent +
+                       "    } {}\n");
 
         // Define the default Entry() and Exit() methods.
-        source.println("    public method Entry {context} {};");
-        source.println("    public method Exit {context} {};");
+        source.println(indent +
+                       "    public method Entry {context} {};");
+        source.println(indent +
+                       "    public method Exit {context} {};");
 
         // Declare the undefined default transitions.
         for (transIt = transList.listIterator();
@@ -289,7 +346,9 @@ public final class SmcParseTreeTcl
             // The Default transition is handled separately.
             if (trans.getName().compareTo("Default") != 0)
             {
-                source.print("\n    public method " +
+                source.print("\n" +
+                             indent +
+                             "    public method " +
                              trans.getName() +
                              " {context");
                 for (paramIt = trans.getParameters().listIterator();
@@ -300,21 +359,27 @@ public final class SmcParseTreeTcl
                     source.print(" ");
                     parameter.generateCode(source);
                 }
-                source.println("} {");
-                source.println("        Default $context;");
-                source.println("        return -code ok;");
-                source.println("    }");
+                source.println(indent + "} {");
+                source.println(indent +
+                               "        Default $context;");
+                source.println(indent +
+                               "        return -code ok;");
+                source.println(indent + "    }");
             }
         }
 
         // Define the default Default transition.
-        source.println("\n    public method Default {context} {");
-        source.println("        set transtion [$context getTransition];");
-        source.println("        return -code error \"Transition \\\"$transition\\\" fell through to a non-existent default definition.\";");
-        source.println("    }");
+        source.println("\n" +
+                       indent +
+                       "    public method Default {context} {");
+        source.println(indent +
+                       "        set transition [$context getTransition];");
+        source.println(indent +
+                       "        return -code error \"Transition \\\"$transition\\\" fell through to a non-existent default definition.\";");
+        source.println(indent + "    }");
 
         // End of the application state class.
-        source.println("}\n");
+        source.println(indent + "}\n");
 
         // Have each map print out its source code in turn.
         for (mapIt = _maps.listIterator();
@@ -322,7 +387,21 @@ public final class SmcParseTreeTcl
             )
         {
             map = (SmcMap) mapIt.next();
-            map.generateCode(header, source, _context);
+            map.generateCode(header,
+                             source,
+                             _context,
+                             pkgScope,
+                             indent);
+        }
+
+        // If necessary, place an end brace for the namespace.
+        if (_package != null && _package.length() > 0)
+        {
+            source.println("}");
+        }
+        else
+        {
+            source.println();
         }
 
         return;

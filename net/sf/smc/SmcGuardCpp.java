@@ -23,6 +23,20 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2001/12/14 20:10:37  cwrapp
+// Changes in release 1.1.0:
+// Add the following features:
+// + 486786: Added the %package keyword which specifies the
+//           Java package/C++ namespace/Tcl namespace
+//           the SMC-generated classes will be placed.
+// + 486471: The %class keyword accepts fully qualified
+//           class names.
+// + 491135: Add FSMContext methods getDebugStream and
+//           setDebugStream.
+// + 492165: Added -sync command line option which causes
+//           the transition methods to be synchronized
+//           (this option may only be used with -java).
+//
 // Revision 1.1  2001/12/03 14:14:03  cwrapp
 // Changes in release 1.0.2:
 // + Placed the class files in Smc.jar in the net.sf.smc package.
@@ -106,6 +120,7 @@ public final class SmcGuardCpp
                              int guardIndex,
                              int guardCount,
                              String context,
+                             String pkg,
                              String mapName,
                              String stateName,
                              String indent)
@@ -150,7 +165,8 @@ public final class SmcGuardCpp
                 // "if" should be used for this condition.
                 source.print("    if (");
                 _condition.generateCode(source, context, "");
-                source.println(")\n    {");
+                source.println(")");
+                source.println("    {");
             }
             else if (_condition != null)
             {
@@ -159,13 +175,15 @@ public final class SmcGuardCpp
                 // the condition.
                 source.print("\n    else if (");
                 _condition.generateCode(source, context, "");
-                source.println(")\n    {");
+                source.println(")");
+                source.println("    {");
             }
             else
             {
                 // This is not the first transition and it has
                 // no condition.
-                source.println("\n    else");
+                source.println();
+                source.println("    else");
                 source.println("    {");
             }
         }
@@ -195,9 +213,8 @@ public final class SmcGuardCpp
         // executed only if 1) this is a standard, non-loopback
         // transition or a pop transition.
         if ((_trans_type == Smc.TRANS_SET &&
-              _end_state.compareTo("nil") != 0 &&
-              _end_state.compareTo(stateName) != 0) ||
-             _trans_type == Smc.TRANS_POP)
+             isLoopback(stateName) == false) ||
+            _trans_type == Smc.TRANS_POP)
         {
             source.println(indent2 +
                            "(s.getState()).Exit(s);");
@@ -222,15 +239,14 @@ public final class SmcGuardCpp
             // executed. Remember: actions are not allowed to
             // issue transitions and clearing the current state
             // prevents them from doing so.
-            if (_trans_type == Smc.TRANS_SET &&
-                (_end_state.compareTo("nil") == 0 ||
-                 _end_state.compareTo(stateName) == 0))
+            if (isLoopback(stateName) == true)
             {
                 endStateName = "EndStateName";
-                source.println("\n" +
-                               indent +
+                source.println(indent2 +
                                context +
-                               "State& EndStateName = s.getState();\n");
+                               "State& " +
+                               endStateName +
+                               " = s.getState();\n");
             }
             else if (_trans_type == Smc.TRANS_PUSH)
             {
@@ -241,7 +257,7 @@ public final class SmcGuardCpp
                 // state to put on the stack.
                 endStateName = _end_state;
                 source.println("\n" +
-                               indent +
+                               indent2 +
                                context +
                                "State& CurrentState = s.getState();\n");
             }
@@ -256,13 +272,20 @@ public final class SmcGuardCpp
         }
 
         // Dump out this transition's actions.
-        for (actionIt = _actions.listIterator();
-             actionIt.hasNext() == true;
-            )
+        if (_actions.size() == 0 && _condition != null)
         {
-            action = (SmcAction) actionIt.next();
-            action.generateCode(source, context, indent2);
-            source.println(";");
+            source.println(indent2 + "// No actions.");
+        }
+        else
+        {
+            for (actionIt = _actions.listIterator();
+                 actionIt.hasNext() == true;
+                )
+            {
+                action = (SmcAction) actionIt.next();
+                action.generateCode(source, context, indent2);
+                source.println(";");
+            }
         }
 
         // Print the setState() call, if necessary. Do NOT
@@ -271,8 +294,7 @@ public final class SmcGuardCpp
         // 2. This is a push or pop transition.
         if (_trans_type == Smc.TRANS_SET &&
             (_actions.size() > 0 ||
-             (_end_state.compareTo("nil") != 0 &&
-              _end_state.compareTo(stateName) != 0)))
+             isLoopback(stateName) == false))
         {
             source.println(indent2 +
                            "s.setState(" +
@@ -319,8 +341,7 @@ public final class SmcGuardCpp
         // executed only if 1) this is a standard, non-loopback
         // transition or a push transition.
         if ((_trans_type == Smc.TRANS_SET &&
-              _end_state.compareTo("nil") != 0 &&
-              _end_state.compareTo(stateName) != 0) ||
+             isLoopback(stateName) == false) ||
              _trans_type == Smc.TRANS_PUSH)
         {
             source.println(indent2 +

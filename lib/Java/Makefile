@@ -23,6 +23,20 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.4  2001/12/14 20:10:37  cwrapp
+# Changes in release 1.1.0:
+# Add the following features:
+# + 486786: Added the %package keyword which specifies the
+#           Java package/C++ namespace/Tcl namespace
+#           the SMC-generated classes will be placed.
+# + 486471: The %class keyword accepts fully qualified
+#           class names.
+# + 491135: Add FSMContext methods getDebugStream and
+#           setDebugStream.
+# + 492165: Added -sync command line option which causes
+#           the transition methods to be synchronized
+#           (this option may only be used with -java).
+#
 # Revision 1.3  2001/11/30 15:17:22  cwrapp
 # Changes in release 1.0.2:
 # + Placed the class files in Smc.jar in the net.sf.smc package.
@@ -79,6 +93,7 @@ JAR_FLAGS=	cvf
 JAR_FILE=	$(PACKAGE_NAME).jar
 
 STAGING_DIR=	../../../staging/smc/lib
+CLASS_DIR=	$(STAGING_DIR)/$(PACKAGE_NAME)
 
 all:		$(JAR_FILE)
 
@@ -86,8 +101,12 @@ $(JAR_FILE) :	$(LIB_SOURCES)
 		$(JAVAC) $(JAVAC_FLAGS) $(LIB_SOURCES)
 		$(JAR) $(JAR_FLAGS) $(JAR_FILE) $(PACKAGE_NAME)
 
-install :	$(JAR_FILE)
+$(CLASS_DIR) :
+		mkdir $(CLASS_DIR)
+
+install :	$(JAR_FILE) $(CLASS_DIR)
 		cp $(JAR_FILE) $(STAGING_DIR)
+		cp $(PACKAGE_NAME)/*.class $(CLASS_DIR)
 
 uninstall :
 		-rm $(STAGING_DIR)/$(JAR_FILE)

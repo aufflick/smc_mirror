@@ -27,6 +27,20 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2001/12/14 20:10:37  cwrapp
+# Changes in release 1.1.0:
+# Add the following features:
+# + 486786: Added the %package keyword which specifies the
+#           Java package/C++ namespace/Tcl namespace
+#           the SMC-generated classes will be placed.
+# + 486471: The %class keyword accepts fully qualified
+#           class names.
+# + 491135: Add FSMContext methods getDebugStream and
+#           setDebugStream.
+# + 492165: Added -sync command line option which causes
+#           the transition methods to be synchronized
+#           (this option may only be used with -java).
+#
 # Revision 1.2  2001/05/09 23:40:02  cwrapp
 # Changes in release 1.0, beta 6:
 # Fixes the four following bugs:
@@ -74,67 +88,73 @@ package require statemap;
 
 source ./Stoplight_sm.tcl;
 
-class Stoplight {
-# Member data.
-    private variable _statemap;
+namespace eval tcl_ex4 {
+    class Stoplight {
+    # Member data.
+        private variable _statemap;
 
 	# Store here how long each light is supposed to last.
 	private variable _timeouts;
 
-    # Store the Tcl timer ID here.
-    private variable _timerID;
+        # Store the Tcl timer ID here.
+        private variable _timerID;
 
-    private variable _canvas;
-    private variable _east_light;
-    private variable _west_light;
-    private variable _north_light;
-    private variable _south_light;
+        private variable _canvas;
+        private variable _east_light;
+        private variable _west_light;
+        private variable _north_light;
+        private variable _south_light;
 
-    private variable _roadWidth 38;
-    private variable _lightDiameter 6;
-    private variable _lightSpace 2;
-    private variable _lightWidth;
-    private variable _lightHeight;
+        private variable _roadWidth 38;
+        private variable _lightDiameter 6;
+        private variable _lightSpace 2;
+        private variable _lightWidth;
+        private variable _lightHeight;
 
 	# List of vehicles waiting for the light to turn green
-    # in a given direction.
+        # in a given direction.
 	private variable _northVehicleList;
 	private variable _southVehicleList;
 	private variable _eastVehicleList;
-    private variable _westVehicleList;
+        private variable _westVehicleList;
 
-# Member functions.
-    constructor {canvas} {
-        set _statemap [StoplightContext #auto $this];
+    # Member functions.
+        constructor {canvas} {
+            set _statemap [::tcl_ex4::StoplightContext #auto $this];
 
-		set _canvas $canvas;
-	
-		# Set the light height and width.
-		set _lightWidth \
-			[expr $_lightDiameter + [expr $_lightSpace * 2]];
-		set _lightHeight \
-			[expr [expr $_lightDiameter * 3] + \
-				  [expr $_lightSpace * 4]];
-	
-		set _northVehicleList {};
-        set _southVehicleList {};
-        set _eastVehicleList {};
-        set _westVehicleList {};
+            set _canvas $canvas;
+            
+            # Set the light height and width.
+            set _lightWidth \
+                    [expr $_lightDiameter + [expr $_lightSpace * 2]];
+            set _lightHeight \
+                    [expr [expr $_lightDiameter * 3] + \
+                    [expr $_lightSpace * 4]];
+            
+            set _northVehicleList {};
+            set _southVehicleList {};
+            set _eastVehicleList {};
+            set _westVehicleList {};
 
-		# Create the stoplight GUI. Draw the roads.
-		DrawRoads;
-	
-		# Draw the stoplights.
-		DrawLights;
+            # Create the stoplight GUI. Draw the roads.
+            DrawRoads;
+            
+            # Draw the stoplights.
+            DrawLights;
 
-		# Set each light timer.
-		array set _timeouts \
-				[list NSGreenTimer 7000 \
-				      EWGreenTimer 5000 \
-					  YellowTimer 2000];
+            # Set each light timer.
+            array set _timeouts \
+                    [list NSGreenTimer 7000 \
+                    EWGreenTimer 5000 \
+                    YellowTimer 2000];
 
-        set _timerID -1;
-    }
+            set _timerID -1;
+
+            # DEBUG
+            # Uncomment the following line so that
+            # FSM debug output may be seen.
+            # $_statemap setDebugFlag 1;
+        }
 
 	# getRoadLengthX --
 	#
@@ -147,7 +167,7 @@ class Stoplight {
 	#   Pixel length of road in X direction.
 
 	public method getRoadLengthX {} {
-		return -code ok [$_canvas cget -width];
+            return -code ok [$_canvas cget -width];
 	}
 
 	# getRoadLengthY --
@@ -161,7 +181,7 @@ class Stoplight {
 	#   Pixel length of road in Y direction.
 
 	public method getRoadLengthY {} {
-		return -code ok [$_canvas cget -height];
+            return -code ok [$_canvas cget -height];
 	}
 
 	# getRoadWidth --
@@ -175,7 +195,7 @@ class Stoplight {
 	#   Road's width in pixels.
 
 	public method getRoadWidth {} {
-		return -code ok $_roadWidth;
+            return -code ok $_roadWidth;
 	}
 
 	# getLight --
@@ -189,49 +209,49 @@ class Stoplight {
 	#   Returns the color for that direction.
 
 	public method getLight {direction} {
-		set Retcode ok;
+            set Retcode ok;
 
-		# The direction represents which way the vehicle
-		# is facing. This is the opposite direction in which
-		# the light is facing.
-		switch -exact -- $direction {
-			north {
-				set RedLight [$_canvas itemcget $_south_light(RED) -fill];
-				set YellowLight [$_canvas itemcget $_south_light(YELLOW) -fill];
-				set GreenLight [$_canvas itemcget $_south_light(GREEN) -fill];
-			}
-			south {
-				set RedLight [$_canvas itemcget $_north_light(RED) -fill];
-				set YellowLight [$_canvas itemcget $_north_light(YELLOW) -fill];
-				set GreenLight [$_canvas itemcget $_north_light(GREEN) -fill];
-			}
-			east {
-				set RedLight [$_canvas itemcget $_west_light(RED) -fill];
-				set YellowLight [$_canvas itemcget $_west_light(YELLOW) -fill];
-				set GreenLight [$_canvas itemcget $_west_light(GREEN) -fill];
-			}
-			west {
-				set RedLight [$_canvas itemcget $_east_light(RED) -fill];
-				set YellowLight [$_canvas itemcget $_east_light(YELLOW) -fill];
-				set GreenLight [$_canvas itemcget $_east_light(GREEN) -fill];
-			}
-			default {
-				set Retcode error;
-				set Retval "Stoplight::getLight: \"$direction\" is an invalid direction.";
-			}
-		}
+            # The direction represents which way the vehicle
+            # is facing. This is the opposite direction in which
+            # the light is facing.
+            switch -exact -- $direction {
+                north {
+                    set RedLight [$_canvas itemcget $_south_light(RED) -fill];
+                    set YellowLight [$_canvas itemcget $_south_light(YELLOW) -fill];
+                    set GreenLight [$_canvas itemcget $_south_light(GREEN) -fill];
+                }
+                south {
+                    set RedLight [$_canvas itemcget $_north_light(RED) -fill];
+                    set YellowLight [$_canvas itemcget $_north_light(YELLOW) -fill];
+                    set GreenLight [$_canvas itemcget $_north_light(GREEN) -fill];
+                }
+                east {
+                    set RedLight [$_canvas itemcget $_west_light(RED) -fill];
+                    set YellowLight [$_canvas itemcget $_west_light(YELLOW) -fill];
+                    set GreenLight [$_canvas itemcget $_west_light(GREEN) -fill];
+                }
+                west {
+                    set RedLight [$_canvas itemcget $_east_light(RED) -fill];
+                    set YellowLight [$_canvas itemcget $_east_light(YELLOW) -fill];
+                    set GreenLight [$_canvas itemcget $_east_light(GREEN) -fill];
+                }
+                default {
+                    set Retcode error;
+                    set Retval "Stoplight::getLight: \"$direction\" is an invalid direction.";
+                }
+            }
 
-		if {[string compare $Retcode "ok"] == 0} {
-			if {[string compare $RedLight "red"] == 0} {
-				set Retval red;
-			} elseif {[string compare $YellowLight "yellow"] == 0} {
-				set Retval yellow;
-			} else {
-				set Retval green;
-			}
-		}
+            if {[string compare $Retcode "ok"] == 0} {
+                if {[string compare $RedLight "red"] == 0} {
+                    set Retval red;
+                } elseif {[string compare $YellowLight "yellow"] == 0} {
+                    set Retval yellow;
+                } else {
+                    set Retval green;
+                }
+            }
 
-		return -code $Retcode $Retval;
+            return -code $Retcode $Retval;
 	}
 
 	# registerVehicle --
@@ -242,229 +262,229 @@ class Stoplight {
 	#
 	# Arguments:
 	#   vehicle    A vehicle object name.
-    #   direction  The direction the vehicle is moving.
+        #   direction  The direction the vehicle is moving.
 	#
 	# Results:
 	#   ok
 
 	public method registerVehicle {vehicle direction} {
-        switch -exact -- $direction {
-            north {
-                lappend _northVehicleList $vehicle;
+            switch -exact -- $direction {
+                north {
+                    lappend _northVehicleList $vehicle;
+                }
+                south {
+                    lappend _southVehicleList $vehicle;
+                }
+                east {
+                    lappend _eastVehicleList $vehicle;
+                }
+                west {
+                    lappend _westVehicleList $vehicle;
+                }
             }
-            south {
-                lappend _southVehicleList $vehicle;
-            }
-            east {
-                lappend _eastVehicleList $vehicle;
-            }
-            west {
-                lappend _westVehicleList $vehicle;
-            }
-        }
 
-		return -code ok;
+            return -code ok;
 	}
 
-    # getQueueSize --
-    #
-    #   Return the number of vehicles waiting on a red in
-    #   a particular direction.
-    #
-    # Arguments:
-    #   direction   The direction the vehicle is moving.
-    #
-    # Results:
-    #   The size of the red light queue for that direction.
+        # getQueueSize --
+        #
+        #   Return the number of vehicles waiting on a red in
+        #   a particular direction.
+        #
+        # Arguments:
+        #   direction   The direction the vehicle is moving.
+        #
+        # Results:
+        #   The size of the red light queue for that direction.
 
-    public method getQueueSize {direction} {
-        switch -exact -- $direction {
-            north {
-                set Retval [llength $_northVehicleList];
+        public method getQueueSize {direction} {
+            switch -exact -- $direction {
+                north {
+                    set Retval [llength $_northVehicleList];
+                }
+                south {
+                    set Retval [llength $_southVehicleList];
+                }
+                east {
+                    set Retval [llength $_eastVehicleList];
+                }
+                west {
+                    set Retval [llength $_westVehicleList];
+                }
             }
-            south {
-                set Retval [llength $_southVehicleList];
-            }
-            east {
-                set Retval [llength $_eastVehicleList];
-            }
-            west {
-                set Retval [llength $_westVehicleList];
+
+            return -code ok $Retval;
+        }
+
+        # setLightTimer --
+        #
+        #   Set a particular light's timer. The value is given in
+        #   seconds, so convert to milliseconds.
+        #
+        # Arguments:
+        #   light    NSGreenTimer, EWGreenTimer or YellowTimer.
+        #   time     Light time in seconds.
+        #
+        # Results:
+        #   ok
+
+        public method setLightTimer {light time} {
+            set _timeouts($light) [expr $time * 1000];
+
+            return -code ok;
+        }
+
+        # start --
+        #
+        #   Start the demo running.
+        #
+        # Arguments:
+        #   None.
+        #
+        # Results:
+        #   ok
+
+        public method start {} {
+            $_statemap Start;
+            return -code ok;
+        }
+
+        # pause --
+        #
+        #   Pause this demo.
+        #
+        # Arguments:
+        #   None.
+        #
+        # Results:
+        #   ok
+
+        public method pause {} {
+            $_statemap Pause;
+            return -code ok;
+        }
+
+        # continue --
+        #
+        #   Continue this demo.
+        #
+        # Arguments:
+        #   None.
+        #
+        # Results:
+        #   ok
+
+        public method continue {} {
+            $_statemap Continue;
+            return -code ok;
+        }
+
+        # stop --
+        #
+        #   Stop this demo.
+        #
+        # Arguments:
+        #   None.
+        #
+        # Results:
+        #   ok
+
+        public method stop {} {
+            $_statemap Stop;
+            return -code ok;
+        }
+
+        # State Map Actions.
+        #
+        # The following methods are called by the state map.
+
+        public method TurnLight {direction color} {
+            switch -exact -- $direction {
+                EWLIGHT {
+                    switch -exact -- $color {
+                        RED {
+                            $_canvas itemconfigure $_east_light(YELLOW) -fill white;
+                            $_canvas itemconfigure $_west_light(YELLOW) -fill white;
+                            $_canvas itemconfigure $_east_light(RED) -fill red;
+                            $_canvas itemconfigure $_west_light(RED) -fill red;
+                        }
+                        GREEN {
+                            $_canvas itemconfigure $_east_light(RED) -fill white;
+                            $_canvas itemconfigure $_west_light(RED) -fill white;
+                            $_canvas itemconfigure $_east_light(GREEN) -fill green;
+                            $_canvas itemconfigure $_west_light(GREEN) -fill green;
+                        }
+                        YELLOW {
+                            $_canvas itemconfigure $_east_light(GREEN) -fill white;
+                            $_canvas itemconfigure $_west_light(GREEN) -fill white;
+                            $_canvas itemconfigure $_east_light(YELLOW) -fill yellow;
+                            $_canvas itemconfigure $_west_light(YELLOW) -fill yellow;
+                        }
+                    }
+                }
+                NSLIGHT {
+                    switch -exact -- $color {
+                        RED {
+                            $_canvas itemconfigure $_north_light(YELLOW) -fill white;
+                            $_canvas itemconfigure $_south_light(YELLOW) -fill white;
+                            $_canvas itemconfigure $_north_light(RED) -fill red;
+                            $_canvas itemconfigure $_south_light(RED) -fill red;
+                        }
+                        GREEN {
+                            $_canvas itemconfigure $_north_light(RED) -fill white;
+                            $_canvas itemconfigure $_south_light(RED) -fill white;
+                            $_canvas itemconfigure $_north_light(GREEN) -fill green;
+                            $_canvas itemconfigure $_south_light(GREEN) -fill green;
+                        }
+                        YELLOW {
+                            $_canvas itemconfigure $_north_light(GREEN) -fill white;
+                            $_canvas itemconfigure $_south_light(GREEN) -fill white;
+                            $_canvas itemconfigure $_north_light(YELLOW) -fill yellow;
+                            $_canvas itemconfigure $_south_light(YELLOW) -fill yellow;
+                        }
+                    }
+                }
             }
         }
 
-        return -code ok $Retval;
-    }
+        public method SetTimer {timer} {
+            set _timerID [after $_timeouts($timer) [list $this Timeout]];
+            return -code ok;
+        }
 
-    # setLightTimer --
-    #
-    #   Set a particular light's timer. The value is given in
-    #   seconds, so convert to milliseconds.
-    #
-    # Arguments:
-    #   light    NSGreenTimer, EWGreenTimer or YellowTimer.
-    #   time     Light time in seconds.
-    #
-    # Results:
-    #   ok
+        public method StopTimer {} {
+            if {$_timerID >= 0} {
+                after cancel $_timerID;
+                set _timerID -1;
+            }
 
-    public method setLightTimer {light time} {
-        set _timeouts($light) [expr $time * 1000];
+            return -code ok;
+        }
 
-        return -code ok;
-    }
-
-    # start --
-    #
-    #   Start the demo running.
-    #
-    # Arguments:
-    #   None.
-    #
-    # Results:
-    #   ok
-
-    public method start {} {
-        $_statemap Start;
-        return -code ok;
-    }
-
-    # pause --
-    #
-    #   Pause this demo.
-    #
-    # Arguments:
-    #   None.
-    #
-    # Results:
-    #   ok
-
-    public method pause {} {
-        $_statemap Pause;
-        return -code ok;
-    }
-
-    # continue --
-    #
-    #   Continue this demo.
-    #
-    # Arguments:
-    #   None.
-    #
-    # Results:
-    #   ok
-
-    public method continue {} {
-        $_statemap Continue;
-        return -code ok;
-    }
-
-    # stop --
-    #
-    #   Stop this demo.
-    #
-    # Arguments:
-    #   None.
-    #
-    # Results:
-    #   ok
-
-    public method stop {} {
-        $_statemap Stop;
-        return -code ok;
-    }
-
-    # State Map Actions.
-    #
-    # The following methods are called by the state map.
-
-    public method TurnLight {direction color} {
-		switch -exact -- $direction {
-			EWLIGHT {
-				switch -exact -- $color {
-					RED {
-						$_canvas itemconfigure $_east_light(YELLOW) -fill white;
-						$_canvas itemconfigure $_west_light(YELLOW) -fill white;
-						$_canvas itemconfigure $_east_light(RED) -fill red;
-						$_canvas itemconfigure $_west_light(RED) -fill red;
-					}
-					GREEN {
-						$_canvas itemconfigure $_east_light(RED) -fill white;
-						$_canvas itemconfigure $_west_light(RED) -fill white;
-						$_canvas itemconfigure $_east_light(GREEN) -fill green;
-						$_canvas itemconfigure $_west_light(GREEN) -fill green;
-					}
-					YELLOW {
-						$_canvas itemconfigure $_east_light(GREEN) -fill white;
-						$_canvas itemconfigure $_west_light(GREEN) -fill white;
-						$_canvas itemconfigure $_east_light(YELLOW) -fill yellow;
-						$_canvas itemconfigure $_west_light(YELLOW) -fill yellow;
-					}
-				}
-			}
-			NSLIGHT {
-				switch -exact -- $color {
-					RED {
-						$_canvas itemconfigure $_north_light(YELLOW) -fill white;
-						$_canvas itemconfigure $_south_light(YELLOW) -fill white;
-						$_canvas itemconfigure $_north_light(RED) -fill red;
-						$_canvas itemconfigure $_south_light(RED) -fill red;
-					}
-					GREEN {
-						$_canvas itemconfigure $_north_light(RED) -fill white;
-						$_canvas itemconfigure $_south_light(RED) -fill white;
-						$_canvas itemconfigure $_north_light(GREEN) -fill green;
-						$_canvas itemconfigure $_south_light(GREEN) -fill green;
-					}
-					YELLOW {
-						$_canvas itemconfigure $_north_light(GREEN) -fill white;
-						$_canvas itemconfigure $_south_light(GREEN) -fill white;
-						$_canvas itemconfigure $_north_light(YELLOW) -fill yellow;
-						$_canvas itemconfigure $_south_light(YELLOW) -fill yellow;
-					}
-				}
-			}
-		}
-    }
-
-    public method SetTimer {timer} {
-		set _timerID [after $_timeouts($timer) [list $this Timeout]];
-		return -code ok;
-    }
-
-    public method StopTimer {} {
-        if {$_timerID >= 0} {
-            after cancel $_timerID;
+        public method Timeout {} {
             set _timerID -1;
+            $_statemap Timeout;
+
+            return -code ok;
         }
 
-        return -code ok;
-    }
+        public method ResetLights {} {
+            $_canvas itemconfigure $_east_light(YELLOW) -fill white;
+            $_canvas itemconfigure $_west_light(YELLOW) -fill white;
+            $_canvas itemconfigure $_east_light(RED) -fill white;
+            $_canvas itemconfigure $_west_light(RED) -fill white;
+            $_canvas itemconfigure $_east_light(GREEN) -fill white;
+            $_canvas itemconfigure $_west_light(GREEN) -fill white;
 
-    public method Timeout {} {
-        set _timerID -1;
-		$_statemap Timeout;
+            $_canvas itemconfigure $_north_light(YELLOW) -fill white;
+            $_canvas itemconfigure $_south_light(YELLOW) -fill white;
+            $_canvas itemconfigure $_north_light(RED) -fill white;
+            $_canvas itemconfigure $_south_light(RED) -fill white;
+            $_canvas itemconfigure $_north_light(GREEN) -fill white;
+            $_canvas itemconfigure $_south_light(GREEN) -fill white;
 
-        return -code ok;
-    }
-
-    public method ResetLights {} {
-        $_canvas itemconfigure $_east_light(YELLOW) -fill white;
-        $_canvas itemconfigure $_west_light(YELLOW) -fill white;
-        $_canvas itemconfigure $_east_light(RED) -fill white;
-        $_canvas itemconfigure $_west_light(RED) -fill white;
-        $_canvas itemconfigure $_east_light(GREEN) -fill white;
-        $_canvas itemconfigure $_west_light(GREEN) -fill white;
-
-        $_canvas itemconfigure $_north_light(YELLOW) -fill white;
-        $_canvas itemconfigure $_south_light(YELLOW) -fill white;
-        $_canvas itemconfigure $_north_light(RED) -fill white;
-        $_canvas itemconfigure $_south_light(RED) -fill white;
-        $_canvas itemconfigure $_north_light(GREEN) -fill white;
-        $_canvas itemconfigure $_south_light(GREEN) -fill white;
-
-        return -code ok;
-    }
+            return -code ok;
+        }
 
 	# InformVehicles --
 	#
@@ -478,248 +498,249 @@ class Stoplight {
 	#   ok
 
 	public method InformVehicles {direction} {
-        switch -exact -- $direction {
-            north {
-                foreach Vehicle $_northVehicleList {
-                    catch "$Vehicle lightGreen";
+            switch -exact -- $direction {
+                north {
+                    foreach Vehicle $_northVehicleList {
+                        catch "$Vehicle lightGreen";
+                    }
+                    set _northVehicleList {};
                 }
-                set _northVehicleList {};
-            }
-            south {
-                foreach Vehicle $_southVehicleList {
-                    catch "$Vehicle lightGreen";
+                south {
+                    foreach Vehicle $_southVehicleList {
+                        catch "$Vehicle lightGreen";
+                    }
+                    set _southVehicleList {};
                 }
-                set _southVehicleList {};
-            }
-            east {
-                foreach Vehicle $_eastVehicleList {
-                    catch "$Vehicle lightGreen";
+                east {
+                    foreach Vehicle $_eastVehicleList {
+                        catch "$Vehicle lightGreen";
+                    }
+                    set _eastVehicleList {};
                 }
-                set _eastVehicleList {};
-            }
-            west {
-                foreach Vehicle $_westVehicleList {
-                    catch "$Vehicle lightGreen";
+                west {
+                    foreach Vehicle $_westVehicleList {
+                        catch "$Vehicle lightGreen";
+                    }
+                    set _westVehicleList {};
                 }
-                set _westVehicleList {};
             }
-        }
 
-		return -code ok;
+            return -code ok;
 	}
 
-    private method DrawRoads {} {
-		# The roads are drawn as follows:
-		#
-		#        (x2,y1)   (x4,y1)
-		#             |  |  |
-		#             |     |
-		#             |  |  |
-        # (x1,y2)     |     |       (x5,y2)
-		# ------------+  |  +------------
-		#         (x2,y2) (x4,y2)    
-        # - - - - - -        - - - - - -
-		#         (x2,y4) (x4,y4)   (x5,y4)
-		# ------------+     +------------
-		# (x1,y4)     |  |  |
-		#             |     |
-		#             |  |  |
-		#             |     |
-		#        (x2,y5) |(x4,y5)
+        private method DrawRoads {} {
+            # The roads are drawn as follows:
+            #
+            #        (x2,y1)   (x4,y1)
+            #             |  |  |
+            #             |     |
+            #             |  |  |
+            # (x1,y2)     |     |       (x5,y2)
+            # ------------+  |  +------------
+            #         (x2,y2) (x4,y2)    
+            # - - - - - -        - - - - - -
+            #         (x2,y4) (x4,y4)   (x5,y4)
+            # ------------+     +------------
+            # (x1,y4)     |  |  |
+            #             |     |
+            #             |  |  |
+            #             |     |
+            #        (x2,y5) |(x4,y5)
 
-		# Calculate the line segment's length.
-		set XLength [expr [expr [getRoadLengthX] / 2] - \
-                          [expr $_roadWidth / 2]];
-		set YLength [expr [expr [getRoadLengthY] / 2] - \
-                          [expr $_roadWidth / 2]];
-	
-		# Calculate the major coordinates.
-		set X1 0;
-		set Y1 0;
-		set X2 $XLength;
-		set Y2 $YLength;
-		set X3 [expr [$_canvas cget -width] / 2];
-		set Y3 [expr [$_canvas cget -height] / 2];
-		set X4 [expr [$_canvas cget -width] - $XLength];
-		set Y4 [expr [$_canvas cget -height] - $YLength];
-		set X5 [$_canvas cget -width];
-		set Y5 [$_canvas cget -height];
-	
-		# Put green lawns around the road.
-		$_canvas create rect $X1 $Y1 $X2 $Y2 -outline "" -fill green;
-		$_canvas create rect $X1 $Y4 $X2 $Y5 -outline "" -fill green;
-		$_canvas create rect $X4 $Y4 $X5 $Y5 -outline "" -fill green;
-		$_canvas create rect $X4 $Y1 $X5 $Y2 -outline "" -fill green;
+            # Calculate the line segment's length.
+            set XLength [expr [expr [getRoadLengthX] / 2] - \
+                    [expr $_roadWidth / 2]];
+            set YLength [expr [expr [getRoadLengthY] / 2] - \
+                    [expr $_roadWidth / 2]];
+            
+            # Calculate the major coordinates.
+            set X1 0;
+            set Y1 0;
+            set X2 $XLength;
+            set Y2 $YLength;
+            set X3 [expr [$_canvas cget -width] / 2];
+            set Y3 [expr [$_canvas cget -height] / 2];
+            set X4 [expr [$_canvas cget -width] - $XLength];
+            set Y4 [expr [$_canvas cget -height] - $YLength];
+            set X5 [$_canvas cget -width];
+            set Y5 [$_canvas cget -height];
+            
+            # Put green lawns around the road.
+            $_canvas create rect $X1 $Y1 $X2 $Y2 -outline "" -fill green;
+            $_canvas create rect $X1 $Y4 $X2 $Y5 -outline "" -fill green;
+            $_canvas create rect $X4 $Y4 $X5 $Y5 -outline "" -fill green;
+            $_canvas create rect $X4 $Y1 $X5 $Y2 -outline "" -fill green;
 
-		# Draw four connected lines where each drawing uses three
-		# coordinates.
-		$_canvas create line $X1 $Y2 $X2 $Y2 $X2 $Y1;
-		$_canvas create line $X4 $Y1 $X4 $Y2 $X5 $Y2;
-		$_canvas create line $X1 $Y4 $X2 $Y4 $X2 $Y5;
-		$_canvas create line $X4 $Y5 $X4 $Y4 $X5 $Y4;
-	
-		# Now draw the lane markings.
-		$_canvas create line $X1 $Y3 $X2 $Y3;
-		$_canvas create line $X3 $Y1 $X3 $Y2;
-		$_canvas create line $X4 $Y3 $X5 $Y3;
-		$_canvas create line $X3 $Y4 $X3 $Y5;
+            # Draw four connected lines where each drawing uses three
+            # coordinates.
+            $_canvas create line $X1 $Y2 $X2 $Y2 $X2 $Y1;
+            $_canvas create line $X4 $Y1 $X4 $Y2 $X5 $Y2;
+            $_canvas create line $X1 $Y4 $X2 $Y4 $X2 $Y5;
+            $_canvas create line $X4 $Y5 $X4 $Y4 $X5 $Y4;
+            
+            # Now draw the lane markings.
+            $_canvas create line $X1 $Y3 $X2 $Y3;
+            $_canvas create line $X3 $Y1 $X3 $Y2;
+            $_canvas create line $X4 $Y3 $X5 $Y3;
+            $_canvas create line $X3 $Y4 $X3 $Y5;
 
-		return -code ok;
-    }
+            return -code ok;
+        }
 
-    private method DrawLights {} {
-		# The lights are drawns as follows:
-		#
-		#  y1          +---+
-		#              | o |green
-		#              | o |yellow
-		#              | o |red
-		#  y2  +-------+---+-------+
-		#      | o o o |   | o o o |
-		#  y3  +-------+---+-------+
-		#              | o |red
-		#              | o |yellow
-		#              | o |green
-		#  y4          +---+
-		#
-		#    x1       x2   x3     x4
-		# Store each light as a separate element in a table.
-	
-		# Figure out the coordinates for the stoplights.
-		set X1 [expr [expr [$_canvas cget -width] / 2] - \
-			[expr $_lightWidth / 2] - $_lightHeight];
-		set Y1 [expr [expr [$_canvas cget -height] / 2] - \
-			[expr $_lightWidth / 2] - $_lightHeight];
-		set X2 [expr $X1 + $_lightHeight];
-		set Y2 [expr $Y1 + $_lightHeight];
-		set X3 [expr $X2 + $_lightWidth];
-		set Y3 [expr $Y2 + $_lightWidth];
-		set X4 [expr $X3 + $_lightHeight];
-		set Y4 [expr $Y3 + $_lightHeight];
-	
-		# Draw the four stop lights boxes.
-		$_canvas create rect $X2 $Y1 $X3 $Y2 -outline black -fill black -width 1;
-		$_canvas create rect $X1 $Y2 $X2 $Y3 -outline black -fill black -width 1;
-		$_canvas create rect $X2 $Y3 $X3 $Y4 -outline black -fill black -width 1;
-		$_canvas create rect $X3 $Y2 $X4 $Y3 -outline black -fill black -width 1;
-	
-		# Draw the lights within the stoplights. Save the
-		# canvas items into an array because they will be
-		# referenced later. Because there are two lights
-		set _north_light(RED) \
-			[$_canvas create oval [expr $X2 + $_lightSpace] \
-								  [expr $Y1 + $_lightSpace] \
-						  [expr $X3 - $_lightSpace] \
-						  [expr $Y1 + \
-								$_lightSpace + \
-							$_lightDiameter] \
-						  -outline black -fill white];
-		set _north_light(YELLOW) \
-			[$_canvas create oval [expr $X2 + $_lightSpace] \
-								  [expr $Y1 + \
-								[expr $_lightSpace * 2] + \
-							$_lightDiameter] \
-						  [expr $X3 - $_lightSpace] \
-						  [expr $Y1 + \
-								[expr $_lightSpace * 2] + \
-							[expr $_lightDiameter * 2]] \
-						  -outline black -fill white];
-		set _north_light(GREEN) \
-			[$_canvas create oval [expr $X2 + $_lightSpace] \
-								  [expr $Y1 + \
-								[expr $_lightSpace * 3] + \
-							[expr $_lightDiameter * 2]] \
-						  [expr $X3 - $_lightSpace] \
-						  [expr $Y1 + \
-								[expr $_lightSpace * 3] + \
-							[expr $_lightDiameter * 3]] \
-						  -outline black -fill white];
-	
-		set _west_light(RED) \
-			[$_canvas create oval [expr $X1 + $_lightSpace] \
-								  [expr $Y2 + $_lightSpace] \
-						  [expr $X1 + \
-								$_lightSpace + \
-								$_lightDiameter] \
-						  [expr $Y3 - $_lightSpace] \
-						  -outline black -fill white];
-		set _west_light(YELLOW) \
-			[$_canvas create oval [expr $X1 + \
-										[expr $_lightSpace * 2] + \
-							$_lightDiameter] \
-								  [expr $Y2 + $_lightSpace] \
-						  [expr $X1 + \
-								[expr $_lightSpace * 2] + \
-								[expr $_lightDiameter * 2]] \
-						  [expr $Y3 - $_lightSpace] \
-						  -outline black -fill white];
-		set _west_light(GREEN) \
-			[$_canvas create oval [expr $X1 + \
-										[expr $_lightSpace * 3] + \
-							[expr $_lightDiameter * 2]] \
-								  [expr $Y2 + $_lightSpace] \
-						  [expr $X1 + \
-								[expr $_lightSpace * 3] + \
-								[expr $_lightDiameter * 3]] \
-						  [expr $Y3 - $_lightSpace] \
-						  -outline black -fill white];
-	
-		set _south_light(GREEN) \
-			[$_canvas create oval [expr $X2 + $_lightSpace] \
-								  [expr $Y3 + $_lightSpace] \
-						  [expr $X3 - $_lightSpace] \
-						  [expr $Y3 + \
-								$_lightSpace + \
-							$_lightDiameter] \
-						  -outline black -fill white];
-		set _south_light(YELLOW) \
-			[$_canvas create oval [expr $X2 + $_lightSpace] \
-								  [expr $Y3 + \
-								[expr $_lightSpace * 2] + \
-							$_lightDiameter] \
-						  [expr $X3 - $_lightSpace] \
-						  [expr $Y3 + \
-								[expr $_lightSpace * 2] + \
-							[expr $_lightDiameter * 2]] \
-						  -outline black -fill white];
-		set _south_light(RED) \
-			[$_canvas create oval [expr $X2 + $_lightSpace] \
-								  [expr $Y3 + \
-								[expr $_lightSpace * 3] + \
-							[expr $_lightDiameter * 2]] \
-						  [expr $X3 - $_lightSpace] \
-						  [expr $Y3 + \
-								[expr $_lightSpace * 3] + \
-							[expr $_lightDiameter * 3]] \
-						  -outline black -fill white];
-	
-		set _east_light(GREEN) \
-			[$_canvas create oval [expr $X3 + $_lightSpace] \
-								  [expr $Y2 + $_lightSpace] \
-						  [expr $X3 + \
-								$_lightSpace + \
-								$_lightDiameter] \
-						  [expr $Y3 - $_lightSpace] \
-						  -outline black -fill white];
-		set _east_light(YELLOW) \
-			[$_canvas create oval [expr $X3 + \
-										[expr $_lightSpace * 2] + \
-							$_lightDiameter] \
-								  [expr $Y2 + $_lightSpace] \
-						  [expr $X3 + \
-								[expr $_lightSpace * 2] + \
-								[expr $_lightDiameter * 2]] \
-						  [expr $Y3 - $_lightSpace] \
-						  -outline black -fill white];
-		set _east_light(RED) \
-			[$_canvas create oval [expr $X3 + \
-										[expr $_lightSpace * 3] + \
-							[expr $_lightDiameter * 2]] \
-								  [expr $Y2 + $_lightSpace] \
-						  [expr $X3 + \
-								[expr $_lightSpace * 3] + \
-								[expr $_lightDiameter * 3]] \
-						  [expr $Y3 - $_lightSpace] \
-						  -outline black -fill white];
+        private method DrawLights {} {
+            # The lights are drawns as follows:
+            #
+            #  y1          +---+
+            #              | o |green
+            #              | o |yellow
+            #              | o |red
+            #  y2  +-------+---+-------+
+            #      | o o o |   | o o o |
+            #  y3  +-------+---+-------+
+            #              | o |red
+            #              | o |yellow
+            #              | o |green
+            #  y4          +---+
+            #
+            #    x1       x2   x3     x4
+            # Store each light as a separate element in a table.
+            
+            # Figure out the coordinates for the stoplights.
+            set X1 [expr [expr [$_canvas cget -width] / 2] - \
+                    [expr $_lightWidth / 2] - $_lightHeight];
+            set Y1 [expr [expr [$_canvas cget -height] / 2] - \
+                    [expr $_lightWidth / 2] - $_lightHeight];
+            set X2 [expr $X1 + $_lightHeight];
+            set Y2 [expr $Y1 + $_lightHeight];
+            set X3 [expr $X2 + $_lightWidth];
+            set Y3 [expr $Y2 + $_lightWidth];
+            set X4 [expr $X3 + $_lightHeight];
+            set Y4 [expr $Y3 + $_lightHeight];
+            
+            # Draw the four stop lights boxes.
+            $_canvas create rect $X2 $Y1 $X3 $Y2 -outline black -fill black -width 1;
+            $_canvas create rect $X1 $Y2 $X2 $Y3 -outline black -fill black -width 1;
+            $_canvas create rect $X2 $Y3 $X3 $Y4 -outline black -fill black -width 1;
+            $_canvas create rect $X3 $Y2 $X4 $Y3 -outline black -fill black -width 1;
+            
+            # Draw the lights within the stoplights. Save the
+            # canvas items into an array because they will be
+            # referenced later. Because there are two lights
+            set _north_light(RED) \
+                    [$_canvas create oval [expr $X2 + $_lightSpace] \
+                    [expr $Y1 + $_lightSpace] \
+                    [expr $X3 - $_lightSpace] \
+                    [expr $Y1 + \
+                    $_lightSpace + \
+                    $_lightDiameter] \
+                    -outline black -fill white];
+            set _north_light(YELLOW) \
+                    [$_canvas create oval [expr $X2 + $_lightSpace] \
+                    [expr $Y1 + \
+                    [expr $_lightSpace * 2] + \
+                    $_lightDiameter] \
+                    [expr $X3 - $_lightSpace] \
+                    [expr $Y1 + \
+                    [expr $_lightSpace * 2] + \
+                    [expr $_lightDiameter * 2]] \
+                    -outline black -fill white];
+            set _north_light(GREEN) \
+                    [$_canvas create oval [expr $X2 + $_lightSpace] \
+                    [expr $Y1 + \
+                    [expr $_lightSpace * 3] + \
+                    [expr $_lightDiameter * 2]] \
+                    [expr $X3 - $_lightSpace] \
+                    [expr $Y1 + \
+                    [expr $_lightSpace * 3] + \
+                    [expr $_lightDiameter * 3]] \
+                    -outline black -fill white];
+            
+            set _west_light(RED) \
+                    [$_canvas create oval [expr $X1 + $_lightSpace] \
+                    [expr $Y2 + $_lightSpace] \
+                    [expr $X1 + \
+                    $_lightSpace + \
+                    $_lightDiameter] \
+                    [expr $Y3 - $_lightSpace] \
+                    -outline black -fill white];
+            set _west_light(YELLOW) \
+                    [$_canvas create oval [expr $X1 + \
+                    [expr $_lightSpace * 2] + \
+                    $_lightDiameter] \
+                    [expr $Y2 + $_lightSpace] \
+                    [expr $X1 + \
+                    [expr $_lightSpace * 2] + \
+                    [expr $_lightDiameter * 2]] \
+                    [expr $Y3 - $_lightSpace] \
+                    -outline black -fill white];
+            set _west_light(GREEN) \
+                    [$_canvas create oval [expr $X1 + \
+                    [expr $_lightSpace * 3] + \
+                    [expr $_lightDiameter * 2]] \
+                    [expr $Y2 + $_lightSpace] \
+                    [expr $X1 + \
+                    [expr $_lightSpace * 3] + \
+                    [expr $_lightDiameter * 3]] \
+                    [expr $Y3 - $_lightSpace] \
+                    -outline black -fill white];
+            
+            set _south_light(GREEN) \
+                    [$_canvas create oval [expr $X2 + $_lightSpace] \
+                    [expr $Y3 + $_lightSpace] \
+                    [expr $X3 - $_lightSpace] \
+                    [expr $Y3 + \
+                    $_lightSpace + \
+                    $_lightDiameter] \
+                    -outline black -fill white];
+            set _south_light(YELLOW) \
+                    [$_canvas create oval [expr $X2 + $_lightSpace] \
+                    [expr $Y3 + \
+                    [expr $_lightSpace * 2] + \
+                    $_lightDiameter] \
+                    [expr $X3 - $_lightSpace] \
+                    [expr $Y3 + \
+                    [expr $_lightSpace * 2] + \
+                    [expr $_lightDiameter * 2]] \
+                    -outline black -fill white];
+            set _south_light(RED) \
+                    [$_canvas create oval [expr $X2 + $_lightSpace] \
+                    [expr $Y3 + \
+                    [expr $_lightSpace * 3] + \
+                    [expr $_lightDiameter * 2]] \
+                    [expr $X3 - $_lightSpace] \
+                    [expr $Y3 + \
+                    [expr $_lightSpace * 3] + \
+                    [expr $_lightDiameter * 3]] \
+                    -outline black -fill white];
+            
+            set _east_light(GREEN) \
+                    [$_canvas create oval [expr $X3 + $_lightSpace] \
+                    [expr $Y2 + $_lightSpace] \
+                    [expr $X3 + \
+                    $_lightSpace + \
+                    $_lightDiameter] \
+                    [expr $Y3 - $_lightSpace] \
+                    -outline black -fill white];
+            set _east_light(YELLOW) \
+                    [$_canvas create oval [expr $X3 + \
+                    [expr $_lightSpace * 2] + \
+                    $_lightDiameter] \
+                    [expr $Y2 + $_lightSpace] \
+                    [expr $X3 + \
+                    [expr $_lightSpace * 2] + \
+                    [expr $_lightDiameter * 2]] \
+                    [expr $Y3 - $_lightSpace] \
+                    -outline black -fill white];
+            set _east_light(RED) \
+                    [$_canvas create oval [expr $X3 + \
+                    [expr $_lightSpace * 3] + \
+                    [expr $_lightDiameter * 2]] \
+                    [expr $Y2 + $_lightSpace] \
+                    [expr $X3 + \
+                    [expr $_lightSpace * 3] + \
+                    [expr $_lightDiameter * 3]] \
+                    [expr $Y3 - $_lightSpace] \
+                    -outline black -fill white];
+        }
     }
 }
