@@ -1,0 +1,76 @@
+// -*- mode: text; tab-width: 4; -*-//
+// The contents of this file are subject to the Mozilla Public
+// License Version 1.1 (the "License"); you may not use this file
+// except in compliance with the License. You may obtain a copy of
+// the License at http://www.mozilla.org/MPL/
+// 
+// Software distributed under the License is distributed on an "AS
+// IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+// implied. See the License for the specific language governing
+// rights and limitations under the License.
+// 
+// The Original Code is State Map Compiler (SMC).
+// 
+// The Initial Developer of the Original Code is Charles W. Rapp.
+// Portions created by Charles W. Rapp are
+// Copyright (C) 2000 Charles W. Rapp.
+// All Rights Reserved.
+// 
+// Contributor(s): 
+//
+// State Map
+//	AppClass
+//
+// State Map
+//  This state map is recognizes the regular expression 0*1*.
+//
+// RCS ID
+// $Id$
+//
+// CHANGE LOG
+// $Log$
+// Revision 1.1  2001/01/03 03:14:00  cwrapp
+// Initial revision
+//
+// Revision 1.1.1.1  2000/08/02 12:51:02  charlesr
+// Initial source import, SMC v. 1.0, Beta 1.
+//
+
+%start Map1::Start
+%class AppClass
+%header AppClass.h
+
+%map Map1
+%%
+// State		Transition		End State		Action(s)
+Start {
+				Zero			Zeros			{}
+				One				Ones			{}
+				EOS				OK				{Acceptable();}
+}
+
+Zeros {
+				Zero			nil				{}
+				One				Ones			{}
+				EOS				OK				{Acceptable();}
+}
+
+Ones {
+				Zero			Error			{}
+				One				nil				{}
+				EOS				OK				{Acceptable();}
+}
+
+OK {}
+
+Error {
+				Zero			nil				{}
+				One				nil				{}
+				EOS				nil				{Unacceptable();}
+}
+
+Default	{
+				Unknown			Error			{}
+}
+
+%%

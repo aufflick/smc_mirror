@@ -1,0 +1,64 @@
+# 
+# The contents of this file are subject to the Mozilla Public
+# License Version 1.1 (the "License"); you may not use this file
+# except in compliance with the License. You may obtain a copy of
+# the License at http://www.mozilla.org/MPL/
+# 
+# Software distributed under the License is distributed on an "AS
+# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# rights and limitations under the License.
+# 
+# The Original Code is State Map Compiler (SMC).
+# 
+# The Initial Developer of the Original Code is Charles W. Rapp.
+# Portions created by Charles W. Rapp are
+# Copyright (C) 2000 Charles W. Rapp.
+# All Rights Reserved.
+# 
+# Contributor(s):
+#
+# RCS ID
+# $Id$
+#
+# CHANGE LOG
+# $Log$
+# Revision 1.1  2001/01/03 03:14:00  cwrapp
+# Initial revision
+#
+# Revision 1.2  2000/10/16 21:08:49  charlesr
+# Added MPL comments.
+#
+
+SM_SOURCES=	TcpConnection.sm
+
+SOURCES=	TcpConnectionContext.java \
+		AsyncTimer.java \
+		TimerListener.java \
+		AsyncDatagramSocket.java \
+		DatagramSocketListener.java \
+		TcpSegment.java \
+		TcpConnection.java \
+		TcpConnectionListener.java \
+		TcpClient.java \
+		TcpServer.java \
+		server.java \
+		client.java
+
+APP_CLASSPATH=	$(CLASSPATH):../../../lib/Java/statemap.jar
+
+JAVAC=		javac
+JAVAC_FLAGS=	-g -classpath $(APP_CLASSPATH)
+SMC=		java -jar ../../../bin/Smc.jar
+SMC_FLAGS=	-java -g
+
+%Context.java : %.sm
+		$(SMC) $(SMC_FLAGS) $<
+
+all :		tcpdemo
+
+tcpdemo :	$(SOURCES)
+		$(JAVAC) $(JAVAC_FLAGS) $(SOURCES)
+
+clean :
+		-rm -f *.class *Context.java

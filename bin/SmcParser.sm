@@ -1,0 +1,885 @@
+// -*- mode: text; tab-width: 4; mode: auto-fill -*-
+%{
+/*
+ * The contents of this file are subject to the Mozilla Public
+ * License Version 1.1 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of
+ * the License at http://www.mozilla.org/MPL/
+ * 
+ * Software distributed under the License is distributed on an "AS
+ * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+ * implied. See the License for the specific language governing
+ * rights and limitations under the License.
+ * 
+ * The Original Code is State Map Compiler (SMC).
+ * 
+ * The Initial Developer of the Original Code is Charles W. Rapp.
+ * Portions created by Charles W. Rapp are
+ * Copyright (C) 2000 Charles W. Rapp.
+ * All Rights Reserved.
+ * 
+ * Contributor(s): 
+ *
+ * smcParser --
+ *
+ *  This statemap defines the  state map language.
+ *
+ * RCS ID
+ * $Id$
+ *
+ * CHANGE LOG
+ * $Log$
+ * Revision 1.1  2001/01/03 03:13:59  cwrapp
+ * Initial revision
+ *
+ * Revision 1.2  2000/09/01 15:32:18  charlesr
+ * Changes for v. 1.0, Beta 2:
+ *
+ * + Removed order dependency on "%start", "%class" and "%header"
+ *   appearance. These three tokens may now appear in any order but
+ *   still must appear before the first map definition.
+ *
+ * + Modified SMC parser so that it will continue after finding an
+ *   error. Also improved the error message quality.
+ *
+ * + Made error messages so emacs is able to parse them.
+ *
+ * Revision 1.1.1.1  2000/08/02 12:50:56  charlesr
+ * Initial source import, SMC v. 1.0, Beta 1.
+ *
+ */
+%}
+
+%start ParserMap::Start
+%class SmcParser
+
+%map ParserMap
+%%
+Start
+{
+	// The statemap can start with an optional raw source code section or
+	// go straight to the map definitions.
+	SOURCE			Start2    			{addSource();
+                                         setHeaderLine();}
+
+    // The state map's start state and class name must be
+    // specified before the map name.
+    // The header file is optional since its name can be
+    // deduced from the class name (maybe). The class name
+    // and header file are ignored when generating Tcl code.
+    START_STATE     StateNameStart      {setHeaderLine();}
+    CLASS_NAME      ClassName           {setHeaderLine();}
+    HEADER_FILE     HeaderFile          {setHeaderLine();}
+
+    MAP_NAME        MapName             {error("%map not preceded by %start or %class.", false);
+                                         setHeaderLine();}
+
+	Default			StartError			{error("Excpecting \"%{ source %}\", %start, or %class.", false);}
+}
+
+// Remain in this start until a known good token is found.
+StartError
+{
+    // Do error checks first.
+    START_STATE [isStartStateSet();]
+                    nil                 {setHeaderLine();}
+    CLASS_NAME [isClassSet();]
+                    nil                 {setHeaderLine();}
+    HEADER_FILE [isHeaderSet();]
+                    nil                 {setHeaderLine();}
+
+    START_STATE     StateNameStart      {setHeaderLine();}
+    CLASS_NAME      ClassName           {setHeaderLine();}
+    HEADER_FILE     HeaderFile          {setHeaderLine();}
+    MAP_NAME        MapName             {setHeaderLine();}
+
+    Default         nil                 {}
+}
+
+Start2
+{
+    // Do error checks first.
+    START_STATE [isStartStateSet();]
+                    StartError          {warning("Start state already set - ignoring this %start.");
+                                         setHeaderLine();}
+    CLASS_NAME [isClassSet();]
+                    StartError          {warning("Class already set - ignoring this %class.");
+                                         setHeaderLine();}
+    HEADER_FILE [isHeaderSet();]
+                    StartError          {warning("Header already set - ignoring this %header.");
+                                         setHeaderLine();}
+
+    START_STATE     StateNameStart      {setHeaderLine();}
+    CLASS_NAME      ClassName           {setHeaderLine();}
+    HEADER_FILE     HeaderFile          {setHeaderLine();}
+
+	MAP_NAME		MapName				{setHeaderLine();}
+
+	Default			nil					{error("Expecting \"%start\", \"%class\" or \"%map\".", false);}
+}
+
+// The state name must be of the form "map::state".
+StateNameStart
+{
+    WORD            StateName1          {appendStartState();}
+
+    Default         StartError          {error("Missing state after %start.", false);}
+}
+
+StateName1
+{
+    COLON           StateName2          {appendStartState();}
+
+    Default         StartError          {error("%start must use a fully qualified state name.", false);}
+}
+
+StateName2
+{
+    COLON           StateName3          {appendStartState();}
+
+    Default         StartError          {error("%start must use a fully qualified state name.", false);}
+}
+
+StateName3
+{
+    WORD            Start2              {appendStartState();
+                                         setStartState();}
+
+    Default         StartError          {error("%start must use a fully qualified state name.", false);}
+}
+
+// Get the owning object's class name.
+ClassName
+{
+    // The next token must be the class name.
+    WORD            Start2              {setClassName();}
+
+    Default         Start2              {error("Missing class name after %class.", false);}
+}
+
+HeaderFile
+{
+    WORD            Start2              {setHeader();}
+
+    Default         Start2              {error("Missing header file after %header.", false);}
+}
+
+MapStart
+{
+	MAP_NAME		MapName				{}
+
+	Default			MapStartError		{error("Expecting %map.", false);}
+}
+
+MapStartError
+{
+    MAP_NAME        MapName             {}
+    Default         nil                 {}
+}
+
+MapName
+{
+    WORD [isDuplicateMap();]
+                    MapStates           {error("Duplicate map name.", false);
+                                         createMap();}
+
+	// The next word transition is the map's name.
+	WORD			MapStates			{createMap();}
+
+    EOD             States              {error("Name expected after \"%map\".", false);
+                                         createMap();}
+	Default			nil					{error("Name expected after \"%map\".", false);}
+}
+
+MapStates
+{
+	// %% marks the start of the map states.
+	EOD				States				{}
+
+    WORD            StateStart          {error("Expecting %% after \"%map mapname\".", false);
+                                         createState();}
+
+	Default			MapStatesError		{error("Expecting %% after \"%map mapname\".", false);}
+}
+
+MapStatesError
+{
+    EOD             States              {}
+    MAP_NAME        MapName             {addMap();}
+    WORD            StateStart          {createState();}
+
+    Default         nil                 {}
+}
+
+States
+{
+	// The "%%" means we have reached the end of this map's definition.
+	EOD				MapStart			{addMap();}
+
+	// A word is the next state's name.
+    WORD [isDuplicateState();]
+                    StateStart          {error("Duplicate state name.", false);
+                                         createState();}
+	WORD			StateStart			{createState();}
+
+    // Error transitions.
+    ENTRY           EntryStart          {error("Expecting either a new state definition or end of map (%%).", false);
+                                         createState();}
+    EXIT            ExitStart           {error("Expecting either a new state definition or end of map (%%).", false);
+                                         createState();}
+    LEFT_BRACE      Transitions         {error("Expecting either a new state definition or end of map (%%).", false);
+                                         createState();}
+    MAP_NAME        MapName             {error("Expecting \"%%\" before another \"%map\".", false);
+                                         addMap();}
+
+	Default			nil					{error("Expecting either a new state definition or end of map (%%).", false);}
+}
+
+StateStart
+{
+    // Check for repeat errors.
+    ENTRY [isEntrySet();]
+                    StateStartError     {warning("This state already has an entry action defined - ignoring this entry action.");}
+    EXIT [isExitSet();]
+                    StateStartError     {warning("This state already has an exit action defined - ignoring this exit action.");}
+
+	// This state has an entry actions.
+	ENTRY			EntryStart			{}
+
+	// This state has an exit action.
+	EXIT			ExitStart			{}
+
+	// The left brace marks the start of the transitions.
+	LEFT_BRACE		Transitions			{}
+
+	Default			StateStartError		{error("After the state name is given, then either an entry action, exit action or '{' is expected.", false);}
+}
+
+StateStartError
+{
+    ENTRY [isEntrySet();]
+                    StateStartError     {}
+    EXIT [isExitSet();]
+                    StateStartError     {}
+
+    ENTRY           EntryStart          {}
+    EXIT            ExitStart           {}
+    LEFT_BRACE      Transitions         {}
+
+    Default         nil                 {}
+}
+
+EntryStart
+{
+	LEFT_BRACE		push(ActionMap::MultiStart)	{}
+
+    // One entry action has been found. Check for more.
+	action_done		push(ActionMap::MultiStart)	{addEntryAction();}
+
+    // All actions have been found. Now go parse the
+    // state's transitions.
+    actions_done    StateStart          {}
+
+	Default			StateStartError		{error("A '{' is expected after Entry.", false);}
+}
+
+ExitStart
+{
+	LEFT_BRACE		push(ActionMap::MultiStart) {}
+
+    // One exit action has been found. Check for others.
+	action_done		push(ActionMap::MultiStart)	{addExitAction();}
+
+    // All exit actions have been found. Now parse the rest
+    // of the state.
+    actions_done    StateStart          {}
+
+	Default			StateStartError    	{error("A '{' is expected after Exit.", false);}
+}
+
+Transitions
+{
+	// A '}' is the end of the transitions.
+	// Look for the next state.
+	RIGHT_BRACE		States				{addState();}
+
+	// This is the transition name.
+	WORD			TransStart			{storeTransitionName();}
+
+	Default			TransError			{error("Expecting either a new transition or a '}'.", false);}
+}
+
+TransError
+{
+    RIGHT_BRACE     States              {addState();}
+	WORD			TransStart			{storeTransitionName();}
+
+    Default         nil                 {}
+}
+
+TransStart
+{
+    // A '(' means this transition has parameters.
+    LEFT_PAREN      TransParams         {createParameterList();}
+
+	// A '[' denotes a guard.
+	LEFT_BRACKET	push(ActionMap::Start) {createTransition();}
+
+	// The guard's condition has been found.
+	// Create a new guard object.
+	action_done		GuardEnd			{}
+
+    // Check for duplicate transitions.
+    PUSH [isDuplicateGuard();]
+                    PushStart           {error("Duplicate transition - duplicate ignored.", false);
+                                         createTransition();
+                                         createGuard();
+                                         setTransType("TRANS_PUSH");}
+    POP [isDuplicateGuard();]
+                    PopStart            {error("Duplicate transition - duplicate ignored.", false);
+                                         createTransition();
+                                         createGuard();
+                                         setTransType("TRANS_POP");}
+    WORD [isDuplicateGuard();]
+                    EndState1           {error("Duplicate transition - duplicate ignored.", false);
+                                         createTransition();
+                                         createGuard();
+                                         setTransType("TRANS_POP");
+                                         setEndState();}
+
+	PUSH			PushStart			{createTransition();
+                                         createGuard();
+										 setTransType("TRANS_PUSH");}
+	POP				PopStart			{createTransition();
+                                         createGuard();
+										 setTransType("TRANS_POP");}
+
+	// This word is the end state. Go to EndState1 in case this
+    // is a fully qualified state name.
+    WORD            EndState1           {createTransition();
+                                         createGuard();
+										 setTransType("TRANS_SET");
+										 setEndState();}
+
+	Default			TransStartError		{error("Expecting either a guard, push, pop or end state.", false);}
+}
+
+TransStartError
+{
+    // A '(' means this transition has parameters.
+    LEFT_PAREN      TransParams         {createParameterList();}
+
+    // A '[' means this transition is guarded.
+    LEFT_BRACKET    push(ActionMap::Start) {}
+    action_done     GuardEnd            {}
+
+    PUSH            PushStart           {createGuard();
+                                         setTransType("TRANS_PUSH");}
+    POP             PopStart            {createGuard();
+                                         setTransType("TRANS_POP");}
+    WORD            EndState1           {createGuard();
+										 setTransType("TRANS_SET");
+										 setEndState();}
+
+    Default         nil                 {}
+}
+
+TransNext
+{
+    // A '(' means this transition has parameters.
+    LEFT_PAREN
+                    TransNextError     {error("Transition parameters previously defined.", false);}
+
+	// A '[' denotes a guard.
+	LEFT_BRACKET	push(ActionMap::Start) {}
+
+	// The guard's condition has been found.
+	// Create a new guard object.
+	action_done		GuardEnd			{}
+
+    // Check for duplicate transitions.
+    PUSH [isDuplicateGuard();]
+                    PushStart           {error("Duplicate transition - duplicate ignored.", false);
+                                         createGuard();
+                                         setTransType("TRANS_PUSH");}
+    POP [isDuplicateGuard();]
+                    PopStart            {error("Duplicate transition - duplicate ignored.", false);
+                                         createGuard();
+                                         setTransType("TRANS_POP");}
+    WORD [isDuplicateGuard();]
+                    EndState1           {error("Duplicate transition - duplicate ignored.", false);
+                                         createGuard();
+                                         setTransType("TRANS_POP");
+                                         setEndState();}
+
+	PUSH			PushStart			{createGuard();
+										 setTransType("TRANS_PUSH");}
+	POP				PopStart			{createGuard();
+										 setTransType("TRANS_POP");}
+
+	// This word is the end state. Go to EndState1 in case this
+    // is a fully qualified state name.
+    WORD            EndState1           {createGuard();
+										 setTransType("TRANS_SET");
+										 setEndState();}
+
+	Default			TransNextError		{error("Expecting either a guard, push, pop or end state.", false);}
+}
+
+TransNextError
+{
+    // Transition parameters have already been defined.
+    LEFT_PAREN      nil                 {}
+
+    // A '[' means this transition is guarded.
+    LEFT_BRACKET    push(ActionMap::Start) {}
+    action_done     GuardEnd            {}
+
+    PUSH            PushStart           {createGuard();
+                                         setTransType("TRANS_PUSH");}
+    POP             PopStart            {createGuard();
+                                         setTransType("TRANS_POP");}
+    WORD            EndState1           {createGuard();
+										 setTransType("TRANS_SET");
+										 setEndState();}
+
+    Default         nil                 {}
+}
+
+TransParams
+{
+    // A ')' marks the end of the parameters. This only
+    // acceptable here if the parameter list is empty. Otherwise
+    // we are expecting more parameters.
+    RIGHT_PAREN [isTransParametersEmpty();]
+                    TransNext           {createTransition();
+                                         createGuard();}
+    RIGHT_PAREN     TransNext           {error("Expecting parameter name.", false);
+                                         createTransition();
+                                         createGuard();}
+
+    WORD            TransParamName      {createParameter();}
+
+    Default         TransParamsError    {error("Expecting parameter name.", false);}
+}
+
+TransParamName
+{
+    // Parameter name must be followed by a ':'.
+    COLON           TransParamType      {}
+
+    Default         TransParamsError    {error("A ':' must follow a paramater name.", false);}
+}
+
+TransParamType
+{
+    WORD            TransParamType2     {appendParameterType("");}
+
+    // Have to see at least one type name before a ')' or a ','.
+    Default         TransParamsError    {error("Expecting type name.", false);}
+}
+
+TransParamType2
+{
+    // A ')' marks the end of the parameters.
+    RIGHT_PAREN     TransNext           {addTransitionParameter();
+                                         createTransition();}
+
+    // A ',' marks the end of this parameter, to be followed by others.
+    COMMA           TransParams         {addTransitionParameter();}
+
+    WORD            TransParamType2     {appendParameterType(" ");}
+
+    // Non-word symbols may be appended only to the last type.
+    LEFT_BRACKET    TransParamType3     {appendParameterType("");}
+    ASTERISK        TransParamType3     {appendParameterType("");}
+    AMPERSAND       TransParamType3     {appendParameterType("");}
+
+    Default         TransParamsError    {error("Invalid type.", false);}
+}
+
+TransParamType3
+{
+    // At this point, only other non-word symbols or an
+    // end-of-type terminator will be accepted.
+    RIGHT_PAREN     TransNext           {addTransitionParameter();
+                                         createTransition();}
+    COMMA           TransParams         {addTransitionParameter();}
+
+    RIGHT_BRACKET   nil                 {appendParameterType("");}
+    ASTERISK        nil                 {appendParameterType("");}
+    AMPERSAND       nil                 {appendParameterType("");}
+
+    Default         TransParamsError    {error("Invalid type.", false);}
+}
+
+TransParamsError
+{
+    RIGHT_PAREN     TransNext           {addTransitionParameter();
+                                         createTransition();}
+    LEFT_BRACKET    push(ActionMap::Start) {addTransitionParameter();}
+    action_done     GuardEnd            {}
+
+    Default         nil                 {}
+}
+
+GuardEnd
+{
+	// A ']' denotes the end of the guard condition.
+	RIGHT_BRACKET	EndState			{}
+
+	Default			GuardEndError		{error("A ']' must terminate a transition guard", false);}
+}
+
+GuardEndError
+{
+	RIGHT_BRACKET	EndState			{}
+
+	Default			nil                 {}
+}
+
+EndState
+{
+    // Check for a duplicate guard.
+    PUSH [isDuplicateGuard();]
+                    PushStart           {error("Duplicate transition - duplicate ignored.", false);
+                                         createGuard();
+                                         setTransType("TRANS_PUSH");}
+    POP [isDuplicateGuard();]
+                    PopStart            {error("Duplicate transition - duplicate ignored.", false);
+                                         createGuard();
+                                         setTransType("TRANS_POP");}
+    WORD [isDuplicateGuard();]
+                    EndState1           {error("Duplicate transition - duplicate ignored.", false);
+                                         createGuard();
+                                         setTransType("TRANS_POP");
+                                         setEndState();}
+
+	PUSH			PushStart			{createGuard();
+                                         setTransType("TRANS_PUSH");}
+	POP				PopStart			{createGuard();
+                                         setTransType("TRANS_POP");}
+	WORD			EndState1			{createGuard();
+										 setTransType("TRANS_SET");
+										 setEndState();}
+
+	Default			EndStateError		{error("Expecting either \"push\", \"pop\" or end state.", false);}
+}
+
+EndStateError
+{
+    LEFT_BRACE      push(ActionMap::MultiStart) {}
+    action_done     push(ActionMap::MultiStart) {addAction();}
+    actions_done    Transitions         {addGuard();
+                                         addTransition();}
+    RIGHT_BRACE     Transitions         {addGuard();
+                                         addTransition();}
+
+    Default         nil                 {}
+}
+
+EndState1
+{
+	// This must be a fully qualified state name.
+	COLON			EndState2			{appendEndState();}
+
+	// A '{' denotes the start of the actions.
+	LEFT_BRACE		push(ActionMap::MultiStart)	{}
+
+	// There are still more actions to parse. Add this action to
+	// the in-progress guard's list.
+	action_done		push(ActionMap::MultiStart) {addAction();}
+
+	// All actions have been parsed. Go on to the next transition.
+	actions_done	Transitions			{addGuard();
+										 addTransition();}
+
+	Default			EndStateError		{error("Expecting a '{'.", false);}
+}
+
+EndState2
+{
+	COLON			EndState3			{appendEndState();}
+
+	Default			EndStateError		{error("Expecting another ':' (as in map::state).", false);}
+}
+
+EndState3
+{
+	WORD			ActionStart			{appendEndState();}
+
+	Default			EndStateError		{error("Expecting a state name (as in map::state)", false);}
+}
+
+PushStart
+{
+	LEFT_PAREN		PushMap				{}
+
+	Default			PushError			{error("push must be followed by a '('.", false);}
+}
+
+PushError
+{
+    RIGHT_PAREN     ActionStart         {}
+    LEFT_BRACE      push(ActionMap::MultiStart) {}
+    action_done     push(ActionMap::MultiStart) {addAction();}
+    actions_done    Transitions         {addGuard();
+                                         addTransition();}
+    RIGHT_BRACE     Transitions         {addGuard();
+                                         addTransition();}
+
+    Default         nil                 {}
+}
+
+PushMap
+{
+	// Is this a map name or a state name?
+	WORD			PushState1			{setEndState();}
+
+	Default			PushError			{error("Expecting a state name.", false);}
+}
+
+PushState1
+{
+	// Just the state name was provided.
+	RIGHT_PAREN		ActionStart			{}
+
+	// We have seen the map name. Now we are looking for the state.
+	COLON			PushState2			{appendEndState();}
+
+	Default			PushError   		{error("Expecting either ')' or ':' (as in map::state).", false);}
+}
+
+PushState2
+{
+	COLON			PushState3			{appendEndState();}
+
+	Default			PushError			{error("Expecting ':' (as in map::state).", false);}
+}
+
+PushState3
+{
+	WORD			PushEnd				{appendEndState();}
+
+	Default			PushError			{error("Expecting a state name (as in map::state).", false);}
+}
+
+PushEnd
+{
+	RIGHT_PAREN		ActionStart			{}
+
+	Default			PushError			{error("push transition must end in ')' (push(state)).", false);}
+}
+
+PopStart
+{
+	LEFT_PAREN		PopAction			{}
+
+	Default			PopError			{error("Expecting '(' after pop.", false);}
+}
+
+PopError
+{
+    RIGHT_PAREN     ActionStart         {}
+    LEFT_BRACE      push(ActionMap::MultiStart) {}
+    action_done     push(ActionMap::MultiStart) {addAction();}
+    actions_done    Transitions         {addGuard();
+                                         addTransition();}
+    RIGHT_BRACE     Transitions         {addGuard();
+                                         addTransition();}
+
+    Default         nil                 {}
+}
+
+PopAction
+{
+	RIGHT_PAREN		ActionStart			{}
+
+	WORD			PopEnd				{setEndState();}
+
+	Default			PopError			{error("Expecting either a pop transition or ')'.", false);}
+}
+
+PopEnd
+{
+	RIGHT_PAREN		ActionStart			{}
+
+	Default			PopError			{error("Expecting ')' to end the pop transition.", false);}
+}
+
+ActionStart
+{
+	// A '{' denotes the start of the actions.
+	LEFT_BRACE		push(ActionMap::MultiStart)	{}
+
+	// There are still more actions to parse. Add this action to
+	// the in-progress guard's list.
+	action_done		push(ActionMap::MultiStart) {addAction();}
+
+	// All actions have been parsed. Go on to the next transition.
+	actions_done	Transitions			{addGuard();
+										 addTransition();}
+
+	Default			ActionStartError	{error("A '{' must proceed any action definitions.", false);}
+}
+
+ActionStartError
+{
+	LEFT_BRACE		push(ActionMap::MultiStart)	{}
+	action_done		push(ActionMap::MultiStart) {addAction();}
+	actions_done	Transitions			{addGuard();
+										 addTransition();}
+    RIGHT_BRACE     Transitions			{addGuard();
+										 addTransition();}
+
+	Default			nil                 {}
+}
+
+%%
+
+//=========================================================================
+// ActionMap
+//	This map is used to parse a single action. Actions are of the form:
+//	WORD '(' {args} ')' ';'
+//
+%map ActionMap
+%%
+
+// Start here if you are looking for muliple actions.
+MultiStart
+{
+	RIGHT_BRACE		pop(actions_done)	{}
+
+	// This word is the action name.
+	WORD			ArgsStart			{createAction();}
+
+	Default			ActionStartError	{error("Expecting either a new action or a '}'.", false);}
+}
+
+// Start here if you are looking for a single action.
+Start
+{
+	// This word is the action name.
+	WORD			ArgsStart			{createAction();}
+
+    // A "!" means that this action is being negated.
+    // Probably being used as a guard.
+    EXCLAMATION     nil                 {setActionNegation();}
+
+	Default			ActionStartError	{error("Expecting action name.", false);}
+}
+
+ActionStartError
+{
+	WORD			ArgsStart			{createAction();}
+    EXCLAMATION     Start               {createAction();
+                                         setActionNegation();}
+    LEFT_PAREN      FirstArgument       {createAction();}
+	RIGHT_PAREN		ArgsEnd				{}
+    SEMICOLON       pop(action_done)    {}
+	RIGHT_BRACE		pop(actions_done)	{}
+
+    Default         nil                 {}
+}
+
+ArgsStart
+{
+	LEFT_PAREN		FirstArgument		{}
+
+    // Error transitions.
+    RIGHT_PAREN     ArgsEnd             {error("Expecting '(' after the action name.", false);}
+    SEMICOLON       pop(action_done)    {error("Expecting '(' after the action name.", false);}
+    RIGHT_BRACE     pop(actions_done)   {error("Expecting '(' after the action name.", false);}
+
+	Default			ArgsStartError		{error("Expecting '(' after the action name.", false);}
+}
+
+ArgsStartError
+{
+	LEFT_PAREN		FirstArgument		{}
+	RIGHT_PAREN		ArgsEnd				{}
+	SEMICOLON		pop(action_done)	{}
+	COMMA			Argument2			{}
+
+	VARIABLE		NextArgument		{addArgument();}
+	WORD			NextArgument		{addArgument();}
+	INTEGER			NextArgument		{addArgument();}
+	FLOAT			NextArgument		{addArgument();}
+	STRING			NextArgument		{addArgument();}
+
+    Default         nil                 {}
+}
+
+FirstArgument
+{
+	RIGHT_PAREN		ArgsEnd				{}
+
+    // Look for scoped variable names.
+	WORD			VarArg1        	    {createVariable();}
+
+	VARIABLE		NextArgument		{addArgument();}
+	INTEGER			NextArgument		{addArgument();}
+	FLOAT			NextArgument		{addArgument();}
+	STRING			NextArgument		{addArgument();}
+
+	Default			ArgsEndError		{error("Expecting either a valid argument or a ')'.", false);}
+}
+
+VarArg1
+{
+    COLON           VarArg2             {appendVariable();}
+
+    RIGHT_PAREN     ArgsEnd             {addVariable();}
+    COMMA           Argument2           {addVariable();}
+
+    Default         ArgsEndError        {error("Expecting either ',' or ')'.", false);}
+}
+
+VarArg2
+{
+    COLON           VarArgEnd           {appendVariable();}
+
+    Default         ArgsEndError        {error("Expecting ':' after first ':'.", false);}
+}
+
+VarArgEnd
+{
+    // Handle multiply scoped variables.
+    WORD            VarArg1            {appendVariable();}
+}
+
+NextArgument
+{
+	RIGHT_PAREN		ArgsEnd				{}
+
+	COMMA			Argument2			{}
+
+	Default			ArgsEndError		{error("Expecting either ',' or ')'.", false);}
+}
+
+Argument2
+{
+	WORD			VarArg1     		{createVariable();}
+	VARIABLE		NextArgument		{addArgument();}
+	INTEGER			NextArgument		{addArgument();}
+	FLOAT			NextArgument		{addArgument();}
+	STRING			NextArgument		{addArgument();}
+
+	Default			ArgsEndError		{error("An argument must either a variable, word, integer, float or a string.", false);}
+}
+
+ArgsEnd
+{
+	SEMICOLON		pop(action_done)	{}
+
+	Default			ArgsEndError		{error("Actions must be terminated with a ';'.", false);}
+}
+
+ArgsEndError
+{
+    SEMICOLON		pop(action_done)	{}
+
+    Default         nil                 {}
+}
+
+%%

@@ -1,0 +1,138 @@
+// -*- tab-width: 4; -*-
+//
+// The contents of this file are subject to the Mozilla Public
+// License Version 1.1 (the "License"); you may not use this file
+// except in compliance with the License. You may obtain a copy of
+// the License at http://www.mozilla.org/MPL/
+// 
+// Software distributed under the License is distributed on an "AS
+// IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+// implied. See the License for the specific language governing
+// rights and limitations under the License.
+// 
+// The Original Code is State Map Compiler (SMC).
+// 
+// The Initial Developer of the Original Code is Charles W. Rapp.
+// Portions created by Charles W. Rapp are
+// Copyright (C) 2000 Charles W. Rapp.
+// All Rights Reserved.
+// 
+// Contributor(s): 
+//
+// State Map
+//  Task
+//
+// Description
+//  A task's sole responsiblity is to execute. This state map
+//  is used to track whether the task is running, suspended,
+//  blocked or stopped.
+//
+// RCS ID
+// $Id$
+//
+// CHANGE LOG
+// $Log$
+// Revision 1.1  2001/01/03 03:14:00  cwrapp
+// Initial revision
+//
+// Revision 1.1.1.1  2000/08/02 12:51:03  charlesr
+// Initial source import, SMC v. 1.0, Beta 1.
+//
+
+%start ExecuteMap::Suspended
+%class Task
+
+%map ExecuteMap
+%%
+// A task begins life in suspended animation.
+Suspended
+{
+    Start       Running         {sendMessage(3, "Running.");
+                                 stateUpdate("Running");
+                                }
+}
+
+// This task is now running.
+Running
+Entry {setStartTime();
+       setRunTimer();
+      }
+Exit {setStopTime();
+      stopTimer("Done");
+     }
+{
+    Suspend     Suspended       {sendMessage(3, "Being suspended.");
+                                 stateUpdate("Suspended");
+                                 updateTaskMan("Task Suspended");
+                                 setSuspendTime();
+                                }
+
+    Done        StoppedState    {sendMessage(3, "Completed.");
+                                 stateUpdate("Done");
+                                 updateTaskMan("Task Done");
+                                 deregister();
+                                }
+}
+
+Blocked
+{
+    Unblock     Suspended       {sendMessage(3, "Unblocked.");
+                                 stateUpdate("Suspended");
+                                }
+
+    Block       nil             {}
+}
+
+Stopping
+{
+    Stopped     StoppedState    {sendMessage(3, "Stopped.");
+                                 stateUpdate("Stopped");
+                                 updateTaskMan("Task Stopped");
+                                 deregister();
+                                }
+
+    Delete      nil             {}
+}
+
+StoppedState
+{
+    // Now that the task is stopped, ignore
+    // requests to block or stop.
+    Block       nil             {}
+    Stop        nil             {}
+    Delete      nil             {}
+}
+
+Deleted
+{
+    Block       nil             {}
+    Stop        nil             {}
+    Delete      nil             {}
+}
+
+Default
+{
+    // Do blocks, stops and deletes immediately.
+    Block       Blocked         {sendMessage(3, "Blocked.");
+                                 stateUpdate("Blocked");
+                                 setSuspendTime();
+                                }
+    Stop        Stopping        {sendMessage(3, "Being stopped.");
+                                 setTimer("Stopped", 0);
+                                }
+    Delete      Deleted         {sendMessage(3, "Deleted.");
+                                 stateUpdate("Deleted");
+                                 updateTaskMan("Task Deleted");
+                                }
+
+    // Ignore all other transitions unless in the
+    // proper state.
+    Start       nil             {}
+    Started     nil             {}
+    Suspend     nil             {}
+    // Suspended   nil             {}
+    Unblock     nil             {}
+    Done        nil             {}
+}
+
+%%
