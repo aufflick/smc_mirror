@@ -2,8 +2,8 @@
 
 
                               SMC -
-                     The State Map Compiler
-                      Version 1.0.2
+                  The State Machine Compiler
+                        Version 1.0.2
 
 
 
@@ -18,8 +18,8 @@ is still "statemap".
 
 
                               SMC -
-                     The State Map Compiler
-                      Version 1.0.1
+                  The State Machine Compiler
+                        Version 1.0.1
 
 
 + Bug Fixes - Default transitions
@@ -47,7 +47,7 @@ machine can be accessed from multiple threads safely.
 
 
                               SMC -
-                     The State Map Compiler
+                   The State Machine Compiler
                       Version 1.0.0, Beta 4
 
 
@@ -96,7 +96,7 @@ as follows, depending on the transition type:
 
 
                               SMC -
-                     The State Map Compiler
+                   The State Machine Compiler
                       Version 1.0, Beta 3
 
 
@@ -157,16 +157,16 @@ insidous bugs that are difficult to find:
 
 So, I have decided to punt on transition queuing and leave it up
 to the developer to handle this problem. Objects can now query
-their state map context to see if a transition is in progress:
+their state machine context to see if a transition is in progress:
 
     bool AppClassContext::isInTransition();
 
-If the state map is in transition, then true is returned. The
+If the state machine is in transition, then true is returned. The
 application must not issue a transition now and should queue up
 that transition for later. If isInTransition() returns false,
 then a transition may be issued.
 
 I have added a lengthy discussion to the SMC Programmer's Manual
-discussing how to develop state maps which avoid this
+discussing how to develop state machines which avoid this
 transition-within-transition problem. In fact, I describe how to
-design state maps in general.
+design state machines in general.

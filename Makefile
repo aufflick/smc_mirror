@@ -9,7 +9,7 @@
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
 # 
-# The Original Code is State Map Compiler (SMC).
+# The Original Code is State Machine Compiler (SMC).
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
@@ -23,19 +23,11 @@
 #
 # CHANGE LOG
 # $Log$
-# Revision 1.4  2002/02/13 02:45:22  cwrapp
-# Changes in release 1.2.0:
-# Added the following features:
-# + 484889: "pop" transitions can now return arguments
-#           along with a transition name.
-# + 496625: Multiple .sm files may be specified in the
-#           compile command.
-#
-# Fixed the following bugs:
-# + 496692: Fixed the %package C++ code generation.
-# + 501157: Transition debug output was still hardcoded
-#           to System.err. This has been corrected so
-#           that FSMContext._debug_stream is used.
+# Revision 1.5  2002/02/19 19:52:45  cwrapp
+# Changes in release 1.3.0:
+# Add the following features:
+# + 479555: Added subroutine/method calls as argument types.
+# + 508878: Added %import keyword.
 #
 # Revision 1.3  2001/11/30 15:17:22  cwrapp
 # Changes in release 1.0.2:
@@ -55,7 +47,7 @@
 # Initial add to repository.
 #
 
-VERSION=	1_2_0
+VERSION=	1_3_0
 
 STAGING_DIR=	../staging
 SMC_STAGING_DIR=$(STAGING_DIR)/smc

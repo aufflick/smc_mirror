@@ -9,7 +9,7 @@
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
-// The Original Code is State Map Compiler (SMC).
+// The Original Code is State Machine Compiler (SMC).
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
@@ -29,6 +29,12 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2002/02/19 19:52:47  cwrapp
+// Changes in release 1.3.0:
+// Add the following features:
+// + 479555: Added subroutine/method calls as argument types.
+// + 508878: Added %import keyword.
+//
 // Revision 1.1  2001/06/26 22:16:24  cwrapp
 // Changes in release 1.0.0:
 // Checking in code for first production release.
@@ -57,6 +63,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.swing.JButton;
@@ -117,8 +124,8 @@ public final class Telephone
         _loadSounds();
         _loadUI(pane);
 
-        // Create the state map to drive this object.
-        _statemap = new TelephoneContext(this);
+        // Create the state machine to drive this object.
+        _fsm = new TelephoneContext(this);
     }
 
     public void issueTimeout(String timer)
@@ -126,7 +133,7 @@ public final class Telephone
         TelephoneTimer task =
             (TelephoneTimer) _timerMap.remove(timer);
 
-        if (task != null && _statemap != null)
+        if (task != null && _fsm != null)
         {
             try
             {
@@ -137,7 +144,7 @@ public final class Telephone
                 if (transition != null)
                 {
                     args = new Object[0];
-                    transition.invoke(_statemap, args);
+                    transition.invoke(_fsm, args);
                 }
             }
             catch (IllegalAccessException accex)
@@ -218,13 +225,16 @@ public final class Telephone
     //
 
     // Use a separate thread to route the call asynchronously.
-    public void routeCall()
+    public void routeCall(String callType,
+                          String areaCode,
+                          String exchange,
+                          String local))
     {
         CallRoutingThread thread =
-            new CallRoutingThread(_callType,
-                                  _areaCode,
-                                  _exchange,
-                                  _local,
+            new CallRoutingThread(callType,
+                                  areaCode,
+                                  exchange,
+                                  local,
                                   this);
 
         thread.start();
@@ -506,10 +516,20 @@ public final class Telephone
         return;
     }
 
+    public void getType()
+    {
+        return (_callType);
+    }
+
     public void setType(int type)
     {
         _callType = type;
         return;
+    }
+
+    public void getAreaCode()
+    {
+        return (_areaCode);
     }
 
     public void saveAreaCode(String n)
@@ -520,12 +540,22 @@ public final class Telephone
         return;
     }
 
+    public void getExchange()
+    {
+        return (_exchange);
+    }
+
     public void saveExchange(String n)
     {
         _exchange += n;
         addDisplay(n);
 
         return;
+    }
+
+    public void getLocal()
+    {
+        return (_local);
     }
 
     public void saveLocal(String n)
@@ -871,11 +901,11 @@ public final class Telephone
 
                         if (command.compareTo("off hook") == 0)
                         {
-                            _statemap.OffHook();
+                            _fsm.OffHook();
                         }
                         else if (command.compareTo("on hook") == 0)
                         {
-                            _statemap.OnHook();
+                            _fsm.OnHook();
                         }
                         else
                         {
@@ -914,7 +944,7 @@ public final class Telephone
                 new ActionListener() {
                     public void actionPerformed(ActionEvent e) 
                     {
-                        _statemap.Digit(e.getActionCommand());
+                        _fsm.Digit(e.getActionCommand());
                     }
                 }
             );
@@ -1207,7 +1237,7 @@ public final class Telephone
     private void _playbackDone(PlaybackThread thread)
     {
         _playbackThread = null;
-        _statemap.PlaybackDone();
+        _fsm.PlaybackDone();
     }
 
     private void _callRoute(int route)
@@ -1215,27 +1245,27 @@ public final class Telephone
         switch (route)
         {
             case EMERGENCY:
-                _statemap.Emergency();
+                _fsm.Emergency();
                 break;
 
             case NYC_TEMP:
-                _statemap.NYCTemp();
+                _fsm.NYCTemp();
                 break;
 
             case TIME:
-                _statemap.Time();
+                _fsm.Time();
                 break;
 
             case DEPOSIT_MONEY:
-                _statemap.DepositMoney();
+                _fsm.DepositMoney();
                 break;
 
             case LINE_BUSY:
-                _statemap.LineBusy();
+                _fsm.LineBusy();
                 break;
 
             case INVALID_NUMBER:
-                _statemap.InvalidNumber();
+                _fsm.InvalidNumber();
                 break;
         }
 
@@ -1245,7 +1275,7 @@ public final class Telephone
 // Member data.
 
     // The telphone state machine.
-    private TelephoneContext _statemap;
+    private TelephoneContext _fsm;
 
     // The type of call being dialed.
     private int _callType;
@@ -1267,13 +1297,13 @@ public final class Telephone
 
     // Zounds! It's sounds!
     private AudioClip[] _dtmf;
-    private HashMap _audioMap;
+    private Map _audioMap;
     private PlaybackThread _playbackThread;
 
     // Timer objects.
-    private HashMap _timerMap;
+    private Map _timerMap;
     private static Timer _timer;
-    private static HashMap _timerTransitionMap;
+    private static Map _timerTransitionMap;
 
     // The telephone's time display.
     private static SimpleDateFormat _ClockFormatter = null;

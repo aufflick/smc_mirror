@@ -9,7 +9,7 @@
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
-// The Original Code is  State Map Compiler(SMC).
+// The Original Code is  State Machine Compiler(SMC).
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
@@ -24,10 +24,16 @@
 // statemap.java --
 //
 //  This package defines the FSMContext class which must be inherited by
-//  any Java class wanting to use an smc-generated state map.
+//  any Java class wanting to use an smc-generated state machine.
 //
 // Change Log
 // $Log$
+// Revision 1.2  2002/02/19 19:52:48  cwrapp
+// Changes in release 1.3.0:
+// Add the following features:
+// + 479555: Added subroutine/method calls as argument types.
+// + 508878: Added %import keyword.
+//
 // Revision 1.1  2001/06/26 22:16:24  cwrapp
 // Changes in release 1.0.0:
 // Checking in code for first production release.
@@ -43,7 +49,7 @@ package statemap;
  * which:
  * <ol>
  *   <li>Is not explicitly defined in the current state.
- *   <li>Is not explicitly defined in the current map's default
+ *   <li>Is not explicitly defined in the current FSM's default
  *       state.
  *   <li>There is no Default transition in the current state.
  * </ol>

@@ -9,7 +9,7 @@
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
-// The Original Code is State Map Compiler (SMC).
+// The Original Code is State Machine Compiler (SMC).
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
@@ -29,6 +29,12 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2002/02/19 19:52:47  cwrapp
+// Changes in release 1.3.0:
+// Add the following features:
+// + 479555: Added subroutine/method calls as argument types.
+// + 508878: Added %import keyword.
+//
 // Revision 1.2  2001/05/09 23:40:02  cwrapp
 // Changes in release 1.0, beta 6:
 // Fixes the four following bugs:
@@ -53,6 +59,12 @@
 // more information.
 //
 // $Log$
+// Revision 1.3  2002/02/19 19:52:47  cwrapp
+// Changes in release 1.3.0:
+// Add the following features:
+// + 479555: Added subroutine/method calls as argument types.
+// + 508878: Added %import keyword.
+//
 // Revision 1.2  2001/05/09 23:40:02  cwrapp
 // Changes in release 1.0, beta 6:
 // Fixes the four following bugs:
@@ -108,6 +120,10 @@ CLOSED
 
     AcceptOpen(segment: TcpSegment)
                  SYN_RCVD      {sendAcceptSynAck(segment);}
+
+    // Ignore undefined transtions when closed.
+    UNDEF(segment: TcpSegment)
+		nil	       {}
 
     // Ignore close requests when closed.
     Close       nil            {}
@@ -377,6 +393,10 @@ Exit  {stopTimer("CLOSE_ACK_TIMER");}
     CloseAckTimeout
                 TIME_WAIT      {closeSocket();
                                 closed("");}
+
+    // Ignore undefined transitions.
+    UNDEF(segment: TcpSegment)
+		nil	       {}
 }
 
 TIME_WAIT
@@ -385,6 +405,10 @@ Entry {startTimer("CLOSE_TIMER", TcpConnection.CLOSE_TIMEOUT);}
     CloseTimeout
                 CLOSED         {closeSocket();
                                 closed("");}
+
+    // Ignore undefined transitions.
+    UNDEF(segment: TcpSegment)
+		nil	       {}
 }
 
 Default

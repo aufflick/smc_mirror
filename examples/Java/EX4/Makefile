@@ -9,7 +9,7 @@
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
 # 
-# The Original Code is State Map Compiler (SMC).
+# The Original Code is State Machine Compiler (SMC).
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
@@ -23,19 +23,11 @@
 #
 # CHANGE LOG
 # $Log$
-# Revision 1.4  2002/02/13 02:45:23  cwrapp
-# Changes in release 1.2.0:
-# Added the following features:
-# + 484889: "pop" transitions can now return arguments
-#           along with a transition name.
-# + 496625: Multiple .sm files may be specified in the
-#           compile command.
-#
-# Fixed the following bugs:
-# + 496692: Fixed the %package C++ code generation.
-# + 501157: Transition debug output was still hardcoded
-#           to System.err. This has been corrected so
-#           that FSMContext._debug_stream is used.
+# Revision 1.5  2002/02/19 19:52:46  cwrapp
+# Changes in release 1.3.0:
+# Add the following features:
+# + 479555: Added subroutine/method calls as argument types.
+# + 508878: Added %import keyword.
 #
 # Revision 1.3  2001/12/14 20:10:37  cwrapp
 # Changes in release 1.1.0:
@@ -107,10 +99,10 @@ SOURCES=	$(SM_SOURCES:%.sm=%Context.java) \
 
 PACKAGE_DIR=	smc_ex4
 
-STATEMAP_LIB_DIR=	../../../lib
+FSM_LIB_DIR=	../../../lib
 
 JAVAC=		javac
-JAVAC_FLAGS=	-d . -g -classpath $(STATEMAP_LIB_DIR)
+JAVAC_FLAGS=	-d . -g -classpath $(FSM_LIB_DIR)
 SMC=		java -jar ../../../bin/Smc.jar
 SMC_FLAGS=	-java -g -sync
 JAR=		jar
@@ -128,7 +120,7 @@ $(TARGET) :	$(SOURCES)
 		$(JAR) $(JAR_CREATE_FLAGS) $(TARGET) \
 			$(PACKAGE_DIR)/*.class
 		$(JAR) $(JAR_UPDATE_FLAGS) $(TARGET) \
-			-C $(STATEMAP_LIB_DIR) statemap
+			-C $(FSM_LIB_DIR) statemap
 
 clean :
 		-rm -f *Context.java $(PACKAGE_DIR)/*.class $(TARGET)

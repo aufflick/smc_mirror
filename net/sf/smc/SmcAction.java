@@ -9,7 +9,7 @@
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
-// The Original Code is State Map Compiler (SMC).
+// The Original Code is State Machine Compiler (SMC).
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
@@ -20,7 +20,7 @@
 //
 // SmcAction --
 //
-//  Stores a state map action. May be associated with a
+//  Stores a state machine action. May be associated with a
 //  transition, a state's entry or exit.
 //
 // RCS ID
@@ -28,19 +28,11 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.3  2002/02/13 02:45:23  cwrapp
-// Changes in release 1.2.0:
-// Added the following features:
-// + 484889: "pop" transitions can now return arguments
-//           along with a transition name.
-// + 496625: Multiple .sm files may be specified in the
-//           compile command.
-//
-// Fixed the following bugs:
-// + 496692: Fixed the %package C++ code generation.
-// + 501157: Transition debug output was still hardcoded
-//           to System.err. This has been corrected so
-//           that FSMContext._debug_stream is used.
+// Revision 1.4  2002/02/19 19:52:49  cwrapp
+// Changes in release 1.3.0:
+// Add the following features:
+// + 479555: Added subroutine/method calls as argument types.
+// + 508878: Added %import keyword.
 //
 // Revision 1.2  2001/12/14 20:10:37  cwrapp
 // Changes in release 1.1.0:
@@ -180,16 +172,16 @@ public abstract class SmcAction
             {
                 ListIterator it1;
                 ListIterator it2;
-                String arg1;
-                String arg2;
+                SmcArgument arg1;
+                SmcArgument arg2;
 
                 for (it1 = _arguments.listIterator(),
                          it2 = action.getArguments().listIterator();
                      it1.hasNext() == true && retval == 0;
                     )
                 {
-                    arg1 = (String) it1.next();
-                    arg2 = (String) it2.next();
+                    arg1 = (SmcArgument) it1.next();
+                    arg2 = (SmcArgument) it2.next();
                     retval = arg1.compareTo(arg2);
                 }
             }

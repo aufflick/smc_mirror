@@ -9,7 +9,7 @@
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
-// The Original Code is State Map Compiler (SMC).
+// The Original Code is State Machine Compiler (SMC).
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
@@ -23,19 +23,11 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.3  2002/02/13 02:45:23  cwrapp
-// Changes in release 1.2.0:
-// Added the following features:
-// + 484889: "pop" transitions can now return arguments
-//           along with a transition name.
-// + 496625: Multiple .sm files may be specified in the
-//           compile command.
-//
-// Fixed the following bugs:
-// + 496692: Fixed the %package C++ code generation.
-// + 501157: Transition debug output was still hardcoded
-//           to System.err. This has been corrected so
-//           that FSMContext._debug_stream is used.
+// Revision 1.4  2002/02/19 19:52:49  cwrapp
+// Changes in release 1.3.0:
+// Add the following features:
+// + 479555: Added subroutine/method calls as argument types.
+// + 508878: Added %import keyword.
 //
 // Revision 1.2  2001/12/14 20:10:37  cwrapp
 // Changes in release 1.1.0:
@@ -234,7 +226,7 @@ public final class SmcGuardCpp
             _trans_type == Smc.TRANS_POP)
         {
             source.println(indent2 +
-                           "(s.getState()).Exit(s);");
+                           "(context.getState()).Exit(context);");
         }
 
         // Now that the necessary conditions are in place, it's
@@ -263,7 +255,7 @@ public final class SmcGuardCpp
                                context +
                                "State& " +
                                endStateName +
-                               " = s.getState();\n");
+                               " = context.getState();\n");
             }
             else if (_trans_type == Smc.TRANS_PUSH)
             {
@@ -276,7 +268,7 @@ public final class SmcGuardCpp
                 source.println("\n" +
                                indent2 +
                                context +
-                               "State& CurrentState = s.getState();\n");
+                               "State& CurrentState = context.getState();\n");
             }
             else
             {
@@ -285,7 +277,7 @@ public final class SmcGuardCpp
 
             // Now that we are in the transition, clear the
             // current state since we are no longer in a state.
-            source.println(indent2 + "s.clearState();");
+            source.println(indent2 + "context.clearState();");
         }
 
         // Dump out this transition's actions.
@@ -314,7 +306,7 @@ public final class SmcGuardCpp
              isLoopback(stateName) == false))
         {
             source.println(indent2 +
-                           "s.setState(" +
+                           "context.setState(" +
                            endStateName +
                            ");");
         }
@@ -326,7 +318,7 @@ public final class SmcGuardCpp
             if (_actions.size() > 0)
             {
                 source.println(indent2 +
-                               "s.setState(CurrentState);");
+                               "context.setState(CurrentState);");
             }
 
             // If pushing to the "nil" state, then use the
@@ -334,19 +326,19 @@ public final class SmcGuardCpp
             if (endStateName.compareTo("nil") == 0)
             {
                 source.println(indent2 +
-                               "s.pushState(currentState);");
+                               "context.pushState(currentState);");
             }
             else
             {
                 source.println(indent2 +
-                               "s.pushState(" +
+                               "context.pushState(" +
                                endStateName +
                                ");");
             }
         }
         else if (_trans_type == Smc.TRANS_POP)
         {
-            source.println(indent2 + "s.popState();");
+            source.println(indent2 + "context.popState();");
         }
 
         // TODO
@@ -362,7 +354,7 @@ public final class SmcGuardCpp
              _trans_type == Smc.TRANS_PUSH)
         {
             source.println(indent2 +
-                           "(s.getState()).Entry(s);");
+                           "(context.getState()).Entry(context);");
         }
 
         // If there is a transition associated with the pop, then
@@ -371,10 +363,26 @@ public final class SmcGuardCpp
             _end_state.compareTo("nil") != 0 &&
             _end_state.length() > 0)
         {
-            source.println(indent2 +
-                           "(s.getState())." +
-                           _end_state +
-                           "(s);");
+            ListIterator ait;
+            SmcArgument arg;
+
+            source.print(indent2 +
+                         "(context.getState())." +
+                         _end_state +
+                         "(context");
+
+            // Output any and all pop arguments.
+            for (ait = _pop_args.listIterator();
+                 ait.hasNext() == true;
+                )
+            {
+                arg = (SmcArgument) ait.next();
+
+                source.print(", ");
+                arg.generateCode(source);
+            }
+
+            source.println(");");
         }
 
         // If this is a guarded transition, it will be necessary

@@ -444,7 +444,7 @@ EXHIBIT A -Mozilla Public License.
      License for the specific language governing rights and limitations
      under the License.
 
-     The Original Code is _State_Map_Compiler_(SMC)____________.
+     The Original Code is _State_Machine_Compiler_(SMC)____________.
 
      The Initial Developer of the Original Code is _Charles W. Rapp_______.
      Portions created by _Charles W. Rapp______ are Copyright (C) ______

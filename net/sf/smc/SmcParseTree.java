@@ -9,7 +9,7 @@
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
-// The Original Code is State Map Compiler (SMC).
+// The Original Code is State Machine Compiler (SMC).
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
@@ -23,6 +23,12 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2002/02/19 19:52:49  cwrapp
+// Changes in release 1.3.0:
+// Add the following features:
+// + 479555: Added subroutine/method calls as argument types.
+// + 508878: Added %import keyword.
+//
 // Revision 1.2  2001/12/14 20:10:37  cwrapp
 // Changes in release 1.1.0:
 // Add the following features:
@@ -103,6 +109,7 @@ public abstract class SmcParseTree
         _context = "";
         _header = "";
         _package = null;
+        _importList = (List) new LinkedList();
         _header_line = 1;
         _maps = (List) new LinkedList();
     }
@@ -166,6 +173,17 @@ public abstract class SmcParseTree
     {
         _package = pkg;
         return;
+    }
+
+    public void addImport(String name)
+    {
+        _importList.add(name);
+        return;
+    }
+
+    public int getImportCount()
+    {
+        return (_importList.size());
     }
 
     public SmcMap findMap(String name)
@@ -494,6 +512,9 @@ public abstract class SmcParseTree
 
     // This code is placed in this package/namespace.
     protected String _package;
+
+    // Placed names of imports in this list.
+    protected List _importList;
 
     // The line where %start, etc. should appear.
     // Used in error messages.

@@ -9,7 +9,7 @@
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
-// The Original Code is State Map Compiler (SMC).
+// The Original Code is State Machine Compiler (SMC).
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
@@ -30,6 +30,12 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2002/02/19 19:52:47  cwrapp
+// Changes in release 1.3.0:
+// Add the following features:
+// + 479555: Added subroutine/method calls as argument types.
+// + 508878: Added %import keyword.
+//
 // Revision 1.2  2001/05/09 23:40:02  cwrapp
 // Changes in release 1.0, beta 6:
 // Fixes the four following bugs:
@@ -76,12 +82,12 @@
 import javax.swing.Timer;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.ListIterator;
-import java.util.HashMap;
-import java.util.Set;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 public final class TaskManager
     implements TaskEventListener
@@ -98,10 +104,10 @@ public final class TaskManager
         _timerTable = new HashMap();
         _exitCode = 0;
 
-        _statemap = new TaskManagerContext(this);
+        _fsm = new TaskManagerContext(this);
 
         // Uncomment to see debug output.
-        // _statemap.setDebugFlag(true);
+        // _fsm.setDebugFlag(true);
 
         // Register with the controller.
         control.register("Task Manager", this);
@@ -138,7 +144,7 @@ public final class TaskManager
                         Integer.toString(time) +
                         ").");
 
-            _statemap.TaskCreated();
+            _fsm.TaskCreated();
         }
 
         return;
@@ -227,7 +233,7 @@ public final class TaskManager
                 _blockedTaskList.remove(taskIndex);
                 _runnableTaskQueue.add(task);
 
-                _statemap.TaskUnblocked();
+                _fsm.TaskUnblocked();
             }
         }
 
@@ -252,7 +258,7 @@ public final class TaskManager
     // Shutting down the application.
     public void shutdown()
     {
-        _statemap.Shutdown();
+        _fsm.Shutdown();
         return;
     }
 
@@ -275,7 +281,7 @@ public final class TaskManager
             if (task == _runningTask)
             {
                 _runningTask = null;
-                _statemap.TaskDone();
+                _fsm.TaskDone();
             }
             else if ((taskIndex =
                       _runnableTaskQueue.indexOf(task)) >= 0)
@@ -307,7 +313,7 @@ public final class TaskManager
         {
             sendMessage(1, "Task " + taskName + " is stopped.");
             _blockedTaskList.remove(taskIndex);
-            _statemap.TaskStopped();
+            _fsm.TaskStopped();
         }
         else
         {
@@ -333,7 +339,7 @@ public final class TaskManager
             if (task == _runningTask)
             {
                 _runningTask = null;
-                _statemap.TaskDeleted();
+                _fsm.TaskDeleted();
             }
             else if ((taskIndex = _runnableTaskQueue.indexOf(task))
                          >= 0)
@@ -351,11 +357,11 @@ public final class TaskManager
     }
 
     //===========================================================
-    // State map actions.
+    // State machine actions.
     //
 
     // Create a timer for the specified period. When the timer
-    // expires, issue the corresponding state map transition.
+    // expires, issue the corresponding state machine transition.
     public void setTimer(String name, int period)
     {
         Timer timer;
@@ -398,7 +404,7 @@ public final class TaskManager
     public void sendMessage(int level, String message)
     {
         TaskController control = new TaskController();
-        HashMap args = new HashMap();
+        Map args = new HashMap();
 
         args.put("level", new Integer(level));
         args.put("object", "TaskManager");
@@ -657,10 +663,10 @@ public final class TaskManager
         return(findTask(name) == null ? false : true);
     }
 
-    // Issue the state map transition associated with this timer
+    // Issue the state machine transition associated with this timer
     // name. Also, remove the now defunct timer from the timer
     // table.
-    public void handleEvent(String eventName, HashMap args)
+    public void handleEvent(String eventName, Map args)
     {
         String taskName;
 
@@ -678,15 +684,15 @@ public final class TaskManager
         }
         else if (eventName.compareTo("Run Task") == 0)
         {
-            _statemap.RunTask();
+            _fsm.RunTask();
         }
         else if (eventName.compareTo("Slice Timeout") == 0)
         {
-            _statemap.SliceTimeout();
+            _fsm.SliceTimeout();
         }
         else if (eventName.compareTo("Reply Timeout") == 0)
         {
-            _statemap.ReplyTimeout();
+            _fsm.ReplyTimeout();
         }
         else if (eventName.compareTo("Suspend Task") == 0)
         {
@@ -715,7 +721,7 @@ public final class TaskManager
                         taskName +
                         " has been suspended.");
 
-            _statemap.TaskSuspended();
+            _fsm.TaskSuspended();
         }
         else if (eventName.compareTo("Task Done") == 0)
         {
@@ -739,7 +745,7 @@ public final class TaskManager
             exitCode = (Integer) args.get("Exit Code");
             _exitCode = exitCode.intValue();
 
-            _statemap.Shutdown();
+            _fsm.Shutdown();
         }
         else if (eventName.compareTo("Exit") == 0)
         {
@@ -747,7 +753,7 @@ public final class TaskManager
         }
         else if (eventName.compareTo("ShutdownTimeout") == 0)
         {
-            _statemap.ShutdownTimeout();
+            _fsm.ShutdownTimeout();
         }
 
         return;
@@ -755,7 +761,7 @@ public final class TaskManager
 
 // Member Data.
 
-    private TaskManagerContext _statemap;
+    private TaskManagerContext _fsm;
 
     // Runnable task queue, sorted by priority.
     private LinkedList _runnableTaskQueue;
@@ -767,7 +773,7 @@ public final class TaskManager
     private Task _runningTask;
 
     // Task manager's various timers.
-    private HashMap _timerTable;
+    private Map _timerTable;
 
     // The application's exit code.
     private int _exitCode;
@@ -786,7 +792,7 @@ public final class TaskManager
 
         public void actionPerformed(ActionEvent e)
         {
-            HashMap args = new HashMap();
+            Map args = new HashMap();
 
             _owner.handleEvent(_timerName, args);
             return;

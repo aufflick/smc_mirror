@@ -9,7 +9,7 @@
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
-// The Original Code is State Map Compiler (SMC).
+// The Original Code is State Machine Compiler (SMC).
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
@@ -23,6 +23,12 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2002/02/19 19:52:49  cwrapp
+// Changes in release 1.3.0:
+// Add the following features:
+// + 479555: Added subroutine/method calls as argument types.
+// + 508878: Added %import keyword.
+//
 // Revision 1.1  2001/12/03 14:14:03  cwrapp
 // Changes in release 1.0.2:
 // + Placed the class files in Smc.jar in the net.sf.smc package.
@@ -90,7 +96,7 @@ public final class SmcActionJava
                              String indent)
     {
         ListIterator argueIt;
-        String argument;
+        SmcArgument argument;
         String separator;
 
         // Need to distinguish between FSMContext actions and
@@ -101,7 +107,7 @@ public final class SmcActionJava
         {
             source.print(indent +
                          _negation +
-                         "s." +
+                         "context." +
                          _name +
                          "(");
         }
@@ -109,7 +115,7 @@ public final class SmcActionJava
         {
             source.print(indent +
                          _negation +
-                         "(s.getOwner())." +
+                         "ctxt." +
                          _name +
                          "(");
         }
@@ -119,11 +125,12 @@ public final class SmcActionJava
              argueIt.hasNext() == true;
              separator = ", ")
         {
-            argument = (String) argueIt.next();
+            argument = (SmcArgument) argueIt.next();
 
             // If this is not the first argument, then put ", "
             // before the argument.
-            source.print(separator + argument);
+            source.print(separator);
+            argument.generateCode(source);
         }
 
         source.print(")");

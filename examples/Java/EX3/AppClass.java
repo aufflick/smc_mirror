@@ -9,7 +9,7 @@
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
-// The Original Code is State Map Compiler (SMC).
+// The Original Code is State Machine Compiler (SMC).
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
@@ -22,7 +22,7 @@
 //	AppClass
 //
 // Description
-//	When a state map executes an action, it is really calling a
+//	When a state machine executes an action, it is really calling a
 //  member function in the context class.
 //
 // RCS ID
@@ -30,8 +30,35 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.1  2001/01/03 03:14:00  cwrapp
-// Initial revision
+// Revision 1.2  2002/02/19 19:52:46  cwrapp
+// Changes in release 1.3.0:
+// Add the following features:
+// + 479555: Added subroutine/method calls as argument types.
+// + 508878: Added %import keyword.
+//
+// Revision 1.1.1.2  2001/03/26 14:41:47  cwrapp
+// Corrected Entry/Exit action semantics. Exit actions are now
+// executed only by simple transitions and pop transitions.
+// Entry actions are executed by simple transitions and push
+// transitions. Loopback transitions do not execute either Exit
+// actions or entry actions. See SMC Programmer's manual for
+// more information.
+//
+// Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
+//
+// ----------------------------------------------------------------------
+// SMC - The State Map Compiler
+// Version: 1.0, Beta 3
+//
+// SMC compiles state map descriptions into a target object oriented
+// language. Currently supported languages are: C++, Java and [incr Tcl].
+// SMC finite state machines have such features as:
+// + Entry/Exit actions for states.
+// + Transition guards
+// + Transition arguments
+// + Push and Pop transitions.
+// + Default transitions. 
+// ----------------------------------------------------------------------
 //
 // Revision 1.1.1.1  2000/08/02 12:51:02  charlesr
 // Initial source import, SMC v. 1.0, Beta 1.
@@ -39,16 +66,16 @@
 
 public class AppClass
 {
-    private AppClassContext _statemap;
+    private AppClassContext _fsm;
     private boolean _is_acceptable;
 
     public AppClass()
     {
-        _statemap = new AppClassContext(this);
+        _fsm = new AppClassContext(this);
         _is_acceptable = false;
 
         // Uncomment to see debug output.
-        // _statemap.setDebugFlag(true);
+        // _fsm.setDebugFlag(true);
     }
 
     public boolean CheckString(String string)
@@ -64,25 +91,25 @@ public class AppClass
             switch (string.charAt(i))
             {
                 case '0':
-                    _statemap.Zero();
+                    _fsm.Zero();
                     break;
 
                 case '1':
-                    _statemap.One();
+                    _fsm.One();
                     break;
 
                 case 'c':
                 case 'C':
-                    _statemap.C();
+                    _fsm.C();
                     break;
 
                 default:
-                    _statemap.Unknown();
+                    _fsm.Unknown();
                     break;
             }
         }
 
-        _statemap.EOS();
+        _fsm.EOS();
 
         return(_is_acceptable);
     }

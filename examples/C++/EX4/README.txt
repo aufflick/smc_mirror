@@ -5,7 +5,7 @@
 
 
 Simplistic, non-graphical simulation of a stoplight. Demonstrates
-how to use state maps to handle external events (in this case
+how to use state machines to handle external events (in this case
 timeouts).
 
 

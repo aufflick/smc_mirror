@@ -9,7 +9,7 @@
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
-// The Original Code is State Map Compiler (SMC).
+// The Original Code is State Machine Compiler (SMC).
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
@@ -26,6 +26,12 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2002/02/19 19:52:49  cwrapp
+// Changes in release 1.3.0:
+// Add the following features:
+// + 479555: Added subroutine/method calls as argument types.
+// + 508878: Added %import keyword.
+//
 // Revision 1.2  2001/12/14 20:10:37  cwrapp
 // Changes in release 1.1.0:
 // Add the following features:
@@ -265,6 +271,11 @@ public final class SmcLexer
     {
         _token.reset();
         _token_buffer.delete(0, _token_buffer.length());
+
+        // The token's line number is the line on which the
+        // token begins.
+        _token.setLineNumber(_line_number);
+
         return;
     }
 
@@ -355,6 +366,11 @@ public final class SmcLexer
         else if (tokenStr.compareTo("%package") == 0)
         {
             _token.setType(SmcLexer.PACKAGE_NAME);
+            _stop_flag = true;
+        }
+        else if (tokenStr.compareTo("%import") == 0)
+        {
+            _token.setType(SmcLexer.IMPORT);
             _stop_flag = true;
         }
         else
@@ -489,24 +505,25 @@ public final class SmcLexer
     /* package */ static final int CLASS_NAME = 10;
     /* package */ static final int HEADER_FILE = 11;
     /* package */ static final int PACKAGE_NAME = 12;
-    /* package */ static final int LEFT_BRACE = 13;
-    /* package */ static final int RIGHT_BRACE = 14;
-    /* package */ static final int LEFT_BRACKET = 15;
-    /* package */ static final int RIGHT_BRACKET = 16;
-    /* package */ static final int LEFT_PAREN = 17;
-    /* package */ static final int RIGHT_PAREN = 18;
-    /* package */ static final int SEMICOLON = 19;
-    /* package */ static final int COLON = 20;
-    /* package */ static final int COMMA = 21;
-    /* package */ static final int EXCLAMATION = 22;
-    /* package */ static final int SOURCE = 23;
-    /* package */ static final int EOD = 24;
-    /* package */ static final int VARIABLE = 25;
-    /* package */ static final int INTEGER = 26;
-    /* package */ static final int FLOAT = 27;
-    /* package */ static final int STRING = 28;
-    /* package */ static final int ASTERISK = 29;
-    /* package */ static final int AMPERSAND = 30;
+    /* package */ static final int IMPORT = 13;
+    /* package */ static final int LEFT_BRACE = 14;
+    /* package */ static final int RIGHT_BRACE = 15;
+    /* package */ static final int LEFT_BRACKET = 16;
+    /* package */ static final int RIGHT_BRACKET = 17;
+    /* package */ static final int LEFT_PAREN = 18;
+    /* package */ static final int RIGHT_PAREN = 19;
+    /* package */ static final int SEMICOLON = 20;
+    /* package */ static final int COLON = 21;
+    /* package */ static final int COMMA = 22;
+    /* package */ static final int EXCLAMATION = 23;
+    /* package */ static final int SOURCE = 24;
+    /* package */ static final int EOD = 25;
+    /* package */ static final int VARIABLE = 26;
+    /* package */ static final int INTEGER = 27;
+    /* package */ static final int FLOAT = 28;
+    /* package */ static final int STRING = 29;
+    /* package */ static final int ASTERISK = 30;
+    /* package */ static final int AMPERSAND = 31;
     /* package */ static final int TOKEN_COUNT = AMPERSAND + 1;
     private static final int KEYWORD_COUNT = 4;
 
@@ -529,6 +546,7 @@ public final class SmcLexer
         _typeName[SmcLexer.CLASS_NAME] = "CLASS_NAME";
         _typeName[SmcLexer.HEADER_FILE] = "HEADER_FILE";
         _typeName[SmcLexer.PACKAGE_NAME] = "PACKAGE_NAME";
+        _typeName[SmcLexer.IMPORT] = "IMPORT";
         _typeName[SmcLexer.LEFT_BRACE] = "LEFT_BRACE";
         _typeName[SmcLexer.RIGHT_BRACE] = "RIGHT_BRACE";
         _typeName[SmcLexer.LEFT_BRACKET] = "LEFT_BRACKET";
@@ -563,6 +581,7 @@ public final class SmcLexer
         {
             _type = TOKEN_NOT_SET;
             _value = null;
+            _line_number = -1;
         }
 
         /* package */ int getType()
@@ -584,6 +603,17 @@ public final class SmcLexer
         /* package */ void setValue(String value)
         {
             _value = value;
+        }
+
+        /* package */ int getLineNumber()
+        {
+            return (_line_number);
+        }
+
+        /* package */ void setLineNumber(int line_number)
+        {
+            _line_number = line_number;
+            return;
         }
 
         /* package */ Token copy()
@@ -610,9 +640,11 @@ public final class SmcLexer
         {
             _type = TOKEN_NOT_SET;
             _value = null;
+            _line_number = -1;
         }
 
         private int _type;
         private String _value;
+        private int _line_number;
     }
 }

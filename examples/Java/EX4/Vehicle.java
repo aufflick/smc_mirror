@@ -9,7 +9,7 @@
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
-// The Original Code is State Map Compiler (SMC).
+// The Original Code is State Machine Compiler (SMC).
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
@@ -30,6 +30,12 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2002/02/19 19:52:47  cwrapp
+// Changes in release 1.3.0:
+// Add the following features:
+// + 479555: Added subroutine/method calls as argument types.
+// + 508878: Added %import keyword.
+//
 // Revision 1.2  2001/12/14 20:10:37  cwrapp
 // Changes in release 1.1.0:
 // Add the following features:
@@ -96,12 +102,12 @@ public final class Vehicle
         _size = new Dimension(size);
         _owner = owner;
 
-        _statemap = new VehicleContext(this);
+        _fsm = new VehicleContext(this);
 
         // Uncomment to see debug output.
-        // _statemap.setDebugFlag(true);
+        // _fsm.setDebugFlag(true);
 
-        _statemap.Start();
+        _fsm.Start();
     }
 
     public void setSpeed(int speed)
@@ -119,7 +125,7 @@ public final class Vehicle
     public void move(Graphics2D g2)
     {
         _graphic = g2;
-        _statemap.Move();
+        _fsm.Move();
         return;
     }
 
@@ -127,7 +133,7 @@ public final class Vehicle
     {
         Graphics2D g2 = (Graphics2D) g;
 
-        _statemap.Stop();
+        _fsm.Stop();
 
         // Cover over the vehicle's last position.
         draw(g2, Color.white);
@@ -137,7 +143,7 @@ public final class Vehicle
 
     public void lightGreen()
     {
-        _statemap.LightGreen();
+        _fsm.LightGreen();
         return;
     }
 
@@ -268,7 +274,7 @@ public final class Vehicle
     }
 
     //----------------------------------------
-    // State Map Actions
+    // State Machine Actions
     //
     // Guards
     public boolean TripDone()
@@ -377,7 +383,7 @@ public final class Vehicle
     private Dimension _size;
 
     // What am I doing?
-    private VehicleContext _statemap;
+    private VehicleContext _fsm;
 
     // Where am I being drawn?
     private Graphics2D _graphic;

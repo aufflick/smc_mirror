@@ -9,7 +9,7 @@
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
-// The Original Code is State Map Compiler (SMC).
+// The Original Code is State Machine Compiler (SMC).
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
@@ -30,6 +30,12 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2002/02/19 19:52:46  cwrapp
+// Changes in release 1.3.0:
+// Add the following features:
+// + 479555: Added subroutine/method calls as argument types.
+// + 508878: Added %import keyword.
+//
 // Revision 1.2  2001/12/14 20:10:37  cwrapp
 // Changes in release 1.1.0:
 // Add the following features:
@@ -136,11 +142,11 @@ public final class Stoplight
         _ewLightDuration = 10000;
         _yellowDuration = 4000;
 
-        // Create the stop light's state map.
-        _statemap = new StoplightContext(this);
+        // Create the stop light's state machine.
+        _fsm = new StoplightContext(this);
 
         // Uncomment to see debug output.
-        // _statemap.setDebugFlag(true);
+        // _fsm.setDebugFlag(true);
     }
 
     public Color getLightsColor(int direction)
@@ -257,25 +263,25 @@ public final class Stoplight
 
     public void startDemo()
     {
-        _statemap.Start();
+        _fsm.Start();
         return;
     }
 
     public void pauseDemo()
     {
-        _statemap.Pause();
+        _fsm.Pause();
         return;
     }
 
     public void continueDemo()
     {
-        _statemap.Continue();
+        _fsm.Continue();
         return;
     }
 
     public void stopDemo()
     {
-        _statemap.Stop();
+        _fsm.Stop();
         return;
     }
 
@@ -378,12 +384,12 @@ public final class Stoplight
         // Get rid of the current timer.
         _stoplightTimer = null;
 
-        _statemap.Timeout();
+        _fsm.Timeout();
         return;
     }
 
     //----------------------------------------
-    // State Map Actions
+    // State Machine Actions
     //
     public void InitLights()
     {
@@ -589,11 +595,11 @@ public final class Stoplight
     //----------------------------------------
     // Dynamic data.
     //
-    // private StoplightContext _statemap;
+    // private StoplightContext _fsm;
     private Point[] _positions;
     private Dimension _size;
     private TrafficCanvas _owner;
-    private StoplightContext _statemap;
+    private StoplightContext _fsm;
 
     // Keep track of each light's current color.
     private Color[][] _lights;

@@ -9,7 +9,7 @@
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
 # 
-# The Original Code is State Map Compiler (SMC).
+# The Original Code is State Machine Compiler (SMC).
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
@@ -23,6 +23,12 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2002/02/19 19:52:46  cwrapp
+# Changes in release 1.3.0:
+# Add the following features:
+# + 479555: Added subroutine/method calls as argument types.
+# + 508878: Added %import keyword.
+#
 # Revision 1.2  2001/05/09 23:40:02  cwrapp
 # Changes in release 1.0, beta 6:
 # Fixes the four following bugs:
@@ -65,9 +71,9 @@ CPPFLAGS  = -g -I../../../lib
 SMC       = java -jar ../../../bin/Smc.jar
 SMCFLAGS  = -c++ -g
 
-STATEMAPS = stoplight.sm
-SOURCES   = $(STATEMAPS:.sm=_sm.cpp) stoplight.cpp Main.cpp
-HEADERS   = $(STATEMAPS:.sm=_sm.h) stoplight.h
+FSMS      = stoplight.sm
+SOURCES   = $(FSMC:.sm=_sm.cpp) stoplight.cpp Main.cpp
+HEADERS   = $(FSMS:.sm=_sm.h) stoplight.h
 OBJECTS   = $(SOURCES:.cpp=.o)
 
 ##############

@@ -9,7 +9,7 @@
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
-// The Original Code is  State Map Compiler(SMC).
+// The Original Code is  State Machine Compiler(SMC).
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
@@ -24,23 +24,15 @@
 // statemap.java --
 //
 //  This package defines the FSMContext class which must be inherited by
-//  any Java class wanting to use an smc-generated state map.
+//  any Java class wanting to use an smc-generated state machine.
 //
 // Change Log
 // $Log$
-// Revision 1.4  2002/02/13 02:45:23  cwrapp
-// Changes in release 1.2.0:
-// Added the following features:
-// + 484889: "pop" transitions can now return arguments
-//           along with a transition name.
-// + 496625: Multiple .sm files may be specified in the
-//           compile command.
-//
-// Fixed the following bugs:
-// + 496692: Fixed the %package C++ code generation.
-// + 501157: Transition debug output was still hardcoded
-//           to System.err. This has been corrected so
-//           that FSMContext._debug_stream is used.
+// Revision 1.5  2002/02/19 19:52:48  cwrapp
+// Changes in release 1.3.0:
+// Add the following features:
+// + 479555: Added subroutine/method calls as argument types.
+// + 508878: Added %import keyword.
 //
 // Revision 1.3  2001/06/16 19:52:43  cwrapp
 // Changes in release 1.0, beta 7:
@@ -99,11 +91,11 @@ import java.io.Serializable;
 
 // statemap.FSMContext --
 //
-//  All Java classes wanting to use an SMC-generated state map
+//  All Java classes wanting to use an SMC-generated state machine
 //  must extend this class. Since FSMContext provides
 //  functionality, it was not possible to implement it as an
 //  interface. See the SMC FAQ for how a class can use a state
-//  map when that class is already extending another class.
+//  machine when that class is already extending another class.
 
 public abstract class FSMContext
     implements Serializable
@@ -122,7 +114,7 @@ public abstract class FSMContext
         _debug_stream = System.err;
     }
 
-    // When debug is set to true, the state map
+    // When debug is set to true, the state machine
     // will print messages to the console.
     public boolean getDebugFlag()
     {
@@ -147,8 +139,8 @@ public abstract class FSMContext
         return;
     }
 
-    // Is this state map in a transition? If state is null, then
-    // true; otherwise, false.
+    // Is this state machine in a transition? If state is null,
+    // then true; otherwise, false.
     public boolean isInTransition()
     {
         return(_state == null ? true : false);

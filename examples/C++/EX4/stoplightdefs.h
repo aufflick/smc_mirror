@@ -12,7 +12,7 @@
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
-// The Original Code is State Map Compiler (SMC).
+// The Original Code is State Machine Compiler (SMC).
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
@@ -25,7 +25,7 @@
 //	TheContext
 //
 // Description
-//	When a state map executes an action, it is really calling a
+//	When a state machine executes an action, it is really calling a
 //	member function in the context class.
 //
 // RCS ID
@@ -33,6 +33,12 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2002/02/19 19:52:46  cwrapp
+// Changes in release 1.3.0:
+// Add the following features:
+// + 479555: Added subroutine/method calls as argument types.
+// + 508878: Added %import keyword.
+//
 // Revision 1.2  2001/12/14 20:10:36  cwrapp
 // Changes in release 1.1.0:
 // Add the following features:

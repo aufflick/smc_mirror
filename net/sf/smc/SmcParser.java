@@ -9,7 +9,7 @@
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
-// The Original Code is State Map Compiler (SMC).
+// The Original Code is State Machine Compiler (SMC).
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
@@ -23,19 +23,11 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.3  2002/02/13 02:45:23  cwrapp
-// Changes in release 1.2.0:
-// Added the following features:
-// + 484889: "pop" transitions can now return arguments
-//           along with a transition name.
-// + 496625: Multiple .sm files may be specified in the
-//           compile command.
-//
-// Fixed the following bugs:
-// + 496692: Fixed the %package C++ code generation.
-// + 501157: Transition debug output was still hardcoded
-//           to System.err. This has been corrected so
-//           that FSMContext._debug_stream is used.
+// Revision 1.4  2002/02/19 19:52:49  cwrapp
+// Changes in release 1.3.0:
+// Add the following features:
+// + 479555: Added subroutine/method calls as argument types.
+// + 508878: Added %import keyword.
 //
 // Revision 1.2  2001/12/14 20:10:37  cwrapp
 // Changes in release 1.1.0:
@@ -131,6 +123,7 @@ import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Stack;
 
 public final class SmcParser
 {
@@ -171,6 +164,10 @@ public final class SmcParser
         _action_in_progress = null;
         _variable_in_progress = null;
 
+        _argList = null;
+        _argsStack = new Stack();
+
+        // DEBUG
         // _parser_map.setDebugFlag(true);
 
         _parse_status = true;
@@ -213,7 +210,6 @@ public final class SmcParser
         else
         {
             _parse_tree = createTargetTree();
-            _argList = (List) new LinkedList();
 
             // If the token collection was successful,
             // start parsing.
@@ -400,10 +396,15 @@ public final class SmcParser
 
     // If true, then the class name is for %class.
     // If false, then the class name is for %package.
-    /* package */ void setNameFlag(boolean flag)
+    /* package */ void setNameType(int type)
     {
-        _nameFlag = flag;
+        _nameType = type;
         return;
+    }
+
+    /* package */ String getFQName()
+    {
+        return (_className);
     }
 
     /* package */ void appendClassName(SmcLexer.Token token)
@@ -412,15 +413,21 @@ public final class SmcParser
         return;
     }
 
-    /* package */ void setClassName()
+    /* package */ void setClassName(String name)
     {
-        if (_nameFlag == true)
+        switch (_nameType)
         {
-            _parse_tree.setContext(_className);
-        }
-        else
-        {
-            _parse_tree.setPackage(_className);
+            case SmcLexer.CLASS_NAME:
+                _parse_tree.setContext(name);
+                break;
+
+            case SmcLexer.PACKAGE_NAME:
+                _parse_tree.setPackage(name);
+                break;
+
+            case SmcLexer.IMPORT:
+                _parse_tree.addImport(name);
+                break;
         }
 
         _className = "";
@@ -887,9 +894,12 @@ public final class SmcParser
     }
 
     // Add an argument to the current action.
-    /* package */ void addArgument(SmcLexer.Token token)
+    /* package */ void addSimpleArgument(SmcLexer.Token token)
     {
-        _argList.add(token.getValue());
+        _argList.add(
+            new SmcSimpleArg(
+                token.getValue(),
+                token.getLineNumber()));
         return;
     }
 
@@ -908,7 +918,7 @@ public final class SmcParser
         return;
     }
 
-    /* package */ void addVariable()
+    /* package */ void addVariableArgument()
     {
         if (_variable_in_progress == null)
         {
@@ -916,14 +926,80 @@ public final class SmcParser
         }
         else
         {
-            _argList.add(_variable_in_progress);
+            _argList.add(
+                new SmcSimpleArg(
+                    _variable_in_progress,
+                    _lexer.getLineNumber()));
             _variable_in_progress = null;
         }
 
         return;
     }
 
-    /* package */ void setPopArgs()
+    // Add a method argument to the argument list.
+    /* package */ void addMethodArgument(List argList)
+    {
+        if (_variable_in_progress == null)
+        {
+            error("There is no method name to add.", false);
+        }
+        else
+        {
+            _argList.add(
+                createTargetMethodArg(
+                    _variable_in_progress,
+                    argList));
+            _variable_in_progress = null;
+        }
+
+        return;
+    }
+
+    // Place the current argument data into a map and push the
+    // map on top of the argument stack.
+    /* package */ void pushArgStack()
+    {
+        Object[] argMap = new Object[ARG_ITEMS];
+
+        argMap[ARG_LIST_INDEX] = _argList;
+        argMap[VAR_IN_PROG_INDEX] = _variable_in_progress;
+
+        _argsStack.push(argMap);
+
+        _argList = (List) new LinkedList();
+        _variable_in_progress = null;
+
+        return;
+    }
+
+    // Return the result argument list.
+    /* package */ List getArgsResult()
+    {
+        return (_argsResult);
+    }
+
+    // Place the current argument list into the result so that
+    // it may be popped back to the caller.
+    /* package */ void setArgsResult()
+    {
+        _argsResult = (List) ((LinkedList) _argList).clone();
+        return;
+    }
+
+    // Pop the previous argument data from the stack and reset
+    // the argument data.
+    /* package */ void popArgStack()
+    {
+        Object[] argMap = (Object[]) _argsStack.pop();
+
+        _argList = (List) argMap[ARG_LIST_INDEX];
+        _variable_in_progress = (String) argMap[VAR_IN_PROG_INDEX];
+
+        return;
+    }
+    
+
+    /* package */ void setPopArgs(List argList)
     {
         if (_guard_in_progress == null)
         {
@@ -932,17 +1008,17 @@ public final class SmcParser
         }
         else
         {
-            _guard_in_progress.setPopArgs(_argList);
+            _guard_in_progress.setPopArgs(argList);
 
             // Clear out the argument list in preparation of
             // the next action/pop.
-            _argList.clear();
+            argList.clear();
         }
 
         return;
     }
 
-    /* package */ void setActionArgs()
+    /* package */ void setActionArgs(List argList)
     {
         if (_action_in_progress == null)
         {
@@ -951,11 +1027,11 @@ public final class SmcParser
         }
         else
         {
-            _action_in_progress.setArguments(_argList);
+            _action_in_progress.setArguments(argList);
 
             // Clear out the argument list in preparation for
             // the next pop/action.
-            _argList.clear();
+            argList.clear();
         }
 
         return;
@@ -1143,6 +1219,36 @@ public final class SmcParser
         return (retval);
     }
 
+    // Create the appropriate method argument object depending
+    // on the target programming language.
+    private SmcArgument createTargetMethodArg(String name, List argList)
+    {
+        SmcArgument retval = null;
+
+        switch(Smc._target_language)
+        {
+            case Smc.C_PLUS_PLUS:
+                retval = new SmcMethodArgCpp(name,
+                                             argList,
+                                             _lexer.getLineNumber());
+                break;
+
+            case Smc.JAVA:
+                retval = new SmcMethodArgJava(name,
+                                             argList,
+                                              _lexer.getLineNumber());
+                break;
+
+            case Smc.TCL:
+                retval = new SmcMethodArgTcl(name,
+                                             argList,
+                                             _lexer.getLineNumber());
+                break;
+        }
+
+        return (retval);
+    }
+
 // Member Data
 
     // The parse state map.
@@ -1153,22 +1259,29 @@ public final class SmcParser
 
     // Read all the tokens into this list first and then
     // pass them to the parser map.
-    List _tokenList;
+    private List _tokenList;
 
     // Store arguments in this list until they can be associated
     // with a pop or an action.
-    List _argList;
+    private List _argList;
+
+    // The argument list is stored here so it can be returned.
+    private List _argsResult;
+
+    // Because a function can now be an
+    private Stack _argsStack;
 
     // Will be generating code for this language.
     private int _language;
 
     // Keep track of errors.
-    String _error_message;
-    boolean _parse_status;
-    boolean _quit_flag;
+    private String _error_message;
+    private boolean _parse_status;
+    private boolean _quit_flag;
 
-    // Keep track whether we are parsing a class name or package.
-    boolean _nameFlag;
+    // Keep track whether we are parsing a class name, package or
+    // import.
+    private int _nameType;
 
     private SmcParseTree _parse_tree;
     private String _start_state;
@@ -1187,6 +1300,11 @@ public final class SmcParser
     private SmcGuard _guard_in_progress;
     private SmcAction _action_in_progress;
     private String _variable_in_progress;
+
+    // Constants
+    private static final int ARG_LIST_INDEX = 0;
+    private static final int VAR_IN_PROG_INDEX = 1;
+    private static final int ARG_ITEMS = 2;
 
     // Statics.
 
@@ -1236,6 +1354,9 @@ public final class SmcParser
                                              param_types);
             _TransMethod[SmcLexer.PACKAGE_NAME] =
                 _map_class.getDeclaredMethod("PACKAGE_NAME",
+                                             param_types);
+            _TransMethod[SmcLexer.IMPORT] =
+                _map_class.getDeclaredMethod("IMPORT",
                                              param_types);
             _TransMethod[SmcLexer.LEFT_BRACE] =
                 _map_class.getDeclaredMethod("LEFT_BRACE",

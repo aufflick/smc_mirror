@@ -4,7 +4,7 @@
                           C++ Example 2
 
 
-This state map "recognizes" the string 0*1* (which includes the
+This state machine "recognizes" the string 0*1* (which includes the
 empty string). This second example differs from the first in that
 it uses default transitions.
 

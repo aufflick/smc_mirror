@@ -12,7 +12,7 @@
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
-// The Original Code is State Map Compiler (SMC).
+// The Original Code is State Machine Compiler (SMC).
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
@@ -42,6 +42,12 @@
 //
 // Change Log
 // $Log$
+// Revision 1.4  2002/02/19 19:52:48  cwrapp
+// Changes in release 1.3.0:
+// Add the following features:
+// + 479555: Added subroutine/method calls as argument types.
+// + 508878: Added %import keyword.
+//
 // Revision 1.3  2001/12/14 20:10:37  cwrapp
 // Changes in release 1.1.0:
 // Add the following features:
@@ -363,7 +369,7 @@ namespace statemap
             return;
         }
 
-        // Is this state map already inside a transition?
+        // Is this state machine already inside a transition?
         // Yes if state is null.
         bool isInTransition() const
         {
@@ -529,7 +535,7 @@ namespace statemap
         // context. It may make sense to copy the application
         // class but the new object is *not* in the same
         // state as the old - the new object must start in
-        // the map's initial state. Therefore, the copy
+        // the FSM's initial state. Therefore, the copy
         // constructor is private in order to prevent it
         // being used.
         FSMContext(const FSMContext& fsm) {};

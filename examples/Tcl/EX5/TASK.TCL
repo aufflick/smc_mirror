@@ -9,7 +9,7 @@
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
 # 
-# The Original Code is State Map Compiler (SMC).
+# The Original Code is State Machine Compiler (SMC).
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
@@ -27,8 +27,27 @@
 #
 # CHANGE LOG
 # $Log$
-# Revision 1.1  2001/01/03 03:14:00  cwrapp
-# Initial revision
+# Revision 1.2  2002/02/19 19:52:48  cwrapp
+# Changes in release 1.3.0:
+# Add the following features:
+# + 479555: Added subroutine/method calls as argument types.
+# + 508878: Added %import keyword.
+#
+# Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
+#
+# ----------------------------------------------------------------------
+# SMC - The State Map Compiler
+# Version: 1.0, Beta 3
+#
+# SMC compiles state map descriptions into a target object oriented
+# language. Currently supported languages are: C++, Java and [incr Tcl].
+# SMC finite state machines have such features as:
+# + Entry/Exit actions for states.
+# + Transition guards
+# + Transition arguments
+# + Push and Pop transitions.
+# + Default transitions. 
+# ----------------------------------------------------------------------
 #
 # Revision 1.1.1.1  2000/08/02 12:51:05  charlesr
 # Initial source import, SMC v. 1.0, Beta 1.
@@ -39,7 +58,7 @@ source ./task_sm.tcl;
 
 class Task {
 # Member data.
-    private variable _statemap;
+    private variable _fsm;
 
     # The task's human-readable name.
     private variable _name;
@@ -68,7 +87,7 @@ class Task {
     private variable _timerTable;
 
     # The timer for updating the percent complete display does
-    # not go through the state map. Keep the timer ID in a
+    # not go through the state machine. Keep the timer ID in a
     # separate variable.
     private variable _updateTimerID;
 
@@ -81,10 +100,10 @@ class Task {
         set _runStartTime 0;
         set _updateTimerID -1;
 
-        set _statemap [TaskContext #auto $this];
+        set _fsm [TaskContext #auto $this];
 
         # Uncomment to see debug output.
-        # _statemap setDebugFlag 1;
+        # _fsm setDebugFlag 1;
 
         # Since the task starts suspended, timestamp.
         set _suspendStartTime [clock clicks];
@@ -222,7 +241,7 @@ class Task {
     #   None.
 
     public method timeout {transition} {
-        $_statemap $transition;
+        $_fsm $transition;
         return -code ok;
     }
 
@@ -240,7 +259,7 @@ class Task {
     #   None.
 
     public method suspend {} {
-        $_statemap Suspend;
+        $_fsm Suspend;
 
         return -code ok;
     }
@@ -256,7 +275,7 @@ class Task {
     #   None.
 
     public method block {} {
-        $_statemap Block;
+        $_fsm Block;
 
         return -code ok;
     }
@@ -272,7 +291,7 @@ class Task {
     #   None.
 
     public method unblock {} {
-        $_statemap Unblock;
+        $_fsm Unblock;
 
         return -code ok;
     }
@@ -288,7 +307,7 @@ class Task {
     #   None.
 
     public method delete {} {
-        $_statemap Delete;
+        $_fsm Delete;
 
         return -code ok;
     }
@@ -306,7 +325,7 @@ class Task {
     #   None.
 
     public method start {} {
-        $_statemap Start;
+        $_fsm Start;
         return -code ok;
     }
 
@@ -321,16 +340,17 @@ class Task {
     #   None.
 
     public method stop {} {
-        $_statemap Stop;
+        $_fsm Stop;
         return -code ok;
     }
 
-    # State Map Actions
+    # State Machine Actions
 
     # setTimer --
     #
     #   Create a timer for the specified period. When the timer
-    #   expires, issue the specified transition to the state map.
+    #   expires, issue the specified transition to the state
+    #   machine.
     #
     # Arguments:
     #   name    The timer's name.

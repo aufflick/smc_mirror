@@ -9,7 +9,7 @@
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
-// The Original Code is State Map Compiler (SMC).
+// The Original Code is State Machine Compiler (SMC).
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
@@ -23,6 +23,12 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2002/02/19 19:52:49  cwrapp
+// Changes in release 1.3.0:
+// Add the following features:
+// + 479555: Added subroutine/method calls as argument types.
+// + 508878: Added %import keyword.
+//
 // Revision 1.2  2001/12/14 20:10:37  cwrapp
 // Changes in release 1.1.0:
 // Add the following features:
@@ -124,9 +130,11 @@ public final class SmcParseTreeJava
                              String srcfileBase)
         throws ParseException
     {
+        ListIterator iIt;
         ListIterator mapIt;
         ListIterator transIt;
         ListIterator paramIt;
+        String packageName;
         SmcMap map;
         SmcTransition trans;
         SmcParameter parameter;
@@ -150,11 +158,24 @@ public final class SmcParseTreeJava
             source.println();
         }
 
+        // Do user-specified imports now.
+        for (iIt = _importList.listIterator();
+             iIt.hasNext() == true;
+            )
+        {
+            packageName = (String) iIt.next();
+            source.println("import " + packageName + ";");
+        }
+
         // If the -g option was specified, then import the
         // PrintStream class.
         if (Smc.isDebug() == true)
         {
             source.println("import java.io.PrintStream;");
+            source.println();
+        }
+        else if (_importList.size() != 0)
+        {
             source.println();
         }
 
@@ -530,10 +551,10 @@ public final class SmcParseTreeJava
         source.println("        }\n");
         source.println("        protected void Entry(" +
                        _context +
-                       "Context s) {}");
+                       "Context context) {}");
         source.println("        protected void Exit(" +
                        _context +
-                       "Context s) {}\n");
+                       "Context context) {}\n");
 
         for (transIt = transList.listIterator();
              transIt.hasNext() == true;
@@ -548,7 +569,7 @@ public final class SmcParseTreeJava
                              trans.getName() +
                              "(" +
                              _context +
-                             "Context s");
+                             "Context context");
 
                 for (paramIt = trans.getParameters().listIterator();
                      paramIt.hasNext() == true;
@@ -566,7 +587,7 @@ public final class SmcParseTreeJava
                 // transition was passed to a state which does not
                 // define the transition. Call the state's default
                 // transition method.
-                source.println("            Default(s);");
+                source.println("            Default(context);");
 
                 source.println("        }");
                 source.println();
@@ -576,14 +597,14 @@ public final class SmcParseTreeJava
         // Generate the overall Default transition for all maps.
         source.println("        protected void Default(" +
                        _context +
-                       "Context s)");
+                       "Context context)");
         source.println("        {");
 
         if (Smc.isDebug() == true)
         {
-            source.println("            if (s.getDebugFlag() == true)");
+            source.println("            if (context.getDebugFlag() == true)");
             source.println("            {");
-            source.println("                PrintStream str = s.getDebugStream();");
+            source.println("                PrintStream str = context.getDebugStream();");
             source.println();
             source.println("                str.println(\"TRANSITION   : Default\");");
             source.println("            }");
@@ -591,9 +612,9 @@ public final class SmcParseTreeJava
         }
 
         source.println("            throw (new statemap.TransitionUndefinedException(\"State: \" +");
-        source.println("                                                             s.getState().getName() +");
+        source.println("                                                             context.getState().getName() +");
         source.println("                                                             \", Transition: \" +");
-        source.println("                                                             s.getTransition()));");
+        source.println("                                                             context.getTransition()));");
         source.println("        }");
 
         // End of state class.

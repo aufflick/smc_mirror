@@ -4,7 +4,7 @@
                          Java Example 2
 
 
-This state map "recognizes" the string 0*1*. Example 2 differs
+This state machine "recognizes" the string 0*1*. Example 2 differs
 from example 1 in that example 2 uses default transitions.
 
 

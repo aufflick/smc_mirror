@@ -4,7 +4,7 @@
                           C++ Example 3
 
 
-This state map "recognizes" the palindromes (words that read the
+This state machine "recognizes" the palindromes (words that read the
 same backwards as forwards). The words consist of the alphabet
 {0, 1, c} where the letter 'c' may appear only once and marks the
 words center.

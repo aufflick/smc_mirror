@@ -11,7 +11,7 @@
  * implied. See the License for the specific language governing
  * rights and limitations under the License.
  * 
- * The Original Code is State Map Compiler (SMC).
+ * The Original Code is State Machine Compiler (SMC).
  * 
  * The Initial Developer of the Original Code is Charles W. Rapp.
  * Portions created by Charles W. Rapp are
@@ -22,26 +22,18 @@
  *
  * smcParser --
  *
- *  This statemap defines the  state map language.
+ *  This state machine defines the  state machine language.
  *
  * RCS ID
  * $Id$
  *
  * CHANGE LOG
  * $Log$
- * Revision 1.3  2002/02/13 02:45:23  cwrapp
- * Changes in release 1.2.0:
- * Added the following features:
- * + 484889: "pop" transitions can now return arguments
- *           along with a transition name.
- * + 496625: Multiple .sm files may be specified in the
- *           compile command.
- *
- * Fixed the following bugs:
- * + 496692: Fixed the %package C++ code generation.
- * + 501157: Transition debug output was still hardcoded
- *           to System.err. This has been corrected so
- *           that FSMContext._debug_stream is used.
+ * Revision 1.4  2002/02/19 19:52:49  cwrapp
+ * Changes in release 1.3.0:
+ * Add the following features:
+ * + 479555: Added subroutine/method calls as argument types.
+ * + 508878: Added %import keyword.
  *
  * Revision 1.2  2001/12/14 20:10:37  cwrapp
  * Changes in release 1.1.0:
@@ -126,13 +118,12 @@
  * Initial source import, SMC v. 1.0, Beta 1.
  *
  */
-
-package net.sf.smc;
-
 %}
 
 %start ParserMap::Start
 %class SmcParser
+%package net.sf.smc
+%import java.util.List
 
 %map ParserMap
 %%
@@ -154,16 +145,21 @@ Start
     CLASS_NAME(token : SmcLexer.Token)
                     push(NameMap::FQName)
                                         {setHeaderLine();
-                                         setNameFlag(true);}
+                                         setNameType(SmcLexer.CLASS_NAME);}
     HEADER_FILE(token : SmcLexer.Token)
                     HeaderFile          {setHeaderLine();}
     PACKAGE_NAME(token : SmcLexer.Token)
                     push(NameMap::FQName)
-                                        {setNameFlag(false);}
+                                        {setNameType(SmcLexer.PACKAGE_NAME);}
+    IMPORT(token : SmcLexer.Token)
+				    push(NameMap::FQName)
+										{setHeaderLine();
+										 setNameType(SmcLexer.IMPORT);}
 
     // These transitions are issued when the FQName has been
     // parsed.
-    FQNameDone      Start2              {setClassName();}
+    FQNameDone(name : String)
+                    Start2              {setClassName(name);}
     FQNameError     Start2              {}
 
     MAP_NAME(token : SmcLexer.Token)
@@ -195,21 +191,27 @@ StartError
     CLASS_NAME(token : SmcLexer.Token)
                     push(NameMap::FQName)
                                         {setHeaderLine();
-                                         setNameFlag(true);}
+                                         setNameType(SmcLexer.CLASS_NAME);}
 
     HEADER_FILE(token : SmcLexer.Token)
                     HeaderFile          {setHeaderLine();}
 
     PACKAGE_NAME(token : SmcLexer.Token)
                     push(NameMap::FQName)
-                                        {setNameFlag(false);}
+                                        {setNameType(SmcLexer.PACKAGE_NAME);}
+
+    IMPORT(token : SmcLexer.Token)
+				    push(NameMap::FQName)
+										{setHeaderLine();
+										 setNameType(SmcLexer.IMPORT);}
 
     MAP_NAME(token : SmcLexer.Token)
                     MapName             {}
 
     // These transitions are issued when the FQName has been
     // parsed.
-    FQNameDone      Start2              {setClassName();}
+    FQNameDone(name : String)
+                    Start2              {setClassName(name);}
     FQNameError     Start2              {}
 
     Default         nil                 {}
@@ -240,7 +242,7 @@ Start2
     CLASS_NAME(token : SmcLexer.Token)
                     push(NameMap::FQName)
                                         {setHeaderLine();
-                                         setNameFlag(true);}
+                                         setNameType(SmcLexer.CLASS_NAME);}
 
     HEADER_FILE(token : SmcLexer.Token)
                     HeaderFile          {setHeaderLine();}
@@ -248,14 +250,19 @@ Start2
     PACKAGE_NAME(token : SmcLexer.Token)
                     push(NameMap::FQName)
                                         {setHeaderLine();
-                                         setNameFlag(false);}
+                                         setNameType(SmcLexer.PACKAGE_NAME);}
 
+    IMPORT(token : SmcLexer.Token)
+				    push(NameMap::FQName)
+										{setHeaderLine();
+										 setNameType(SmcLexer.IMPORT);}
     MAP_NAME(token : SmcLexer.Token)
                     MapName             {setHeaderLine();}
 
     // These transitions are issued when the FQName has been
     // parsed.
-    FQNameDone      Start2              {setClassName();}
+    FQNameDone(name : String)
+                    Start2              {setClassName(name);}
     FQNameError     Start2              {}
 
     Default         nil                 {error("Expecting \"%start\", \"%class\", \"%header\", \"%package\" or \"%map\".", false);}
@@ -999,7 +1006,9 @@ PopArgs
     COMMA(token : SmcLexer.Token)
                     push(ArgMap::ArgsStart)
                                         {}
-    ArgsDone        ActionStart         {setPopArgs();}
+    ArgsDone(argList : List)
+                    ActionStart         {setPopArgs(argList);}
+
     ArgsError       ActionStart         {}
 
     Default         PopError            {error("Expecting ')' to end the pop transition.", false);}
@@ -1109,7 +1118,9 @@ ArgsStart
     LEFT_PAREN(token : SmcLexer.Token)
                     push(ArgMap::ArgsStart)
                                         {}
-    ArgsDone        ArgsEnd             {setActionArgs();}
+    ArgsDone(argList : List)
+                    ArgsEnd             {setActionArgs(argList);}
+
     ArgsError       ArgsEndError        {}
 
     // Error transitions.
@@ -1128,7 +1139,8 @@ ArgsStartError
     LEFT_PAREN(token : SmcLexer.Token)
                     push(ArgMap::ArgsStart)
                                         {}
-    ArgsDone        ArgsEnd             {setActionArgs();}
+    ArgsDone(argList : List)
+                    ArgsEnd             {setActionArgs(argList);}
     ArgsError       ArgsEndError        {}
 
     RIGHT_PAREN(token : SmcLexer.Token)
@@ -1164,37 +1176,80 @@ ArgsEndError
 %map ArgMap
 %%
 ArgsStart
+Entry {pushArgStack();}
 {
     // Look for scoped variable names.
     WORD(token : SmcLexer.Token)
                     VarArg1             {createVariable(token);}
 
     VARIABLE(token : SmcLexer.Token)
-                    NextArgument        {addArgument(token);}
+                    NextArgument        {addSimpleArgument(token);}
     INTEGER(token : SmcLexer.Token)
-                    NextArgument        {addArgument(token);}
+                    NextArgument        {addSimpleArgument(token);}
     FLOAT(token : SmcLexer.Token)
-                    NextArgument        {addArgument(token);}
+                    NextArgument        {addSimpleArgument(token);}
     STRING(token : SmcLexer.Token)
-                    NextArgument        {addArgument(token);}
+                    NextArgument        {addSimpleArgument(token);}
 
     // There are no arguments.
     RIGHT_PAREN(token : SmcLexer.Token)
-                    pop(ArgsDone)       {}
+                    pop(ArgsDone, ctxt.getArgsResult())
+                                        {setArgsResult();
+										 popArgStack();}
+
+    Default         ArgsError           {error("Expecting either a valid argument or a ')'.", false);}
+}
+
+ArgsContinue
+{
+    // Look for scoped variable names.
+    WORD(token : SmcLexer.Token)
+                    VarArg1             {createVariable(token);}
+
+    VARIABLE(token : SmcLexer.Token)
+                    NextArgument        {addSimpleArgument(token);}
+    INTEGER(token : SmcLexer.Token)
+                    NextArgument        {addSimpleArgument(token);}
+    FLOAT(token : SmcLexer.Token)
+                    NextArgument        {addSimpleArgument(token);}
+    STRING(token : SmcLexer.Token)
+                    NextArgument        {addSimpleArgument(token);}
+
+    // There are no arguments.
+    RIGHT_PAREN(token : SmcLexer.Token)
+                    pop(ArgsDone, ctxt.getArgsResult())
+                                        {setArgsResult();
+										 popArgStack();}
 
     Default         ArgsError           {error("Expecting either a valid argument or a ')'.", false);}
 }
 
 VarArg1
 {
+    // A colon means that this argument is scoped.
+    // (Identifiers using the period scope are handled in the
+    //  lexer.)
     COLON(token : SmcLexer.Token)
                     VarArg2             {appendVariable(token);}
 
+    // End of arguments.
     RIGHT_PAREN(token : SmcLexer.Token)
-                    pop(ArgsDone)       {addVariable();}
+                    pop(ArgsDone, ctxt.getArgsResult())
+										{addVariableArgument();
+										 setArgsResult();
+										 popArgStack();}
 
+    // A left paren denotes that this identifier is a function
+	// call. 
+    LEFT_PAREN(token : SmcLexer.Token)
+                    push(ArgsStart)		{}
+    ArgsDone(argList : List)
+					NextArgument		{addMethodArgument(argList);}
+	ArgsError		ArgsError			{}
+
+    // A new argument.
     COMMA(token : SmcLexer.Token)
-                    ArgsStart           {addVariable();}
+                    ArgsContinue        {addVariableArgument();}
 
     Default         ArgsError           {error("Expecting either ',' or ')'.", false);}
 }
@@ -1217,10 +1272,12 @@ VarArgEnd
 NextArgument
 {
     RIGHT_PAREN(token : SmcLexer.Token)
-                    pop(ArgsDone)       {}
+                    pop(ArgsDone, ctxt.getArgsResult())
+										{setArgsResult();
+										 popArgStack();}
 
     COMMA(token : SmcLexer.Token)
-                    ArgsStart           {}
+                    ArgsContinue        {}
 
     Default         ArgsError           {error("Expecting either ',' or ')'.", false);}
 }
@@ -1228,7 +1285,7 @@ NextArgument
 ArgsError
 {
     RIGHT_PAREN(token : SmcLexer.Token)
-                    pop(ArgsError)      {}
+                    pop(ArgsError)      {popArgStack();}
 
     Default         nil                 {}
 }
@@ -1252,7 +1309,7 @@ FQName
                 ClassName       {appendClassName(token);}
 
     Default     pop(FQNameError)
-                                {error("Missing class name after %class.", false);}
+                                {error("Missing class name after %keyword.", false);}
 }
 
 ClassName
@@ -1263,16 +1320,24 @@ ClassName
 
     // Look for a '%' keyword to mark the end of the class name.
     START_STATE(token : SmcLexer.Token)
-                    pop(FQNameDone)     {pushBack(token);}
+                    pop(FQNameDone, ctxt.getFQName())
+										{pushBack(token);}
 
     HEADER_FILE(token : SmcLexer.Token)
-                    pop(FQNameDone)     {pushBack(token);}
+                    pop(FQNameDone, ctxt.getFQName())
+										{pushBack(token);}
 
     PACKAGE_NAME(token : SmcLexer.Token)
-                    pop(FQNameDone)     {pushBack(token);}
+                    pop(FQNameDone, ctxt.getFQName())
+										{pushBack(token);}
+
+    IMPORT(token : SmcLexer.Token)
+                    pop(FQNameDone, ctxt.getFQName())
+										{pushBack(token);}
 
     MAP_NAME(token : SmcLexer.Token)
-                    pop(FQNameDone)     {pushBack(token);}
+                    pop(FQNameDone, ctxt.getFQName())
+										{pushBack(token);}
 
     Default         nil                 {error("Expecting \"%start\", \"%header\", \"%package\" or \"%map\".", false);}
 }

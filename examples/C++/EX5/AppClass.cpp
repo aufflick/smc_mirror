@@ -9,7 +9,7 @@
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
-// The Original Code is State Map Compiler (SMC).
+// The Original Code is State Machine Compiler (SMC).
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
@@ -34,8 +34,35 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.1  2001/01/03 03:14:00  cwrapp
-// Initial revision
+// Revision 1.2  2002/02/19 19:52:46  cwrapp
+// Changes in release 1.3.0:
+// Add the following features:
+// + 479555: Added subroutine/method calls as argument types.
+// + 508878: Added %import keyword.
+//
+// Revision 1.1.1.2  2001/03/26 14:41:46  cwrapp
+// Corrected Entry/Exit action semantics. Exit actions are now
+// executed only by simple transitions and pop transitions.
+// Entry actions are executed by simple transitions and push
+// transitions. Loopback transitions do not execute either Exit
+// actions or entry actions. See SMC Programmer's manual for
+// more information.
+//
+// Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
+//
+// ----------------------------------------------------------------------
+// SMC - The State Map Compiler
+// Version: 1.0, Beta 3
+//
+// SMC compiles state map descriptions into a target object oriented
+// language. Currently supported languages are: C++, Java and [incr Tcl].
+// SMC finite state machines have such features as:
+// + Entry/Exit actions for states.
+// + Transition guards
+// + Transition arguments
+// + Push and Pop transitions.
+// + Default transitions. 
+// ----------------------------------------------------------------------
 //
 // Revision 1.1.1.1  2000/08/02 12:51:00  charlesr
 // Initial source import, SMC v. 1.0, Beta 1.
@@ -58,12 +85,12 @@ using namespace std;
 const static char _rcs_id[] = "$Id$";
 
 AppClass::AppClass()
-: _state_map(*this),
+: _fsm(*this),
   _number_of_requests(0),
   _continue_running(1)
 {
     // Uncomment following line to see debug output.
-    // _state_map.setDebugFlag(true);
+    // _fsm.setDebugFlag(true);
 }
 
 void AppClass::Run()
@@ -105,7 +132,7 @@ void AppClass::ReceiveRequest(const char *message)
 		++_number_of_requests;
 
 		// Process this message.
-		_state_map.RequestReceived();
+		_fsm.RequestReceived();
 	}
 
 	return;
@@ -115,7 +142,7 @@ void AppClass::CheckForRequest()
 {
 	if (_number_of_requests > 0)
 	{
-		_state_map.ProcessRequest();
+		_fsm.ProcessRequest();
 	}
 	else if (_number_of_requests < 0)
 	{
@@ -159,5 +186,5 @@ void AppClass::ProcessingCompleted()
 {
     cout << "... Processing completed." << endl;
 
-    _state_map.ProcessingDone();
+    _fsm.ProcessingDone();
 } // end of AppClass::ProcessingCompleted()

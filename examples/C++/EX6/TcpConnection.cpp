@@ -9,7 +9,7 @@
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
-// The Original Code is State Map Compiler (SMC).
+// The Original Code is State Machine Compiler (SMC).
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
@@ -29,6 +29,12 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2002/02/19 19:52:46  cwrapp
+// Changes in release 1.3.0:
+// Add the following features:
+// + 479555: Added subroutine/method calls as argument types.
+// + 508878: Added %import keyword.
+//
 // Revision 1.2  2001/05/09 23:40:02  cwrapp
 // Changes in release 1.0, beta 6:
 // Fixes the four following bugs:
@@ -117,7 +123,7 @@ void TcpConnection::transmit(const char *data,
                              int offset,
                              int size)
 {
-    _statemap.Transmit(data, offset, size);
+    _fsm.Transmit(data, offset, size);
     return;
 } // end of TcpConnection::transmit(const unsigned char*, int, int)
 
@@ -127,7 +133,7 @@ void TcpConnection::transmit(const char *data,
 //
 void TcpConnection::doClose()
 {
-    _statemap.Close();
+    _fsm.Close();
     return;
 } // end of TcpConnection::doClose()
 
@@ -223,47 +229,47 @@ void TcpConnection::handleReceive(int)
         switch(flags)
         {
             case TcpSegment::FIN:
-                _statemap.FIN(segment);
+                _fsm.FIN(segment);
                 break;
 
             case TcpSegment::SYN:
-                _statemap.SYN(segment);
+                _fsm.SYN(segment);
                 break;
 
             case TcpSegment::RST:
-                _statemap.RST(segment);
+                _fsm.RST(segment);
                 break;
 
             case TcpSegment::PSH:
-                _statemap.PSH(segment);
+                _fsm.PSH(segment);
                 break;
 
             case TcpSegment::ACK:
-                _statemap.ACK(segment);
+                _fsm.ACK(segment);
                 break;
 
             case TcpSegment::URG:
-                _statemap.URG(segment);
+                _fsm.URG(segment);
                 break;
 
             case TcpSegment::FIN_ACK:
-                _statemap.FIN_ACK(segment);
+                _fsm.FIN_ACK(segment);
                 break;
 
             case TcpSegment::SYN_ACK:
-                _statemap.SYN_ACK(segment);
+                _fsm.SYN_ACK(segment);
                 break;
 
             case TcpSegment::RST_ACK:
-                _statemap.RST_ACK(segment);
+                _fsm.RST_ACK(segment);
                 break;
 
             case TcpSegment::PSH_ACK:
-                _statemap.PSH_ACK(segment);
+                _fsm.PSH_ACK(segment);
                 break;
 
             default:
-                _statemap.UNDEF(segment);
+                _fsm.UNDEF(segment);
                 break;
         }
     }
@@ -283,35 +289,35 @@ void TcpConnection::handleTimeout(const char *name)
 
     if (strcmp(name, "ACK_TIMER") == 0)
     {
-        _statemap.AckTimeout();
+        _fsm.AckTimeout();
     }
     else if (strcmp(name, "CONN_ACK_TIMER") == 0)
     {
-        _statemap.ConnAckTimeout();
+        _fsm.ConnAckTimeout();
     }
     else if (strcmp(name, "TRANS_ACK_TIMER") == 0)
     {
-        _statemap.TransAckTimeout();
+        _fsm.TransAckTimeout();
     }
     else if (strcmp(name, "CLOSE_ACK_TIMER") == 0)
     {
-        _statemap.CloseAckTimeout();
+        _fsm.CloseAckTimeout();
     }
     else if (strcmp(name, "CLOSE_TIMER") == 0)
     {
-        _statemap.CloseTimeout();
+        _fsm.CloseTimeout();
     }
     else if (strcmp(name, "SERVER_OPENED") == 0)
     {
-        _statemap.ServerOpened();
+        _fsm.ServerOpened();
     }
     else if (strcmp(name, "CLIENT_OPENED") == 0)
     {
-        _statemap.ClientOpened(&_farAddress);
+        _fsm.ClientOpened(&_farAddress);
     }
     else if (strcmp(name, "OPEN_FAILED") == 0)
     {
-        _statemap.OpenFailed(_errorMessage);
+        _fsm.OpenFailed(_errorMessage);
         if (_errorMessage != NULL)
         {
             delete[] _errorMessage;
@@ -928,6 +934,8 @@ void TcpConnection::doSend(unsigned short flags,
         delete[] packet;
     }
 
+    delete send_segment;
+
     return;
 } // end of TcpConnection::doSend(...)
 
@@ -1023,7 +1031,7 @@ TcpConnection::TcpConnection(TcpConnectionListener& listener)
   _buffer(NULL),
   _bufferSize(0),
   _errorMessage(NULL),
-  _statemap(*this)
+  _fsm(*this)
 {
     (void) memset(&_nearAddress, 0, sizeof(_nearAddress));
     (void) memset(&_farAddress, 0, sizeof(_farAddress));
@@ -1031,7 +1039,7 @@ TcpConnection::TcpConnection(TcpConnectionListener& listener)
 
 #if defined(SMC_DEBUG)
     // Turn on state map debug printout.
-    _statemap.setDebugFlag(true);
+    _fsm.setDebugFlag(true);
 #endif
 
     return;
@@ -1066,7 +1074,7 @@ TcpConnection::TcpConnection(const sockaddr_in& far_address,
   _buffer(NULL),
   _bufferSize(0),
   _errorMessage(NULL),
-  _statemap(*this)
+  _fsm(*this)
 {
     // Register the UDP socket with the event loop.
     Gevent_loop->addFD(_udp_socket, *this);
@@ -1079,7 +1087,7 @@ TcpConnection::TcpConnection(const sockaddr_in& far_address,
 
 #if defined(SMC_DEBUG)
     // Uncomment to turn on state map debug printout.
-    _statemap.setDebugFlag(true);
+    _fsm.setDebugFlag(true);
 #endif
 
     return;
@@ -1116,7 +1124,7 @@ TcpConnection::~TcpConnection()
 //
 void TcpConnection::passiveOpen(unsigned short port)
 {
-    _statemap.PassiveOpen(port);
+    _fsm.PassiveOpen(port);
     return;
 } // end of TcpConnection::passiveOpen(unsigned short)
 
@@ -1126,7 +1134,7 @@ void TcpConnection::passiveOpen(unsigned short port)
 //
 void TcpConnection::activeOpen(const sockaddr_in& address)
 {
-    _statemap.ActiveOpen(&address);
+    _fsm.ActiveOpen(&address);
     return;
 } // end of TcpConnection::activeOpen(const sockaddr_in&)
 
@@ -1136,7 +1144,7 @@ void TcpConnection::activeOpen(const sockaddr_in& address)
 //
 void TcpConnection::acceptOpen(const TcpSegment& segment)
 {
-    _statemap.AcceptOpen(&segment);
+    _fsm.AcceptOpen(&segment);
     return;
 } // end of TcpConnection::acceptOpen(const TcpSegment&)
 

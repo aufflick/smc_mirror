@@ -9,7 +9,7 @@
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
-// The Original Code is State Map Compiler (SMC).
+// The Original Code is State Machine Compiler (SMC).
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
@@ -29,19 +29,11 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.2  2002/02/13 02:45:23  cwrapp
-// Changes in release 1.2.0:
-// Added the following features:
-// + 484889: "pop" transitions can now return arguments
-//           along with a transition name.
-// + 496625: Multiple .sm files may be specified in the
-//           compile command.
-//
-// Fixed the following bugs:
-// + 496692: Fixed the %package C++ code generation.
-// + 501157: Transition debug output was still hardcoded
-//           to System.err. This has been corrected so
-//           that FSMContext._debug_stream is used.
+// Revision 1.3  2002/02/19 19:52:47  cwrapp
+// Changes in release 1.3.0:
+// Add the following features:
+// + 479555: Added subroutine/method calls as argument types.
+// + 508878: Added %import keyword.
 //
 // Revision 1.1.1.2  2001/03/26 14:41:47  cwrapp
 // Corrected Entry/Exit action semantics. Exit actions are now
@@ -85,7 +77,7 @@ public abstract class TcpConnection
 
     public final synchronized void close()
     {
-        _statemap.Close();
+        _fsm.Close();
         return;
     }
 
@@ -109,8 +101,7 @@ public abstract class TcpConnection
 
         try
         {
-            _transition_table[segment.getFlags()].invoke(_statemap,
-                                                         args);
+            _transition_table[segment.getFlags()].invoke(_fsm, args);
         }
         catch (Exception jex)
         {
@@ -132,31 +123,31 @@ public abstract class TcpConnection
     {
         if (name.compareTo("CONN_ACK_TIMER") == 0)
         {
-            _statemap.ConnAckTimeout();
+            _fsm.ConnAckTimeout();
         }
         else if (name.compareTo("TRANS_ACK_TIMER") == 0)
         {
-            _statemap.TransAckTimeout();
+            _fsm.TransAckTimeout();
         }
         else if (name.compareTo("CLOSE_ACK_TIMER") == 0)
         {
-            _statemap.CloseAckTimeout();
+            _fsm.CloseAckTimeout();
         }
         else if (name.compareTo("CLOSE_TIMER") == 0)
         {
-            _statemap.CloseTimeout();
+            _fsm.CloseTimeout();
         }
         else if (name.compareTo("SERVER_OPENED") == 0)
         {
-            _statemap.Opened();
+            _fsm.Opened();
         }
         else if (name.compareTo("CLIENT_OPENED") == 0)
         {
-            _statemap.Opened(_address, _port);
+            _fsm.Opened(_address, _port);
         }
         else if (name.compareTo("OPEN_FAILED") == 0)
         {
-            _statemap.OpenFailed(_errorMessage);
+            _fsm.OpenFailed(_errorMessage);
             _errorMessage = null;
         }
 
@@ -167,7 +158,7 @@ public abstract class TcpConnection
     protected TcpConnection(TcpConnectionListener listener)
     {
         _listener = listener;
-        _statemap = new TcpConnectionContext(this);
+        _fsm = new TcpConnectionContext(this);
         _sequence_number = 0;
         _async_socket = null;
         _address = null;
@@ -176,7 +167,7 @@ public abstract class TcpConnection
         _errorMessage = null;
 
         // Turn on FSM debugging.
-        // _statemap.setDebugFlag(true);
+        // _fsm.setDebugFlag(true);
 
         return;
     }
@@ -196,10 +187,10 @@ public abstract class TcpConnection
         _server = server;
         _errorMessage = null;
         _listener = listener;
-        _statemap = new TcpConnectionContext(this);
+        _fsm = new TcpConnectionContext(this);
 
         // Turn on FSM debugging.
-        // _statemap.setDebugFlag(true);
+        // _fsm.setDebugFlag(true);
 
         _async_socket.start();
 
@@ -208,19 +199,19 @@ public abstract class TcpConnection
 
     protected final synchronized void passiveOpen(int port)
     {
-        _statemap.PassiveOpen(port);
+        _fsm.PassiveOpen(port);
         return;
     }
 
     protected final synchronized void activeOpen(InetAddress address, int port)
     {
-        _statemap.ActiveOpen(address, port);
+        _fsm.ActiveOpen(address, port);
         return;
     }
 
     protected final synchronized void acceptOpen(TcpSegment segment)
     {
-        _statemap.AcceptOpen(segment);
+        _fsm.AcceptOpen(segment);
         return;
     }
 
@@ -241,7 +232,7 @@ public abstract class TcpConnection
 
     protected synchronized void transmit(byte[] data, int offset, int length)
     {
-        _statemap.Transmit(data, offset, length);
+        _fsm.Transmit(data, offset, length);
         return;
     }
 
@@ -516,6 +507,14 @@ public abstract class TcpConnection
         int local_port;
         int ack_number;
         TcpSegment send_segment;
+        DatagramSocket socket;
+
+        // Quietly quit if there is not socket.
+        if (_async_socket == null ||
+            (socket = _async_socket.getDatagramSocket()) == null)
+        {
+            return;
+        }
 
         // If the address and port were not specified, then send
         // this segment to whatever client socket we are
@@ -586,11 +585,11 @@ public abstract class TcpConnection
 //                                   send_segment);
 
             _async_socket.getDatagramSocket().send(packet);
-            // _statemap.Transmitted();
+            // _fsm.Transmitted();
         }
         catch (IOException io_exception)
         {
-            // _statemap.TransmitFailed(io_exception.getMessage());
+            // _fsm.TransmitFailed(io_exception.getMessage());
         }
 
         return;
@@ -657,7 +656,7 @@ public abstract class TcpConnection
 // Member data.
 
     protected TcpConnectionListener _listener;
-    private TcpConnectionContext  _statemap;
+    private TcpConnectionContext  _fsm;
     protected AsyncDatagramSocket   _async_socket;
     private int                   _sequence_number;
 

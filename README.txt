@@ -1,30 +1,70 @@
 
 
                                SMC
-                     The State Map Compiler
-                     (Version: 1.2.0)
+                     The State Machine Compiler
+                         (Version: 1.3.0)
+
+                     http://smc.sourceforge.net
 
 
 
 0. What's New?
 --------------
 
-This point release contains two new features
+New Features:
 
-+ 484889: "pop" transitions can now return arguments
-          along with a transition name.
++ All transitions may now access the application context class
+  via the "ctxt" variable. Just as the "this" variable in C++ and
+  Java refers to the object itself, the SMC "ctxt" variable
+  references the state machine's context object.
 
-+ 496625: Multiple .sm files may be specified in the
-          compile command.
+  For example, if the context class is AppClass, then in "ctxt"
+  is declared as:
 
-Two minor bugs where fixed:
+  +  C++: AppClass& ctxt;
+  + Java: AppClass ctxt;
+  +  Tcl: variable ctxt;
 
-+ 496692: Cleaned up %package C++ code generation.
++ Methods and functions are now valid arguments themselves.
+  For example, in the following "Idle" state, notice the
+  "DoTask" transition and how the transition arguments are
+  used in the "startTask" transition action:
 
-+ 501157: Transition debug output was still hardcoded
-          to System.err. This has been corrected so
-          that FSMContext._debug_stream is used.
+  Idle
+  {
+      DoTask(task : Task&)
+          Working    {startTask(task.getWorkList(),
+                                ctxt.getTaskManager(),
+                                getUniqueTaskId());}
+  }
 
+  Notice that "task" and "ctxt" are needed to make the proper
+  method calls. The call "getUniqueTaskId()" is an independent
+  subroutine and *not* a method. While "startTask" does not
+  have an object reference preceeding it, it must be an
+  accessible context class method (that is, it is interpreted as
+  "ctxt.startTask(...)").
+
+  SourceForge feature #: 479555
+
++ A %import keyword has been added. The syntax is:
+
+  %import <name>
+
+  and results in the following code being generated:
+
+  +  C++: using namespace <name>;
+  + Java: import <name>;
+  +  Tcl: package requirce <name>;
+
+  Note: As always, the SMC programmer is responsible for making
+        sure that <name> is valid. SMC does not validate <name>
+        and an invalid <name> will be found when the generated
+        code is compiled (in C++ and Java) or run (in Tcl).
+
+Bug Fixes:
+
+This release contains no new bug fixes.
 
 
 1. System Requirements
@@ -38,24 +78,28 @@ Two minor bugs where fixed:
 2. Introduction
 ---------------
 
-If you use state maps to define your objects behavior and are
+If you use state machines to define your objects behavior and are
 tired of the time-consuming, error-prone work of implementing
-those state maps as state transition matrices or widely scattered
-switch statements, then SMC is what you're looking for.
+those state machines as state transition matrices or widely
+scattered switch statements, then SMC is what you're looking for.
 
-SMC takes a state map definition and generates State pattern
-classes implementing that state map. The only code you need
-to add to your object is 1) create the state map object and
+SMC takes a state machine definition and generates State pattern
+classes implementing that state machine. The only code you need
+to add to your object is 1) create the state machine object and
 2) issue transitions. ITS THAT EASY.
 
-+ No, your object doesn't have to inherit any state map class.
-+ No, your object doesn't have to implement any state map methods.
++ No, you don't have to inherit any state machine class.
++ No, you don't have to implement any state machine interface.
 
-YES, your object's constructor does:
+YES, you add to your class constructor:
 
-        _my_state_map = new MyClassContext(this);
+        _my_fsm = new MyClassContext(this);
 
-Congratulations! You've integrated a statemap into your object.
+YES, you issue state transitions:
+
+        _my_fsm.HandleMessage(msg);
+
+Congratulations! You've integrated a state machine into your object.
 
 SMC is written in Java and is truly "Write once, run anywhere".
 If you have at least the Java Standard Edition v. 1.2.2 loaded,
@@ -66,15 +110,17 @@ Java Standard Edition can be downloaded for FREE from
 
                     http://java.sun.com/j2se/
 
-SMC currently supports three object-oriented languages: C++,
-Java and [incr Tcl].
+SMC currently supports three object-oriented languages:
+  1. C++,
+  2. Java and
+  3. [incr Tcl].
 
 
 3. Download
 -----------
 
 Surf over to http://smc.sourceforge.net and check out
-"File Releases". The latest SMC version is 1.0.0.
+"File Releases". The latest SMC version is 1.3.0.
 SMC downloads come in two flavors: tar/gzip (for Unix)
 and self-extracting zip file (for Windows).
 
@@ -155,7 +201,7 @@ file), you install SMC as follows:
 1. Figure out where you can to load the Smc directory and place
    the SMC package there.
 2. If you already have an "smc" directory/folder, change its name
-   to something like "smc_old" or "smc_1_0_b4". This will prevent
+   to something like "smc_old" or "smc_1_2_0". This will prevent
    its contents from being overwritten in case you want to back
    out of the new version. Once you are satisfied with the new
    version, you may delete the old SMC.

@@ -14,7 +14,7 @@ exec Tclsh80 "$0" "$@"
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
 # 
-# The Original Code is State Map Compiler (SMC).
+# The Original Code is State Machine Compiler (SMC).
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
@@ -25,7 +25,7 @@ exec Tclsh80 "$0" "$@"
 #
 # checkstring --
 #
-#  This test program uses the state map language to determine
+#  This test program uses the state machine language to determine
 #  is a string is of the form 0*1*.
 #
 # RCS ID
@@ -33,6 +33,12 @@ exec Tclsh80 "$0" "$@"
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2002/02/19 19:52:47  cwrapp
+# Changes in release 1.3.0:
+# Add the following features:
+# + 479555: Added subroutine/method calls as argument types.
+# + 508878: Added %import keyword.
+#
 # Revision 1.2  2001/10/12 14:28:04  cwrapp
 # SMC v. 1.0.1
 #

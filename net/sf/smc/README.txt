@@ -2,7 +2,7 @@
 
 
                               SMC -
-                     The State Map Compiler
+                   The State Machine Compiler
 
 
 + Building & Installing Smc.jar

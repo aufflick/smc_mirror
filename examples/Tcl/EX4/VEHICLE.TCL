@@ -9,7 +9,7 @@
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
 # 
-# The Original Code is State Map Compiler (SMC).
+# The Original Code is State Machine Compiler (SMC).
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
@@ -28,6 +28,12 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2002/02/19 19:52:48  cwrapp
+# Changes in release 1.3.0:
+# Add the following features:
+# + 479555: Added subroutine/method calls as argument types.
+# + 508878: Added %import keyword.
+#
 # Revision 1.2  2001/12/14 20:10:37  cwrapp
 # Changes in release 1.1.0:
 # Add the following features:
@@ -77,7 +83,7 @@ source ./Vehicle_sm.tcl;
 namespace eval ::tcl_ex4 {
     class Vehicle {
     # Member data.
-        private variable _statemap;
+        private variable _fsm;
 
         # The canvas to draw on and the direction this vehicle is
         # moving.
@@ -117,7 +123,7 @@ namespace eval ::tcl_ex4 {
 
     # Member functions.
         constructor {stoplight direction canvas} {
-            set _statemap [::tcl_ex4::VehicleContext #auto $this];
+            set _fsm [::tcl_ex4::VehicleContext #auto $this];
 
             set _canvas $canvas;
             set _direction $direction;
@@ -168,7 +174,7 @@ namespace eval ::tcl_ex4 {
             # DEBUG
             # Uncomment the following line so that
             # FSM debug output may be seen.
-            # $_statemap setDebugFlag 1;
+            # $_fsm setDebugFlag 1;
         }
 
         destructor {
@@ -199,12 +205,12 @@ namespace eval ::tcl_ex4 {
             set _timerID -1;
 
             if [OffCanvas] {
-                $_statemap TripDone;
+                $_fsm TripDone;
             } elseif {[AtIntersection] && \
                     [string compare [$_stoplight getLight $_direction] "green"] != 0} {
-                $_statemap LightRed;
+                $_fsm LightRed;
             } else {
-                $_statemap KeepGoing;
+                $_fsm KeepGoing;
             }
 
             return -code ok;
@@ -221,7 +227,7 @@ namespace eval ::tcl_ex4 {
         #   ok
 
         public method lightGreen {} {
-            $_statemap LightGreen;
+            $_fsm LightGreen;
 
             return -code ok;
         }
@@ -276,7 +282,7 @@ namespace eval ::tcl_ex4 {
         #   ok
 
         public method start {} {
-            $_statemap Start;
+            $_fsm Start;
             return -code ok;
         }
 
@@ -291,7 +297,7 @@ namespace eval ::tcl_ex4 {
         #   ok
 
         public method pause {} {
-            $_statemap Pause;
+            $_fsm Pause;
             return -code ok;
         }
 
@@ -306,7 +312,7 @@ namespace eval ::tcl_ex4 {
         #   ok
 
         public method continue {} {
-            $_statemap Continue;
+            $_fsm Continue;
             return -code ok;
         }
 
@@ -321,13 +327,13 @@ namespace eval ::tcl_ex4 {
         #   ok
 
         public method stop {} {
-            $_statemap Stop;
+            $_fsm Stop;
             return -code ok;
         }
 
-        # State Map Actions
+        # State Machine Actions
         #
-        # The following methods are called by the state map.
+        # The following methods are called by the state machine.
 
         # SetTimer --
         #

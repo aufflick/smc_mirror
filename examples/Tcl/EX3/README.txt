@@ -4,7 +4,7 @@
                           Tcl Example 3
 
 
-This state map "recognizes" the palindromes (words that read the
+This state machine "recognizes" the palindromes (words that read the
 same backwards as forwards). The words consist of the alphabet
 {0, 1, c} where the letter 'c' may appear only once and marks the
 words center.
@@ -16,7 +16,7 @@ words center.
 NOTE: Smc.jar must be built and installed.
 
 Unix & Windows:
-    $ java -jar ../../../bin/Smc.jar AppClass.sm
+    $ java -jar ../../../bin/Smc.jar -tcl AppClass.sm
 
 
 + Executing
@@ -24,27 +24,27 @@ Unix & Windows:
 
 Unix & Windows
 
-    $ tclsh checkstring <string>
+    $ tclsh checkstring.tcl <string>
 
 Try several different strings, such as:
 
-    $ tclsh checkstring ""
+    $ tclsh checkstring.tcl ""
       -> unacceptable
       
-    $ tclsh checkstring 00
+    $ tclsh checkstring.tcl 00
       -> unacceptable
       
-    $ tclsh checkstring 1c
+    $ tclsh checkstring.tcl 1c
       -> unacceptable
       
-    $ tclsh checkstring c0
+    $ tclsh checkstring.tcl c0
       -> unacceptable
       
-    $ tclsh checkstring abcba
+    $ tclsh checkstring.tcl abcba
       -> unacceptable
 
-    $ tclsh checkstring 110010c010011
+    $ tclsh checkstring.tcl 110010c010011
       -> acceptable
 
-    $ tclsh checkstring 110010c110010
+    $ tclsh checkstring.tcl 110010c110010
       -> unacceptable

@@ -9,7 +9,7 @@
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
-// The Original Code is State Map Compiler (SMC).
+// The Original Code is State Machine Compiler (SMC).
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
@@ -29,6 +29,12 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2002/02/19 19:52:47  cwrapp
+// Changes in release 1.3.0:
+// Add the following features:
+// + 479555: Added subroutine/method calls as argument types.
+// + 508878: Added %import keyword.
+//
 // Revision 1.2  2001/05/09 23:40:02  cwrapp
 // Changes in release 1.0, beta 6:
 // Fixes the four following bugs:
@@ -74,6 +80,7 @@
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.Timer;
@@ -94,10 +101,10 @@ public final class Task
         _runStartTime = null;
         _timerTable = new HashMap();
 
-        _statemap = new TaskContext(this);
+        _fsm = new TaskContext(this);
 
         // Uncomment to see debug output.
-        // _statemap.setDebugFlag(true);
+        // _fsm.setDebugFlag(true);
 
         // Register with the task controller.
         control.register(name, this);
@@ -107,7 +114,7 @@ public final class Task
         _suspendStartTime = new Date();
 
         // Have this task placed on the task display.
-        HashMap args = new HashMap();
+        Map args = new HashMap();
         args.put(new String("name"), name);
         args.put(new String("status"), new String("Suspended"));
         args.put(new String("priority"), new Integer(priority));
@@ -172,35 +179,35 @@ public final class Task
         return(retval);
     }
 
-    public void handleEvent(String eventName, HashMap args)
+    public void handleEvent(String eventName, Map args)
     {
         if (eventName.compareTo("start") == 0)
         {
-            _statemap.Start();
+            _fsm.Start();
         }
         else if (eventName.compareTo("suspend") == 0)
         {
-            _statemap.Suspend();
+            _fsm.Suspend();
         }
         else if (eventName.compareTo("block") == 0)
         {
-            _statemap.Block();
+            _fsm.Block();
         }
         else if (eventName.compareTo("unblock") == 0)
         {
-            _statemap.Unblock();
+            _fsm.Unblock();
         }
         else if (eventName.compareTo("stop") == 0)
         {
-            _statemap.Stop();
+            _fsm.Stop();
         }
         else if (eventName.compareTo("delete") == 0)
         {
-            _statemap.Delete();
+            _fsm.Delete();
         }
         else if (eventName.compareTo("Done") == 0)
         {
-            _statemap.Done();
+            _fsm.Done();
         }
         else if (eventName.compareTo("Update Time") == 0)
         {
@@ -208,18 +215,18 @@ public final class Task
         }
         else if (eventName.compareTo("Stopped") == 0)
         {
-            _statemap.Stopped();
+            _fsm.Stopped();
         }
 
         return;
     }
 
     //===========================================================
-    // State Map Actions.
+    // State Machine Actions.
     //
 
     // Create a timer for the specified period. When the timer
-    // expires, issue the associated state map transition.
+    // expires, issue the associated state machine transition.
     public void setTimer(String name, int period)
     {
         Timer timer;
@@ -262,7 +269,7 @@ public final class Task
     public void sendMessage(int level, String message)
     {
         TaskController control = new TaskController();
-        HashMap args = new HashMap();
+        Map args = new HashMap();
 
         args.put(new String("level"), new Integer(level));
         args.put(new String("object"), _name);
@@ -278,7 +285,7 @@ public final class Task
     public void stateUpdate(String change)
     {
         TaskController controller = new TaskController();
-        HashMap args = new HashMap();
+        Map args = new HashMap();
 
         args.put(new String("name"), _name);
         args.put(new String("status"), change);
@@ -295,7 +302,7 @@ public final class Task
         int timeLeft;
         int percentComplete;
         Date currTime = new Date();
-        HashMap args = new HashMap();
+        Map args = new HashMap();
 
         timeLeft =
                 _timeLeft -
@@ -354,7 +361,7 @@ public final class Task
     {
         TaskController control = new TaskController();
         Date currTime = new Date();
-        HashMap args = new HashMap();
+        Map args = new HashMap();
         int percentComplete;
 
         _timeLeft =
@@ -387,7 +394,7 @@ public final class Task
     public void updateTaskMan(String state)
     {
         TaskController control = new TaskController();
-        HashMap args = new HashMap();
+        Map args = new HashMap();
 
         args.put(new String("Task Name"), _name);
         control.postMessage("Task Manager",
@@ -407,7 +414,7 @@ public final class Task
 
 // Member Data
 
-    private TaskContext _statemap;
+    private TaskContext _fsm;
 
     // The task's human readable name.
     private String _name;
@@ -433,7 +440,7 @@ public final class Task
     private Date _suspendStartTime;
 
     // Put internal timers here.
-    private HashMap _timerTable;
+    private Map _timerTable;
 
 // Inner Classes
 
@@ -450,7 +457,7 @@ public final class Task
 
         public void actionPerformed(ActionEvent e)
         {
-            HashMap args = new HashMap();
+            Map args = new HashMap();
 
             _owner.handleEvent(_name, args);
             return;

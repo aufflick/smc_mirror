@@ -9,7 +9,7 @@
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
-// The Original Code is State Map Compiler (SMC).
+// The Original Code is State Machine Compiler (SMC).
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
@@ -29,17 +29,51 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.1  2001/01/03 03:14:00  cwrapp
-// Initial revision
+// Revision 1.2  2002/02/19 19:52:46  cwrapp
+// Changes in release 1.3.0:
+// Add the following features:
+// + 479555: Added subroutine/method calls as argument types.
+// + 508878: Added %import keyword.
+//
+// Revision 1.1.1.2  2001/03/26 14:41:46  cwrapp
+// Corrected Entry/Exit action semantics. Exit actions are now
+// executed only by simple transitions and pop transitions.
+// Entry actions are executed by simple transitions and push
+// transitions. Loopback transitions do not execute either Exit
+// actions or entry actions. See SMC Programmer's manual for
+// more information.
+//
+// Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
+//
+// ----------------------------------------------------------------------
+// SMC - The State Map Compiler
+// Version: 1.0, Beta 3
+//
+// SMC compiles state map descriptions into a target object oriented
+// language. Currently supported languages are: C++, Java and [incr Tcl].
+// SMC finite state machines have such features as:
+// + Entry/Exit actions for states.
+// + Transition guards
+// + Transition arguments
+// + Push and Pop transitions.
+// + Default transitions. 
+// ----------------------------------------------------------------------
 //
 
 #include "AppServer.h"
 #include "AppClient.h"
+#include "Eventloop.h"
 #if defined(WIN32)
 #include <winsock2.h>
 #else
 #include <arpa/inet.h>
 #endif
+
+// Externally defined global variables.
+extern Eventloop *Gevent_loop;
+
+// Constants.
+const static char *DELETE_TIMER = "DeleteTimer";
 
 //---------------------------------------------------------------
 // AppServer() (Public)
@@ -47,7 +81,8 @@
 //
 AppServer::AppServer()
 : _server(NULL),
-  _clientList(NULL)
+  _clientList(NULL),
+  _deleteList(NULL)
 {}
 
 //---------------------------------------------------------------
@@ -76,6 +111,15 @@ AppServer::~AppServer()
         delete client;
     }
     _clientList = NULL;
+
+    for (client = _deleteList;
+         client != NULL;
+         client = nextClient)
+    {
+        nextClient = client->getNext();
+        delete client;
+    }
+    _deleteList = NULL;
 
     return;
 } // end of AppServer::~AppServer()
@@ -127,10 +171,16 @@ void AppServer::clientClosed(const AppClient& client)
         {
             remove_entry = *entry;
             *entry = (*entry)->getNext();
-            remove_entry->setNext(NULL);
 
-            delete remove_entry->getClient();
-            delete remove_entry;
+            // Now put the client on the delete list and
+            // start the delete timer.
+            remove_entry->setNext(_deleteList);
+            _deleteList = remove_entry;
+
+            if (Gevent_loop->doesTimerExist(DELETE_TIMER) == true)
+            {
+                Gevent_loop->startTimer(DELETE_TIMER, 1, *this);
+            }
 
             break;
         }
@@ -227,3 +277,27 @@ void AppServer::accepted(TcpClient& client, TcpServer& server)
 
     return;
 } // end of AppServer::accepted(TcpClient&, TcpServer&)
+
+//---------------------------------------------------------------
+// handleTimeout(const char*) (Public)
+// Time to delete the zombie clients.
+//
+void AppServer::handleTimeout(const char *name)
+{
+    if (strcmp(name, DELETE_TIMER) == 0)
+    {
+        ClientEntry *it;
+        ClientEntry *next;
+
+        for (it = _deleteList; it != NULL; it = next)
+        {
+            next = it->getNext();
+            it->setNext(NULL);
+            delete it;
+        }
+
+        _deleteList = NULL;
+    }
+
+    return;
+} // end of AppServer::handleTimeout(const char*)

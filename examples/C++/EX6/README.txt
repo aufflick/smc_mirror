@@ -4,7 +4,7 @@
                           C++ Example 6
 
 
-An incomplete implementation of the TCP state map. This
+An incomplete implementation of the TCP state machine. This
 implementation is based on UDP sockets and does the TCP connect
 and disconnect processing. This demo does *not* implement
 TCP's sophisticated transmission capability.

@@ -9,7 +9,7 @@
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
-// The Original Code is State Map Compiler (SMC).
+// The Original Code is State Machine Compiler (SMC).
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
@@ -23,6 +23,12 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2002/02/19 19:52:49  cwrapp
+// Changes in release 1.3.0:
+// Add the following features:
+// + 479555: Added subroutine/method calls as argument types.
+// + 508878: Added %import keyword.
+//
 // Revision 1.2  2001/12/14 20:10:37  cwrapp
 // Changes in release 1.1.0:
 // Add the following features:
@@ -125,9 +131,11 @@ public final class SmcParseTreeTcl
         throws ParseException
     {
         String pkgScope;
+        ListIterator iIt;
         ListIterator mapIt;
         ListIterator transIt;
         ListIterator paramIt;
+        String packageName;
         SmcMap map;
         SmcTransition trans;
         SmcParameter parameter;
@@ -138,6 +146,20 @@ public final class SmcParseTreeTcl
         if (_source != null && _source.length() > 0)
         {
             source.println(_source + "\n");
+        }
+
+        // Do user-specified imports now.
+        if (_importList.size() != 0)
+        {
+            for (iIt = _importList.listIterator();
+                 iIt.hasNext() == true;
+                )
+            {
+                packageName = (String) iIt.next();
+                source.println("package require " + packageName + ";");
+            }
+
+            source.println();
         }
 
         // If a namespace was specified, then output that

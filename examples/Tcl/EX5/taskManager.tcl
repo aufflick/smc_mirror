@@ -9,7 +9,7 @@
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
 # 
-# The Original Code is State Map Compiler (SMC).
+# The Original Code is State Machine Compiler (SMC).
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
@@ -29,8 +29,27 @@
 #
 # CHANGE LOG
 # $Log$
-# Revision 1.1  2001/01/03 03:14:00  cwrapp
-# Initial revision
+# Revision 1.2  2002/02/19 19:52:48  cwrapp
+# Changes in release 1.3.0:
+# Add the following features:
+# + 479555: Added subroutine/method calls as argument types.
+# + 508878: Added %import keyword.
+#
+# Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
+#
+# ----------------------------------------------------------------------
+# SMC - The State Map Compiler
+# Version: 1.0, Beta 3
+#
+# SMC compiles state map descriptions into a target object oriented
+# language. Currently supported languages are: C++, Java and [incr Tcl].
+# SMC finite state machines have such features as:
+# + Entry/Exit actions for states.
+# + Transition guards
+# + Transition arguments
+# + Push and Pop transitions.
+# + Default transitions. 
+# ----------------------------------------------------------------------
 #
 # Revision 1.1.1.1  2000/08/02 12:51:06  charlesr
 # Initial source import, SMC v. 1.0, Beta 1.
@@ -41,7 +60,7 @@ source ./taskManager_sm.tcl;
 
 class TaskManager {
 # Member data.
-    private variable _statemap;
+    private variable _fsm;
 
     # The queue of runnable tasks sorted by priority.
     private variable _runnableTaskQueue;
@@ -74,10 +93,10 @@ class TaskManager {
         set _garbageTimerID -1;
         set _exitCode 0;
 
-        set _statemap [TaskManagerContext #auto $this];
+        set _fsm [TaskManagerContext #auto $this];
 
         # Uncomment to see debug output.
-        # _statemap setDebugFlag 1;
+        # _fsm setDebugFlag 1;
     }
 
     destructor {
@@ -114,7 +133,7 @@ class TaskManager {
     #   None.
 
     public method timeout {transition} {
-        $_statemap $transition;
+        $_fsm $transition;
         return -code ok;
     }
 
@@ -166,7 +185,7 @@ class TaskManager {
             set TaskObj "::TaskManager::$TaskObj";
             lappend _runnableTaskQueue $TaskObj;
             sendMessage 1 "Created task $name (priority: $priority, time: $time)";
-            $_statemap TaskCreated;
+            $_fsm TaskCreated;
         }
 
         return -code ok;
@@ -264,7 +283,7 @@ class TaskManager {
                                   $TaskIndex];
                 lappend _runnableTaskQueue $Task;
 
-                $_statemap TaskUnblocked;
+                $_fsm TaskUnblocked;
             }
         }
 
@@ -304,7 +323,7 @@ class TaskManager {
     #   None.
 
     public method shutdown {} {
-        $_statemap Shutdown;
+        $_fsm Shutdown;
 
         return -code ok;
     }
@@ -331,7 +350,7 @@ class TaskManager {
             # Is this the running task?
             if {[string compare $Task $_runningTask] == 0} {
                 set _runningTask "";
-                $_statemap TaskDone;
+                $_fsm TaskDone;
             } elseif {[set TaskIndex [lsearch -exact $_runnableTaskQueue $Task]] >= 0} {
                 # I don't know how a suspended task managed to
                 # complete. Remove it from the runnable list.
@@ -377,7 +396,7 @@ class TaskManager {
                               $TaskIndex];
             ZombifyTask $Task;
 
-            $_statemap TaskStopped;
+            $_fsm TaskStopped;
         } else {
             sendMessage 4 "TaskManager::taskStopped: $taskName not on blocked list.";
         }
@@ -404,7 +423,7 @@ class TaskManager {
 
             if {[string compare $_runningTask $Task] == 0} {
                 set _runningTask "";
-                $_statemap TaskDeleted;
+                $_fsm TaskDeleted;
             } elseif {[set TaskIndex [lsearch -exact $_runnableTaskQueue $Task]] >= 0} {
                 # Move the task from the runnable queue to the
                 # blocked queue.
@@ -427,12 +446,13 @@ class TaskManager {
         return -code ok;
     }
 
-    # State map actions.
+    # State machine actions.
 
     # setTimer --
     #
     #   Create a timer for the specified period. When the timer
-    #   expires, issue the specified transition to the state map.
+    #   expires, issue the specified transition to the state
+    #   machine.
     #
     # Arguments:
     #   name    The timer's name.

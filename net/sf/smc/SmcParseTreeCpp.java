@@ -9,7 +9,7 @@
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
-// The Original Code is State Map Compiler (SMC).
+// The Original Code is State Machine Compiler (SMC).
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
@@ -23,19 +23,11 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.3  2002/02/13 02:45:23  cwrapp
-// Changes in release 1.2.0:
-// Added the following features:
-// + 484889: "pop" transitions can now return arguments
-//           along with a transition name.
-// + 496625: Multiple .sm files may be specified in the
-//           compile command.
-//
-// Fixed the following bugs:
-// + 496692: Fixed the %package C++ code generation.
-// + 501157: Transition debug output was still hardcoded
-//           to System.err. This has been corrected so
-//           that FSMContext._debug_stream is used.
+// Revision 1.4  2002/02/19 19:52:49  cwrapp
+// Changes in release 1.3.0:
+// Add the following features:
+// + 479555: Added subroutine/method calls as argument types.
+// + 508878: Added %import keyword.
 //
 // Revision 1.2  2001/12/14 20:10:37  cwrapp
 // Changes in release 1.1.0:
@@ -142,10 +134,12 @@ public final class SmcParseTreeCpp
         String mapName;
         String separator;
         String indent;
+        ListIterator iIt;
         ListIterator mapIt;
         ListIterator stateIt;
         ListIterator transIt;
         ListIterator paramIt;
+        String packageName;
         SmcMap map;
         SmcState state;
         SmcTransition trans;
@@ -192,7 +186,18 @@ public final class SmcParseTreeCpp
                 
         // Import the statemap namespace symbols into the main
         // namespace.
-        header.println("using namespace statemap;\n");
+        header.println("using namespace statemap;");
+
+        // Do user-specified imports now.
+        for (iIt = _importList.listIterator();
+             iIt.hasNext() == true;
+            )
+        {
+            packageName = (String) iIt.next();
+            header.println("using namespace " + packageName + ";");
+        }
+
+        header.println();
 
         // If a namespace was specified, then output that
         // namespace now.
@@ -314,7 +319,7 @@ public final class SmcParseTreeCpp
                              trans.getName() +
                              "(" +
                              _context +
-                             "Context& s");
+                             "Context& context");
 
                 for (paramIt = trans.getParameters().listIterator();
                      paramIt.hasNext() == true;
@@ -334,7 +339,7 @@ public final class SmcParseTreeCpp
         header.println(indent +
                        "    virtual void Default(" +
                        _context +
-                       "Context& s);");
+                       "Context& context);");
 
         // The base class has been defined.
         header.println(indent + "};\n");
@@ -415,7 +420,7 @@ public final class SmcParseTreeCpp
                              trans.getName() +
                              "(" +
                              _context +
-                             "Context& s");
+                             "Context& context");
 
                 for (paramIt = trans.getParameters().listIterator();
                      paramIt.hasNext() == true;
@@ -428,7 +433,7 @@ public final class SmcParseTreeCpp
 
                 source.println(")");
                 source.println(indent + "{");
-                source.println(indent + "    Default(s);");
+                source.println(indent + "    Default(context);");
                 source.println(indent + "    return;");
                 source.println(indent + "}");
             }
@@ -442,17 +447,17 @@ public final class SmcParseTreeCpp
                        _context +
                        "State::Default(" +
                        _context +
-                       "Context& s)");
+                       "Context& context)");
         source.println(indent + "{");
 
         // Print the transition out to the verbose log.
         if (Smc.isDebug() == true)
         {
             source.println(indent +
-                           "    if (s.getDebugFlag() == true)");
+                           "    if (context.getDebugFlag() == true)");
             source.println(indent + "    {");
             source.println(indent +
-                           "        ostream& str = s.getDebugStream();");
+                           "        ostream& str = context.getDebugStream();");
             source.println();
             source.println(indent +
                            "        str << \"TRANSITION   : Default\"");
@@ -469,9 +474,9 @@ public final class SmcParseTreeCpp
         source.println(indent +
                        "        TransitionUndefinedException(");
         source.println(indent +
-                       "            s.getState().getName(),");
+                       "            context.getState().getName(),");
         source.println(indent +
-                       "            s.getTransition()));");
+                       "            context.getTransition()));");
         source.println();
 
         source.println(indent + "    return;");

@@ -9,7 +9,7 @@
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
-// The Original Code is State Map Compiler (SMC).
+// The Original Code is State Machine Compiler (SMC).
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
@@ -23,6 +23,12 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2002/02/19 19:52:49  cwrapp
+// Changes in release 1.3.0:
+// Add the following features:
+// + 479555: Added subroutine/method calls as argument types.
+// + 508878: Added %import keyword.
+//
 // Revision 1.2  2001/12/14 20:10:37  cwrapp
 // Changes in release 1.1.0:
 // Add the following features:
@@ -152,8 +158,13 @@ public final class SmcStateJava
         {
             source.println("\n            protected void Entry(" +
                            context +
-                           "Context s)");
+                           "Context context)");
             source.println("            {");
+
+            // Declare the "ctxt" local variable.
+            source.println("                " +
+                           context +
+                           " ctxt = context.getOwner();\n");
 
             // Generate the actions associated with this code.
             for (actionIt = _entryActions.listIterator();
@@ -176,8 +187,13 @@ public final class SmcStateJava
         {
             source.println("\n            protected void Exit(" +
                            context +
-                           "Context s)");
+                           "Context context)");
             source.println("            {");
+
+            // Declare the "ctxt" local variable.
+            source.println("                " +
+                           context +
+                           " ctxt = context.getOwner();\n");
 
             // Generate the actions associated with this code.
             for (actionIt = _exitActions.listIterator();
