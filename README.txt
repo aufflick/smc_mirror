@@ -2,7 +2,7 @@
 
                                SMC
                      The State Map Compiler
-                     (Version: 1.0 Beta 6)
+                     (Version: 1.0.0)
 
 
 
@@ -42,6 +42,7 @@ then you can run SMC (if you have the Java Enterpise Edition, so
 much the better!)
 
 Java Standard Edition can be downloaded for FREE from
+
                     http://java.sun.com/j2se/
 
 SMC currently supports three object-oriented languages: C++,
@@ -52,7 +53,7 @@ Java and [incr Tcl].
 -----------
 
 Surf over to http://smc.sourceforge.net and check out
-"File Releases". The latest SMC version is 1.0 Beta 1.
+"File Releases". The latest SMC version is 1.0.0.
 SMC downloads come in two flavors: tar/gzip (for Unix)
 and self-extracting zip file (for Windows).
 
@@ -110,6 +111,8 @@ The download package's directory layout is:
                     |      +-EX5
                     |      |
                     |      +-EX6
+                    |      |
+                    |      +-EX7
                     |
                     +-Tcl--+-EX1 (Tcl source code)
                            |
@@ -136,8 +139,8 @@ file), you install SMC as follows:
    out of the new version. Once you are satisfied with the new
    version, you may delete the old SMC.
 3. Load the SMC package:
-    (Unix) $ tar xvfz Smc_1_0_Beta1.tgz
-    (Windows) running Smc_1_0_Beta1.zip
+    (Unix) $ tar xvfz Smc_1_0_0.tgz
+    (Windows) running Smc_1_0_0.zip
 
 You're done! There really is nothing more that needs to be done.
 You may want to take the following steps.
@@ -172,4 +175,4 @@ Surf over to http://smc.sourceforge.net to:
 + Talk with other SMC users in Public Forums.
 + Report bugs.
 + Get the latest news about SMC.
-+ Download SMC source code.
++ Access SMC source code via a CVS web interface.

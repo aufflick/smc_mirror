@@ -31,6 +31,12 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2001/06/26 22:00:17  cwrapp
+// Changes in release 1.0.0:
+// Checking in code for first production release.
+// If SMC should crash, critical information are printed out along
+// with instructions explaining where to send that information.
+//
 // Revision 1.3  2001/06/16 19:52:43  cwrapp
 // Changes in release 1.0, beta 7:
 // Fixes the minor code generation bugs and introduces a new
@@ -135,7 +141,7 @@ public final class Smc
 
         // The default smc output level is 1.
         _target_language = LANG_NOT_SET;
-        _version = "v. 1.0, beta 6";
+        _version = "v. 1.0.0";
         _source_file_name = null;
         _debug = false;
         _trans_queue = false;
@@ -225,8 +231,26 @@ public final class Smc
             catch (Exception e)
             {
                 retcode = 1;
-                System.err.println(e.toString());
+
+                System.err.println("SMC has exprienced a fatal error. Please e-mail the following error output to rapp@acm.org. Thank you.\n");
+                System.err.println("--------------------------------------------------------------------------------");
+                System.err.println("SMC version: " + _version);
+                System.err.println("JRE version: v. " +
+                                   System.getProperty("java.version"));
+                System.err.println("JRE vender: " +
+                                   System.getProperty("java.vendor") +
+                                   " (" +
+                                   System.getProperty("java.vendor.url") +
+                                   ")");
+                System.err.println("JVM: " +
+                                   System.getProperty("java.vm.name") +
+                                   ", v. " +
+                                   System.getProperty("java.vm.version"));
+                System.err.println("JVM vender: " +
+                                   System.getProperty("java.vm.vendor"));
+                System.err.println("Exception:\n");
                 e.printStackTrace();
+                System.err.println("--------------------------------------------------------------------------------");
             }
         }
 
