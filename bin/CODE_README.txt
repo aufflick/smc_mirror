@@ -3,6 +3,84 @@
 
                               SMC -
                      The State Map Compiler
+                      Version 1.0.1
+
+
++ Bug Fixes - Default transitions
+---------------------------------
+
+Modified generated code so that all default transitions are now
+defined in the <appclass>State class and not in each of the
+individual map classes. The resulting generated code is
+equivalent to the previous code *except* it now throws a
+TransitionUndefinedException when a transition is issued in a
+map which does not define that exception. Also, the generated
+code has been reduced and is easier to read.
+
+Also updated generate [incr Tcl] code so that it is now
+up-to-date with the C++ and Java class structure.
+
+
++ Bug Fixes - Generated Java code thread safe
+---------------------------------------------
+
+The generated Java code is now thread safe. Now the same state
+machine can be accessed from multiple threads safely.
+
+
+
+
+                              SMC -
+                     The State Map Compiler
+                      Version 1.0.0, Beta 4
+
+
++ Bug Fixes - Entry/Exit Actions
+--------------------------------
+
+SMC previously executed the current state's Exit actions and the
+destination state's Entry actions on every transition.Experience
+now shows that this is not correct behavior for loopback, push
+and pop transitions. Entry and Exit actions are now executed
+as follows, depending on the transition type:
+
++ Simple, non-loopback transition:
+    1. Execute current state's Exit actions.
+    2. Clear current state.
+    3. Execute transition actions.
+    4. Set current state to destination state.
+    5. Execute destination state's Entry actions.
+
++ Loopback transition:
+  Note: Entry and Exit actions *are* not executed.
+    1. Save current state.
+    2. Clear current state.
+    3. Execute transition actions.
+    4. Restore current state.
+
++ Push transition:
+  Note: Only the Entry actions are executed.
+    1. Push current state on top of state stack.
+    2. Clear current state.
+    3. Execute transition actions.
+    4. Set current state to destination state.
+    5. Execute destination state's Entry actions.
+
++ Pop transition:
+  Note: Only the Exit actions are executed.
+    1. Execute current state's Exit acions.
+    2. Clear current state.
+    3. Execute transition actions.
+    4. Pop state off the top of the state stack and make it the
+       current state.
+    5. If the pop included a transition, issue that transition
+       from the current state.
+
+
+
+
+                              SMC -
+                     The State Map Compiler
                       Version 1.0, Beta 3
 
 

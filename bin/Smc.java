@@ -31,6 +31,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2001/10/12 14:28:04  cwrapp
+// SMC v. 1.0.1
+//
 // Revision 1.4  2001/06/26 22:00:17  cwrapp
 // Changes in release 1.0.0:
 // Checking in code for first production release.
@@ -141,7 +144,7 @@ public final class Smc
 
         // The default smc output level is 1.
         _target_language = LANG_NOT_SET;
-        _version = "v. 1.0.0";
+        _version = "v. 1.0.1";
         _source_file_name = null;
         _debug = false;
         _trans_queue = false;
@@ -182,6 +185,12 @@ public final class Smc
                     FileOutputStream sourceFileStream;
                     PrintStream headerStream = null;
                     PrintStream sourceStream;
+
+                    // For some strange reason I get the wrong
+                    // line separator character when I use Java
+                    // on Windows. Set the line separator to "\n"
+                    // and all is well.
+                    System.setProperty("line.separator", "\n");
 
                     // Strip away any preceding directories from
                     // the source file name.

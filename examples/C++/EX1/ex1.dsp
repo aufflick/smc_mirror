@@ -95,6 +95,15 @@ SOURCE=.\AppClass.sm
 
 !IF  "$(CFG)" == "ex1 - Win32 Release"
 
+# Begin Custom Build
+InputPath=.\AppClass.sm
+InputName=AppClass
+
+"$(InputName)_sm.h $(InputName)_sm.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	java -jar ..\..\..\bin\Smc.jar -c++ $(InputPath)
+
+# End Custom Build
+
 !ELSEIF  "$(CFG)" == "ex1 - Win32 Debug"
 
 # Begin Custom Build

@@ -23,6 +23,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2001/10/12 14:28:04  cwrapp
+// SMC v. 1.0.1
+//
 // Revision 1.2  2001/05/09 23:40:01  cwrapp
 // Changes in release 1.0, beta 6:
 // Fixes the four following bugs:
@@ -250,69 +253,75 @@ public final class SmcMapJava
         }
 
         // Declare the undefined default transitions.
-        for (transIt = getUndefinedDefaultTransitions().listIterator();
-             transIt.hasNext() == true;
-            )
-        {
-            transition = (SmcTransition) transIt.next();
-            source.print("\n        protected void " +
-                         transition.getName() +
-                         "(" +
-                         context +
-                         "Context s");
-            for (paramIt = transition.getParameters().listIterator();
-                 paramIt.hasNext() == true;
-                )
-            {
-                parameter = (SmcParameter) paramIt.next();
-                source.print(", ");
-                parameter.generateCode(source);
-            }
-            source.println(")");
-            source.println("        {");
-            source.println("            Default(s);");
-            source.println("            return;");
-            source.println("        }");
-        }
+        //
+        // SF Bug 469289: This code has been move into
+        //                SmcParseTreeJava.java.
+        //  for (transIt = getUndefinedDefaultTransitions().listIterator();
+//               transIt.hasNext() == true;
+//              )
+//          {
+//              transition = (SmcTransition) transIt.next();
+//              source.print("\n        protected void " +
+//                           transition.getName() +
+//                           "(" +
+//                           context +
+//                           "Context s");
+//              for (paramIt = transition.getParameters().listIterator();
+//                   paramIt.hasNext() == true;
+//                  )
+//              {
+//                  parameter = (SmcParameter) paramIt.next();
+//                  source.print(", ");
+//                  parameter.generateCode(source);
+//              }
+//              source.println(")");
+//              source.println("        {");
+//              source.println("            Default(s);");
+//              source.println("            return;");
+//              source.println("        }");
+//          }
 
         // Add the special transition "Default" to the list if
         // not already defined.
-        if (Collections.binarySearch(definedDefaultTransitions,
-                                     defaultTransition,
-                                     new Comparator() {
-                                         public int compare(Object o1,
-                                                            Object o2) {
-                                             return(((SmcTransition) o1).compareTo((SmcTransition) o2));
-                                         }
-                                      }) < 0)
-        {
-            source.println("\n        protected void Default(" +
-                           context +
-                           "Context s)");
-            source.println("        {");
+        //
+        // SF Bug 469289: This code has been move into
+        //                SmcParseTreeJava.java.
+//          if (Collections.binarySearch(definedDefaultTransitions,
+//                                       defaultTransition,
+//                                       new Comparator() {
+//                                           public int compare(Object o1,
+//                                                              Object o2) {
+//                                               return(((SmcTransition) o1).compareTo((SmcTransition) o2));
+//                                           }
+//                                        }) < 0)
+//          {
+//              source.println("\n        protected void Default(" +
+//                             context +
+//                             "Context s)");
+//              source.println("        {");
 
-            // Output transition out to debug stream.
-            if (Smc.isDebug() == true)
-            {
-                source.println("            if (s.getDebugFlag() == true)");
-                source.println("            {");
-                source.println("                System.err.println(\"TRANSITION   : " +
-                               _name +
-                               ".Default\");");
-                source.println("            }\n");
-            }
+//              // Output transition out to debug stream.
+//              if (Smc.isDebug() == true)
+//              {
+//                  source.println("            if (s.getDebugFlag() == true)");
+//                  source.println("            {");
+//                  source.println("                System.err.println(\"TRANSITION   : " +
+//                                 _name +
+//                                 ".Default\");");
+//                  source.println("            }\n");
+//              }
 
-            // A transition has been issued which has no
-            // definition in the current state and there
-            // is no default to cover for it. Throw an
-            // exception.
-            source.println("            throw (new statemap.TransitionUndefinedException(\"State: \" +");
-            source.println("                                                             s.getState().getName() +");
-            source.println("                                                             \", Transition: \" +");
-            source.println("                                                             s.getTransition()));");
+//              // A transition has been issued which has no
+//              // definition in the current state and there
+//              // is no default to cover for it. Throw an
+//              // exception.
+//              source.println("            throw (new statemap.TransitionUndefinedException(\"State: \" +");
+//              source.println("                                                             s.getState().getName() +");
+//              source.println("                                                             \", Transition: \" +");
+//              source.println("                                                             s.getTransition()));");
 
-            source.println("        }");
-        }
+//              source.println("        }");
+//          }
 
         // Have each state now generate its code. Each state
         // class is an inner class.

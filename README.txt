@@ -2,7 +2,7 @@
 
                                SMC
                      The State Map Compiler
-                     (Version: 1.0.0)
+                     (Version: 1.0.1)
 
 
 

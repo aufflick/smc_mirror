@@ -23,6 +23,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2001/10/12 14:28:04  cwrapp
+// SMC v. 1.0.1
+//
 // Revision 1.2  2001/05/09 23:40:01  cwrapp
 // Changes in release 1.0, beta 6:
 // Fixes the four following bugs:
@@ -124,7 +127,7 @@ public final class SmcMapTcl
         // Declare the map class.
         source.println("class " + _name + " {");
 
-        source.println("\n# Member data.\n");
+        source.println("# Member data.\n");
 
         // Print all the static state objects.
         for (stateIt = _states.listIterator();
@@ -142,16 +145,16 @@ public final class SmcMapTcl
 
         // Declare the map's default state class.
         source.println("class " + _name + "_Default {");
-        source.println("    inherit ::statemap::State;\n");
+        source.println("    inherit " +
+                       context +
+                       "State;\n");
 
         source.println("# Member functions.\n");
         source.println("    constructor {name} {");
-        source.println("       ::statemap::State::constructor $name;");
-        source.println("    } {}\n");
-
-        // Define the default Entry() and Exit() methods.
-        source.println("    public method Entry {context} {};");
-        source.println("    public method Exit {context} {};");
+        source.println("       ::" +
+                       context +
+                       "State::constructor $name;");
+        source.println("    } {}");
 
         // Dump out the user-defined default transitions.
         if (_default_state != null)
@@ -169,54 +172,6 @@ public final class SmcMapTcl
                                    null);
             }
         }
-
-        // Declare the undefined default transitions.
-        for (transIt = getUndefinedDefaultTransitions().listIterator();
-             transIt.hasNext() == true;
-            )
-        {
-            trans = (SmcTransition) transIt.next();
-            source.print("\n    public method " +
-                         trans.getName() +
-                         " {context");
-            for (paramIt = trans.getParameters().listIterator();
-                 paramIt.hasNext() == true;
-                )
-            {
-                parameter = (SmcParameter) paramIt.next();
-                source.print(" ");
-                parameter.generateCode(source);
-            }
-            source.println("} {");
-            source.println("        set _transition \"" +
-                           trans.getName() +
-                           "\";");
-            source.println("        Default $context;");
-            source.println("        return -code ok;");
-            source.println("    }");
-        }
-
-        // Define the default Default transition if it has not
-        // already been defined.
-        if (Collections.binarySearch(definedDefaultTransitions,
-                                     defaultTransition,
-                                     new Comparator() {
-                                         public int compare(Object o1,
-                                                            Object o2) {
-                                             return(((SmcTransition) o1).compareTo((SmcTransition) o2));
-                                         }
-                                      }) < 0)
-        {
-            source.println("\n    public method Default {context} {");
-            source.println("        return -code error \"Transition \\\"$_transition\\\" fell through to a non-existent default definition.\"");
-            source.println("    }");
-        }
-
-        source.println("\n# Member data.\n");
-
-        // This private member data is for storing the
-        // transition's name when a default transition is taken.
-        source.println("    protected common _transition \"\";");
 
         // End the map's default state class declaration.
         source.println("}\n");

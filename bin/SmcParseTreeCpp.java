@@ -23,6 +23,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2001/10/12 14:28:04  cwrapp
+// SMC v. 1.0.1
+//
 // Revision 1.2  2001/05/09 23:40:01  cwrapp
 // Changes in release 1.0, beta 6:
 // Fixes the four following bugs:
@@ -222,28 +225,39 @@ public final class SmcParseTreeCpp
                                });
         }
 
+        // Output the global transition declarations.
         for (transIt = transList.listIterator();
              transIt.hasNext() == true;
             )
         {
             trans = (SmcTransition) transIt.next();
-            header.print("    virtual void " +
-                         trans.getName() +
-                         "(" +
-                         _context +
-                         "Context& s");
 
-            for (paramIt = trans.getParameters().listIterator();
-                 paramIt.hasNext() == true;
-                )
+            if (trans.getName().compareTo("Default") != 0)
             {
-                param = (SmcParameter) paramIt.next();
-                header.print(", ");
-                param.generateCode(header);
-            }
+                header.print("    virtual void " +
+                             trans.getName() +
+                             "(" +
+                             _context +
+                             "Context& s");
 
-            header.println(") {};");
+                for (paramIt = trans.getParameters().listIterator();
+                     paramIt.hasNext() == true;
+                    )
+                {
+                    param = (SmcParameter) paramIt.next();
+                    header.print(", ");
+                    param.generateCode(header);
+                }
+
+                header.println(");");
+            }
         }
+
+        // Declare the global Default transition.
+        header.println("\nprotected:");
+        header.println("    virtual void Default(" +
+                       _context +
+                       "Context& s);");
 
         // The base class has been defined.
         header.println("};\n");
@@ -291,6 +305,65 @@ public final class SmcParseTreeCpp
                                "\");");
             }
         }
+
+        // Output the default transition definitions.
+        for (transIt = transList.listIterator();
+             transIt.hasNext() == true;
+            )
+        {
+            trans = (SmcTransition) transIt.next();
+
+            if (trans.getName().compareTo("Default") != 0)
+            {
+                source.print("\nvoid " +
+                             _context +
+                             "State::" +
+                             trans.getName() +
+                             "(" +
+                             _context +
+                             "Context& s");
+
+                for (paramIt = trans.getParameters().listIterator();
+                     paramIt.hasNext() == true;
+                    )
+                {
+                    param = (SmcParameter) paramIt.next();
+                    header.print(", ");
+                    param.generateCode(header);
+                }
+
+                source.println(")\n{");
+                source.println("    Default(s);");
+                source.println("    return;");
+                source.println("}");
+            }
+        }
+
+        // Output the Default transition method ... almost.
+        // If -g is being used, then add the "s" argname.
+        source.println("\nvoid " +
+                       _context +
+                       "State::Default(" +
+                       _context +
+                       "Context& s)\n{");
+
+        // Print the transition out to the verbose log.
+        if (Smc.isDebug() == true)
+        {
+            source.println("    if (s.getDebugFlag() == true)");
+            source.println("    {");
+            source.println("        fprintf(stderr, \"TRANSITION   : Default\\n\");");
+            source.println("    }\n");
+        }
+
+        // A transition has been issued which has no
+        // definition in the current state and there
+        // is no default to cover for it. Throw an
+        // exception.
+        source.println("    throw TransitionUndefinedException(s.getState().getName(),");
+        source.println("                                       s.getTransition());\n");
+
+        source.println("    return;\n}");
 
         // Have each map print out its source code now.
         for (mapIt = _maps.listIterator();

@@ -23,6 +23,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2001/10/12 14:28:04  cwrapp
+// SMC v. 1.0.1
+//
 // Revision 1.2  2001/05/09 23:40:01  cwrapp
 // Changes in release 1.0, beta 6:
 // Fixes the four following bugs:
@@ -130,14 +133,11 @@ public final class SmcParseTreeTcl
 
         // If transition queuing is being done, then initialize
         // the queue here.
-        if (Smc.isTransQueue() == true)
-        {
-            source.println("        set _trans_queue {};");
-        }
+//          if (Smc.isTransQueue() == true)
+//          {
+//              source.println("        set _trans_queue {};");
+//          }
 
-        source.println("    }\n");
-        source.println("    public method getOwner {} {");
-        source.println("        return -code ok $_owner;");
         source.println("    }");
 
         // For every possible transition in every state map,
@@ -167,42 +167,49 @@ public final class SmcParseTreeTcl
             )
         {
             trans = (SmcTransition) transIt.next();
-            source.print("\n    public method " +
-                         trans.getName() +
-                         " {");
-            for (paramIt = trans.getParameters().listIterator(),
-                         separator = "";
-                 paramIt.hasNext() == true;
-                 separator = " ")
+
+            // Don't do the Default transition.
+            if (trans.getName().compareTo("Default") != 0)
             {
-                parameter = (SmcParameter) paramIt.next();
-                source.print(separator);
-                parameter.generateCode(source);
-            }
-            source.println("} {");
+                source.print("\n    public method " +
+                             trans.getName() +
+                             " {");
+                for (paramIt = trans.getParameters().listIterator(),
+                   separator = "";
+                     paramIt.hasNext() == true;
+                     separator = " ")
+                {
+                    parameter = (SmcParameter) paramIt.next();
+                    source.print(separator);
+                    parameter.generateCode(source);
+                }
+                source.println("} {");
 
             // If transition queuing, then queue the transition
             // and its arguments and execute them in from the
             // dispatch transitions method.
-            if (Smc.isTransQueue() == true)
-            {
-                source.print("        lappend _trans_queue [list " +
-                             trans.getName() +
-                             " [list");
-                for (paramIt = trans.getParameters().listIterator();
-                     paramIt.hasNext() == true;
-                    )
-                {
-                    parameter = (SmcParameter) paramIt.next();
-                    source.print(" $" + parameter.getName());
-                }
-                source.println("];\n");
-                source.println("        if {[string compare $_state \"\"] == 0} {");
-                source.println("            dispatchTransitions;");
-                source.println("        }");
-            }
-            else
-            {
+//              if (Smc.isTransQueue() == true)
+//              {
+//                  source.print("        lappend _trans_queue [list " +
+//                               trans.getName() +
+//                               " [list");
+//                  for (paramIt = trans.getParameters().listIterator();
+//                       paramIt.hasNext() == true;
+//                      )
+//                  {
+//                      parameter = (SmcParameter) paramIt.next();
+//                      source.print(" $" + parameter.getName());
+//                  }
+//                  source.println("];\n");
+//                  source.println("        if {[string compare $_state \"\"] == 0} {");
+//                  source.println("            dispatchTransitions;");
+//                  source.println("        }");
+//              }
+//              else
+//              {
+                source.println("        set _transition \"" +
+                               trans.getName() +
+                               "\";");
                 source.print("        [getState] " +
                              trans.getName() +
                              " $this");
@@ -214,32 +221,90 @@ public final class SmcParseTreeTcl
                     source.print(" $" + parameter.getName());
                 }
                 source.println(";");
+                source.println("        set _transition \"\";");
                 source.println("        return -code ok;");
                 source.println("    }");
+//              }
             }
         }
 
-        if (Smc.isTransQueue() == true)
-        {
-            source.println("\n    private method dispatchTransitions {} {");
-            source.println("        while {[llength $_trans_queue] > 0} {");
-            source.println("            set transition [lindex $_trans_queue 0];");
-            source.println("            set _trans_queue [lreplace $_trans_queue 0 0];");
-            source.println("            eval $_state [lindex $transition 0] [lindex $transition 1];");
-            source.println("        }");
-            source.println("    }");
-        }
+//          if (Smc.isTransQueue() == true)
+//          {
+//              source.println("\n    private method dispatchTransitions {} {");
+//              source.println("        while {[llength $_trans_queue] > 0} {");
+//              source.println("            set transition [lindex $_trans_queue 0];");
+//              source.println("            set _trans_queue [lreplace $_trans_queue 0 0];");
+//              source.println("            eval $_state [lindex $transition 0] [lindex $transition 1];");
+//              source.println("        }");
+//              source.println("    }");
+//          }
+
+        source.println("\n    public method getOwner {} {");
+        source.println("        return -code ok $_owner;");
+        source.println("    }");
 
         source.println("\n# Member data.\n");
         source.println("    private variable _owner;");
 
         // If transition queuing, declare the necessary data.
-        if (Smc.isTransQueue() == true)
-        {
-            source.println("    private variable _trans_queue;");
-        }
+//          if (Smc.isTransQueue() == true)
+//          {
+//              source.println("    private variable _trans_queue;");
+//          }
 
         // Put the closing brace on the context class.
+        source.println("}\n");
+
+        //
+        // Now output the application's state class.
+        source.println("class " +
+                       _context +
+                       "State {");
+        source.println("    inherit ::statemap::State;\n");
+        source.println("# Member functions.\n");
+        source.println("    constructor {name} {");
+        source.println("        ::statemap::State::constructor $name;");
+        source.println("    } {}\n");
+
+        // Define the default Entry() and Exit() methods.
+        source.println("    public method Entry {context} {};");
+        source.println("    public method Exit {context} {};");
+
+        // Declare the undefined default transitions.
+        for (transIt = transList.listIterator();
+             transIt.hasNext() == true;
+            )
+        {
+            trans = (SmcTransition) transIt.next();
+
+            // The Default transition is handled separately.
+            if (trans.getName().compareTo("Default") != 0)
+            {
+                source.print("\n    public method " +
+                             trans.getName() +
+                             " {context");
+                for (paramIt = trans.getParameters().listIterator();
+                     paramIt.hasNext() == true;
+                    )
+                {
+                    parameter = (SmcParameter) paramIt.next();
+                    source.print(" ");
+                    parameter.generateCode(source);
+                }
+                source.println("} {");
+                source.println("        Default $context;");
+                source.println("        return -code ok;");
+                source.println("    }");
+            }
+        }
+
+        // Define the default Default transition.
+        source.println("\n    public method Default {context} {");
+        source.println("        set transtion [$context getTransition];");
+        source.println("        return -code error \"Transition \\\"$transition\\\" fell through to a non-existent default definition.\";");
+        source.println("    }");
+
+        // End of the application state class.
         source.println("}\n");
 
         // Have each map print out its source code in turn.

@@ -23,6 +23,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2001/10/12 14:28:04  cwrapp
+// SMC v. 1.0.1
+//
 // Revision 1.2  2001/05/09 23:40:01  cwrapp
 // Changes in release 1.0, beta 6:
 // Fixes the four following bugs:
@@ -214,89 +217,95 @@ public final class SmcMapCpp
         }
 
         // Declare the undefined default transitions.
-        for (transIt = getUndefinedDefaultTransitions().listIterator();
-             transIt.hasNext() == true;
-            )
-        {
-            transition = (SmcTransition) transIt.next();
-            header.print("    virtual void " +
-                         transition.getName() +
-                         "(" +
-                         context +
-                         "Context& s");
-            for (paramIt = transition.getParameters().listIterator();
-                 paramIt.hasNext() == true;
-                )
-            {
-                parameter = (SmcParameter) paramIt.next();
-                header.print(", ");
-                parameter.generateCode(header);
-            }
-            header.println(");");
+        //
+        // SF Bug 469289: This code has been move into
+        //                SmcParseTreeCpp.java.
+//          for (transIt = getUndefinedDefaultTransitions().listIterator();
+//               transIt.hasNext() == true;
+//              )
+//          {
+//              transition = (SmcTransition) transIt.next();
+//              header.print("    virtual void " +
+//                           transition.getName() +
+//                           "(" +
+//                           context +
+//                           "Context& s");
+//              for (paramIt = transition.getParameters().listIterator();
+//                   paramIt.hasNext() == true;
+//                  )
+//              {
+//                  parameter = (SmcParameter) paramIt.next();
+//                  header.print(", ");
+//                  parameter.generateCode(header);
+//              }
+//              header.println(");");
 
-            source.print("\nvoid " +
-                         _name +
-                         "_Default::" +
-                         transition.getName() +
-                         "(" +
-                         context +
-                         "Context& s");
-            for (paramIt = transition.getParameters().listIterator();
-                 paramIt.hasNext() == true;
-                )
-            {
-                parameter = (SmcParameter) paramIt.next();
-                source.print(", ");
-                parameter.generateCode(source);
-            }
-            source.println(")\n{");
-            source.println("    Default(s);");
-            source.println("    return;\n}");
-        }
+//              source.print("\nvoid " +
+//                           _name +
+//                           "_Default::" +
+//                           transition.getName() +
+//                           "(" +
+//                           context +
+//                           "Context& s");
+//              for (paramIt = transition.getParameters().listIterator();
+//                   paramIt.hasNext() == true;
+//                  )
+//              {
+//                  parameter = (SmcParameter) paramIt.next();
+//                  source.print(", ");
+//                  parameter.generateCode(source);
+//              }
+//              source.println(")\n{");
+//              source.println("    Default(s);");
+//              source.println("    return;\n}");
+//          }
 
         // Add the special transition "Default" to the list if
         // not already defined.
-        if (Collections.binarySearch(definedDefaultTransitions,
-                                     defaultTransition,
-                                     new Comparator() {
-                                         public int compare(Object o1,
-                                                            Object o2) {
-                                             return(((SmcTransition) o1).compareTo((SmcTransition) o2));
-                                         }
-                                      }) < 0)
-        {
-            header.println("    virtual void Default(" +
-                           context +
-                           "Context& s);");
+        //
+        // SF Bug 469289: This code has been move into
+        //                SmcParseTreeCpp.java.
+//          if (Collections.binarySearch(definedDefaultTransitions,
+//                                       defaultTransition,
+//                                       new Comparator() {
+//                                           public int compare(Object o1,
+//                                                              Object o2) {
+//                                               return(((SmcTransition) o1).compareTo((SmcTransition) o2));
+//                                           }
+//                                        }) < 0)
+//          {
+//              header.println("    virtual void Default(" +
+//                             context +
+//                             "Context& s);");
 
-            // Output the Default transition method ... almost.
-            // If -g is being used, then add the "s" argname.
-            source.println("\nvoid " +
-                           _name +
-                           "_Default::Default(" +
-                           context +
-                           "Context& s)\n{");
+//              // Output the Default transition method ... almost.
+//              // If -g is being used, then add the "s" argname.
+//              source.println("\nvoid " +
+//                             _name +
+//                             "_Default::Default(" +
+//                             context +
+//                             "Context& s)\n{");
 
-            // Print the transition out to the verbose log.
-            if (Smc.isDebug() == true)
-            {
-                source.println("    if (s.getDebugFlag() == true)");
-                source.println("    {");
-                source.println("        fprintf(stderr, \"TRANSITION   : " +
-                               _name +
-                               " Default\\n\");");
-                source.println("    }\n");
-            }
+//              // Print the transition out to the verbose log.
+//              if (Smc.isDebug() == true)
+//              {
+//                  source.println("    if (s.getDebugFlag() == true)");
+//                  source.println("    {");
+//                  source.println("        fprintf(stderr, \"TRANSITION   : " +
+//                                 _name +
+//                                 " Default\\n\");");
+//                  source.println("    }\n");
+//              }
 
-            // A transition has been issued which has no
-            // definition in the current state and there
-            // is no default to cover for it. Throw an
-            // exception.
-            source.println("    throw TransitionUndefinedException(s.getState().getName(),");
-            source.println("                                       s.getTransition());\n");
+//              // A transition has been issued which has no
+//              // definition in the current state and there
+//              // is no default to cover for it. Throw an
+//              // exception.
+//              source.println("    throw TransitionUndefinedException(s.getState().getName(),");
+//              source.println("                                       s.getTransition());\n");
 
-            source.println("    return;\n}");
-        }
+//              source.println("    return;\n}");
+//          }
 
         // The map class has been defined.
         header.println("};");

@@ -28,6 +28,9 @@
 #
 # Change Log
 # $Log$
+# Revision 1.3  2001/10/12 14:28:04  cwrapp
+# SMC v. 1.0.1
+#
 # Revision 1.2  2001/05/09 23:40:02  cwrapp
 # Changes in release 1.0, beta 6:
 # Fixes the four following bugs:
@@ -92,6 +95,7 @@ namespace eval ::statemap:: {
     protected variable _state "";
     private variable _previous_state "";
     private variable _state_stack {};
+    private variable _transition;
     private variable _debug_flag;
 
 # Member functions.
@@ -100,6 +104,7 @@ namespace eval ::statemap:: {
         set _state "";
         set _previous_state "";
         set _state_stack {};
+        set _transition "";
         set _debug_flag 0;
     }
 
@@ -125,6 +130,10 @@ namespace eval ::statemap:: {
         }
 
         return -code ok $retval;
+    }
+
+    public method getTransition {} {
+        return -code ok $_transition;
     }
 
     public method getState {} {
@@ -204,5 +213,13 @@ namespace eval ::statemap:: {
         }
 
         return -code ok;
+    }
+
+    # Save away the transition name only if debugging is
+    # turned on.
+    protected method setTransition {transition} {
+        if {$_debug_flag == 1} {
+            set _transition $transition;
+        }
     }
 }

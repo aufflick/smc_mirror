@@ -23,6 +23,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2001/10/12 14:28:04  cwrapp
+// SMC v. 1.0.1
+//
 // Revision 1.2  2001/05/09 23:40:01  cwrapp
 // Changes in release 1.0, beta 6:
 // Fixes the four following bugs:
@@ -165,29 +168,6 @@ public final class SmcParseTreeJava
 
         source.println("    }\n");
 
-        // getState() method.
-        source.println("    public " +
-                       _context +
-                       "State getState()");
-        source.println("        throws statemap.StateUndefinedException");
-        source.println("    {");
-        source.println("        if (_state == null)");
-        source.println("        {");
-        source.println("            throw(new statemap.StateUndefinedException());");
-        source.println("        }\n");
-        source.println("        return((" +
-                       _context +
-                       "State) _state);");
-        source.println("    }\n");
-
-        // getOwner() method.
-        source.println("    public " +
-                       _context +
-                       " getOwner()");
-        source.println("    {");
-        source.println("        return(_owner);");
-        source.println("    }\n");
-
         // Generate the default transition methods.
         // Get the transition list.
         LinkedList transList = new LinkedList();
@@ -216,7 +196,7 @@ public final class SmcParseTreeJava
             trans = (SmcTransition) transIt.next();
             if (trans.getName().compareTo("Default") != 0)
             {
-                source.print("    public void " +
+                source.print("    public synchronized void " +
                              trans.getName() +
                              "(");
                 for (paramIt = trans.getParameters().listIterator(),
@@ -390,6 +370,29 @@ public final class SmcParseTreeJava
              */
         }
 
+        // getState() method.
+        source.println("    protected " +
+                       _context +
+                       "State getState()");
+        source.println("        throws statemap.StateUndefinedException");
+        source.println("    {");
+        source.println("        if (_state == null)");
+        source.println("        {");
+        source.println("            throw(new statemap.StateUndefinedException());");
+        source.println("        }\n");
+        source.println("        return((" +
+                       _context +
+                       "State) _state);");
+        source.println("    }\n");
+
+        // getOwner() method.
+        source.println("    protected " +
+                       _context +
+                       " getOwner()");
+        source.println("    {");
+        source.println("        return(_owner);");
+        source.println("    }\n");
+
         /*
          * Transition queuing not supported.
          *
@@ -488,23 +491,56 @@ public final class SmcParseTreeJava
             )
         {
             trans = (SmcTransition) transIt.next();
-            source.print("        protected void " +
-                         trans.getName() +
-                         "(" +
-                         _context +
-                         "Context s");
 
-            for (paramIt = trans.getParameters().listIterator();
-                 paramIt.hasNext() == true;
-                )
+            // Don't generate the Default transition here.
+            if (trans.getName().compareTo("Default") != 0)
             {
-                parameter = (SmcParameter) paramIt.next();
-                source.print(", ");
-                parameter.generateCode(source);
-            }
+                source.print("        protected void " +
+                             trans.getName() +
+                             "(" +
+                             _context +
+                             "Context s");
 
-            source.println(") {}");
+                for (paramIt = trans.getParameters().listIterator();
+                     paramIt.hasNext() == true;
+                    )
+                {
+                    parameter = (SmcParameter) paramIt.next();
+                    source.print(", ");
+                    parameter.generateCode(source);
+                }
+
+                source.println(")\n        {");
+
+                // If this method is reached, that means that this
+                // transition was passed to a state which does not
+                // define the transition. Call the state's default
+                // transition method.
+                source.println("            Default(s);");
+
+                source.println("        }\n");
+            }
         }
+
+        // Generate the overall Default transition for all maps.
+        source.println("        protected void Default(" +
+                       _context +
+                       "Context s)");
+        source.println("        {");
+
+        if (Smc.isDebug() == true)
+        {
+            source.println("            if (s.getDebugFlag() == true)");
+            source.println("            {");
+            source.println("                System.err.println(\"TRANSITION   : Default\");");
+            source.println("            }\n");
+        }
+
+        source.println("            throw (new statemap.TransitionUndefinedException(\"State: \" +");
+        source.println("                                                             s.getState().getName() +");
+        source.println("                                                             \", Transition: \" +");
+        source.println("                                                             s.getTransition()));");
+        source.println("        }");
 
         // End of state class.
         source.println("    }");

@@ -115,6 +115,15 @@ SOURCE=.\TcpConnection.sm
 
 !IF  "$(CFG)" == "server - Win32 Release"
 
+# Begin Custom Build
+TargetName=server
+InputPath=.\TcpConnection.sm
+
+"$(TargetName)_sm.h $(TargetName)_sm.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	java -jar ..\..\..\bin\Smc.jar -c++ $(InputPath)
+
+# End Custom Build
+
 !ELSEIF  "$(CFG)" == "server - Win32 Debug"
 
 # Begin Custom Build

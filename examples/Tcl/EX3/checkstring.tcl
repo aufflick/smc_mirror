@@ -33,8 +33,24 @@ exec Tclsh80 "$0" "$@"
 #
 # CHANGE LOG
 # $Log$
-# Revision 1.1  2001/01/03 03:14:00  cwrapp
-# Initial revision
+# Revision 1.2  2001/10/12 14:28:04  cwrapp
+# SMC v. 1.0.1
+#
+# Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
+#
+# ----------------------------------------------------------------------
+# SMC - The State Map Compiler
+# Version: 1.0, Beta 3
+#
+# SMC compiles state map descriptions into a target object oriented
+# language. Currently supported languages are: C++, Java and [incr Tcl].
+# SMC finite state machines have such features as:
+# + Entry/Exit actions for states.
+# + Transition guards
+# + Transition arguments
+# + Push and Pop transitions.
+# + Default transitions. 
+# ----------------------------------------------------------------------
 #
 # Revision 1.1.1.1  2000/08/02 12:51:05  charlesr
 # Initial source import, SMC v. 1.0, Beta 1.
@@ -51,7 +67,7 @@ source ./AppClass.tcl;
 # Check if a string has been passed in.
 if {[llength $argv] < 1} {
     puts stderr "No string to check.";
-    set ErrorCode error;
+    set ErrorCode 1;
 } else {
     AppClass mycontext;
 
@@ -62,7 +78,7 @@ if {[llength $argv] < 1} {
     flush stdout;
 
     if {! [mycontext CheckString $InputString]} {
-	puts -nonewline stdout "not ";
+        puts -nonewline stdout "not ";
     }
 
     puts stdout "acceptable.";
