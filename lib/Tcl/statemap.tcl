@@ -29,11 +29,22 @@
 #
 # Change Log
 # $Log$
-# Revision 1.5  2002/02/19 19:52:48  cwrapp
-# Changes in release 1.3.0:
-# Add the following features:
-# + 479555: Added subroutine/method calls as argument types.
-# + 508878: Added %import keyword.
+# Revision 1.6  2002/05/07 00:19:10  cwrapp
+# Changes in release 1.3.2:
+# Add the following feature:
+# + 528321: Modified push transition syntax to be:
+#
+# 	  <transname> <state1>/push(<state2>)  {<actions>}
+#
+# 	  which means "transition to <state1> and then
+# 	  immediately push to <state2>". The current
+# 	  syntax:
+#
+# 	  <transname> push(<state2>)  {<actions>}
+#
+#           is still valid and <state1> is assumed to be "nil".
+#
+# No bug fixes.
 #
 # Revision 1.4  2001/12/14 20:10:37  cwrapp
 # Changes in release 1.1.0:

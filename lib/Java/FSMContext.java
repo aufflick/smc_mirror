@@ -28,11 +28,22 @@
 //
 // Change Log
 // $Log$
-// Revision 1.5  2002/02/19 19:52:48  cwrapp
-// Changes in release 1.3.0:
-// Add the following features:
-// + 479555: Added subroutine/method calls as argument types.
-// + 508878: Added %import keyword.
+// Revision 1.6  2002/05/07 00:19:10  cwrapp
+// Changes in release 1.3.2:
+// Add the following feature:
+// + 528321: Modified push transition syntax to be:
+//
+// 	  <transname> <state1>/push(<state2>)  {<actions>}
+//
+// 	  which means "transition to <state1> and then
+// 	  immediately push to <state2>". The current
+// 	  syntax:
+//
+// 	  <transname> push(<state2>)  {<actions>}
+//
+//           is still valid and <state1> is assumed to be "nil".
+//
+// No bug fixes.
 //
 // Revision 1.3  2001/06/16 19:52:43  cwrapp
 // Changes in release 1.0, beta 7:
@@ -118,7 +129,7 @@ public abstract class FSMContext
     // will print messages to the console.
     public boolean getDebugFlag()
     {
-        return(_debug_flag);
+        return(_debug_flag && _debug_stream != null);
     }
 
     public void setDebugFlag(boolean flag)
@@ -130,7 +141,7 @@ public abstract class FSMContext
     // Write the debug output to this stream.
     public PrintStream getDebugStream()
     {
-        return (_debug_stream);
+        return (_debug_stream == null ? System.err : _debug_stream);
     }
 
     public void setDebugStream(PrintStream stream)
@@ -148,10 +159,10 @@ public abstract class FSMContext
 
     public void setState(State state)
     {
-        if (_debug_flag == true)
+        if (getDebugFlag() == true)
         {
-            _debug_stream.println("NEW STATE    : " +
-                                  state.getName());
+            getDebugStream().println("NEW STATE    : " +
+                                     state.getName());
         }
 
         // Should this be done?
@@ -183,10 +194,10 @@ public abstract class FSMContext
 
     public void pushState(State state)
     {
-        if (_debug_flag == true)
+        if (getDebugFlag() == true)
         {
-            _debug_stream.println("PUSH TO STATE: " +
-                                  state.getName());
+            getDebugStream().println("PUSH TO STATE: " +
+                                     state.getName());
         }
 
         if (_state != null)
@@ -203,9 +214,9 @@ public abstract class FSMContext
     {
         if (_state_stack.empty() == true)
         {
-            if (_debug_flag == true)
+            if (getDebugFlag() == true)
             {
-                _debug_stream.println("POPPING ON EMPTY STATE STACK.");
+                getDebugStream().println("POPPING ON EMPTY STATE STACK.");
             }
 
             throw new java.util.EmptyStackException();
@@ -216,9 +227,9 @@ public abstract class FSMContext
             // from the stack and returns it.
             _state = (State) _state_stack.pop();
 
-            if (_debug_flag == true)
+            if (getDebugFlag() == true)
             {
-                _debug_stream.println("POP TO STATE : " +
+                getDebugStream().println("POP TO STATE : " +
                                       _state.getName());
             }
         }
@@ -272,7 +283,7 @@ public abstract class FSMContext
     protected boolean _debug_flag;
 
     // Write debug output to this stream.
-    protected PrintStream _debug_stream;
+    transient protected PrintStream _debug_stream;
 
 // Inner classes
 
