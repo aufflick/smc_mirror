@@ -23,57 +23,39 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2001/11/30 15:17:22  cwrapp
+# Changes in release 1.0.2:
+# + Placed the class files in Smc.jar in the net.sf.smc package.
+# + Moved Java source files from smc/bin to net/sf/smc.
+# + Corrected a C++ generation bug wherein arguments were written
+#   to the .h file rather than the .cpp file.
+#
 # Revision 1.1  2001/05/13 16:19:34  cwrapp
 # Initial add to repository.
 #
 
-INSTALL_DIRS=	C++_install \
-		Java_install \
-		Tcl_install
-
-UNINSTALL_DIRS=	C++_uninstall \
-		Java_uninstall \
-		Tcl_uninstall
-
-CLEAN_DIRS=	C++_clean \
-		Java_clean \
-		Tcl_clean
-
 STAGING_DIR=	../../staging/smc/lib
 
 # Copy all products to the staging directory.
-install : $(STAGING_DIR) $(INSTALL_DIRS)
+install : $(STAGING_DIR)
+		$(MAKE) -C C++ install
+		$(MAKE) -C Java install
+		$(MAKE) -C Tcl install
 
 $(STAGING_DIR) :
 		mkdir $(STAGING_DIR)
 
-C++_install :
-		$(MAKE) -C C++ install
-
-Java_install :
-		$(MAKE) -C Java install
-
-Tcl_install :
-		$(MAKE) -C Tcl install
-
-uninstall : $(UNINSTALL_DIRS)
-
-C++_uninstall :
+uninstall :
 		$(MAKE) -C C++ uninstall
-
-Java_uninstall :
 		$(MAKE) -C Java uninstall
-
-Tcl_uninstall :
 		$(MAKE) -C Tcl uninstall
 
-clean : $(CLEAN_DIRS)
-
-C++_clean :
+clean :
 		$(MAKE) -C C++ clean
-
-Java_clean :
 		$(MAKE) -C Java clean
-
-Tcl_clean :
 		$(MAKE) -C Tcl clean
+
+realclean :
+		$(Make) -C C++ realclean
+		$(Make) -C Java realclean
+		$(Make) -C Tcl realclean

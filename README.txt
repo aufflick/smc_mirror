@@ -2,11 +2,21 @@
 
                                SMC
                      The State Map Compiler
-                     (Version: 1.0.1)
+                     (Version: 1.0.2)
 
 
 
-0. System Requirements
+0. What's New?
+--------------
+
+No new features or bug fixes. Instead, the classes in the
+Smc executable JAR file (Smc.jar) are now in package net.sf.smc.
+This was done so that Smc.jar could be more easily added to IDEs
+like NetBeans.
+
+
+
+1. System Requirements
 ----------------------
 
 + JRE (Standard Edition) 1.2.2 or better.
@@ -14,7 +24,7 @@
   for more information).
 
 
-1. Introduction
+2. Introduction
 ---------------
 
 If you use state maps to define your objects behavior and are
@@ -49,7 +59,7 @@ SMC currently supports three object-oriented languages: C++,
 Java and [incr Tcl].
 
 
-2. Download
+3. Download
 -----------
 
 Surf over to http://smc.sourceforge.net and check out
@@ -125,7 +135,7 @@ The download package's directory layout is:
                            +-EX5
 
 
-3. Installation
+4. Installation
 ---------------
 
 After downloading SMC (either tar/gzip or self-extracting zip
@@ -153,7 +163,7 @@ You may want to take the following steps.
   variable.
 
 
-4. Examples
+5. Examples
 -----------
 
 The examples directory contains example SMC-based applications.
@@ -165,7 +175,7 @@ To learn more about each example and how to build & run each one,
 read the example's README.txt.
 
 
-5. FAQ/Documentation/Reporting Bugs/Latest News
+6. FAQ/Documentation/Reporting Bugs/Latest News
 -----------------------------------------------
 
 Surf over to http://smc.sourceforge.net to:

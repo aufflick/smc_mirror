@@ -23,6 +23,13 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2001/11/30 15:17:22  cwrapp
+# Changes in release 1.0.2:
+# + Placed the class files in Smc.jar in the net.sf.smc package.
+# + Moved Java source files from smc/bin to net/sf/smc.
+# + Corrected a C++ generation bug wherein arguments were written
+#   to the .h file rather than the .cpp file.
+#
 # Revision 1.2  2001/06/16 19:52:43  cwrapp
 # Changes in release 1.0, beta 7:
 # Fixes the minor code generation bugs and introduces a new
@@ -34,80 +41,61 @@
 # Initial add to repository.
 #
 
-INSTALL_DIRS=	lib_install \
-		bin_install \
-		examples_install \
-		misc_install
+VERSION=	1_0_2
 
-UNINSTALL_DIRS=	lib_uninstall \
-		bin_uninstall \
-		examples_uninstall \
-		misc_uninstall
-
-CLEAN_DIRS=	lib_clean \
-		bin_clean
-
-STAGING_DIR =	../staging
-
+STAGING_DIR=	../staging
 SMC_STAGING_DIR=$(STAGING_DIR)/smc
+SMC_RELEASE_DIR=$(STAGING_DIR)/smc_$(VERSION)
+RELEASE_DIR=	$(STAGING_DIR)/releases
 
-TARFILE=	$(STAGING_DIR)/releases/smc_1_0b7.tar
-GZIPFILE=	$(STAGING_DIR)/releases/smc_1_0b7.tgz
+TARFILE=	$(RELEASE_DIR)/smc_$(VERSION).tar
+GZIPFILE=	$(RELEASE_DIR)/smc_$(VERSION).tgz
 
-# Copy all products to the staging directory.
-install : $(STAGING_DIR) $(SMC_STAGING_DIR) $(INSTALL_DIRS)
-		cp -f LICENSE.txt $(SMC_STAGING_DIR)
-		cp -f README.txt $(SMC_STAGING_DIR)
-
+# Create the staging directories if needed.
 $(STAGING_DIR) :
 		mkdir $(STAGING_DIR)
 
-$(SMC_STAGING_DIR) :
+$(SMC_STAGING_DIR) :	$(STAGING_DIR)
 		mkdir $(SMC_STAGING_DIR)
 
-lib_install :
+$(RELEASE_DIR) :	$(STAGING_DIR)
+		mkdir $(RELEASE_DIR)
+
+# Copy all products to the staging directory.
+install :	$(SMC_STAGING_DIR)
 		$(MAKE) -C lib install
-
-bin_install :
-		$(MAKE) -C bin install
-
-examples_install :
+		$(MAKE) -C net/sf/smc install
 		cp -R -f -p ./examples $(SMC_STAGING_DIR)
 		-rm -fr $(SMC_STAGING_DIR)/examples/CVS
 		-rm -fr $(SMC_STAGING_DIR)/examples/*/CVS
 		-rm -fr $(SMC_STAGING_DIR)/examples/*/*/CVS
-
-misc_install :
 		$(MAKE) -C misc install
+		cp -f LICENSE.txt $(SMC_STAGING_DIR)
+		cp -f README.txt $(SMC_STAGING_DIR)
 
-uninstall : $(UNINSTALL_DIRS)
+uninstall :
+		$(MAKE) -C lib uninstall
+		$(MAKE) -C net/sf/smc uninstall
+		$(MAKE) -C misc uninstall
+		-rm -fr $(SMC_STAGING_DIR)/examples
 		-rm -f $(SMC_STAGING_DIR)/LICENSE.txt
 		-rm -f $(SMC_STAGING_DIR)/README.txt
 
-lib_uninstall :
-		$(MAKE) -C lib uninstall
-
-bin_uninstall :
-		$(MAKE) -C bin uninstall
-
-examples_uninstall : 
-		-rm -fr $(SMC_STAGING_DIR)/examples
-
-misc_uninstall :
-		$(MAKE) -C misc uninstall
-
-clean : $(CLEAN_DIRS)
-
-lib_clean :
+clean :
 		$(MAKE) -C lib clean
+		$(MAKE) -C ./net/sf/smc clean
 
-bin_clean :
-		$(MAKE) -C bin clean
-
-dist : 		install
-		cd $(STAGING_DIR); tar cvf $(TARFILE) smc
+dist : 		install $(RELEASE_DIR)
+		rm -fr $(SMC_RELEASE_DIR)
+		cd $(STAGING_DIR); \
+			mv $(SMC_STAGING_DIR) $(SMC_RELEASE_DIR); \
+			tar cvf $(TARFILE) smc_$(VERSION)
 		gzip $(TARFILE)
 		mv $(TARFILE).gz $(GZIPFILE)
 
 distclean :
 		-rm -f $(TARFILE) $(GZIPFILE)
+
+realclean :
+		$(MAKE) -C lib realclean
+		$(MAKE) -C ./net/sf/smc realclean

@@ -23,6 +23,13 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2001/11/30 15:17:22  cwrapp
+# Changes in release 1.0.2:
+# + Placed the class files in Smc.jar in the net.sf.smc package.
+# + Moved Java source files from smc/bin to net/sf/smc.
+# + Corrected a C++ generation bug wherein arguments were written
+#   to the .h file rather than the .cpp file.
+#
 # Revision 1.2  2001/05/09 23:40:02  cwrapp
 # Changes in release 1.0, beta 6:
 # Fixes the four following bugs:
@@ -87,3 +94,6 @@ uninstall :
 
 clean :
 		-rm -f $(JAR_FILE) $(PACKAGE_NAME)/*
+
+realclean :	clean
+		-rm -fr ./statemap
