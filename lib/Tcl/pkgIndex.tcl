@@ -13,10 +13,21 @@
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
-# Copyright (C) 2000 Charles W. Rapp.
+# Copyright (C) 2000 - 2003 Charles W. Rapp.
 # All Rights Reserved.
 # 
 # Contributor(s):
+#
+# RCS ID
+# $Id$
+#
+# CHANGE LOG
+# $Log$
+# Revision 1.5  2005/05/28 18:47:13  cwrapp
+# Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
+#
+# Revision 1.0  2003/12/14 20:44:31  charlesr
+# Initial revision
 #
 
 package ifneeded statemap 0.1 \

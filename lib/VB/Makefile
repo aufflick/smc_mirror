@@ -32,39 +32,58 @@
 # Include the official macros.
 include ../../smc.mk
 
-STAGING_DIR=	../../../staging/smc/lib/statemap1.0
+LIB_SOURCES=	FSMContext.vb \
+		State.vb \
+		TransitionUndefinedException.vb \
+		StateUndefinedException.vb
+
+PACKAGE_NAME=	statemap
+
+JAVAC=		javac
+JAVAC_FLAGS=	-d . -g
+JAR=		jar
+JAR_FLAGS=	cvf
+DLL_FILE=	$(PACKAGE_NAME).dll
+
+STAGING_DIR=	../../../staging/smc/lib
 
 #################################################################
 # Rules.
 #
 
-$(STAGING_DIR) :
-		mkdir $(STAGING_DIR)
+all:		$(DLL_FILE)
 
-install :	$(STAGING_DIR) statemap.tcl pkgIndex.tcl
-		cp -f statemap.tcl $(STAGING_DIR)
-		cp -f pkgIndex.tcl $(STAGING_DIR)
+# .dll can only be built withing Dev Studio.
+
+$(STAGING_DIR)/VB :
+		mkdir $(STAGING_DIR)/VB
+
+install :	$(DLL_FILE) $(STAGING_DIR)/VB
+		cp -f $(DLL_FILE) $(STAGING_DIR)/VB
 
 uninstall :
-		-rm $(STAGING_DIR)/statemap.tcl
-		-rm $(STAGING_DIR)/pkgIndex.tcl
+		-rm -f $(STAGING_DIR)/VB/$(DLL_FILE)
 
 clean :
+		-rm -f ./$(DLL_FILE) ./$(PACKAGE_NAME)/*
 
-realclean :
+realclean :	clean
 
 #
 # CHANGE LOG
 # $Log$
-# Revision 1.6  2005/05/28 18:47:13  cwrapp
+# Revision 1.1  2005/05/28 18:47:13  cwrapp
 # Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
 #
-# Revision 1.2  2005/02/21 19:06:27  charlesr
+# Revision 1.3  2005/02/21 19:06:40  charlesr
 # Including standard SMC macros.
 #
-# Revision 1.1  2004/10/30 15:56:29  charlesr
+# Revision 1.2  2004/10/30 15:57:07  charlesr
 # Added -f option to the install copy.
 #
-# Revision 1.0  2003/12/14 20:42:05  charlesr
+# Revision 1.1  2004/09/06 16:35:55  charlesr
+# Updated for SMC v. 3.1.0.
+#
+# Revision 1.0  2004/05/31 13:46:35  charlesr
 # Initial revision
 #

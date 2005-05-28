@@ -13,92 +13,36 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 Charles W. Rapp.
+// Copyright (C) 2000 - 2003 Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
-//
-// RCS ID
-// $Id$
 //
 // statemap.java --
 //
 //  This package defines the FSMContext class which must be inherited by
 //  any Java class wanting to use an smc-generated state machine.
 //
+// RCS ID
+// $Id$
+//
 // Change Log
 // $Log$
-// Revision 1.6  2002/05/07 00:19:10  cwrapp
-// Changes in release 1.3.2:
-// Add the following feature:
-// + 528321: Modified push transition syntax to be:
+// Revision 1.7  2005/05/28 18:44:13  cwrapp
+// Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
 //
-// 	  <transname> <state1>/push(<state2>)  {<actions>}
+// Revision 1.1  2005/02/21 19:03:38  charlesr
+// Variable name clean up.
 //
-// 	  which means "transition to <state1> and then
-// 	  immediately push to <state2>". The current
-// 	  syntax:
-//
-// 	  <transname> push(<state2>)  {<actions>}
-//
-//           is still valid and <state1> is assumed to be "nil".
-//
-// No bug fixes.
-//
-// Revision 1.3  2001/06/16 19:52:43  cwrapp
-// Changes in release 1.0, beta 7:
-// Fixes the minor code generation bugs and introduces a new
-// example Java program (found at examples/Java/EX7). This
-// example program is also a Java applet and can be seen at
-// http://smc.sourceforge.net/SmcDemo.htm.
-//
-// Revision 1.2  2001/05/09 23:40:02  cwrapp
-// Changes in release 1.0, beta 6:
-// Fixes the four following bugs:
-// + 416011: SMC does not properly handle pop transitions which
-//           have no argument.
-// + 416013: SMC generated code does not throw a
-//           "Transition Undefined" exception as per Programmer's
-//           Manual.
-// + 416014: The initial state's Entry actions are not being
-//           executed.
-// + 416015: When a transition has both a guarded and an unguarded
-//           definition, the Exit actions are only called when the
-//           guard evaluates to true.
-// + 422795: SMC -tcl abnormally terminates.
-//
-// Revision 1.1.1.2  2001/03/26 14:41:47  cwrapp
-// Corrected Entry/Exit action semantics. Exit actions are now
-// executed only by simple transitions and pop transitions.
-// Entry actions are executed by simple transitions and push
-// transitions. Loopback transitions do not execute either Exit
-// actions or entry actions. See SMC Programmer's manual for
-// more information.
-//
-// Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
-//
-// ----------------------------------------------------------------------
-// SMC - The State Map Compiler
-// Version: 1.0, Beta 3
-//
-// SMC compiles state map descriptions into a target object oriented
-// language. Currently supported languages are: C++, Java and [incr Tcl].
-// SMC finite state machines have such features as:
-// + Entry/Exit actions for states.
-// + Transition guards
-// + Transition arguments
-// + Push and Pop transitions.
-// + Default transitions. 
-// ----------------------------------------------------------------------
-//
-// Revision 1.1.1.1  2000/08/02 12:50:57  charlesr
-// Initial source import, SMC v. 1.0, Beta 1.
+// Revision 1.0  2003/12/14 20:38:40  charlesr
+// Initial revision
 //
 
 package statemap;
 
 import java.io.PrintStream;
 import java.io.Serializable;
+import java.util.EmptyStackException;
 
 // statemap.FSMContext --
 //
@@ -119,34 +63,34 @@ public abstract class FSMContext
         // sets the initial state.
         _state = null;
         _transition = "";
-        _previous_state = null;
-        _state_stack = new java.util.Stack();
-        _debug_flag = false;
-        _debug_stream = System.err;
+        _previousState = null;
+        _stateStack = null;
+        _debugFlag = false;
+        _debugStream = System.err;
     }
 
     // When debug is set to true, the state machine
     // will print messages to the console.
     public boolean getDebugFlag()
     {
-        return(_debug_flag && _debug_stream != null);
+        return(_debugFlag && _debugStream != null);
     }
 
     public void setDebugFlag(boolean flag)
     {
-        _debug_flag = flag;
+        _debugFlag = flag;
         return;
     }
 
     // Write the debug output to this stream.
     public PrintStream getDebugStream()
     {
-        return (_debug_stream == null ? System.err : _debug_stream);
+        return (_debugStream == null ? System.err : _debugStream);
     }
 
     public void setDebugStream(PrintStream stream)
     {
-        _debug_stream = stream;
+        _debugStream = stream;
         return;
     }
 
@@ -165,8 +109,6 @@ public abstract class FSMContext
                                      state.getName());
         }
 
-        // Should this be done?
-        // _previous_state = _state;
         _state = state;
 
         return;
@@ -174,58 +116,72 @@ public abstract class FSMContext
 
     public void clearState()
     {
-        _previous_state = _state;
+        _previousState = _state;
         _state = null;
 
         return;
     }
 
-    public State getPreviousState() throws java.lang.NullPointerException
+    public State getPreviousState()
+        throws NullPointerException
     {
-        if (_previous_state == null)
+        if (_previousState == null)
         {
-            throw new java.lang.NullPointerException();
+            throw (new NullPointerException());
         }
         else
         {
-            return(_previous_state);
+            return(_previousState);
         }
     }
 
     public void pushState(State state)
     {
+        if (_state == null)
+        {
+            throw (new NullPointerException());
+        }
+
         if (getDebugFlag() == true)
         {
             getDebugStream().println("PUSH TO STATE: " +
                                      state.getName());
         }
 
-        if (_state != null)
+        if (_stateStack == null)
         {
-            _state_stack.push(_state);
+            _stateStack = new java.util.Stack();
         }
 
+        _stateStack.push(_state);
         _state = state;
 
         return;
     }
 
-    public void popState() throws java.util.EmptyStackException
+    public void popState()
+        throws EmptyStackException
     {
-        if (_state_stack.empty() == true)
+        if (_stateStack == null ||
+            _stateStack.isEmpty() == true)
         {
             if (getDebugFlag() == true)
             {
                 getDebugStream().println("POPPING ON EMPTY STATE STACK.");
             }
 
-            throw new java.util.EmptyStackException();
+            throw (new EmptyStackException());
         }
         else
         {
             // The pop method removes the top element
             // from the stack and returns it.
-            _state = (State) _state_stack.pop();
+            _state = (State) _stateStack.pop();
+
+            if (_stateStack.isEmpty() == true)
+            {
+                _stateStack = null;
+            }
 
             if (getDebugFlag() == true)
             {
@@ -239,10 +195,8 @@ public abstract class FSMContext
 
     public void emptyStateStack()
     {
-        while (_state_stack.empty() == false)
-        {
-            _state_stack.pop();
-        }
+        _stateStack.clear();
+        _stateStack = null;
 
         return;
     }
@@ -252,92 +206,27 @@ public abstract class FSMContext
         return(_transition);
     }
 
-    // Release all acquired resources.
-    protected void finalize() throws java.lang.Throwable
-    {
-        _state = null;
-        _transition = null;
-        _previous_state = null;
-        _state_stack = null;
-
-        super.finalize();
-    }
-
 // Member data
 
     // The current state.
-    protected State _state;
+    transient protected State _state;
 
     // The current transition *name*. Used for debugging
     // purposes.
-    protected String _transition;
+    transient protected String _transition;
 
     // Remember what state a transition left.
-    protected State _previous_state;
+    // Do no persist the previous state because an FSM should be
+    // serialized while in transition.
+    transient protected State _previousState;
 
     // This stack is used when a push transition is taken.
-    protected java.util.Stack _state_stack;
+    transient protected java.util.Stack _stateStack;
 
     // When this flag is set to true, this class will print
     // out debug messages.
-    protected boolean _debug_flag;
+    transient protected boolean _debugFlag;
 
     // Write debug output to this stream.
-    transient protected PrintStream _debug_stream;
-
-// Inner classes
-
-    /* Transition queuing will not be released. This code will be
-     * left in place but commented out.
-     *
-    // This entry is used to store transitions on the transition
-    // queue.
-    public final class TransEntry
-    {
-        public TransEntry(String method_name,
-                          Object[] args,
-                          Class[] parameters)
-        {
-            _method_name = method_name;
-            _args = args;
-            _parameters = parameters;
-            return;
-        }
-
-        public String getMethodName()
-        {
-            return(_method_name);
-        }
-
-        public Object[] getArgs()
-        {
-            return(_args);
-        }
-
-        public Class[] getParameters()
-        {
-            return(_parameters);
-        }
-
-        public void free()
-        {
-            int i;
-
-            _method_name = null;
-            for (i = 0; i < _args.length; ++i)
-            {
-                _args[i] = null;
-                _parameters[i] = null;
-            }
-            _args = null;
-            _parameters = null;
-
-            return;
-        }
-
-        private String   _method_name;
-        private Object[] _args;
-        private Class[]  _parameters;
-    }
-     */
+    transient protected PrintStream _debugStream;
 }

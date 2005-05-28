@@ -13,13 +13,13 @@
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
-# Copyright (C) 2000 - 2005. Charles W. Rapp.
+# Copyright (C) 2005. Charles W. Rapp.
 # All Rights Reserved.
 #
 # Port to Python by Francois Perrad, francois.perrad@gadz.org
 # Copyright 2004, Francois Perrad.
 # All Rights Reserved.
-#
+# 
 # Contributor(s):
 #   Eitan Suez contributed examples/Ant.
 #   (Name withheld) contributed the C# code generation and
@@ -39,9 +39,9 @@
 #
 
 # Include the official macros.
-include ../smc.mk
+include ../../smc.mk
 
-STAGING_DIR=	../../staging/smc/lib
+STAGING_DIR=	../../../staging/smc/lib
 
 #################################################################
 # Rules.
@@ -50,54 +50,26 @@ STAGING_DIR=	../../staging/smc/lib
 $(STAGING_DIR) :
 		mkdir $(STAGING_DIR)
 
-# Copy all products to the staging directory.
-install : 	$(STAGING_DIR)
-		$(MAKE) -C C++ install
-		$(MAKE) -C Java install
-		$(MAKE) -C Tcl install
-		$(MAKE) -C VB install
-		$(MAKE) -C CSharp install
-		$(MAKE) -C Python install
+install :	$(STAGING_DIR) setup.py
+		python setup.py install
 
+# TODO:
+# Is it possible to uninstall the Python library?
 uninstall :
-		$(MAKE) -C C++ uninstall
-		$(MAKE) -C Java uninstall
-		$(MAKE) -C Tcl uninstall
-		$(MAKE) -C VB uninstall
-		$(MAKE) -C CSharp uninstall
-		$(MAKE) -C Python uninstall
+
+docs :		$(SOURCES)
+		pydoc -w statemap
 
 clean :
-		$(MAKE) -C C++ clean
-		$(MAKE) -C Java clean
-		$(MAKE) -C Tcl clean
-		$(MAKE) -C VB clean
-		$(MAKE) -C CSharp clean
-		$(MAKE) -C Python clean
 
-realclean :
-		$(MAKE) -C C++ realclean
-		$(MAKE) -C Java realclean
-		$(MAKE) -C Tcl realclean
-		$(MAKE) -C VB realclean
-		$(MAKE) -C CSharp realclean
-		$(MAKE) -C Python realclean
+realclean :	clean
 
 #
 # CHANGE LOG
 # $Log$
-# Revision 1.5  2005/05/28 18:44:10  cwrapp
+# Revision 1.1  2005/05/28 18:47:13  cwrapp
 # Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
 #
-# Revision 1.3  2005/02/21 19:07:03  charlesr
-# Including standard SMC macros.
-#
-# Revision 1.2  2004/09/06 16:35:06  charlesr
-# Updated for SMC v. 3.1.0.
-#
-# Revision 1.1  2004/05/31 13:44:03  charlesr
-# Updated macros and rules for VB.net.
-#
-# Revision 1.0  2003/12/14 20:41:37  charlesr
+# Revision 1.0  2005/02/21 19:05:27  charlesr
 # Initial revision
 #

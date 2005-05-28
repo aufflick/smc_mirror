@@ -16,13 +16,10 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 Charles W. Rapp.
+// Copyright (C) 2000 - 2004 Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
-//
-// RCS ID
-// $Id$
 //
 // Namespace
 //	statemap
@@ -40,104 +37,70 @@
 // Author
 //	C. W. Rapp
 //
-// Change Log
-// $Log$
-// Revision 1.5  2002/05/07 00:19:10  cwrapp
-// Changes in release 1.3.2:
-// Add the following feature:
-// + 528321: Modified push transition syntax to be:
+// RCS ID
+// $Id$
 //
-// 	  <transname> <state1>/push(<state2>)  {<actions>}
+// CHANGE LOG
+// (See bottom of file)
 //
-// 	  which means "transition to <state1> and then
-// 	  immediately push to <state2>". The current
-// 	  syntax:
-//
-// 	  <transname> push(<state2>)  {<actions>}
-//
-//           is still valid and <state1> is assumed to be "nil".
-//
-// No bug fixes.
-//
-// Revision 1.3  2001/12/14 20:10:37  cwrapp
-// Changes in release 1.1.0:
-// Add the following features:
-// + 486786: Added the %package keyword which specifies the
-//           Java package/C++ namespace/Tcl namespace
-//           the SMC-generated classes will be placed.
-// + 486471: The %class keyword accepts fully qualified
-//           class names.
-// + 491135: Add FSMContext methods getDebugStream and
-//           setDebugStream.
-// + 492165: Added -sync command line option which causes
-//           the transition methods to be synchronized
-//           (this option may only be used with -java).
-//
-// Revision 1.2  2001/05/09 23:40:02  cwrapp
-// Changes in release 1.0, beta 6:
-// Fixes the four following bugs:
-// + 416011: SMC does not properly handle pop transitions which
-//           have no argument.
-// + 416013: SMC generated code does not throw a
-//           "Transition Undefined" exception as per Programmer's
-//           Manual.
-// + 416014: The initial state's Entry actions are not being
-//           executed.
-// + 416015: When a transition has both a guarded and an unguarded
-//           definition, the Exit actions are only called when the
-//           guard evaluates to true.
-// + 422795: SMC -tcl abnormally terminates.
-//
-// Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
-//
-// ----------------------------------------------------------------------
-// SMC - The State Map Compiler
-// Version: 1.0, Beta 3
-//
-// SMC compiles state map descriptions into a target object oriented
-// language. Currently supported languages are: C++, Java and [incr Tcl].
-// SMC finite state machines have such features as:
-// + Entry/Exit actions for states.
-// + Transition guards
-// + Transition arguments
-// + Push and Pop transitions.
-// + Default transitions. 
-// ----------------------------------------------------------------------
-//
-// Revision 1.1.1.1  2000/08/02 12:50:57  charlesr
-// Initial source import, SMC v. 1.0, Beta 1.
-//
-#ifdef WIN32
+
+#if (__GNUC__ >= 3 && __GNUC_MINOR__ >= 1)
+#include <iostream>
+#if defined(SMC_NO_EXCEPTIONS)
+#include <cassert>
+#endif // SMC_NO_EXCEPTIONS
+#include <cstdio>
+#elif defined(WIN32)
 #include <iostream>
 #include <windows.h>
+#if defined(SMC_NO_EXCEPTIONS)
+#include <cassert>
+#endif // SMC_NO_EXCEPTIONS
 #else
 #include <iostream.h>
-#endif
+#if defined(SMC_NO_EXCEPTIONS)
 #include <assert.h>
+#endif // SMC_NO_EXCEPTIONS
 #include <stdio.h>
-
-#ifdef SMC_TRANS_Q
-#include <memory.h>
-#endif
-
-#ifdef WIN32
-using namespace std;
 #endif
 
 namespace statemap
 {
+#ifndef SMC_NO_EXCEPTIONS
+    // This class is thrown when a pop is issued on an empty
+    // state stack.
+    class PopOnEmptyStateStackException
+    {
+    public:
+
+        // Default constructor.
+        PopOnEmptyStateStackException() {};
+
+        // Destructor.
+        ~PopOnEmptyStateStackException() {};
+    };
+#endif // !SMC_NO_EXCEPTIONS
+
     class State
     {
     // Member functions.
     public:
-        const char* getName()
+
+        const char* getName() const
         {
-            return(_name);
+            return (_name);
         };
 
+        int getId() const
+        {
+            return (_stateId);
+        }
+
     protected:
-        State(const char *name)
-        : _name(NULL)
+
+        State(const char *name, int stateId)
+        : _name(NULL),
+          _stateId(stateId)
         {
             if (name != NULL)
             {
@@ -161,6 +124,7 @@ namespace statemap
         };
 
     private:
+
         // Make the default and copy constructors private to
         // prevent their use.
         State() {};
@@ -169,8 +133,12 @@ namespace statemap
     // Member data.
     public:
     protected:
+
         // This state's printable name.
         char *_name;
+
+        // This state's unique identifier.
+        int _stateId;
 
     private:
     };
@@ -179,85 +147,10 @@ namespace statemap
     {
     // Nested classes.
     public:
-
-#ifdef SMC_TRANS_Q
-        class TransEntry
-        {
-        // Member functions
-        public:
-            TransEntry(int trans_index,
-                       unsigned char **argv,
-                       int argc)
-            : _trans_index(trans_index),
-              _argv(argv),
-              _argc(argc),
-              _next(NULL)
-            {};
-
-            ~TransEntry()
-            {
-                if (_argv != NULL)
-                {
-                    int i;
-
-                    for (i = 0; i < _argc; ++i)
-                    {
-                        if (_argv[i] != NULL)
-                        {
-                            delete[] _argv[i];
-                            _argv[i] = NULL;
-                        }
-                    }
-
-                    delete[] _argv;
-                    _argv = NULL;
-                }
-
-                _next = NULL;
-
-                return;
-            };
-
-            int getIndex() const
-            {
-                return(_trans_index);
-            };
-
-            int getArgc() const
-            {
-                return(_argc);
-            };
-
-            unsigned char** getArgv() const
-            {
-                return(_argv);
-            };
-
-        protected:
-        private:
-
-        // Member data.
-        public:
-        protected:
-        private:
-            // The transition routine's ordinal number.
-            int _trans_index;
-
-            // The transition's arguments.
-            unsigned char **_argv;
-            int _argc;
-
-            // The next enqueued transition.
-            TransEntry *_next;
-
-        // Friends
-            friend class FSMContext;
-        }; // end of class TransEntry
-#endif
-
     protected:
     private:
 
+        // Implements the state stack.
         class StateEntry
         {
         // Member functions.
@@ -301,9 +194,6 @@ namespace statemap
         virtual ~FSMContext()
         {
             StateEntry *state;
-#ifdef SMC_TRANS_Q
-            TransEntry *transition;
-#endif
 
             if (_transition != NULL)
             {
@@ -317,16 +207,6 @@ namespace statemap
                 _state_stack = _state_stack->_next;
                 delete state;
             }
-
-#ifdef SMC_TRANS_Q
-            while (_trans_queue_head != NULL)
-            {
-                transition = _trans_queue_head;
-                _trans_queue_head = _trans_queue_head->_next;
-                delete transition;
-            }
-            _trans_queue_tail = NULL;
-#endif
         };
 
         // Comparison and assignment operators
@@ -349,11 +229,14 @@ namespace statemap
             return(this == &fsm);
         };
 
+        // Returns the debug flag's current setting.
         bool getDebugFlag()
         {
             return(_debug_flag);
         };
 
+        // Sets the debug flag. A true value means debugging
+        // is on and false means off.
         void setDebugFlag(bool flag)
         {
             _debug_flag = flag;
@@ -369,16 +252,20 @@ namespace statemap
             return;
         };
 
-        ostream& getDebugStream()
+#ifdef SMC_USES_IOSTREAMS
+        // Returns the stream to which debug output is written.
+        std::ostream& getDebugStream()
         {
             return (*_debug_stream);
         };
 
-        void setDebugStream(ostream& debug_stream)
+        // Sets the debug output stream.
+        void setDebugStream(std::ostream& debug_stream)
         {
             _debug_stream = &debug_stream;
             return;
         }
+#endif // SMC_USES_IOSTREAMS
 
         // Is this state machine already inside a transition?
         // Yes if state is null.
@@ -387,27 +274,77 @@ namespace statemap
             return(_state == NULL ? true : false);
         };
 
+        // Returns the current transition's name.
+        // Used only for debugging purposes.
         char* getTransition()
         {
             return (_transition);
         };
 
-        // Clear the current state.
-        void clearState()
-        { _state = NULL; };
+        // Saves away the transition name only if debugging
+        // is turned on.
+        void setTransition(char *transition)
+        {
+            if (_debug_flag == true)
+            {
+                _transition = transition;
+            }
 
-        // Set the current state to the specified state.
+            return;
+        }
+
+        // Clears the current state.
+        void clearState()
+        {
+            _previous_state = _state;
+            _state = NULL;
+        };
+
+        // Returns the state which a transition left.
+        // May be NULL.
+        State* getPreviousState()
+        {
+            return (_previous_state);
+        }
+
+        // Sets the current state to the specified state.
         void setState(const State& state)
         {
             _state = const_cast<State *>(&state);
 
             if (_debug_flag == true)
             {
+#ifdef SMC_USES_IOSTREAMS
                 *_debug_stream << "NEW STATE    : "
                                << _state->getName()
-                               << endl;
+                               << std::endl;
+#else
+                TRACE("NEW STATE    : %s\n\r",
+                      _state->getName());
+#endif // SMC_USES_IOSTREAMS
             }
         };
+
+        // Returns true if the state stack is empty and false
+        // otherwise.
+        bool isStateStackEmpty() const
+        {
+            return (_state_stack == NULL);
+        }
+
+        // Returns the state stack's depth.
+        int getStateStackDepth() const
+        {
+            StateEntry *state_ptr;
+            int retval;
+
+            for (state_ptr = _state_stack, retval = 0;
+                 state_ptr != NULL;
+                 state_ptr = state_ptr->getNext(), ++retval)
+                ;
+
+            return (retval);
+        }
 
         // Push the current state on top of the state stack
         // and make the specified state the current state.
@@ -427,9 +364,14 @@ namespace statemap
 
             if (_debug_flag == true)
             {
+#ifdef SMC_USES_IOSTREAMS
                 *_debug_stream << "PUSH TO STATE: "
                                << _state->getName()
-                               << endl;
+                               << std::endl;
+#else
+                TRACE("PUSH TO STATE: %s\n\r",
+                      _state->getName());
+#endif // SMC_USES_IOSTREAMS
             }
         };
 
@@ -440,7 +382,14 @@ namespace statemap
             StateEntry *entry;
 
             // Popping when there was no previous push is an error.
+#ifdef SMC_NO_EXCEPTIONS
             assert(_state_stack != NULL);
+#else
+            if (_state_stack == NULL)
+            {
+                throw PopOnEmptyStateStackException();
+            }
+#endif // SMC_NO_EXCEPTIONS
 
             _state = _state_stack->getState();
             entry = _state_stack;
@@ -449,9 +398,14 @@ namespace statemap
 
             if (_debug_flag == true)
             {
+#ifdef SMC_USES_IOSTREAMS
                 *_debug_stream << "POP TO STATE : "
                                << _state->getName()
-                               << endl;
+                               << std::endl;
+#else
+                TRACE("POP TO STATE : %s\n\r",
+                      _state->getName());
+#endif // SMC_USES_IOSTREAMS
             }
         };
 
@@ -472,76 +426,24 @@ namespace statemap
             _state_stack = NULL;
         };
 
-#ifdef SMC_TRANS_Q
-        // Enqueue and dequeue a transition.
-        void enqueue_transition(TransEntry *transition)
-        {
-            if (_trans_queue_head == NULL)
-            {
-                _trans_queue_head = transition;
-            }
-            else
-            {
-                _trans_queue_tail->_next = transition;
-            }
-
-            _trans_queue_tail = transition;
-            return;
-        };
-
-        TransEntry* dequeue_transition()
-        {
-            TransEntry *retval;
-
-            retval = _trans_queue_head;
-            if (_trans_queue_head != NULL)
-            {
-                _trans_queue_head = _trans_queue_head->_next;
-                if (_trans_queue_head == NULL)
-                {
-                    _trans_queue_tail = NULL;
-                }
-            }
-
-            return(retval);
-        };
-#endif
-
     protected:
+
         // Default constructor.
         FSMContext()
         : _state(NULL),
+          _previous_state(NULL),
           _state_stack(NULL),
           _transition(NULL),
-#ifdef SMC_TRANS_Q
-          _trans_queue_head(NULL),
-          _trans_queue_tail(NULL),
-#endif
+#ifdef SMC_USES_IOSTREAMS
           _debug_flag(false),
-          _debug_stream(&cerr)
+          _debug_stream(&std::cerr)
+#else
+          _debug_flag(false)
+#endif // SMC_USES_IOSTREAMS
         {};
 
-        // Save away the transition name only if
-        // debugging is turned on.
-        void setTransition(const char *transition)
-        {
-            if (_debug_flag == true)
-            {
-                if (_transition != NULL)
-                {
-                    delete[] _transition;
-                    _transition = NULL;
-                }
-
-                if (transition != NULL)
-                {
-                    _transition = new char[strlen(transition) + 1];
-                    (void) strcpy(_transition, transition);
-                }
-            }
-        };
-
     private:
+
         // I don't believe that it makes sense to copy a
         // context. It may make sense to copy the application
         // class but the new object is *not* in the same
@@ -554,8 +456,12 @@ namespace statemap
     // Member data
     public:
     protected:
+
         // The current state of the finite state machine.
         State *_state;
+
+        // Remember which state a transition left.
+        State *_previous_state;
 
         // The stack of pushed states.
         StateEntry *_state_stack;
@@ -564,22 +470,19 @@ namespace statemap
         // purposes.
         char *_transition;
 
-#ifdef SMC_TRANS_Q
-        // Queued transitions.
-        TransEntry *_trans_queue_head;
-        TransEntry *_trans_queue_tail;
-#endif
-
     private:
 
         // When this flag is set to true, this class will print
         // out debug messages.
         bool _debug_flag;
 
+// Include the following only if C++ iostreams are being used.
+#ifdef SMC_USES_IOSTREAMS
         // When FSM debugging is on, debug messages will be
         // written to this output stream. This stream is set to
         // standard error by default.
-        ostream *_debug_stream;
+        std::ostream *_debug_stream;
+#endif // SMC_USES_IOSTREAMS
 
     }; // end of class FSMContext
 
@@ -602,40 +505,29 @@ namespace statemap
     // but there is no code to handle it.
     class TransitionUndefinedException
     {
+    // Member methods.
     public:
 
         // Default constructor.
         TransitionUndefinedException()
-        {
-            _state = NULL;
-            _transition = NULL;
-        };
+        : _state(NULL),
+          _transition(NULL)
+        {};
 
         // Construct an exception using the specified state
         // and transition.
         TransitionUndefinedException(const char *state,
                                      const char *transition)
-        {
-            if (state == NULL)
-            {
-                _state = NULL;
-            }
-            else
-            {
-                _state = new char[strlen(state) + 1];
-                (void) strcpy(_state, state);
-            }
+        : _state(_CopyString(state)),
+          _transition(_CopyString(transition))
+        {};
 
-            if (transition == NULL)
-            {
-                _transition = NULL;
-            }
-            else
-            {
-                _transition = new char[strlen(transition) + 1];
-                (void) strcpy(_transition, transition);
-            }
-        };
+        // Copy constructor.
+        TransitionUndefinedException(
+            const TransitionUndefinedException& ex)
+        : _state(_CopyString(ex._state)),
+          _transition(_CopyString(ex._transition))
+        {};
 
         // Destructor.
         ~TransitionUndefinedException()
@@ -649,27 +541,171 @@ namespace statemap
             if (_transition != NULL)
             {
                 delete[] _transition;
-                _state = NULL;
+                _transition = NULL;
             }
         };
 
-        // Return the state. May be NULL.
+        // Assignment operator.
+        const TransitionUndefinedException&
+            operator=(const TransitionUndefinedException& ex)
+        {
+            // Don't do self assignment.
+            if (this != &ex)
+            {
+                if (_state != NULL)
+                {
+                    delete[] _state;
+                    _state = NULL;
+                }
+
+                if (_transition != NULL)
+                {
+                    delete[] _transition;
+                    _transition = NULL;
+                }
+
+                _state = _CopyString(ex._state);
+                _transition = _CopyString(ex._transition);
+            }
+
+            return (*this);
+        };
+
+        // Returns the state. May be NULL.
         char* getState() const
         {
             return(_state);
         };
 
-        // Return the transition. May be NULL.
+        // Returns the transition. May be NULL.
         char* getTransition() const
         {
             return (_transition);
         };
 
-	// private
+    protected:
+    private:
+
+        // Copies a non-null string and returns the copy.
+        static char* _CopyString(const char *s)
+        {
+            char *retval = NULL;
+
+            if (s != NULL)
+            {
+                retval = new char[strlen(s) + 1];
+                (void) strcpy(retval, s);
+            }
+
+            return (retval);
+        };
+
+    // Member data.
+    public:
+    protected:
+    private:
 
 		char *_state;
 		char *_transition;
-	};
-}
+    };
+
+    // This class is thrown when a state ID is either less than
+    // the minimal value or greater than the maximal value.
+    class IndexOutOfBoundsException
+    {
+    // Member methods.
+    public:
+
+        // Default constructor.
+        IndexOutOfBoundsException()
+        : _index(0),
+          _minIndex(0),
+          _maxIndex(0)
+        {};
+
+        // Constructs an exception using the specified index,
+        // minimum index and maximum index.
+        IndexOutOfBoundsException(int index,
+                                  int minIndex,
+                                  int maxIndex)
+        : _index(index),
+          _minIndex(minIndex),
+          _maxIndex(maxIndex)
+        {};
+
+        // Copy constructor.
+        IndexOutOfBoundsException(
+            const IndexOutOfBoundsException& ex)
+        : _index(ex._index),
+          _minIndex(ex._minIndex),
+          _maxIndex(ex._maxIndex)
+        {};
+
+        // Destructor.
+        ~IndexOutOfBoundsException()
+        {};
+
+        // Assignment operator.
+        const IndexOutOfBoundsException&
+            operator=(const IndexOutOfBoundsException& ex)
+        {
+            // Don't do self assignment.
+            if (this != &ex)
+            {
+                _index = ex._index;
+                _minIndex = ex._minIndex;
+                _maxIndex = ex._maxIndex;
+            }
+
+            return (*this);
+        };
+
+        // Returns the out-of-bounds index.
+        int getIndex() const
+        {
+            return(_index);
+        };
+
+        // Returns the minimum allowed index value.
+        int getMinIndex() const
+        {
+            return (_minIndex);
+        };
+
+        // Returns the maximum allowed index value.
+        int getMaxIndex() const
+        {
+            return (_maxIndex);
+        };
+
+    protected:
+    private:
+
+    // Member data.
+    public:
+    protected:
+    private:
+
+		int _index;
+		int _minIndex;
+        int _maxIndex;
+    };
+};
+
+//
+// CHANGE LOG
+// $Log$
+// Revision 1.6  2005/05/28 18:44:13  cwrapp
+// Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
+//
+// Revision 1.2  2005/02/21 19:01:42  charlesr
+// Changed State::_id to State::_stateId because of Object-C++
+// reserved word conflict.
+//
+// Revision 1.1  2004/05/31 13:44:41  charlesr
+// Added support for non-iostreams output.
+//
+// Revision 1.0  2003/12/14 20:37:49  charlesr
+// Initial revision
 
 #endif
