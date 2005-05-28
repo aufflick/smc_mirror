@@ -13,7 +13,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 Charles W. Rapp.
+// Copyright (C) 2000 - 2003 Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
@@ -29,46 +29,11 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.3  2002/05/07 00:29:50  cwrapp
-// Changes in release 1.3.2:
-// Add the following feature:
-// + 528321: Modified push transition syntax to be:
+// Revision 1.4  2005/05/28 13:31:18  cwrapp
+// Updated C++ examples.
 //
-// 	  <transname> <state1>/push(<state2>)  {<actions>}
-//
-// 	  which means "transition to <state1> and then
-// 	  immediately push to <state2>". The current
-// 	  syntax:
-//
-// 	  <transname> push(<state2>)  {<actions>}
-//
-//           is still valid and <state1> is assumed to be "nil".
-//
-// No bug fixes.
-//
-// Revision 1.1.1.2  2001/03/26 14:41:47  cwrapp
-// Corrected Entry/Exit action semantics. Exit actions are now
-// executed only by simple transitions and pop transitions.
-// Entry actions are executed by simple transitions and push
-// transitions. Loopback transitions do not execute either Exit
-// actions or entry actions. See SMC Programmer's manual for
-// more information.
-//
-// Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
-//
-// ----------------------------------------------------------------------
-// SMC - The State Map Compiler
-// Version: 1.0, Beta 3
-//
-// SMC compiles state map descriptions into a target object oriented
-// language. Currently supported languages are: C++, Java and [incr Tcl].
-// SMC finite state machines have such features as:
-// + Entry/Exit actions for states.
-// + Transition guards
-// + Transition arguments
-// + Push and Pop transitions.
-// + Default transitions. 
-// ----------------------------------------------------------------------
+// Revision 1.0  2003/12/14 19:41:38  charlesr
+// Initial revision
 //
 
 #include "TcpSegment.h"
@@ -79,6 +44,8 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #endif
+
+using namespace std;
 
 // Static member data declarations.
 const int TcpSegment::TCP_HEADER_SIZE = 16;
@@ -209,6 +176,42 @@ const sockaddr_in& TcpSegment::getDestination() const
 {
     return(_dest_address);
 } // end of TcpSegment::getDestination() const
+
+//---------------------------------------------------------------
+// getSrcAddress() const (Public)
+// Return the segment's source address.
+//
+unsigned long TcpSegment::getSrcAddress() const
+{
+    return (_src_address.sin_addr.s_addr);
+} // end of TcpSegment::getSrcAddress() const
+
+//---------------------------------------------------------------
+// getSrcPort() const (Public)
+// Return the segment's source port.
+//
+unsigned short TcpSegment::getSrcPort() const
+{
+    return (_src_address.sin_port);
+} // end of TcpSegment::getSrcPort() const
+
+//---------------------------------------------------------------
+// getDestAddress() const (Public)
+// Return the segment's destination address.
+//
+unsigned long TcpSegment::getDestAddress() const
+{
+    return (_dest_address.sin_addr.s_addr);
+} // end of TcpSegment::getDestAddress() const
+
+//---------------------------------------------------------------
+// getDestPort() const (Public)
+// Return the segment's destination port.
+//
+unsigned short TcpSegment::getDestPort() const
+{
+    return (_dest_address.sin_port);
+} // end of TcpSegment::getDestPort() const
 
 //---------------------------------------------------------------
 // getSequenceNumber() const (Public)
@@ -452,7 +455,8 @@ ostream& operator<<(ostream& stream, const TcpSegment& segment)
            << segment._ack_number
            << "\n\t        Flags: "
            << flagStr
-           << " (0x" << hex << segment._flags << dec << ")"
+           << " (0x"
+           << ios::hex << segment._flags << ios::dec << ")"
            << "\n\t    Data size: "
            << segment._data_size;
 

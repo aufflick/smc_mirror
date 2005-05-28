@@ -13,7 +13,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 Charles W. Rapp.
+// Copyright (C) 2000 - 2003 Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
@@ -29,54 +29,16 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.4  2002/05/07 00:29:50  cwrapp
-// Changes in release 1.3.2:
-// Add the following feature:
-// + 528321: Modified push transition syntax to be:
+// Revision 1.5  2005/05/28 13:31:18  cwrapp
+// Updated C++ examples.
 //
-// 	  <transname> <state1>/push(<state2>)  {<actions>}
+// Revision 1.0  2003/12/14 19:40:23  charlesr
+// Initial revision
 //
-// 	  which means "transition to <state1> and then
-// 	  immediately push to <state2>". The current
-// 	  syntax:
-//
-// 	  <transname> push(<state2>)  {<actions>}
-//
-//           is still valid and <state1> is assumed to be "nil".
-//
-// No bug fixes.
-//
-// Revision 1.2  2001/05/09 23:40:02  cwrapp
-// Changes in release 1.0, beta 6:
-// Fixes the four following bugs:
-// + 416011: SMC does not properly handle pop transitions which
-//           have no argument.
-// + 416013: SMC generated code does not throw a
-//           "Transition Undefined" exception as per Programmer's
-//           Manual.
-// + 416014: The initial state's Entry actions are not being
-//           executed.
-// + 416015: When a transition has both a guarded and an unguarded
-//           definition, the Exit actions are only called when the
-//           guard evaluates to true.
-// + 422795: SMC -tcl abnormally terminates.
-//
-// Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
-//
-// ----------------------------------------------------------------------
-// SMC - The State Map Compiler
-// Version: 1.0, Beta 3
-//
-// SMC compiles state map descriptions into a target object oriented
-// language. Currently supported languages are: C++, Java and [incr Tcl].
-// SMC finite state machines have such features as:
-// + Entry/Exit actions for states.
-// + Transition guards
-// + Transition arguments
-// + Push and Pop transitions.
-// + Default transitions. 
-// ----------------------------------------------------------------------
-//
+
+#ifdef WIN32
+#pragma warning(disable: 4355)
+#endif
 
 #include "TcpConnection.h"
 #include "TcpSegment.h"
@@ -98,10 +60,9 @@
 #if defined(WIN32)
 // Get rid of an annoying build warning.
 #pragma warning(disable: 4355)
-#   if defined(SMC_DEBUG)
-using namespace std;
-#   endif
 #endif
+
+using namespace std;
 
 // External variable declarations.
 extern Eventloop *Gevent_loop;
@@ -125,6 +86,33 @@ const static unsigned short MAX_PORT = 5000;
 
 // External routine declarations.
 char* winsock_strerror(int);
+
+//---------------------------------------------------------------
+// getFarAddress() const (Public)
+// Return the far-end's 4-byte IP address.
+//
+unsigned long TcpConnection::getFarAddress() const
+{
+    return (_farAddress.sin_addr.s_addr);
+} // end of TcpConnection::getFarAddress() const
+
+//---------------------------------------------------------------
+// getFarPort() const (Public)
+// Return the far-end's TCP port.
+//
+unsigned short TcpConnection::getFarPort() const
+{
+    return (_farAddress.sin_port);
+} // end of TcpConnection::getFarPort() const
+
+//---------------------------------------------------------------
+// getSequenceNumber() const (Public)
+// Return the current sequence number.
+//
+unsigned long TcpConnection::getSequenceNumber() const
+{
+    return (_sequence_number);
+} // end of TcpConnection::getSequenceNumber() const
 
 //---------------------------------------------------------------
 // transmit(const unsigned char*, int, int) (Public)
@@ -240,47 +228,47 @@ void TcpConnection::handleReceive(int)
         switch(flags)
         {
             case TcpSegment::FIN:
-                _fsm.FIN(segment);
+                _fsm.FIN(*segment);
                 break;
 
             case TcpSegment::SYN:
-                _fsm.SYN(segment);
+                _fsm.SYN(*segment);
                 break;
 
             case TcpSegment::RST:
-                _fsm.RST(segment);
+                _fsm.RST(*segment);
                 break;
 
             case TcpSegment::PSH:
-                _fsm.PSH(segment);
+                _fsm.PSH(*segment);
                 break;
 
             case TcpSegment::ACK:
-                _fsm.ACK(segment);
+                _fsm.ACK(*segment);
                 break;
 
             case TcpSegment::URG:
-                _fsm.URG(segment);
+                _fsm.URG(*segment);
                 break;
 
             case TcpSegment::FIN_ACK:
-                _fsm.FIN_ACK(segment);
+                _fsm.FIN_ACK(*segment);
                 break;
 
             case TcpSegment::SYN_ACK:
-                _fsm.SYN_ACK(segment);
+                _fsm.SYN_ACK(*segment);
                 break;
 
             case TcpSegment::RST_ACK:
-                _fsm.RST_ACK(segment);
+                _fsm.RST_ACK(*segment);
                 break;
 
             case TcpSegment::PSH_ACK:
-                _fsm.PSH_ACK(segment);
+                _fsm.PSH_ACK(*segment);
                 break;
 
             default:
-                _fsm.UNDEF(segment);
+                _fsm.UNDEF(*segment);
                 break;
         }
     }
@@ -338,32 +326,6 @@ void TcpConnection::handleTimeout(const char *name)
 
     return;
 } // end of TcpConnection::handleTimeout(const char*)
-
-//---------------------------------------------------------------
-// isInterloper(const TcpSegment*) const (Public)
-// Is this segment from the expected source?
-//
-int TcpConnection::isInterloper(const TcpSegment *segment) const
-{
-    const sockaddr_in& seg_address = segment->getSource();
-
-    return(seg_address.sin_addr.s_addr !=
-               _farAddress.sin_addr.s_addr ||
-           seg_address.sin_port != _farAddress.sin_port);
-} // end of TcpConnection::isInterloper(const TcpSegment*) const
-
-//---------------------------------------------------------------
-// isValidAck(const TcpSegment*) const (Public)
-// Does this TCP segment contain a valid acknowledgement?
-//
-int TcpConnection::isValidAck(const TcpSegment *segment) const
-{
-    const sockaddr_in& seg_address = segment->getSource();
-
-    return(seg_address.sin_addr.s_addr == _farAddress.sin_addr.s_addr &&
-           seg_address.sin_port == _farAddress.sin_port &&
-           segment->getAcknowledgeNumber() == _sequence_number);
-} // end of TcpConnection::isValidAck(const TcpSegment*) const
 
 //---------------------------------------------------------------
 // openServerSocket(unsigned short) (Public)
@@ -646,20 +608,20 @@ void TcpConnection::transmitFailed(const char *reason)
 } // end of TcpConnection::transmitFailed(const char*)
 
 //---------------------------------------------------------------
-// receive(const TcpSegment*) (Public)
+// receive(const TcpSegment&) (Public)
 // Send received data to the listener.
 //
-void TcpConnection::receive(const TcpSegment *segment)
+void TcpConnection::receive(const TcpSegment& segment)
 {
     if (_listener != NULL)
     {
-        _listener->receive(segment->getData(),
-                           segment->getDataSize(),
+        _listener->receive(segment.getData(),
+                           segment.getDataSize(),
                            *this);
     }
 
     return;
-} // end of TcpConnection::receive(const TcpSegment*)
+} // end of TcpConnection::receive(const TcpSegment&)
 
 //---------------------------------------------------------------
 // sendOpenSyn(const sockaddr_in*) (Public)
@@ -682,10 +644,10 @@ void TcpConnection::sendOpenSyn(const sockaddr_in *address)
 } // end of TcpConnection::sendOpenSyn(const sockaddr_in*)
 
 //---------------------------------------------------------------
-// accept(const TcpSegment*) (Public)
+// accept(const TcpSegment&) (Public)
 // Create a client socket to handle the new connection.
 //
-void TcpConnection::accept(const TcpSegment *segment)
+void TcpConnection::accept(const TcpSegment& segment)
 {
     TcpClient *accept_client;
     int new_socket;
@@ -729,7 +691,7 @@ void TcpConnection::accept(const TcpSegment *segment)
 
         // Have the new client socket use this server
         // socket's near address for now.
-        accept_client = new TcpClient(segment->getSource(),
+        accept_client = new TcpClient(segment.getSource(),
                                       _nearAddress,
                                       (unsigned short) new_port,
                                       new_socket,
@@ -763,7 +725,7 @@ void TcpConnection::accept(const TcpSegment *segment)
 
         // Have the new client socket use this server
         // socket's near address for now.
-        accept_client = new TcpClient(segment->getSource(),
+        accept_client = new TcpClient(segment.getSource(),
                                       _nearAddress,
                                       new_socket,
                                       _sequence_number,
@@ -772,11 +734,11 @@ void TcpConnection::accept(const TcpSegment *segment)
 
 #endif
 
-        accept_client->acceptOpen(*segment);
+        accept_client->acceptOpen(segment);
     }
 
     return;
-} // end of TcpConnection::accept(const TcpSegment*)
+} // end of TcpConnection::accept(const TcpSegment&)
 
 //---------------------------------------------------------------
 // accepted() (Public)
@@ -801,10 +763,10 @@ void TcpConnection::accepted()
 } // end of TcpConnection::accepted()
 
 //---------------------------------------------------------------
-// sendSynAck(const TcpSegment*) (Public)
+// sendSynAck(const TcpSegment&) (Public)
 // Acknowledge a SYN message.
 //
-void TcpConnection::sendSynAck(const TcpSegment *segment)
+void TcpConnection::sendSynAck(const TcpSegment& segment)
 {
     unsigned short port;
     char port_bytes[2];
@@ -820,30 +782,30 @@ void TcpConnection::sendSynAck(const TcpSegment *segment)
     port_bytes[0] = (char) ((port & 0xff00) >> 8);
     port_bytes[1] = (char) (port & 0x00ff);
 
-    doSend(TcpSegment::SYN_ACK, port_bytes, 0, 2, segment);
+    doSend(TcpSegment::SYN_ACK, port_bytes, 0, 2, &segment);
 
     return;
-} // end of TcpConnection::sendSynAck(const TcpSegment*)
+} // end of TcpConnection::sendSynAck(const TcpSegment&)
 
 //---------------------------------------------------------------
-// sendSynAckAck(const TcpSegment*) (Public)
+// sendSynAckAck(const TcpSegment&) (Public)
 // Acknowledge the service's acknowledge. Need to do this so
 // doSend() will use the correct address.
 //
-void TcpConnection::sendSynAckAck(const TcpSegment *segment)
+void TcpConnection::sendSynAckAck(const TcpSegment& segment)
 {
     TcpSegment faux_segment(_farAddress,
                             _nearAddress,
-                            segment->getSequenceNumber(),
-                            segment->getAcknowledgeNumber(),
-                            segment->getFlags(),
+                            segment.getSequenceNumber(),
+                            segment.getAcknowledgeNumber(),
+                            segment.getFlags(),
                             NULL,
                             0,
                             0);
 
     doSend(TcpSegment::ACK, NULL, 0, 0, &faux_segment);
     return;
-} // end of TcpConnection::sendSynAckAck(const TcpSegment*)
+} // end of TcpConnection::sendSynAckAck(const TcpSegment&)
 
 //---------------------------------------------------------------
 // doSend(...) (Public)
@@ -1002,33 +964,33 @@ void TcpConnection::setNearAddress()
 } // end of TcpConnection::setNearAddress()
 
 //---------------------------------------------------------------
-// setFarAddress(const TcpSegment*) (Public)
+// setFarAddress(const TcpSegment&) (Public)
 // Send data to a new client port instead of the server port.
 //
-void TcpConnection::setFarAddress(const TcpSegment *segment)
+void TcpConnection::setFarAddress(const TcpSegment& segment)
 {
-    const char *data = segment->getData();
-    const int data_size = segment->getDataSize();
+    const char *data = segment.getData();
+    const int data_size = segment.getDataSize();
     unsigned short port;
 
     _farAddress.sin_family = AF_INET;
     port = ((((unsigned short) data[0]) & 0x00ff) << 8) |
             (((unsigned short) data[1]) & 0x00ff);
     _farAddress.sin_port = ntohs(port);
-    _farAddress.sin_addr.s_addr = segment->getSource().sin_addr.s_addr;
+    _farAddress.sin_addr.s_addr = segment.getSource().sin_addr.s_addr;
 
     return;
-} // end of TcpConnection::setFarAddress(const TcpSegment*)
+} // end of TcpConnection::setFarAddress(const TcpSegment&)
 
 //---------------------------------------------------------------
-// deleteSegment(const TcpSegment*) (Public)
+// deleteSegment(const TcpSegment&) (Public)
 // Delete a segment object.
 //
-void TcpConnection::deleteSegment(const TcpSegment *segment)
+void TcpConnection::deleteSegment(const TcpSegment& segment)
 {
-    delete const_cast<TcpSegment *>(segment);
+    delete const_cast<TcpSegment*>(&segment);
     return;
-} // end of TcpConnection::deleteSegment(const TcpSegment*)
+} // end of TcpConnection::deleteSegment(const TcpSegment&)
 
 //---------------------------------------------------------------
 // TcpConnection(TcpConnectionListener&) (Protected)
@@ -1155,7 +1117,7 @@ void TcpConnection::activeOpen(const sockaddr_in& address)
 //
 void TcpConnection::acceptOpen(const TcpSegment& segment)
 {
-    _fsm.AcceptOpen(&segment);
+    _fsm.AcceptOpen(segment);
     return;
 } // end of TcpConnection::acceptOpen(const TcpSegment&)
 

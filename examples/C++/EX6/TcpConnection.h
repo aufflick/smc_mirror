@@ -16,7 +16,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 Charles W. Rapp.
+// Copyright (C) 2000 - 2003 Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
@@ -32,51 +32,15 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.3  2002/05/07 00:29:50  cwrapp
-// Changes in release 1.3.2:
-// Add the following feature:
-// + 528321: Modified push transition syntax to be:
+// Revision 1.4  2005/05/28 13:31:18  cwrapp
+// Updated C++ examples.
 //
-// 	  <transname> <state1>/push(<state2>)  {<actions>}
-//
-// 	  which means "transition to <state1> and then
-// 	  immediately push to <state2>". The current
-// 	  syntax:
-//
-// 	  <transname> push(<state2>)  {<actions>}
-//
-//           is still valid and <state1> is assumed to be "nil".
-//
-// No bug fixes.
-//
-// Revision 1.1.1.2  2001/03/26 14:41:47  cwrapp
-// Corrected Entry/Exit action semantics. Exit actions are now
-// executed only by simple transitions and pop transitions.
-// Entry actions are executed by simple transitions and push
-// transitions. Loopback transitions do not execute either Exit
-// actions or entry actions. See SMC Programmer's manual for
-// more information.
-//
-// Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
-//
-// ----------------------------------------------------------------------
-// SMC - The State Map Compiler
-// Version: 1.0, Beta 3
-//
-// SMC compiles state map descriptions into a target object oriented
-// language. Currently supported languages are: C++, Java and [incr Tcl].
-// SMC finite state machines have such features as:
-// + Entry/Exit actions for states.
-// + Transition guards
-// + Transition arguments
-// + Push and Pop transitions.
-// + Default transitions. 
-// ----------------------------------------------------------------------
+// Revision 1.0  2003/12/14 19:40:45  charlesr
+// Initial revision
 //
 
 #include <sys/types.h>
 #if defined(WIN32)
-// #include <winbase.h>
 #include <winsock2.h>
 #else
 #include <netinet/in.h>
@@ -94,6 +58,15 @@ class TcpConnection :
 // Member functions.
  public:
 
+    // Return the far-end's 4-byte IP address.
+    unsigned long getFarAddress() const;
+
+    // Return the far-end's TCP port.
+    unsigned short getFarPort() const;
+
+    // Return the current sequence number.
+    unsigned long getSequenceNumber() const;
+
     // Send the raw bytes to the far end client socket.
     void transmit(const char *data,
                   int offset,
@@ -108,19 +81,6 @@ class TcpConnection :
     // Socket event handling methods.
     void handleReceive(int fd);
     void handleTimeout(const char *name);
-    
-    //-----------------------------------------------------------
-    // State Machine Guards
-    //
-
-    // Is this segment from the expected source? If not, then
-    // it is from an interloper.
-    int isInterloper(const TcpSegment *segment) const;
-
-    // The segment is from the expected source but does it have
-    // the correct acknowledgement number? The correct number is
-    // the current sequence number.
-    int isValidAck(const TcpSegment *segment) const;
 
     //-----------------------------------------------------------
     // State Machine Actions
@@ -135,12 +95,12 @@ class TcpConnection :
     void clearListener();
     void transmitted();
     void transmitFailed(const char *reason);
-    void receive(const TcpSegment *segment);
+    void receive(const TcpSegment& segment);
     void sendOpenSyn(const sockaddr_in *address);
-    void accept(const TcpSegment *segment);
+    void accept(const TcpSegment& segment);
     void accepted();
-    void sendSynAck(const TcpSegment *segment);
-    void sendSynAckAck(const TcpSegment *segment);
+    void sendSynAck(const TcpSegment& segment);
+    void sendSynAckAck(const TcpSegment& segment);
     void doSend(unsigned short flags,
                 const char *data,
                 int offset,
@@ -149,8 +109,8 @@ class TcpConnection :
     void startTimer(const char *name, time_t time);
     void stopTimer(const char *name);
     void setNearAddress();
-    void setFarAddress(const TcpSegment *segment);
-    void deleteSegment(const TcpSegment *segment);
+    void setFarAddress(const TcpSegment& segment);
+    void deleteSegment(const TcpSegment& segment);
 
  protected:
 

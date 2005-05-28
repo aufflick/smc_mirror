@@ -23,56 +23,11 @@
 #
 # CHANGE LOG
 # $Log$
-# Revision 1.4  2002/05/07 00:29:49  cwrapp
-# Changes in release 1.3.2:
-# Add the following feature:
-# + 528321: Modified push transition syntax to be:
+# Revision 1.5  2005/05/28 13:31:16  cwrapp
+# Updated C++ examples.
 #
-# 	  <transname> <state1>/push(<state2>)  {<actions>}
-#
-# 	  which means "transition to <state1> and then
-# 	  immediately push to <state2>". The current
-# 	  syntax:
-#
-# 	  <transname> push(<state2>)  {<actions>}
-#
-#           is still valid and <state1> is assumed to be "nil".
-#
-# No bug fixes.
-#
-# Revision 1.2  2001/05/09 23:40:01  cwrapp
-# Changes in release 1.0, beta 6:
-# Fixes the four following bugs:
-# + 416011: SMC does not properly handle pop transitions which
-#           have no argument.
-# + 416013: SMC generated code does not throw a
-#           "Transition Undefined" exception as per Programmer's
-#           Manual.
-# + 416014: The initial state's Entry actions are not being
-#           executed.
-# + 416015: When a transition has both a guarded and an unguarded
-#           definition, the Exit actions are only called when the
-#           guard evaluates to true.
-# + 422795: SMC -tcl abnormally terminates.
-#
-# Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
-#
-# ----------------------------------------------------------------------
-# SMC - The State Map Compiler
-# Version: 1.0, Beta 3
-#
-# SMC compiles state map descriptions into a target object oriented
-# language. Currently supported languages are: C++, Java and [incr Tcl].
-# SMC finite state machines have such features as:
-# + Entry/Exit actions for states.
-# + Transition guards
-# + Transition arguments
-# + Push and Pop transitions.
-# + Default transitions. 
-# ----------------------------------------------------------------------
-#
-# Revision 1.1.1.1  2000/08/02 12:50:58  charlesr
-# Initial source import, SMC v. 1.0, Beta 1.
+# Revision 1.0  2003/12/14 19:12:26  charlesr
+# Initial revision
 #
 
 TARGET    = checkstring
