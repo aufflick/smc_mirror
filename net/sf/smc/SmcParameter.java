@@ -13,78 +13,46 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 Charles W. Rapp.
+// Copyright (C) 2000 - 2005. Charles W. Rapp.
 // All Rights Reserved.
 // 
-// Contributor(s): 
+// Contributor(s):
+//   Eitan Suez contributed examples/Ant.
+//   (Name withheld) contributed the C# code generation and
+//   examples/C#.
+//   Francois Perrad contributed the Python code generation and
+//   examples/Python.
 //
 // RCS ID
 // $Id$
 //
 // CHANGE LOG
-// $Log$
-// Revision 1.3  2002/05/07 00:10:20  cwrapp
-// Changes in release 1.3.2:
-// Add the following feature:
-// + 528321: Modified push transition syntax to be:
-//
-// 	  <transname> <state1>/push(<state2>)  {<actions>}
-//
-// 	  which means "transition to <state1> and then
-// 	  immediately push to <state2>". The current
-// 	  syntax:
-//
-// 	  <transname> push(<state2>)  {<actions>}
-//
-//           is still valid and <state1> is assumed to be "nil".
-//
-// No bug fixes.
-//
-// Revision 1.1  2001/12/03 14:14:03  cwrapp
-// Changes in release 1.0.2:
-// + Placed the class files in Smc.jar in the net.sf.smc package.
-// + Moved Java source files from smc/bin to net/sf/smc.
-// + Corrected a C++ generation bug wherein arguments were written
-//   to the .h file rather than the .cpp file.
-//
-// Revision 1.1.1.2  2001/03/26 14:41:46  cwrapp
-// Corrected Entry/Exit action semantics. Exit actions are now
-// executed only by simple transitions and pop transitions.
-// Entry actions are executed by simple transitions and push
-// transitions. Loopback transitions do not execute either Exit
-// actions or entry actions. See SMC Programmer's manual for
-// more information.
-//
-// Revision 1.1.1.1  2001/01/03 03:13:59  cwrapp
-//
-// ----------------------------------------------------------------------
-// SMC - The State Map Compiler
-// Version: 1.0, Beta 3
-//
-// SMC compiles state map descriptions into a target object oriented
-// language. Currently supported languages are: C++, Java and [incr Tcl].
-// SMC finite state machines have such features as:
-// + Entry/Exit actions for states.
-// + Transition guards
-// + Transition arguments
-// + Push and Pop transitions.
-// + Default transitions. 
-// ----------------------------------------------------------------------
+// (See the bottom of this file.)
 //
 
 package net.sf.smc;
 
 import java.io.PrintStream;
 
-public abstract class SmcParameter
+public final class SmcParameter
+    extends SmcElement
+    implements Comparable
 {
-// Member Methods
+//---------------------------------------------------------------
+// Member methods
+//
 
-    public SmcParameter(String name, int line_number)
+    public SmcParameter(String name, int lineNumber)
     {
-        _name = name;
-        _line_number = line_number;
-        _type = "";
+        super (name, lineNumber);
+
+        // While Tcl is weakly typed, it still differentiates
+        // between call-by-value and call-by-name. By default,
+        // SMC generates call-by-value.
+        if (Smc._targetLanguage == Smc.TCL)
+        {
+            _type = "value";
+        }
     }
 
     public boolean equals(Object obj)
@@ -95,48 +63,43 @@ public abstract class SmcParameter
         {
             SmcParameter parameter = (SmcParameter) obj;
 
-            if (_name.compareTo(parameter.getName()) == 0 &&
-                _type.compareTo(parameter.getType()) == 0)
-            {
-                retval = true;
-            }
-            else
-            {
-                retval = false;
-            }
+            retval = _name.equals(parameter.getName()) == true &&
+                     _type.equals(parameter.getType()) == true;
         }
         catch (Exception jex)
         {
             retval = false;
         }
 
-        return(retval);
+        return (retval);
     }
 
-    public int compareTo(SmcParameter param)
+    public int compareTo(Object obj)
+        throws ClassCastException
     {
-        return(_type.compareTo(param.getType()));
-    }
+        SmcParameter param = (SmcParameter) obj;
+        int retval;
 
-    public String getName()
-    {
-        return(_name);
+        if ((retval = _name.compareTo(param.getName())) == 0)
+        {
+            retval = _type.compareTo(param.getType());
+        }
+
+        return (retval);
     }
 
     public String getType()
     {
-        return(_type);
+        return (_type);
     }
 
-    public void appendType(String type_name, String separator)
+    public void setType(String typeName)
     {
-        _type += separator + type_name;
+        // Trim away whitespace since the type was
+        // read in verbatim.
+        _type = typeName.trim();
+
         return;
-    }
-
-    public int getLineNumber()
-    {
-        return(_line_number);
     }
 
     public String toString()
@@ -144,11 +107,59 @@ public abstract class SmcParameter
         return(_name + ": " + _type);
     }
 
-    public abstract void generateCode(PrintStream source);
+    //-----------------------------------------------------------
+    // SmcElement Abstract Methods.
+    //
 
-// Member Data.
+    public void accept(SmcVisitor visitor)
+    {
+        visitor.visit(this);
+        return;
+    }
 
-    String _name;
-    String _type;
-    int _line_number;
+    //
+    // end of SmcElement Abstract Methods.
+    //-----------------------------------------------------------
+
+//---------------------------------------------------------------
+// Member data
+//
+
+    // A parameter has a name, a type and the line number where it
+    // appears in the .sm file.
+    private String _type;
+
+    //-----------------------------------------------------------
+    // Constants.
+    //
+    public static final String TCL_VALUE_TYPE = "value";
+    public static final String TCL_REFERENCE_TYPE = "reference";
 }
+
+//
+// CHANGE LOG
+// $Log$
+// Revision 1.4  2005/05/28 19:28:42  cwrapp
+// Moved to visitor pattern.
+//
+// Revision 1.5  2005/02/21 15:37:35  charlesr
+// Added Francois Perrad to Contributors section for Python work.
+//
+// Revision 1.4  2005/02/03 16:48:51  charlesr
+// In implementing the Visitor pattern, the generateCode()
+// methods have been moved to the appropriate Visitor
+// subclasses (e.g. SmcJavaGenerator). This class now extends
+// SmcElement.
+//
+// Revision 1.3  2004/10/30 16:06:38  charlesr
+// Added Graphviz DOT file generation.
+//
+// Revision 1.2  2004/09/06 16:40:41  charlesr
+// Added C# support.
+//
+// Revision 1.1  2004/05/31 13:55:36  charlesr
+// Added support for VB.net code generation.
+//
+// Revision 1.0  2003/12/14 21:04:32  charlesr
+// Initial revision
+//

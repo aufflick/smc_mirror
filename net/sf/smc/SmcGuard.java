@@ -13,271 +13,286 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 Charles W. Rapp.
+// Copyright (C) 2000 - 2005. Charles W. Rapp.
 // All Rights Reserved.
 // 
-// Contributor(s): 
+// Contributor(s):
+//   Eitan Suez contributed examples/Ant.
+//   (Name withheld) contributed the C# code generation and
+//   examples/C#.
+//   Francois Perrad contributed the Python code generation and
+//   examples/Python.
 //
 // RCS ID
 // $Id$
 //
 // CHANGE LOG
-// $Log$
-// Revision 1.5  2002/05/07 00:10:20  cwrapp
-// Changes in release 1.3.2:
-// Add the following feature:
-// + 528321: Modified push transition syntax to be:
-//
-// 	  <transname> <state1>/push(<state2>)  {<actions>}
-//
-// 	  which means "transition to <state1> and then
-// 	  immediately push to <state2>". The current
-// 	  syntax:
-//
-// 	  <transname> push(<state2>)  {<actions>}
-//
-//           is still valid and <state1> is assumed to be "nil".
-//
-// No bug fixes.
-//
-// Revision 1.2  2001/12/14 20:10:37  cwrapp
-// Changes in release 1.1.0:
-// Add the following features:
-// + 486786: Added the %package keyword which specifies the
-//           Java package/C++ namespace/Tcl namespace
-//           the SMC-generated classes will be placed.
-// + 486471: The %class keyword accepts fully qualified
-//           class names.
-// + 491135: Add FSMContext methods getDebugStream and
-//           setDebugStream.
-// + 492165: Added -sync command line option which causes
-//           the transition methods to be synchronized
-//           (this option may only be used with -java).
-//
-// Revision 1.1  2001/12/03 14:14:03  cwrapp
-// Changes in release 1.0.2:
-// + Placed the class files in Smc.jar in the net.sf.smc package.
-// + Moved Java source files from smc/bin to net/sf/smc.
-// + Corrected a C++ generation bug wherein arguments were written
-//   to the .h file rather than the .cpp file.
-//
-// Revision 1.1.1.2  2001/03/26 14:41:46  cwrapp
-// Corrected Entry/Exit action semantics. Exit actions are now
-// executed only by simple transitions and pop transitions.
-// Entry actions are executed by simple transitions and push
-// transitions. Loopback transitions do not execute either Exit
-// actions or entry actions. See SMC Programmer's manual for
-// more information.
-//
-// Revision 1.1.1.1  2001/01/03 03:13:59  cwrapp
-//
-// ----------------------------------------------------------------------
-// SMC - The State Map Compiler
-// Version: 1.0, Beta 3
-//
-// SMC compiles state map descriptions into a target object oriented
-// language. Currently supported languages are: C++, Java and [incr Tcl].
-// SMC finite state machines have such features as:
-// + Entry/Exit actions for states.
-// + Transition guards
-// + Transition arguments
-// + Push and Pop transitions.
-// + Default transitions. 
-// ----------------------------------------------------------------------
-//
-// Revision 1.2  2000/09/01 15:32:07  charlesr
-// Changes for v. 1.0, Beta 2:
-//
-// + Removed order dependency on "%start", "%class" and "%header"
-//   appearance. These three tokens may now appear in any order but
-//   still must appear before the first map definition.
-//
-// + Modified SMC parser so that it will continue after finding an
-//   error. Also improved the error message quality.
-//
-// + Made error messages so emacs is able to parse them.
-//
-// Revision 1.1.1.1  2000/08/02 12:50:56  charlesr
-// Initial source import, SMC v. 1.0, Beta 1.
+// (See the bottom of this file.)
 //
 
 package net.sf.smc;
 
 import java.io.PrintStream;
+import java.io.StringWriter;
 import java.text.ParseException;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 
-public abstract class SmcGuard
+public final class SmcGuard
+    extends SmcElement
 {
-// Member Methods
+//---------------------------------------------------------------
+// Member methods
+//
 
-    public SmcGuard(SmcAction condition, int line_number)
+    public SmcGuard(String cond,
+                    int lineNumber,
+                    SmcTransition transition)
     {
-        _condition = condition;
-        _line_number = line_number;
-        _end_state = "";
-        _push_state = "";
-        _actions = (List) new LinkedList();
-        _pop_args = (List) new LinkedList();
+        super (transition.getName(), lineNumber);
+
+        _transition = transition;
+        _condition = cond;
+        _endState = "";
+        _pushState = "";
+        _actions = null;
+        _popArgs = "";
     }
 
-    public SmcAction getCondition()
+    public SmcTransition getTransition()
+    {
+        return (_transition);
+    }
+
+    public String getCondition()
     {
         return(_condition);
     }
 
-    public int getLineNumber()
-    {
-        return(_line_number);
-    }
-
     public int getTransType()
     {
-        return(_trans_type);
+        return(_transType);
     }
 
-    public void setTransType(int trans_type)
+    public void setTransType(int transType)
     {
-        _trans_type = trans_type;
+        _transType = transType;
         return;
     }
 
     public String getEndState()
     {
-        return(_end_state);
+        return(_endState);
     }
 
-    public void setEndState(String end_state)
+    public void setEndState(String endState)
     {
-        _end_state = end_state;
-        return;
-    }
-
-    public void appendEndState(String token)
-    {
-        _end_state += token;
+        _endState = endState;
         return;
     }
 
     public String getPushState()
     {
-        return (_push_state);
+        return (_pushState);
     }
 
     public void setPushState(String state)
     {
-        _push_state = state;
+        _pushState = state;
         return;
     }
 
-    public void appendPushState(String token)
+    public String getPopArgs()
     {
-        _push_state += token;
+        return (_popArgs);
+    }
+
+    public void setPopArgs(String args)
+    {
+        _popArgs = args;
         return;
     }
 
-    public void setPopArgs(List argList)
+    public List getActions()
     {
-        _pop_args = (List) ((LinkedList) argList).clone();
+        return (_actions);
+    }
+
+    public void setActions(List actions)
+    {
+        _actions = (List) ((LinkedList) actions).clone();
         return;
-    }
-
-    public void addAction(SmcAction action)
-    {
-        _actions.add(action);
-        return;
-    }
-
-    // Return true if this transition is a loopback.
-    public boolean isLoopback(String stateName)
-    {
-        return ((_trans_type == Smc.TRANS_SET ||
-                 _trans_type == Smc.TRANS_PUSH) &&
-                (_end_state.compareTo("nil") == 0 ||
-                 _end_state.compareTo(stateName) == 0));
-    }
-
-    // Return the number of actions.
-    public int getActionCount()
-    {
-        return (_actions.size());
     }
 
     public String toString()
     {
-        String retval;
-        String separator;
-        ListIterator action_it;
-        SmcAction action;
+        StringBuffer retval = new StringBuffer(512);
 
-        if (_condition == null)
+        retval.append(_name);
+
+        if (_condition.length() > 0)
         {
-            retval = "";
-        }
-        else
-        {
-            retval = "[" + _condition + "]";
+            retval.append(" [");
+            retval.append(_condition);
+            retval.append("]");
         }
 
-        switch(_trans_type)
+        switch(_transType)
         {
             case Smc.TRANS_NOT_SET:
-                retval += " not set";
+                retval.append(" not set");
                 break;
 
             case Smc.TRANS_SET:
             case Smc.TRANS_PUSH:
-                retval += " set";
+                retval.append(" set");
                 break;
 
             case Smc.TRANS_POP:
-                retval += " pop";
+                retval.append(" pop");
                 break;
         }
 
-        retval += " " + _end_state;
+        retval.append(" ");
+        retval.append(_endState);
 
-        if (_trans_type == Smc.TRANS_PUSH)
+        if (_transType == Smc.TRANS_PUSH)
         {
-            retval += "/";
-            retval += " push(";
-            retval += _push_state;
-            retval += ")";
+            retval.append("/");
+            retval.append(" push(");
+            retval.append(_pushState);
+            retval.append(")");
         }
 
-        retval += " {";
-        for (action_it = _actions.listIterator(),
-                 separator = "";
-             action_it.hasNext() == true;
-             separator = " ")
+        retval.append(" {\n");
+        if (_actions.size() > 0)
         {
-            action = (SmcAction) action_it.next();
-            retval += separator + action;
-        }
-        retval += "}";
+            Iterator ait;
 
-        return(retval);
+            for (ait = _actions.iterator();
+                 ait.hasNext() == true;
+                )
+            {
+                retval.append("    ");
+                retval.append((SmcAction) ait.next());
+                retval.append(";\n");
+            }
+        }
+        retval.append("}");
+
+        return(retval.toString());
     }
 
-    public abstract void generateCode(PrintStream source,
-                                      int guardIndex,
-                                      int guardCount,
-                                      String context,
-                                      String pkg,
-                                      String mapName,
-                                      String stateName,
-                                      String indent)
-        throws ParseException;
+    // Returns true if this guard references the ctxt variable.
+    public boolean hasCtxtReference()
+    {
+        boolean retcode = false;
 
-// Member Data
+        // The ctxt variable may appear in the condition, the
+        // actions or in the pop arguments.
+        if ((_condition != null &&
+             _condition.indexOf("ctxt.") >= 0) ||
+            (_actions != null &&
+             _actions.isEmpty() == false) ||
+            (_transType == Smc.TRANS_POP &&
+             _popArgs != null &&
+             _popArgs.indexOf("ctxt.") >= 0))
+        {
+            retcode = true;
+        }
 
-    protected SmcAction _condition;
-    protected int _line_number;
-    protected int _trans_type;
-    protected String _end_state;
-    protected String _push_state;
-    protected List _pop_args;
-    protected List _actions;
+        return (retcode);
+    }
+
+    //-----------------------------------------------------------
+    // SmcElement Abstract Methods.
+    //
+
+    public void accept(SmcVisitor visitor)
+    {
+        visitor.visit(this);
+    }
+
+    //
+    // end of SmcElement Abstract Methods.
+    //-----------------------------------------------------------
+
+    // Scope the state name. If the state is unscoped, then
+    // return "<mapName>.<stateName>". If the state named
+    // contains the scope string "::", replace that with a ".".
+    private String _scopeStateName(final String stateName,
+                                   final String mapName)
+    {
+        int index;
+        StringWriter retval = new StringWriter();
+
+        index = stateName.indexOf("::");
+        if (index < 0)
+        {
+            retval.write(mapName);
+            retval.write(".");
+            retval.write(stateName);
+        }
+        else
+        {
+            retval.write(stateName.substring(0, index));
+            retval.write('.');
+            retval.write(stateName.substring(index + 2));
+        }
+
+        return (retval.toString());
+    }
+
+//---------------------------------------------------------------
+// Member data.
+//
+
+    private SmcTransition _transition;
+    private String _condition;
+    private int _transType;
+    private String _endState;
+    private String _pushState;
+    private String _popArgs;
+    private List _actions;
+
+    //-----------------------------------------------------------
+    // Constants.
+    //
+    /* package */ static final String NIL_STATE = "nil";
 }
+
+//
+// CHANGE LOG
+// $Log$
+// Revision 1.6  2005/05/28 19:28:42  cwrapp
+// Moved to visitor pattern.
+//
+// Revision 1.7  2005/02/21 15:35:24  charlesr
+// Added Francois Perrad to Contributors section for Python work.
+//
+// Revision 1.6  2005/02/21 15:14:07  charlesr
+// Moved isLoopback() method from this class to SmcCodeGenerator.
+//
+// Revision 1.5  2005/02/03 16:45:49  charlesr
+// In implementing the Visitor pattern, the generateCode()
+// methods have been moved to the appropriate Visitor
+// subclasses (e.g. SmcJavaGenerator). This class now extends
+// SmcElement.
+//
+// Revision 1.4  2004/11/14 18:24:59  charlesr
+// Minor improvements to the DOT file output.
+//
+// Revision 1.3  2004/10/30 16:04:39  charlesr
+// Added Graphviz DOT file generation.
+// Added getPopArgs() method.
+//
+// Revision 1.2  2004/09/06 16:40:01  charlesr
+// Added C# support.
+//
+// Revision 1.1  2004/05/31 13:54:03  charlesr
+// Added support for VB.net code generation.
+//
+// Revision 1.0  2003/12/14 21:03:28  charlesr
+// Initial revision
+//

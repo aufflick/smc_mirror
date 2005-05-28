@@ -13,482 +13,442 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 Charles W. Rapp.
+// Copyright (C) 2000 - 2005. Charles W. Rapp.
 // All Rights Reserved.
 // 
-// Contributor(s): 
+// Contributor(s):
+//   Eitan Suez contributed examples/Ant.
+//   (Name withheld) contributed the C# code generation and
+//   examples/C#.
+//   Francois Perrad contributed the Python code generation and
+//   examples/Python.
 //
 // RCS ID
 // $Id$
 //
 // CHANGE LOG
-// $Log$
-// Revision 1.5  2002/05/07 00:10:20  cwrapp
-// Changes in release 1.3.2:
-// Add the following feature:
-// + 528321: Modified push transition syntax to be:
-//
-// 	  <transname> <state1>/push(<state2>)  {<actions>}
-//
-// 	  which means "transition to <state1> and then
-// 	  immediately push to <state2>". The current
-// 	  syntax:
-//
-// 	  <transname> push(<state2>)  {<actions>}
-//
-//           is still valid and <state1> is assumed to be "nil".
-//
-// No bug fixes.
-//
-// Revision 1.2  2001/12/14 20:10:37  cwrapp
-// Changes in release 1.1.0:
-// Add the following features:
-// + 486786: Added the %package keyword which specifies the
-//           Java package/C++ namespace/Tcl namespace
-//           the SMC-generated classes will be placed.
-// + 486471: The %class keyword accepts fully qualified
-//           class names.
-// + 491135: Add FSMContext methods getDebugStream and
-//           setDebugStream.
-// + 492165: Added -sync command line option which causes
-//           the transition methods to be synchronized
-//           (this option may only be used with -java).
-//
-// Revision 1.1  2001/12/03 14:14:03  cwrapp
-// Changes in release 1.0.2:
-// + Placed the class files in Smc.jar in the net.sf.smc package.
-// + Moved Java source files from smc/bin to net/sf/smc.
-// + Corrected a C++ generation bug wherein arguments were written
-//   to the .h file rather than the .cpp file.
-//
-// Revision 1.3  2001/06/16 19:52:43  cwrapp
-// Changes in release 1.0, beta 7:
-// Fixes the minor code generation bugs and introduces a new
-// example Java program (found at examples/Java/EX7). This
-// example program is also a Java applet and can be seen at
-// http://smc.sourceforge.net/SmcDemo.htm.
-//
-// Revision 1.2  2001/05/09 23:40:01  cwrapp
-// Changes in release 1.0, beta 6:
-// Fixes the four following bugs:
-// + 416011: SMC does not properly handle pop transitions which
-//           have no argument.
-// + 416013: SMC generated code does not throw a
-//           "Transition Undefined" exception as per Programmer's
-//           Manual.
-// + 416014: The initial state's Entry actions are not being
-//           executed.
-// + 416015: When a transition has both a guarded and an unguarded
-//           definition, the Exit actions are only called when the
-//           guard evaluates to true.
-// + 422795: SMC -tcl abnormally terminates.
-//
-// Revision 1.1.1.2  2001/03/26 14:41:46  cwrapp
-// Corrected Entry/Exit action semantics. Exit actions are now
-// executed only by simple transitions and pop transitions.
-// Entry actions are executed by simple transitions and push
-// transitions. Loopback transitions do not execute either Exit
-// actions or entry actions. See SMC Programmer's manual for
-// more information.
-//
-// Revision 1.1.1.1  2001/01/03 03:13:59  cwrapp
-//
-// ----------------------------------------------------------------------
-// SMC - The State Map Compiler
-// Version: 1.0, Beta 3
-//
-// SMC compiles state map descriptions into a target object oriented
-// language. Currently supported languages are: C++, Java and [incr Tcl].
-// SMC finite state machines have such features as:
-// + Entry/Exit actions for states.
-// + Transition guards
-// + Transition arguments
-// + Push and Pop transitions.
-// + Default transitions. 
-// ----------------------------------------------------------------------
-//
-// Revision 1.2  2000/09/01 15:32:17  charlesr
-// Changes for v. 1.0, Beta 2:
-//
-// + Removed order dependency on "%start", "%class" and "%header"
-//   appearance. These three tokens may now appear in any order but
-//   still must appear before the first map definition.
-//
-// + Modified SMC parser so that it will continue after finding an
-//   error. Also improved the error message quality.
-//
-// + Made error messages so emacs is able to parse them.
-//
-// Revision 1.1  2000/08/23 21:25:40  charlesr
-// Initial revision
-//
-// Revision 1.1.1.1  2000/08/02 12:50:56  charlesr
-// Initial source import, SMC v. 1.0, Beta 1.
+// (See bottom of file.)
 //
 
 package net.sf.smc;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
-import java.util.Stack;
 
 public final class SmcParser
 {
 // Member Methods
 
-    public SmcParser(SmcLexer lexer, int language)
+    /**
+     * Creates a parser for the named FSM in the given input
+     * stream. If <code>debugFlag</code> is <code>true</code>,
+     * then the parser and lexer debug output will be generated.
+     * @param fsmName the finite state machine's name.
+     * @param istream the input stream contains the SMC code.
+     * @param debugFlag if true, turn on debug output.
+     */
+    public SmcParser(String name,
+                     InputStream istream,
+                     boolean debugFlag)
     {
-        _lexer = lexer;
-        _language = language;
-        _parser_map = new SmcParserContext(this);
-
-        _start_state = "";
-        _className = "";
-        _context = "";
-        _header = "";
-
-        _action_negation = false;
-        
+        _name = name;
+        _messages = (List) new LinkedList();
+        _lexer = new SmcLexer(istream, debugFlag);
+        _parserFSM = new SmcParserContext(this);
+        _parserFSM.setDebugFlag(debugFlag);
     }
 
-    public SmcParseTree parse()
+    /**
+     * Parses the named FSM in the given input stream and returns
+     * the finite state machine.
+     */
+    public SmcFSM parse()
         throws IOException,
                IllegalAccessException,
                InvocationTargetException
     {
         SmcLexer.Token token = null;
-        int token_type;
+        int tokenType;
         Object[] params = new Object[1];
 
-        _name_in_progress = "";
-        _map_in_progress = null;
-        _state_in_progress = null;
-        _transition_name = null;
-        _transition_parameters = null;
-        _parameter_in_progress = null;
-        _transition_in_progress = null;
-        _guard_in_progress = null;
-        _action_in_progress = null;
-        _variable_in_progress = null;
+        _mapInProgress = null;
+        _stateInProgress = null;
+        _transitionName = null;
+        _transitionInProgress = null;
+        _guardInProgress = null;
+        _paramInProgress = null;
+        _actionInProgress = null;
+        _argInProgress = null;
 
+        _paramList = null;
+        _actionList = null;
         _argList = null;
-        _argsStack = new Stack();
 
-        // DEBUG
-        // _parser_map.setDebugFlag(true);
+        _parseStatus = true;
+        _quitFlag = false;
 
-        _parse_status = true;
-        _quit_flag = false;
+        _fsm = new SmcFSM(_name);
+
+        // Start lexing in cooked mode.
+        _lexer.setCookedMode();
 
         // Read all the tokens into a list.
-        _tokenList = (List) new LinkedList();
-        token_type = SmcLexer.TOKEN_NOT_SET;
-        while (_quit_flag == false &&
-               (token = _lexer.nextToken()) != null &&
-               (token_type = token.getType()) != SmcLexer.DONE_SUCCESS &&
-               token_type != SmcLexer.DONE_FAILED &&
-               token_type != SmcLexer.TOKEN_NOT_SET)
+        tokenType = SmcLexer.TOKEN_NOT_SET;
+        while (_quitFlag == false &&
+               (token = _lexer.nextToken()) != null)
         {
+            tokenType = token.getType();
+            _lineNumber = token.getLineNumber();
+
             // Is the token type valid?
-            if (token_type > SmcLexer.TOKEN_NOT_SET &&
-                token_type < SmcLexer.TOKEN_COUNT)
+            if (tokenType <= SmcLexer.TOKEN_NOT_SET &&
+                tokenType >= SmcLexer.TOKEN_COUNT)
             {
-                // Yes. Add it to the list.
-                _tokenList.add(token.copy());
-            }
-            else
-            {
+                // No.
                 error("Undefined token type (" +
-                      Integer.toString(token_type) +
+                      Integer.toString(tokenType) +
                       ")",
-                      true);
+                      token.getLineNumber());
 
-                _quit_flag = true;
-                _parse_status = false;
+                _quitFlag = true;
+                _parseStatus = false;
             }
-        }
-
-        // If the last token as a failure, don't go on.
-        if (token_type == SmcLexer.DONE_FAILED ||
-            token_type == SmcLexer.TOKEN_NOT_SET)
-        {
-            error(token.getValue(), true);
-        }
-        else
-        {
-            _parse_tree = createTargetTree();
-
-            // If the token collection was successful,
-            // start parsing.
-            while (_quit_flag == false &&
-                   _tokenList.isEmpty() == false)
+            // If the last token as a failure, don't go on.
+            else if (tokenType == SmcLexer.DONE_FAILED)
             {
-                token = (SmcLexer.Token) _tokenList.remove(0);
-                token_type = token.getType();
-
+                _quitFlag = true;
+                _parseStatus = false;
+                error(token.getValue(), token.getLineNumber());
+            }
+            // If the last token is success, don't go on either.
+            else if (tokenType == SmcLexer.DONE_SUCCESS)
+            {
+                _quitFlag = true;
+            }
+            else 
+            {
+                // Issue a transition for this token.
                 params[0] = token;
-                _TransMethod[token_type].invoke(_parser_map,
+                _TransMethod[tokenType].invoke(_parserFSM,
                                                 params);
             }
-
-            if (_parse_status == false)
-            {
-                _parse_tree = null;
-            }
         }
 
-        return (_parse_tree);
+        // If the parse failed, delete the tree.
+        if (_parseStatus == false)
+        {
+            _fsm = null;
+        }
+
+        return (_fsm);
     }
 
-    //----------------------------------------
-    // State Map Actions
+    /**
+     * Returns the parser's warning and error messages list.
+     * @return the parser's warning and error messages list.
+     */
+    public List getMessages()
+    {
+        return (_messages);
+    }
+
+    //-----------------------------------------------------------
+    // State Machine Guards
     //
 
-    /* package */ void warning(String error_msg)
+    /* package */ boolean isValidHeader()
     {
-        System.err.println(Smc.getSourceFileName() +
-                           ":" +
-                           Integer.toString(_lexer.getLineNumber()) +
-                           ": warning - " +
-                           error_msg);
-        return;
+        String context = _fsm.getContext();
+        String start = _fsm.getStartState();
+
+        return (context != null &&
+                context.length() > 0 &&
+                start != null &&
+                start.length() > 0);
     }
 
-    /* package */ void error(String error_msg, boolean quitFlag)
+    /* package */ boolean isValidStartState(String name)
     {
-        System.err.println(Smc.getSourceFileName() +
-                           ":" +
-                           Integer.toString(_lexer.getLineNumber()) +
-                           ": error - " +
-                           error_msg);
-        _parse_status = false;
-        if (_quit_flag == true)
+        int index;
+        boolean retval = false;
+
+        // The name must be of the form "<id>::<id>".
+        index = name.indexOf("::");
+
+        // Fail if "::" does not appear at all or appears
+        // more than once.
+        if (index >= 0 && name.indexOf("::", (index + 1)) < 0)
         {
-            _quit_flag = quitFlag;
-        }
-
-        return;
-    }
-
-    /* package */ boolean isStartStateSet()
-    {
-        return (_parse_tree.getStartState().length() == 0 ? false : true);
-    }
-
-    /* package */ boolean isClassSet()
-    {
-        return (_parse_tree.getContext().length() == 0 ? false : true);
-    }
-
-    /* package */ boolean isHeaderSet()
-    {
-        return (_parse_tree.getHeader().length() == 0 ? false : true);
-    }
-
-    /* package */ boolean isPackageSet()
-    {
-        String pkg = _parse_tree.getPackage();
-
-        return (pkg != null && pkg.length() > 0);
-    }
-
-    /* package */ boolean isDuplicateMap(SmcLexer.Token token)
-    {
-        return (_parse_tree.findMap(token.getValue()) == null ? false : true);
-    }
-
-    /* package */ boolean isDuplicateState(SmcLexer.Token token)
-    {
-        return (_map_in_progress.findState(token.getValue()));
-    }
-
-    /* package */ boolean isEntrySet()
-    {
-        return (_state_in_progress.getEntryActions().size() == 0 ? false : true);
-    }
-
-    /* package */ boolean isExitSet()
-    {
-        return (_state_in_progress.getExitActions().size() == 0 ? false : true);
-    }
-
-    /* package */ boolean isDuplicateGuard()
-    {
-        ListIterator guardIt;
-        SmcGuard guard;
-        SmcAction condition;
-        boolean retval;
-
-        if (_transition_in_progress == null)
-        {
-            retval = false;
-        }
-        else
-        {
-            for (guardIt = _transition_in_progress.getGuards().listIterator(),
-                     retval = false;
-                 guardIt.hasNext() == true && retval == false;
-                )
-            {
-                guard = (SmcGuard) guardIt.next();
-                condition = guard.getCondition();
-
-                // If the condition and the current action are
-                // equal, then the guards are equal.
-                if (condition == null && _action_in_progress == null ||
-                    (condition != null &&
-                     _action_in_progress != null &&
-                     condition.compareTo(_action_in_progress) == 0))
-                {
-                    retval = true;
-                }
-            }
+            // Given how the lexer works, we are guaranteed
+            // that the two identifiers are valid.
+            retval = true;
         }
 
         return (retval);
     }
 
-    /* package */ boolean isCpp()
+    /* package */ boolean isDuplicateMap(String name)
     {
-        return (_language == Smc.C_PLUS_PLUS);
+        return (_fsm.findMap(name) == null ?
+                false : true);
     }
 
-    /* package */ boolean isJava()
+    /* package */ boolean isDuplicateState(String name)
     {
-        return (_language == Smc.JAVA);
+        return (_mapInProgress.isKnownState(name));
     }
 
-    /* package */ boolean isTcl()
-    {
-        return (_language == Smc.TCL);
-    }
+    //
+    // end of State Machine Guards
+    //-----------------------------------------------------------
 
-    /* package */ boolean isTransParametersEmpty()
-    {
-        return ((_transition_parameters == null ||
-                 _transition_parameters.size() == 0)
-                ? true : false);
-    }
+    //-----------------------------------------------------------
+    // State Machine Actions
+    //
 
-    // Push a token back on the front of the token list.
-    /* package */ void pushBack(SmcLexer.Token token)
+    /* package */ void warning(String errorMsg, int lineNumber)
     {
-        _tokenList.add(0, token);
+        _messages.add(
+            new SmcMessage(_name,
+                           lineNumber,
+                           SmcMessage.WARNING,
+                           errorMsg));
         return;
     }
 
-    /* package */ void setHeaderLine()
+    /* package */ void error(String errorMsg, int lineNumber)
     {
-        _parse_tree.setHeaderLine(_lexer.getLineNumber());
+        _messages.add(
+            new SmcMessage(_name,
+                           lineNumber,
+                           SmcMessage.ERROR,
+                           errorMsg));
+
+        _parseStatus = false;
+
         return;
     }
 
-    /* package */ void addSource(SmcLexer.Token token)
+    /* package */ int getLineNumber()
     {
-        _parse_tree.setSource(token.getValue());
+        return (_lineNumber);
+    }
+
+    /* package */ int getTargetLanguage()
+    {
+        return (Smc._targetLanguage);
+    }
+
+    // Put the lexer into raw mode.
+    /* package */ void setRawMode(String openChar,
+                                  String closeChar)
+    {
+        _lexer.setRawMode(openChar.charAt(0),
+                          closeChar.charAt(0));
         return;
     }
 
-    /* package */ void appendStartState(SmcLexer.Token token)
+    // Put the lexer into the raw mode used for
+    // collecting parameter types.
+    /* package */ void setRawMode(String openChar,
+                                  String closeChar,
+                                  String separator)
     {
-        _start_state += token.getValue();
+        _lexer.setRawMode(openChar.charAt(0),
+                          closeChar.charAt(0),
+                          separator.charAt(0));
         return;
     }
 
-    /* package */ void setStartState()
+    // Put the lexer into the raw mode used for collecting
+    // parameter types.
+    /* package */ void setRawMode(String closeChars)
     {
-        _parse_tree.setStartState(_start_state);
+        _lexer.setRawMode(closeChars);
         return;
     }
 
-    // If true, then the class name is for %class.
-    // If false, then the class name is for %package.
-    /* package */ void setNameType(int type)
+    // Put the lexer into cooked mode.
+    /* package */ void setCookedMode()
     {
-        _nameType = type;
+        _lexer.setCookedMode();
         return;
     }
 
-    /* package */ String getFQName()
+    /* package */ void setHeaderLine(int lineNumber)
     {
-        return (_className);
-    }
-
-    /* package */ void appendClassName(SmcLexer.Token token)
-    {
-        _className += token.getValue();
+        _fsm.setHeaderLine(lineNumber);
         return;
     }
 
-    /* package */ void setClassName(String name)
+    /* package */ void setSource(String source)
     {
-        switch (_nameType)
+        String src = _fsm.getSource();
+
+        if (src != null && src.length() > 0)
         {
-            case SmcLexer.CLASS_NAME:
-                _parse_tree.setContext(name);
-                break;
-
-            case SmcLexer.PACKAGE_NAME:
-                _parse_tree.setPackage(name);
-                break;
-
-            case SmcLexer.IMPORT:
-                _parse_tree.addImport(name);
-                break;
+            warning("%{ %} source previously specified, new " +
+                    "source ignored.",
+                    _lineNumber);
+        }
+        else
+        {
+            _fsm.setSource(source);
         }
 
-        _className = "";
+        return;
+    }
+
+    /* package */ void setStartState(String stateName)
+    {
+        String start = _fsm.getStartState();
+
+        if (start != null && start.length() > 0)
+        {
+            warning("%start previously specified, new start " +
+                    "state ignored.",
+                    _lineNumber);
+        }
+        else
+        {
+            _fsm.setStartState(stateName);
+        }
 
         return;
     }
 
-    /* package */ void setHeader(SmcLexer.Token token)
+    /* package */ void setContext(String name)
     {
-        _parse_tree.setHeader(token.getValue());
+        String context = _fsm.getContext();
+
+        if (context != null && context.length() > 0)
+        {
+            warning("%class previously specified, new context " +
+                    "ignored.",
+                    _lineNumber);
+        }
+        else
+        {
+            _fsm.setContext(name);
+        }
+
+        return;
+    }
+
+    /* package */ void setPackageName(String name)
+    {
+        String pkg = _fsm.getPackage();
+
+        if (pkg != null && pkg.length() > 0)
+        {
+            warning("%package previously specified, " +
+                    "new package ignored.",
+                    _lineNumber);
+        }
+        else
+        {
+            _fsm.setPackage(name.trim());
+        }
+
+        return;
+    }
+
+    /* package */ void addImport(String name)
+    {
+        _fsm.addImport(name.trim());
+        return;
+    }
+
+    /* package */ void addDeclare(String name)
+    {
+        _fsm.addDeclare(name.trim());
+        return;
+    }
+
+    /* package */ void setHeader(String name)
+    {
+        String header = _fsm.getHeader();
+
+        if (header != null && header.length() > 0)
+        {
+            warning("%header previously specified, " +
+                    "new header file ignored.",
+                    _lineNumber);
+        }
+        else
+        {
+            _fsm.setHeader(name.trim());
+        }
+
+        return;
+    }
+
+    /* package */ void addInclude(String name)
+    {
+        _fsm.addInclude(name.trim());
         return;
     }
 
     /* package */ void addMap()
     {
-        if (_map_in_progress == null)
+        if (_mapInProgress == null)
         {
-            error("There is no in-progress map to add", false);
+            error("There is no in-progress map to add",
+                  _lineNumber);
         }
         else
         {
             // If this map does not have a default state, then
             // create one now.
-            if (_map_in_progress.hasDefaultState() == false)
+            if (_mapInProgress.hasDefaultState() == false)
             {
                 SmcState DefaultState =
-                        createTargetState("Default");
+                    new SmcState(
+                        "Default",
+                        _mapInProgress.getLineNumber(),
+                        _mapInProgress);
 
-                _map_in_progress.addState(DefaultState);
+                _mapInProgress.addState(DefaultState);
             }
 
-            _parse_tree.addMap(_map_in_progress);
-            _map_in_progress = null;
+            _fsm.addMap(_mapInProgress);
+            _mapInProgress = null;
         }
 
         return;
     }
 
-    /* package */ void createMap(SmcLexer.Token token)
+    /* package */ void createMap(String name, int lineNumber)
     {
-        if (_map_in_progress != null)
+        if (_mapInProgress != null)
         {
-            error("Cannot create new map while still filling in previous map (" +
-                  _map_in_progress.getName() +
+            error("Cannot create new map while still filling " +
+                  "in previous map (" +
+                  _mapInProgress.getName() +
                   ").",
-                  false);
+                  lineNumber);
         }
         else
         {
-            _map_in_progress = createTargetMap(token.getValue());
+            if (_parserFSM.getDebugFlag() == true)
+            {
+                PrintStream os = _parserFSM.getDebugStream();
+
+                os.println("CREATE MAP   : " +
+                           name +
+                           "(" +
+                           Integer.toString(lineNumber) +
+                           ")");
+            }
+
+            _mapInProgress =
+                new SmcMap(name, lineNumber, _fsm);
         }
 
         return;
@@ -496,86 +456,100 @@ public final class SmcParser
 
     /* package */ void addState()
     {
-        if (_map_in_progress == null)
+        if (_mapInProgress == null)
         {
-            error("There is no in-progress map to which the state may be added.",
-                  false);
+            error("There is no in-progress map to which the " +
+                  "state may be added.",
+                  _lineNumber);
         }
-        else if (_state_in_progress == null)
+        else if (_stateInProgress == null)
         {
-            error("There is no in-progrss state to add to the map.",
-                  false);
+            error("There is no in-progrss state to add to the " +
+                  "map.",
+                  _lineNumber);
         }
         else
         {
-            _map_in_progress.addState(_state_in_progress);
-            _state_in_progress = null;
+            _mapInProgress.addState(_stateInProgress);
+            _stateInProgress = null;
         }
 
         return;
     }
 
-    /* package */ void createState(SmcLexer.Token token)
+    /* package */ void createState(String name, int lineNumber)
     {
         SmcState retval;
 
-        if (_state_in_progress != null)
+        if (_stateInProgress != null)
         {
-            error("Cannot create new state while still filling in previous state (" +
-                  _state_in_progress.getName() +
+            error("Cannot create new state while still " +
+                  "filling in previous state (" +
+                  _stateInProgress.getName() +
                   ").",
-                  false);
+                  lineNumber);
         }
         else
         {
-            _state_in_progress =
-                createTargetState(token.getValue());
+            if (_parserFSM.getDebugFlag() == true)
+            {
+                PrintStream os = _parserFSM.getDebugStream();
+
+                os.println("CREATE STATE : " +
+                           name +
+                           "(" +
+                           Integer.toString(lineNumber) +
+                           ")");
+            }
+
+            _stateInProgress =
+                new SmcState(name, lineNumber, _mapInProgress);
         }
 
         return;
     }
 
-    /* package */ void addEntryAction()
+    /* package */ void setEntryAction(List actions)
     {
-        // First verify there is an in-progress action.
-        if (_action_in_progress == null)
+        // Verify there is an in-progress state.
+        if (_stateInProgress == null)
         {
-            error("There is no in-progress action to use as the entry action.",
-                  false);
+            error("There is no in-progress state to receive " +
+                  "the entry action.",
+                  _lineNumber);
         }
-        // Second verify there is an in-progress state.
-        else if (_state_in_progress == null)
+        else if (_stateInProgress.getEntryActions() != null)
         {
-            error("There is no in-progress state to receive the entry action.",
-                  false);
+            warning("Entry action previously specified, new " +
+                    "entry action ignored.",
+                    _lineNumber);
         }
         else
         {
-            _state_in_progress.addEntryAction(_action_in_progress);
-            _action_in_progress = null;
+            _stateInProgress.setEntryActions(actions);
         }
 
         return;
     }
 
-    /* package */ void addExitAction()
+    /* package */ void setExitAction(List actions)
     {
-        // First verify there is an in-progress action.
-        if (_action_in_progress == null)
+        // Verify there is an in-progress state.
+        if (_stateInProgress == null)
         {
-            error("There is no in-progress action to use as the exit action.",
-                  false);
+            error("There is no in-progress state to receive " +
+                  "the exit action.",
+                  _lineNumber);
         }
-        // Second verify there is an in-progress state.
-        else if (_state_in_progress == null)
+        else if (_stateInProgress.getExitActions() != null)
         {
-            error("There is no in-progress state to receive the exit action.",
-                  false);
+            warning("Exit action previously specified, new " +
+                    "exit action ignored.",
+                    _lineNumber);
         }
         else
         {
-            _state_in_progress.addExitAction(_action_in_progress);
-            _action_in_progress = null;
+            _stateInProgress.setExitActions(actions);
         }
 
         return;
@@ -585,109 +559,49 @@ public final class SmcParser
     // state's transition list.
     /* package */ void addTransition()
     {
-        if (_state_in_progress == null)
+        if (_stateInProgress == null)
         {
-            error("There is no in-progress state to which the transition may be added.",
-                  false);
+            error("There is no in-progress state to which the " +
+                  "transition may be added.",
+                  _lineNumber);
         }
-        else if (_transition_in_progress == null)
+        else if (_transitionInProgress == null)
         {
-            error("There is no in-progress transition to add to the state.",
-                  false);
+            error("There is no in-progress transition to add " +
+                  "to the state.",
+                  _lineNumber);
         }
         else
         {
-            _state_in_progress.addTransition(_transition_in_progress);
-            _transition_in_progress = null;
+            _stateInProgress.addTransition(
+                _transitionInProgress);
+            _transitionInProgress = null;
         }
 
         return;
+    }
+
+    // Returns the stored transition name.
+    /* package */ String getTransitionName()
+    {
+        return (_transitionName);
     }
 
     // Store away the transition's name for later use in
     // creating the transition.
-    /* package */ void storeTransitionName(SmcLexer.Token token)
+    /* package */ void storeTransitionName(String name)
     {
-        if (_transition_name != null)
+        if (_transitionName != null)
         {
-            error("There already is a previously stored transition name - \"" +
-                  _transition_name +
+            error("There already is a previously stored " +
+                  "transition name - \"" +
+                  name +
                   "\".",
-                  false);
+                  _lineNumber);
         }
         else
         {
-            _transition_name = token.getValue();
-        }
-
-        return;
-    }
-
-    // Create a transition parameter list.
-    /* package */ void createParameterList()
-    {
-        if (_transition_parameters != null)
-        {
-            error("Parameter list in-progress.", false);
-        }
-        else
-        {
-            _transition_parameters = (List) new LinkedList();
-        }
-
-        return;
-    }
-
-    // Create a parameter object with the current token as its
-    // name.
-    /* package */ void createParameter(SmcLexer.Token token)
-    {
-        if (_parameter_in_progress != null)
-        {
-            error("There is a parameter already in-progress (" +
-                  _parameter_in_progress.getName() +
-                  ")",
-                  false);
-        }
-        else
-        {
-            _parameter_in_progress =
-                    createTargetParameter(token.getValue());
-        }
-
-        return;
-    }
-
-    /* package */ void appendParameterType(SmcLexer.Token token,
-                                    String separator)
-    {
-        if (_parameter_in_progress == null)
-        {
-            error("There is no in-progress parameter.", false);
-        }
-        else
-        {
-            _parameter_in_progress.appendType(token.getValue(),
-                                              separator);
-        }
-
-        return;
-    }
-
-    /* package */ void addTransitionParameter()
-    {
-        if (_parameter_in_progress == null)
-        {
-            error("There is no in-progress parameter.", false);
-        }
-        else if (_transition_parameters == null)
-        {
-            error("There is no in-progress parameter list.", false);
-        }
-        else
-        {
-            _transition_parameters.add(_parameter_in_progress);
-            _parameter_in_progress = null;
+            _transitionName = name;
         }
 
         return;
@@ -695,68 +609,110 @@ public final class SmcParser
 
     // Create a transition object with the current token as its
     // name.
-    /* package */ void createTransition()
+    /* package */ void createTransition(List params,
+                                        int lineNumber)
     {
-        if (_transition_in_progress != null)
+        if (_transitionInProgress != null)
         {
-            error("Cannot create new transition while still filling in previous transition (" +
-                  _transition_in_progress.getName() +
+            error("Cannot create new transition while still " +
+                  "filling in previous transition (" +
+                  _transitionInProgress.getName() +
                   ").",
-                  false);
+                  lineNumber);
         }
-        else if (_state_in_progress == null)
+        else if (_stateInProgress == null)
         {
-            error("There is no in-progress state to which the transition may be added.",
-                  false);
+            error("There is no in-progress state to which the " +
+                  "transition may be added.",
+                  lineNumber);
         }
-        else if (_transition_name == null)
+        else if (_transitionName == null)
         {
-            error("There is no stored transition name.", false);
+            error("There is no stored transition name.",
+                  lineNumber);
         }
         else
         {
+            String name;
             SmcTransition transition;
-
-            if (_transition_parameters == null)
-            {
-                _transition_parameters = (List) new LinkedList();
-            }
 
             // Check if this state already has a transition with
             // this name. If so, then reuse that object.
             // Otherwise, create a new transition object.
-            if ((_transition_in_progress = _state_in_progress.findTransition(_transition_name, _transition_parameters)) == null)
+            _transitionInProgress =
+                _stateInProgress.findTransition(
+                    _transitionName, params);
+            if (_transitionInProgress == null)
             {
-                _transition_in_progress =
-                        createTargetTransition(_transition_name,
-                                               _transition_parameters);
+                if (_parserFSM.getDebugFlag() == true)
+                {
+                    PrintStream os = _parserFSM.getDebugStream();
+                    Iterator pit;
+                    String sep;
+                    StringBuffer buffer = new StringBuffer(80);
+
+                    buffer.append("CREATE TRANS : ");
+                    buffer.append(_transitionName);
+                    buffer.append('(');
+
+                    for (pit = params.iterator(), sep = "";
+                         pit.hasNext() == true;
+                         sep = ", ")
+                    {
+                        buffer.append(sep);
+                        buffer.append((SmcParameter) pit.next());
+                    }
+
+                    buffer.append(')');
+                    buffer.append(" (");
+                    buffer.append(lineNumber);
+                    buffer.append(")");
+
+                    os.println(buffer);
+                }
+
+                _transitionInProgress =
+                    new SmcTransition(
+                        _transitionName,
+                        params,
+                        lineNumber,
+                        _stateInProgress);
             }
 
-            _transition_name = null;
-            _transition_parameters = null;
+            _transitionName = null;
         }
 
         return;
     }
 
+    // Create a transition object with the current token as its
+    // name.
+    /* package */ void createTransition(int lineNumber)
+    {
+        createTransition(new LinkedList(), lineNumber);
+        return;
+    }
+
     /* package */ void addGuard()
     {
-        if (_transition_in_progress == null)
+        if (_transitionInProgress == null)
         {
-            error("There is no in-progress transition to which the guard may be added.",
-                  false);
+            error("There is no in-progress transition to " +
+                  "which the guard may be added.",
+                  _lineNumber);
         }
-        else if (_guard_in_progress == null)
+        else if (_guardInProgress == null)
         {
-            error("There is no in-progress guard to add to the " +
-                  _transition_in_progress.getName() +
+            error("There is no in-progress guard to add " +
+                  "to the " +
+                  _transitionInProgress.getName() +
                   " transition.",
-                  false);
+                  _lineNumber);
         }
         else
         {
-            _transition_in_progress.addGuard(_guard_in_progress);
-            _guard_in_progress = null;
+            _transitionInProgress.addGuard(_guardInProgress);
+            _guardInProgress = null;
         }
 
         return;
@@ -764,18 +720,33 @@ public final class SmcParser
 
     // Create a guard object with the in-progress action as its
     // condition.
-    /* package */ void createGuard()
+    /* package */ void createGuard(String transition,
+                                   String condition,
+                                   int lineNumber)
     {
-        if (_guard_in_progress != null)
+        if (_guardInProgress != null)
         {
-            error("Cannot create new guard while still filling in previous guard.",
-                  false);
+            error("Cannot create new guard while still " +
+                  "filling in previous guard.",
+                  lineNumber);
         }
         else
         {
-            _guard_in_progress =
-                    createTargetGuard(_action_in_progress);
-            _action_in_progress = null;
+            if (_parserFSM.getDebugFlag() == true)
+            {
+                PrintStream os = _parserFSM.getDebugStream();
+
+                os.println("CREATE GUARD : " +
+                           condition +
+                           "(" +
+                           Integer.toString(lineNumber) +
+                           ")");
+            }
+
+            _guardInProgress =
+                new SmcGuard(condition,
+                             lineNumber,
+                             _transitionInProgress);
         }
 
         return;
@@ -783,12 +754,13 @@ public final class SmcParser
 
     // Set the in-progress guard's transtion type (set, push or
     // pop).
-    /* package */ void setTransType(int  trans_type)
+    /* package */ void setTransType(int trans_type)
     {
-        if (_guard_in_progress == null)
+        if (_guardInProgress == null)
         {
-            error("There is no in-progress guard to which to set the transition type.",
-                  false);
+            error("There is no in-progress guard to which to " +
+                  "set the transition type.",
+                  _lineNumber);
         }
         else
         {
@@ -797,12 +769,14 @@ public final class SmcParser
                 case Smc.TRANS_SET:
                 case Smc.TRANS_PUSH:
                 case Smc.TRANS_POP:
-                    _guard_in_progress.setTransType(trans_type);
+                    _guardInProgress.setTransType(trans_type);
                     break;
 
                 default:
-                    error("Transition type must be either \"TRANS_SET\", \"TRANS_PUSH\" or \"TRANS_POP\".",
-                          false);
+                    error("Transition type must be either " +
+                          "\"TRANS_SET\", \"TRANS_PUSH\" or " +
+                          "\"TRANS_POP\".",
+                          _lineNumber);
                     break;
             }
         }
@@ -811,574 +785,450 @@ public final class SmcParser
     }
 
     // Set the in-progress guard's end state.
-    /* package */ void setEndState(SmcLexer.Token token)
-    {
-        if (_guard_in_progress == null)
-        {
-            error("There is no in-progress guard to which to add the end state.",
-                  false);
-        }
-        else
-        {
-            _guard_in_progress.setEndState(token.getValue());
-        }
-
-        return;
-    }
-
-    // Set the in-progress guard's end state.
     /* package */ void setEndState(String state)
     {
-        if (_guard_in_progress == null)
+        if (_guardInProgress == null)
         {
-            error("There is no in-progress guard to which to add the end state.",
-                  false);
+            error("There is no in-progress guard to which to " +
+                  "add the end state.",
+                  _lineNumber);
         }
         else
         {
-            _guard_in_progress.setEndState(state);
-        }
-
-        return;
-    }
-
-    // Append the current token to the end state.
-    /* package */ void appendEndState(SmcLexer.Token token)
-    {
-        if (_guard_in_progress == null)
-        {
-            error("There is no in-progress guard to which to append to the end state.",
-                  false);
-        }
-        else
-        {
-            _guard_in_progress.appendEndState(token.getValue());
+            _guardInProgress.setEndState(state);
         }
 
         return;
     }
 
     // Set the in-progress guard's push state.
-    /* package */ void setPushState(SmcLexer.Token token)
+    /* package */ void setPushState(String name)
     {
-        if (_guard_in_progress == null)
+        if (_guardInProgress == null)
         {
-            error("There is no in-progress guard to which to add the end state.",
-                  false);
+            error("There is no in-progress guard to which to " +
+                  "add the end state.",
+                  _lineNumber);
         }
-        else if (_guard_in_progress.getTransType() != Smc.TRANS_PUSH)
+        else if (_guardInProgress.getTransType() !=
+                     Smc.TRANS_PUSH)
         {
-            error("Cannot set push state on a non-push transition.",
-                  false);
+            error("Cannot set push state on a non-push " +
+                  "transition.",
+                  _lineNumber);
         }
-        else if (token.getValue().equals("nil") == true)
+        else if (name.equals("nil") == true)
         {
-            error("Cannot push to \"nil\" state.", false);
+            error("Cannot push to \"nil\" state.",
+                  _lineNumber);
         }
         else
         {
-            _guard_in_progress.setPushState(token.getValue());
+            _guardInProgress.setPushState(name);
         }
 
         return;
     }
 
-    // Append the current token to the push state.
-    /* package */ void appendPushState(SmcLexer.Token token)
+    // Set the guard's actions.
+    /* package */ void setActions(List actions)
     {
-        if (_guard_in_progress == null)
+        if (_guardInProgress == null)
         {
-            error("There is no in-progress guard to which to append to the end state.",
-                  false);
-        }
-        else if (_guard_in_progress.getTransType() != Smc.TRANS_PUSH)
-        {
-            error("Cannot append push state on a non-push transition.",
-                  false);
+            error("There is no in-progress guard to which to " +
+                  "add the action.",
+                  _lineNumber);
         }
         else
         {
-            _guard_in_progress.appendPushState(token.getValue());
+            _guardInProgress.setActions(actions);
         }
 
         return;
     }
 
-    // Append the in-progress action to the guard's list.
+    /* package */ void setPopArgs(String args)
+    {
+        if (_guardInProgress == null)
+        {
+            error("There is no in-progress guard to which to " +
+                  "add the action.",
+                  _lineNumber);
+        }
+        else
+        {
+            _guardInProgress.setPopArgs(args);
+        }
+
+        return;
+    }
+
+    /* package */ void createParamList()
+    {
+        if (_paramList == null)
+        {
+            _paramList = (List) new LinkedList();
+        }
+
+        return;
+    }
+
+    /* package */ List getParamList()
+    {
+        List retval = _paramList;
+
+        _paramList = null;
+
+        return (retval);
+    }
+
+    /* package */ void createParameter(String name, int lineNumber)
+    {
+        if (_paramInProgress != null)
+        {
+            error("Cannot create new parameter while still " +
+                  "filling in previous one.",
+                  lineNumber);
+        }
+        else
+        {
+            if (_parserFSM.getDebugFlag() == true)
+            {
+                PrintStream os = _parserFSM.getDebugStream();
+
+                os.println("CREATE PARAM : " +
+                           name +
+                           "(" +
+                           Integer.toString(lineNumber) +
+                           ")");
+            }
+
+            _paramInProgress =
+                new SmcParameter(name, lineNumber);
+        }
+
+        return;
+    }
+
+    /* package */ void setParamType(String type)
+    {
+        if (_paramInProgress == null)
+        {
+            error("There is no in-progress parameter to which " +
+                  "to add the type.",
+                  _lineNumber);
+        }
+        else
+        {
+            _paramInProgress.setType(type);
+        }
+
+        return;
+    }
+
+    /* package */ void addParameter()
+    {
+        if (_paramList == null)
+        {
+            error("There is no parameter list to which the " +
+                  "parameter may be added.",
+                  _lineNumber);
+        }
+        else if (_paramInProgress == null)
+        {
+            error("There is no in-progress parameter to add " +
+                  "to the list.",
+                  _lineNumber);
+        }
+        else
+        {
+            _paramList.add(_paramInProgress);
+            _paramInProgress = null;
+        }
+
+        return;
+    }
+
+    /* package */ void clearParameter()
+    {
+        _paramInProgress = null;
+        return;
+    }
+
+    /* package */ void createActionList()
+    {
+        if (_actionList != null)
+        {
+            error("Cannot create an action list when one " +
+                  "already exists.",
+                  _lineNumber);
+        }
+        else
+        {
+            _actionList = (List) new LinkedList();
+        }
+
+        return;
+    }
+
+    /* package */ List getActionList()
+    {
+        List retval = _actionList;
+
+        _actionList = null;
+
+        return(retval);
+    }
+
+    /* package */ void createAction(String name, int lineNumber)
+    {
+        if (_actionInProgress != null)
+        {
+            error("Cannot create new action while still " +
+                  "filling in previous one.",
+                  lineNumber);
+        }
+        else
+        {
+            if (_parserFSM.getDebugFlag() == true)
+            {
+                PrintStream os = _parserFSM.getDebugStream();
+
+                os.println("CREATE ACTION: " +
+                           name +
+                           "(" +
+                           Integer.toString(lineNumber) +
+                           ")");
+            }
+
+            _actionInProgress =
+                new SmcAction(name, lineNumber);
+        }
+
+        return;
+    }
+
+    /* package */ void setActionArgs(List args)
+    {
+        if (_actionInProgress == null)
+        {
+            error("There is no in-progress action to which to " +
+                  "add the arguments.",
+                  _lineNumber);
+        }
+        else
+        {
+            _actionInProgress.setArguments(args);
+        }
+
+        return;
+    }
+
     /* package */ void addAction()
     {
-        if (_guard_in_progress == null)
+        if (_actionList == null)
         {
-            error("There is no in-progress guard to which to add the action.",
-                  false);
+            error("There is no action list to which the " +
+                  "action may be added.",
+                  _lineNumber);
         }
-        else if (_action_in_progress == null)
+        else if (_actionInProgress == null)
         {
-            error("There is no in-progress action to which to add to the guard.",
-                  false);
-        }
-        else
-        {
-            _guard_in_progress.addAction(_action_in_progress);
-            _action_in_progress = null;
-        }
-
-        return;
-    }
-
-    /* package */ void setActionNegation()
-    {
-        _action_negation = true;
-        return;
-    }
-
-    /* package */ void createAction(SmcLexer.Token token)
-    {
-        if (_action_in_progress != null)
-        {
-            error("May not create new action while still filling in previous action.",
-                  false);
+            error("There is no in-progress action to add to " +
+                  "the list.",
+                  _lineNumber);
         }
         else
         {
-            _action_in_progress =
-                    createTargetAction(token.getValue(),
-                                       _action_negation);
-            _action_negation = false;
+            _actionList.add(_actionInProgress);
+            _actionInProgress = null;
         }
 
         return;
     }
 
-    /* package */ void createVariable(SmcLexer.Token token)
+    // Retrieve the current action's property assignment flag.
+    /* package */ boolean getProperty()
     {
-        if (_variable_in_progress != null)
+        boolean retcode = false;
+
+        if (_actionInProgress == null)
         {
-            error("May not create new variable while still filling in previous variable.",
-                  false);
+            error("There is no in-progress action, " +
+                  "get property flag failed.",
+                  _lineNumber);
         }
         else
         {
-            _variable_in_progress = new String(token.getValue());
+            retcode = _actionInProgress.isProperty();
         }
 
-        return;
+        return (retcode);
     }
 
-    // Add an argument to the current action.
-    /* package */ void addSimpleArgument(SmcLexer.Token token)
+    // Mark the current action as a .Net assignment.
+    /* package */ void setProperty(boolean flag)
     {
-        _argList.add(
-            new SmcSimpleArg(
-                token.getValue(),
-                token.getLineNumber()));
-        return;
-    }
-
-    /* package */ void appendVariable(SmcLexer.Token token)
-    {
-        if (_variable_in_progress == null)
+        if (_actionInProgress == null)
         {
-            error("There is no in-progress action to which to append.",
-                  false);
+            error("There is no in-progress action, " +
+                  "set property flag failed.",
+                  _lineNumber);
         }
         else
         {
-            _variable_in_progress += token.getValue();
+            _actionInProgress.setProperty(flag);
         }
 
         return;
     }
 
-    /* package */ void addVariableArgument()
+    /* package */ void clearActions()
     {
-        if (_variable_in_progress == null)
+        if (_actionList != null)
         {
-            error("There is no in-progress variable to add.", false);
+            _actionList.clear();
+            _actionList = null;
+        }
+
+        return;
+    }
+
+    /* package */ void createArgList()
+    {
+        if (_argList != null)
+        {
+            error("Cannot create an argument list when one " +
+                  "already exists.",
+                  _lineNumber);
         }
         else
         {
-            _argList.add(
-                new SmcSimpleArg(
-                    _variable_in_progress,
-                    _lexer.getLineNumber()));
-            _variable_in_progress = null;
+            _argList = (List) new LinkedList();
         }
 
         return;
     }
 
-    // Add a method argument to the argument list.
-    /* package */ void addMethodArgument(List argList)
+    /* package */ List getArgsList()
     {
-        if (_variable_in_progress == null)
+        List retval = _argList;
+
+        _argList = null;
+
+        return(retval);
+    }
+
+    /* package */ void createArgument(String name, int lineNumber)
+    {
+        if (_argInProgress != null)
         {
-            error("There is no method name to add.", false);
+            error("Cannot create new argument while still " +
+                  "filling in previous one.",
+                  lineNumber);
         }
         else
         {
-            _argList.add(
-                createTargetMethodArg(
-                    _variable_in_progress,
-                    argList));
-            _variable_in_progress = null;
+            if (_parserFSM.getDebugFlag() == true)
+            {
+                PrintStream os = _parserFSM.getDebugStream();
+
+                os.println("   CREATE ARG: " +
+                           name +
+                           "(" +
+                           Integer.toString(lineNumber) +
+                           ")");
+            }
+
+            _argInProgress = name;
         }
 
         return;
     }
 
-    // Place the current argument data into a map and push the
-    // map on top of the argument stack.
-    /* package */ void pushArgStack()
+    /* package */ void addArgument()
     {
-        Object[] argMap = new Object[ARG_ITEMS];
-
-        argMap[ARG_LIST_INDEX] = _argList;
-        argMap[VAR_IN_PROG_INDEX] = _variable_in_progress;
-
-        _argsStack.push(argMap);
-
-        _argList = (List) new LinkedList();
-        _variable_in_progress = null;
-
-        return;
-    }
-
-    // Return the result argument list.
-    /* package */ List getArgsResult()
-    {
-        return (_argsResult);
-    }
-
-    // Place the current argument list into the result so that
-    // it may be popped back to the caller.
-    /* package */ void setArgsResult()
-    {
-        _argsResult = (List) ((LinkedList) _argList).clone();
-        return;
-    }
-
-    // Pop the previous argument data from the stack and reset
-    // the argument data.
-    /* package */ void popArgStack()
-    {
-        Object[] argMap = (Object[]) _argsStack.pop();
-
-        _argList = (List) argMap[ARG_LIST_INDEX];
-        _variable_in_progress = (String) argMap[VAR_IN_PROG_INDEX];
-
-        return;
-    }
-    
-
-    /* package */ void setPopArgs(List argList)
-    {
-        if (_guard_in_progress == null)
+        if (_argList == null)
         {
-            error("There is no in-progress guard to which to add the action.",
-                  false);
+            error("There is no argument list to which the " +
+                  "argument may be added.",
+                  _lineNumber);
+        }
+        else if (_argInProgress == null)
+        {
+            error("There is no in-progress argument to add to " +
+                  "the list.",
+                  _lineNumber);
         }
         else
         {
-            _guard_in_progress.setPopArgs(argList);
-
-            // Clear out the argument list in preparation of
-            // the next action/pop.
-            argList.clear();
+            _argList.add(_argInProgress.trim());
+            _argInProgress = null;
         }
 
         return;
     }
 
-    /* package */ void setActionArgs(List argList)
+    /* package */ void clearArguments()
     {
-        if (_action_in_progress == null)
+        if (_argList != null)
         {
-            error("There is no in-progress action to which to add the argument.",
-                  false);
-        }
-        else
-        {
-            _action_in_progress.setArguments(argList);
-
-            // Clear out the argument list in preparation for
-            // the next pop/action.
-            argList.clear();
+            _argList.clear();
+            _argList = null;
         }
 
         return;
     }
 
-    private SmcParseTree createTargetTree()
-    {
-        SmcParseTree retval = null;
-
-        switch(Smc._target_language)
-        {
-            case Smc.C_PLUS_PLUS:
-                retval = new SmcParseTreeCpp();
-                break;
-
-            case Smc.JAVA:
-                retval = new SmcParseTreeJava();
-                break;
-
-            case Smc.TCL:
-                retval = new SmcParseTreeTcl();
-                break;
-        }
-
-        return (retval);
-    }
-
-    // Create a map object that is language-specific.
-    private SmcMap createTargetMap(String name)
-    {
-        SmcMap retval = null;
-
-        switch(Smc._target_language)
-        {
-            case Smc.C_PLUS_PLUS:
-                retval = new SmcMapCpp(name,
-                                       _lexer.getLineNumber());
-                break;
-
-            case Smc.JAVA:
-                retval = new SmcMapJava(name,
-                                       _lexer.getLineNumber());
-                break;
-
-            case Smc.TCL:
-                retval = new SmcMapTcl(name,
-                                       _lexer.getLineNumber());
-                break;
-        }
-
-        return (retval);
-    }
-
-    // Create a state object that is language-specific.
-    private SmcState createTargetState(String name)
-    {
-        SmcState retval = null;
-
-        switch(Smc._target_language)
-        {
-            case Smc.C_PLUS_PLUS:
-                retval = new SmcStateCpp(name,
-                                         _lexer.getLineNumber());
-                break;
-
-            case Smc.JAVA:
-                retval = new SmcStateJava(name,
-                                          _lexer.getLineNumber());
-                break;
-
-            case Smc.TCL:
-                retval = new SmcStateTcl(name,
-                                         _lexer.getLineNumber());
-                break;
-        }
-
-        return (retval);
-    }
-
-    private SmcTransition createTargetTransition(String name,
-                                                 List parameters)
-    {
-        SmcTransition retval = null;
-
-        switch(Smc._target_language)
-        {
-            case Smc.C_PLUS_PLUS:
-                retval = new SmcTransitionCpp(name,
-                                              parameters,
-                                              _lexer.getLineNumber());
-                break;
-
-            case Smc.JAVA:
-                retval = new SmcTransitionJava(name,
-                                              parameters,
-                                               _lexer.getLineNumber());
-                break;
-
-            case Smc.TCL:
-                retval = new SmcTransitionTcl(name,
-                                              parameters,
-                                              _lexer.getLineNumber());
-                break;
-        }
-
-        return (retval);
-    }
-
-    private SmcParameter createTargetParameter(String name)
-    {
-        SmcParameter retval = null;
-
-        switch(Smc._target_language)
-        {
-            case Smc.C_PLUS_PLUS:
-                retval = new SmcParameterCpp(name,
-                                             _lexer.getLineNumber());
-                break;
-
-            case Smc.JAVA:
-                retval = new SmcParameterJava(name,
-                                              _lexer.getLineNumber());
-                break;
-
-            case Smc.TCL:
-                retval = new SmcParameterTcl(name,
-                                             _lexer.getLineNumber());
-                break;
-        }
-
-        return (retval);
-    }
-
-    private SmcGuard createTargetGuard(SmcAction condition)
-    {
-        SmcGuard retval = null;
-
-        switch(Smc._target_language)
-        {
-            case Smc.C_PLUS_PLUS:
-                retval = new SmcGuardCpp(condition,
-                                         _lexer.getLineNumber());
-                break;
-
-            case Smc.JAVA:
-                retval = new SmcGuardJava(condition,
-                                          _lexer.getLineNumber());
-                break;
-
-            case Smc.TCL:
-                retval = new SmcGuardTcl(condition,
-                                         _lexer.getLineNumber());
-                break;
-        }
-
-        return (retval);
-    }
-
-    private SmcAction createTargetAction(String name,
-                                         boolean negation_flag)
-    {
-        SmcAction retval = null;
-
-        switch(Smc._target_language)
-        {
-            case Smc.C_PLUS_PLUS:
-                retval = new SmcActionCpp(name,
-                                          negation_flag,
-                                          _lexer.getLineNumber());
-                break;
-
-            case Smc.JAVA:
-                retval = new SmcActionJava(name,
-                                           negation_flag,
-                                           _lexer.getLineNumber());
-                break;
-
-            case Smc.TCL:
-                retval = new SmcActionTcl(name,
-                                          negation_flag,
-                                          _lexer.getLineNumber());
-                break;
-        }
-
-        return (retval);
-    }
-
-    // Create the appropriate method argument object depending
-    // on the target programming language.
-    private SmcArgument createTargetMethodArg(String name, List argList)
-    {
-        SmcArgument retval = null;
-
-        switch(Smc._target_language)
-        {
-            case Smc.C_PLUS_PLUS:
-                retval = new SmcMethodArgCpp(name,
-                                             argList,
-                                             _lexer.getLineNumber());
-                break;
-
-            case Smc.JAVA:
-                retval = new SmcMethodArgJava(name,
-                                             argList,
-                                              _lexer.getLineNumber());
-                break;
-
-            case Smc.TCL:
-                retval = new SmcMethodArgTcl(name,
-                                             argList,
-                                             _lexer.getLineNumber());
-                break;
-        }
-
-        return (retval);
-    }
+    //
+    // end of State Machine Actions
+    //-----------------------------------------------------------
 
 // Member Data
 
+    // The FSM name.
+    private String _name;
+
+    // Store warning and error messages into this list. Do not
+    // output them. That is up to the application.
+    private List _messages;
+
     // The parse state map.
-    private SmcParserContext _parser_map;
+    private SmcParserContext _parserFSM;
 
     // Get tokens from the lexer.
     private SmcLexer _lexer;
 
-    // Read all the tokens into this list first and then
-    // pass them to the parser map.
-    private List _tokenList;
+    // Keep track of errors.
+    private boolean _parseStatus;
+    private boolean _quitFlag;
 
-    // Store arguments in this list until they can be associated
-    // with a pop or an action.
+    // Store the parse result here.
+    private SmcFSM _fsm;
+
+    private SmcMap _mapInProgress;
+    private SmcState _stateInProgress;
+    private String _transitionName;
+    private SmcTransition _transitionInProgress;
+    private SmcGuard _guardInProgress;
+    private SmcParameter _paramInProgress;
+    private SmcAction _actionInProgress;
+    private String _argInProgress;
+
+    // Store parsed parameters here.
+    private List _paramList;
+
+    // Store parsed transition actions here.
+    private List _actionList;
+
+    // Store parsed action arguments here.
     private List _argList;
 
-    // The argument list is stored here so it can be returned.
-    private List _argsResult;
+    private int _lineNumber;
 
-    // Because a function can now be an
-    private Stack _argsStack;
-
-    // Will be generating code for this language.
-    private int _language;
-
-    // Keep track of errors.
-    private String _error_message;
-    private boolean _parse_status;
-    private boolean _quit_flag;
-
-    // Keep track whether we are parsing a class name, package or
-    // import.
-    private int _nameType;
-
-    private SmcParseTree _parse_tree;
-    private String _start_state;
-    private String _className;
-    private String _context;
-    private String _header;
-    private boolean _action_negation;
-
-    private String _name_in_progress;
-    private SmcMap _map_in_progress;
-    private SmcState _state_in_progress;
-    private String _transition_name;
-    private List _transition_parameters;
-    private SmcParameter _parameter_in_progress;
-    private SmcTransition _transition_in_progress;
-    private SmcGuard _guard_in_progress;
-    private SmcAction _action_in_progress;
-    private String _variable_in_progress;
-
-    // Constants
-    private static final int ARG_LIST_INDEX = 0;
-    private static final int VAR_IN_PROG_INDEX = 1;
-    private static final int ARG_ITEMS = 2;
-
+    //-----------------------------------------------------------
     // Statics.
+    //
 
     // Create a hashmap which associates token names with
     // parser transitions. When a token is received, use this
@@ -1388,115 +1238,168 @@ public final class SmcParser
 
     static
     {
+        String transName = "<not set>";
+
         _TransMethod = new Method[SmcLexer.TOKEN_COUNT];
 
         try
         {
-            Class _map_class = SmcParserContext.class;
-            Class[] param_types = new Class[1];
+            Class fsmClass = SmcParserContext.class;
+            Class[] paramTypes = new Class[1];
 
-            param_types[0] = SmcLexer.Token.class;
+            paramTypes[0] = SmcLexer.Token.class;
 
+            transName = "ENTRY";
             _TransMethod[SmcLexer.ENTRY] =
-                _map_class.getDeclaredMethod("ENTRY",
-                                             param_types);
+                fsmClass.getDeclaredMethod("ENTRY",
+                                           paramTypes);
+            transName = "EXIT";
             _TransMethod[SmcLexer.EXIT] =
-                _map_class.getDeclaredMethod("EXIT",
-                                             param_types);
+                fsmClass.getDeclaredMethod("EXIT",
+                                           paramTypes);
+            transName = "POP";
             _TransMethod[SmcLexer.POP] =
-                _map_class.getDeclaredMethod("POP",
-                                             param_types);
+                fsmClass.getDeclaredMethod("POP",
+                                           paramTypes);
+            transName = "PUSH";
             _TransMethod[SmcLexer.PUSH] =
-                _map_class.getDeclaredMethod("PUSH",
-                                             param_types);
+                fsmClass.getDeclaredMethod("PUSH",
+                                           paramTypes);
+            transName = "WORD";
             _TransMethod[SmcLexer.WORD] =
-                _map_class.getDeclaredMethod("WORD",
-                                             param_types);
+                fsmClass.getDeclaredMethod("WORD",
+                                           paramTypes);
+            transName = "START_STATE";
             _TransMethod[SmcLexer.START_STATE] =
-                _map_class.getDeclaredMethod("START_STATE",
-                                             param_types);
+                fsmClass.getDeclaredMethod("START_STATE",
+                                           paramTypes);
+            transName = "MAP_NAME";
             _TransMethod[SmcLexer.MAP_NAME] =
-                _map_class.getDeclaredMethod("MAP_NAME",
-                                             param_types);
+                fsmClass.getDeclaredMethod("MAP_NAME",
+                                           paramTypes);
+            transName = "CLASS_NAME";
             _TransMethod[SmcLexer.CLASS_NAME] =
-                _map_class.getDeclaredMethod("CLASS_NAME",
-                                             param_types);
+                fsmClass.getDeclaredMethod("CLASS_NAME",
+                                           paramTypes);
+            transName = "HEADER_FILE";
             _TransMethod[SmcLexer.HEADER_FILE] =
-                _map_class.getDeclaredMethod("HEADER_FILE",
-                                             param_types);
+                fsmClass.getDeclaredMethod("HEADER_FILE",
+                                           paramTypes);
+            transName = "INCLUDE_FILE";
+            _TransMethod[SmcLexer.INCLUDE_FILE] =
+                fsmClass.getDeclaredMethod("INCLUDE_FILE",
+                                           paramTypes);
+            transName = "PACKAGE_NAME";
             _TransMethod[SmcLexer.PACKAGE_NAME] =
-                _map_class.getDeclaredMethod("PACKAGE_NAME",
-                                             param_types);
+                fsmClass.getDeclaredMethod("PACKAGE_NAME",
+                                           paramTypes);
+            transName = "IMPORT";
             _TransMethod[SmcLexer.IMPORT] =
-                _map_class.getDeclaredMethod("IMPORT",
-                                             param_types);
+                fsmClass.getDeclaredMethod("IMPORT",
+                                           paramTypes);
+            transName = "DECLARE";
+            _TransMethod[SmcLexer.DECLARE] =
+                fsmClass.getDeclaredMethod("DECLARE",
+                                           paramTypes);
+            transName = "LEFT_BRACE";
             _TransMethod[SmcLexer.LEFT_BRACE] =
-                _map_class.getDeclaredMethod("LEFT_BRACE",
-                                             param_types);
+                fsmClass.getDeclaredMethod("LEFT_BRACE",
+                                           paramTypes);
+            transName = "RIGHT_BRACE";
             _TransMethod[SmcLexer.RIGHT_BRACE] =
-                _map_class.getDeclaredMethod("RIGHT_BRACE",
-                                             param_types);
+                fsmClass.getDeclaredMethod("RIGHT_BRACE",
+                                           paramTypes);
+            transName = "LEFT_BRACKET";
             _TransMethod[SmcLexer.LEFT_BRACKET] =
-                _map_class.getDeclaredMethod("LEFT_BRACKET",
-                                             param_types);
-            _TransMethod[SmcLexer.RIGHT_BRACKET] =
-                _map_class.getDeclaredMethod("RIGHT_BRACKET",
-                                             param_types);
+                fsmClass.getDeclaredMethod("LEFT_BRACKET",
+                                           paramTypes);
+            transName = "LEFT_PAREN";
             _TransMethod[SmcLexer.LEFT_PAREN] =
-                _map_class.getDeclaredMethod("LEFT_PAREN",
-                                             param_types);
+                fsmClass.getDeclaredMethod("LEFT_PAREN",
+                                           paramTypes);
+            transName = "RIGHT_PAREN";
             _TransMethod[SmcLexer.RIGHT_PAREN] =
-                _map_class.getDeclaredMethod("RIGHT_PAREN",
-                                             param_types);
-            _TransMethod[SmcLexer.SEMICOLON] =
-                _map_class.getDeclaredMethod("SEMICOLON",
-                                             param_types);
-            _TransMethod[SmcLexer.COLON] =
-                _map_class.getDeclaredMethod("COLON",
-                                             param_types);
+                fsmClass.getDeclaredMethod("RIGHT_PAREN",
+                                           paramTypes);
+            transName = "COMMA";
             _TransMethod[SmcLexer.COMMA] =
-                _map_class.getDeclaredMethod("COMMA",
-                                             param_types);
-            _TransMethod[SmcLexer.EXCLAMATION] =
-                _map_class.getDeclaredMethod("EXCLAMATION",
-                                             param_types);
+                fsmClass.getDeclaredMethod("COMMA",
+                                           paramTypes);
+            transName = "COLON";
+            _TransMethod[SmcLexer.COLON] =
+                fsmClass.getDeclaredMethod("COLON",
+                                           paramTypes);
+            transName = "SEMICOLON";
+            _TransMethod[SmcLexer.SEMICOLON] =
+                fsmClass.getDeclaredMethod("SEMICOLON",
+                                           paramTypes);
+            transName = "SOURCE";
             _TransMethod[SmcLexer.SOURCE] =
-                _map_class.getDeclaredMethod("SOURCE",
-                                             param_types);
+                fsmClass.getDeclaredMethod("SOURCE",
+                                           paramTypes);
+            transName = "EOD";
             _TransMethod[SmcLexer.EOD] =
-                _map_class.getDeclaredMethod("EOD",
-                                             param_types);
-            _TransMethod[SmcLexer.VARIABLE] =
-                _map_class.getDeclaredMethod("VARIABLE",
-                                             param_types);
-            _TransMethod[SmcLexer.INTEGER] =
-                _map_class.getDeclaredMethod("INTEGER",
-                                             param_types);
-            _TransMethod[SmcLexer.FLOAT] =
-                _map_class.getDeclaredMethod("FLOAT",
-                                             param_types);
-            _TransMethod[SmcLexer.STRING] =
-                _map_class.getDeclaredMethod("STRING",
-                                             param_types);
-            _TransMethod[SmcLexer.ASTERISK] =
-                _map_class.getDeclaredMethod("ASTERISK",
-                                             param_types);
-            _TransMethod[SmcLexer.AMPERSAND] =
-                _map_class.getDeclaredMethod("AMPERSAND",
-                                             param_types);
+                fsmClass.getDeclaredMethod("EOD",
+                                           paramTypes);
+            transName = "SLASH";
             _TransMethod[SmcLexer.SLASH] =
-                _map_class.getDeclaredMethod("SLASH",
-                                             param_types);
+                fsmClass.getDeclaredMethod("SLASH",
+                                           paramTypes);
+            transName = "EQUAL";
+            _TransMethod[SmcLexer.EQUAL] =
+                fsmClass.getDeclaredMethod("EQUAL",
+                                           paramTypes);
         }
         catch (NoSuchMethodException ex1)
         {
-            System.err.println("INITIALIZATION ERROR! " + ex1);
-            System.exit(1);
+            System.err.println("INITIALIZATION ERROR! No such " +
+                               "method as SmcParserContext." +
+                               transName +
+                               ".");
+            System.exit(2);
         }
         catch (SecurityException ex2)
         {
-            System.err.println("INITIALIZATION ERROR! " + ex2);
-            System.exit(1);
+            System.err.println("INITIALIZATION ERROR! Not " +
+                               "allowed to access " +
+                               "SmcParserContext." +
+                               transName +
+                               ".");
+            System.exit(2);
         }
     }
 }
+
+// CHANGE LOG
+// $Log$
+// Revision 1.6  2005/05/28 19:28:42  cwrapp
+// Moved to visitor pattern.
+//
+// Revision 1.5  2005/02/21 15:37:43  charlesr
+// Added Francois Perrad to Contributors section for Python work.
+//
+// Revision 1.4  2005/02/21 15:19:30  charlesr
+// Trimming import, header and include names because they are lexed
+// as pure source.
+//
+// Revision 1.3  2005/02/03 17:04:39  charlesr
+// The parser was modified as part of an ongoing project to
+// make the SMC parser a self-contained, stand-alone library.
+// These changes include:
+// + Have SmcParser instantiate the SmcLexer thereby making
+//   the lexer entirely encapsulated by the parser.
+// + Collecting warning and error messages in SmcMessage
+//   objects. The application owning the parser can then call
+//   SmcParser.getMessages() and display the messages in the
+//   appropriate manner.
+// + If the parser is in debug mode, then all output is now
+//   guaranteed to be written to the same output stream.
+//
+// Revision 1.2  2004/09/06 16:41:03  charlesr
+// Added C# support.
+//
+// Revision 1.1  2004/05/31 13:56:05  charlesr
+// Added support for VB.net code generation.
+//
+// Revision 1.0  2003/12/14 21:05:08  charlesr
+// Initial revision

@@ -1,4 +1,5 @@
-// -*- mode: text; tab-width: 4; -*-
+// -*- tab-width: 4; -*-
+
 %{
 /*
  * The contents of this file are subject to the Mozilla Public
@@ -15,10 +16,15 @@
  * 
  * The Initial Developer of the Original Code is Charles W. Rapp.
  * Portions created by Charles W. Rapp are
- * Copyright (C) 2000 Charles W. Rapp.
+ * Copyright (C) 2000 - 2005. Charles W. Rapp.
  * All Rights Reserved.
  * 
- * Contributor(s): 
+ * Contributor(s):
+ *   Eitan Suez contributed examples/Ant.
+ *   (Name withheld) contributed the C# code generation and
+ *   examples/C#.
+ *   Francois Perrad contributed the Python code generation and
+ *   examples/Python.
  *
  * smcParser --
  *
@@ -29,104 +35,28 @@
  *
  * CHANGE LOG
  * $Log$
- * Revision 1.5  2002/05/07 00:10:20  cwrapp
- * Changes in release 1.3.2:
- * Add the following feature:
- * + 528321: Modified push transition syntax to be:
+ * Revision 1.6  2005/05/28 19:28:42  cwrapp
+ * Moved to visitor pattern.
  *
- * 	  <transname> <state1>/push(<state2>)  {<actions>}
+ * Revision 1.5  2005/02/21 15:37:52  charlesr
+ * Added Francois Perrad to Contributors section for Python work.
  *
- * 	  which means "transition to <state1> and then
- * 	  immediately push to <state2>". The current
- * 	  syntax:
+ * Revision 1.4  2005/02/21 15:21:21  charlesr
+ * Added -graph target as allowing %include, %declare and %import.
  *
- * 	  <transname> push(<state2>)  {<actions>}
+ * Revision 1.3  2005/02/03 17:06:21  charlesr
+ * SmcParser.warning() and .error() methods now take a line
+ * number argument. All calls to these method within the
+ * parser's FSM have been modified.
  *
- *           is still valid and <state1> is assumed to be "nil".
+ * Revision 1.2  2004/09/06 16:41:32  charlesr
+ * Added "property = value" syntax. Added C# support.
  *
- * No bug fixes.
+ * Revision 1.1  2004/05/31 13:56:34  charlesr
+ * Added support for VB.net code generation.
  *
- * Revision 1.2  2001/12/14 20:10:37  cwrapp
- * Changes in release 1.1.0:
- * Add the following features:
- * + 486786: Added the %package keyword which specifies the
- *           Java package/C++ namespace/Tcl namespace
- *           the SMC-generated classes will be placed.
- * + 486471: The %class keyword accepts fully qualified
- *           class names.
- * + 491135: Add FSMContext methods getDebugStream and
- *           setDebugStream.
- * + 492165: Added -sync command line option which causes
- *           the transition methods to be synchronized
- *           (this option may only be used with -java).
- *
- * Revision 1.1  2001/12/03 14:14:03  cwrapp
- * Changes in release 1.0.2:
- * + Placed the class files in Smc.jar in the net.sf.smc package.
- * + Moved Java source files from smc/bin to net/sf/smc.
- * + Corrected a C++ generation bug wherein arguments were written
- *   to the .h file rather than the .cpp file.
- *
- * Revision 1.3  2001/06/16 19:52:43  cwrapp
- * Changes in release 1.0, beta 7:
- * Fixes the minor code generation bugs and introduces a new
- * example Java program (found at examples/Java/EX7). This
- * example program is also a Java applet and can be seen at
- * http://smc.sourceforge.net/SmcDemo.htm.
- *
- * Revision 1.2  2001/05/09 23:40:01  cwrapp
- * Changes in release 1.0, beta 6:
- * Fixes the four following bugs:
- * + 416011: SMC does not properly handle pop transitions which
- *       have no argument.
- * + 416013: SMC generated code does not throw a
- *       "Transition Undefined" exception as per Programmer's
- *       Manual.
- * + 416014: The initial state's Entry actions are not being
- *       executed.
- * + 416015: When a transition has both a guarded and an unguarded
- *       definition, the Exit actions are only called when the
- *       guard evaluates to true.
- * + 422795: SMC -tcl abnormally terminates.
- *
- * Revision 1.1.1.2  2001/03/26 14:41:46  cwrapp
- * Corrected Entry/Exit action semantics. Exit actions are now
- * executed only by simple transitions and pop transitions.
- * Entry actions are executed by simple transitions and push
- * transitions. Loopback transitions do not execute either Exit
- * actions or entry actions. See SMC Programmer's manual for
- * more information.
- *
- * Revision 1.1.1.1  2001/01/03 03:13:59  cwrapp
- *
- * ----------------------------------------------------------------------
- * SMC - The State Map Compiler
- * Version: 1.0, Beta 3
- *
- * SMC compiles state map descriptions into a target object oriented
- * language. Currently supported languages are: C++, Java and [incr Tcl].
- * SMC finite state machines have such features as:
- * + Entry/Exit actions for states.
- * + Transition guards
- * + Transition arguments
- * + Push and Pop transitions.
- * + Default transitions. 
- * ----------------------------------------------------------------------
- *
- * Revision 1.2  2000/09/01 15:32:18  charlesr
- * Changes for v. 1.0, Beta 2:
- *
- * + Removed order dependency on "%start", "%class" and "%header"
- *   appearance. These three tokens may now appear in any order but
- *   still must appear before the first map definition.
- *
- * + Modified SMC parser so that it will continue after finding an
- *   error. Also improved the error message quality.
- *
- * + Made error messages so emacs is able to parse them.
- *
- * Revision 1.1.1.1  2000/08/02 12:50:56  charlesr
- * Initial source import, SMC v. 1.0, Beta 1.
+ * Revision 1.0  2003/12/14 21:06:00  charlesr
+ * Initial revision
  *
  */
 %}
@@ -140,11 +70,14 @@
 %%
 Start
 {
-    // The statemap can start with an optional raw source code section or
-    // go straight to the map definitions.
+    // The statemap can start with an optional raw source code
+    // section or go straight to the map definitions.
     SOURCE(token : SmcLexer.Token)
-                    Start2              {addSource(token);
-                                         setHeaderLine();}
+        nil
+        {
+            setSource(token.getValue());
+            setHeaderLine(token.getLineNumber());
+        }
 
     // The state map's start state and class name must be
     // specified before the map name.
@@ -152,341 +85,606 @@ Start
     // deduced from the class name (maybe). The class name
     // and header file are ignored when generating Tcl code.
     START_STATE(token : SmcLexer.Token)
-                    StateNameStart      {setHeaderLine();}
-    CLASS_NAME(token : SmcLexer.Token)
-                    push(NameMap::FQName)
-                                        {setHeaderLine();
-                                         setNameType(SmcLexer.CLASS_NAME);}
-    HEADER_FILE(token : SmcLexer.Token)
-                    HeaderFile          {setHeaderLine();}
-    PACKAGE_NAME(token : SmcLexer.Token)
-                    push(NameMap::FQName)
-                                        {setNameType(SmcLexer.PACKAGE_NAME);}
-    IMPORT(token : SmcLexer.Token)
-				    push(NameMap::FQName)
-										{setHeaderLine();
-										 setNameType(SmcLexer.IMPORT);}
+        StartState
+        {
+            setHeaderLine(token.getLineNumber());
+        }
 
-    // These transitions are issued when the FQName has been
-    // parsed.
-    FQNameDone(name : String)
-                    Start2              {setClassName(name);}
-    FQNameError     Start2              {}
+    CLASS_NAME(token : SmcLexer.Token)
+        Context
+        {
+            setHeaderLine(token.getLineNumber());
+        }
+
+    HEADER_FILE(token: SmcLexer.Token)
+      [Smc._targetLanguage != Smc.C_PLUS_PLUS &&
+       Smc._targetLanguage != Smc.TABLE &&
+       Smc._targetLanguage != Smc.GRAPH]
+        nil
+        {
+            error(
+                "%header may only be used with -c++, -table or -graph options.",
+                token.getLineNumber());
+        }
+
+    HEADER_FILE(token : SmcLexer.Token)
+        HeaderFile
+        {
+            setHeaderLine(token.getLineNumber());
+        }
+
+    INCLUDE_FILE(token: SmcLexer.Token)
+      [Smc._targetLanguage != Smc.C_PLUS_PLUS &&
+       Smc._targetLanguage != Smc.TABLE &&
+       Smc._targetLanguage != Smc.GRAPH]
+        nil
+        {
+            error(
+                "%include may only be used with -c++, -table or -graph options.",
+                token.getLineNumber());
+        }
+
+    INCLUDE_FILE(token: SmcLexer.Token)
+        IncludeFile
+        {
+            setHeaderLine(token.getLineNumber());
+        }
+
+    PACKAGE_NAME(token : SmcLexer.Token)
+        Package
+        {}
+
+    IMPORT(token : SmcLexer.Token)
+        Import
+        {
+            setHeaderLine(token.getLineNumber());
+        }
+
+    DECLARE(token: SmcLexer.Token)
+      [Smc._targetLanguage != Smc.C_PLUS_PLUS &&
+       Smc._targetLanguage != Smc.TABLE &&
+       Smc._targetLanguage != Smc.GRAPH]
+        nil
+        {
+            error(
+                "%declare may only be used with -c++, -table or -graph options.",
+                token.getLineNumber());
+        }
+
+    DECLARE(token : SmcLexer.Token)
+        Declare
+        {
+            setHeaderLine(token.getLineNumber());
+        }
 
     MAP_NAME(token : SmcLexer.Token)
-                    MapName             {error("%map not preceded by %start or %class.", false);}
+      [ctxt.isValidHeader() == true]
+        MapName
+        {
+            setHeaderLine(token.getLineNumber());
+        }
 
-    Default         StartError          {error("Expecting \"%{ source %}\", %start, or %class.", false);}
+    MAP_NAME(token : SmcLexer.Token)
+        StartError
+        {
+            error("%map not preceded by %start and %class.",
+                  token.getLineNumber());
+        }
+
+    Default
+        StartError
+        {
+            error(
+                "Expecting \"%{ source %}\", %start, or %class.",
+                ctxt.getLineNumber());
+        }
 }
 
-// Remain in this start until a known good token is found.
-StartError
+Context
 {
-    // Do error checks first.
-    START_STATE(token : SmcLexer.Token) [isStartStateSet();]
-                    nil                 {setHeaderLine();}
+    WORD(token: SmcLexer.Token)
+        Start
+        {
+            setContext(token.getValue());
+        }
 
-    CLASS_NAME(token : SmcLexer.Token) [isClassSet();]
-                    nil                 {setHeaderLine();}
-
-    HEADER_FILE(token : SmcLexer.Token) [isHeaderSet();]
-                    nil                 {setHeaderLine();}
-
-    PACKAGE_NAME(token : SmcLexer.Token) [isPackageSet();]
-                    StartError          {}
-
-    // Everything is OK.
-    START_STATE(token : SmcLexer.Token)
-                    StateNameStart      {setHeaderLine();}
-
-    CLASS_NAME(token : SmcLexer.Token)
-                    push(NameMap::FQName)
-                                        {setHeaderLine();
-                                         setNameType(SmcLexer.CLASS_NAME);}
-
-    HEADER_FILE(token : SmcLexer.Token)
-                    HeaderFile          {setHeaderLine();}
-
-    PACKAGE_NAME(token : SmcLexer.Token)
-                    push(NameMap::FQName)
-                                        {setNameType(SmcLexer.PACKAGE_NAME);}
-
-    IMPORT(token : SmcLexer.Token)
-				    push(NameMap::FQName)
-										{setHeaderLine();
-										 setNameType(SmcLexer.IMPORT);}
-
-    MAP_NAME(token : SmcLexer.Token)
-                    MapName             {}
-
-    // These transitions are issued when the FQName has been
-    // parsed.
-    FQNameDone(name : String)
-                    Start2              {setClassName(name);}
-    FQNameError     Start2              {}
-
-    Default         nil                 {}
-}
-
-Start2
-{
-    // Do error checks first.
-    START_STATE(token : SmcLexer.Token) [isStartStateSet();]
-                    StartError          {warning("Start state already set - ignoring this %start.");
-                                         setHeaderLine();}
-
-    CLASS_NAME(token : SmcLexer.Token) [isClassSet();]
-                    StartError          {warning("Class already set - ignoring this %class.");
-                                         setHeaderLine();}
-
-    HEADER_FILE(token : SmcLexer.Token) [isHeaderSet();]
-                    StartError          {warning("Header already set - ignoring this %header.");
-                                         setHeaderLine();}
-
-    PACKAGE_NAME(token : SmcLexer.Token) [isPackageSet();]
-                    StartError          {warning("Package already set - ignoring this %package.");
-                                         setHeaderLine();}
-
-    START_STATE(token : SmcLexer.Token)
-                    StateNameStart      {setHeaderLine();}
-
-    CLASS_NAME(token : SmcLexer.Token)
-                    push(NameMap::FQName)
-                                        {setHeaderLine();
-                                         setNameType(SmcLexer.CLASS_NAME);}
-
-    HEADER_FILE(token : SmcLexer.Token)
-                    HeaderFile          {setHeaderLine();}
-
-    PACKAGE_NAME(token : SmcLexer.Token)
-                    push(NameMap::FQName)
-                                        {setHeaderLine();
-                                         setNameType(SmcLexer.PACKAGE_NAME);}
-
-    IMPORT(token : SmcLexer.Token)
-				    push(NameMap::FQName)
-										{setHeaderLine();
-										 setNameType(SmcLexer.IMPORT);}
-    MAP_NAME(token : SmcLexer.Token)
-                    MapName             {setHeaderLine();}
-
-    // These transitions are issued when the FQName has been
-    // parsed.
-    FQNameDone(name : String)
-                    Start2              {setClassName(name);}
-    FQNameError     Start2              {}
-
-    Default         nil                 {error("Expecting \"%start\", \"%class\", \"%header\", \"%package\" or \"%map\".", false);}
+    Default
+        StartError
+        {
+            error("Missing name after %class.",
+                  ctxt.getLineNumber());
+        }
 }
 
 // The state name must be of the form "map::state".
-StateNameStart
+StartState
 {
     WORD(token : SmcLexer.Token)
-                    StateName1          {appendStartState(token);}
+      [ctxt.isValidStartState(token.getValue()) == true]
+        Start
+        {
+            setStartState(token.getValue());
+        }
 
-    Default         StartError          {error("Missing state after %start.", false);}
-}
-
-StateName1
-{
-    COLON(token : SmcLexer.Token)
-                    StateName2          {appendStartState(token);}
-
-    Default         StartError          {error("%start must use a fully qualified state name.", false);}
-}
-
-StateName2
-{
-    COLON(token : SmcLexer.Token)
-                    StateName3          {appendStartState(token);}
-
-    Default         StartError          {error("%start must use a fully qualified state name.", false);}
-}
-
-StateName3
-{
     WORD(token : SmcLexer.Token)
-                    Start2              {appendStartState(token);
-                                         setStartState();}
+        StartError
+        {
+            error(
+                "Start state must be of the form \"map::state\".",
+                token.getLineNumber());
+        }
 
-    Default         StartError          {error("%start must use a fully qualified state name.", false);}
+    Default
+        StartError
+        {
+            error("Missing state after %start.",
+                  ctxt.getLineNumber());
+        }
 }
 
 HeaderFile
+    Entry
+    {
+	    setRawMode("\n\r\f");
+    }
+    Exit
+    {
+	    setCookedMode();
+    }
 {
-    WORD(token : SmcLexer.Token)
-                    Start2              {setHeader(token);}
+    SOURCE(token : SmcLexer.Token)
+        Start
+        {
+            setHeader(token.getValue());
+        }
 
-    Default         Start2              {error("Missing header file after %header.", false);}
+    Default
+        StartError
+        {
+            error("Missing header file after %header.",
+                  ctxt.getLineNumber());
+        }
+}
+
+IncludeFile
+    Entry
+    {
+	    setRawMode("\n\r\f");
+    }
+    Exit
+    {
+	    setCookedMode();
+    }
+{
+	SOURCE(token: SmcLexer.Token)
+        Start
+        {
+            addInclude(token.getValue());
+        }
+
+    Default
+        StartError
+        {
+            error("Missing include file after %include.",
+                  ctxt.getLineNumber());
+        }
+}
+
+Package
+{
+    WORD(token: SmcLexer.Token)
+        Start
+        {
+            setPackageName(token.getValue());
+        }
+
+    Default
+        StartError
+        {
+            error("Missing name after %package.",
+                  ctxt.getLineNumber());
+        }
+}
+
+Import
+    Entry
+    {
+	    setRawMode("\n\r\f");
+    }
+    Exit
+    {
+	    setCookedMode();
+    }
+{
+    SOURCE(token : SmcLexer.Token)
+        Start
+        {
+            addImport(token.getValue());
+        }
+
+    Default
+        StartError
+        {
+            error("Missing name after %import.",
+                  ctxt.getLineNumber());
+        }
+}
+
+Declare
+    Entry
+    {
+	    setRawMode("\n\r");
+    }
+    Exit
+    {
+	    setCookedMode();
+    }
+{
+    SOURCE(token : SmcLexer.Token)
+        Start
+        {
+            addDeclare(token.getValue());
+        }
+
+    Default
+        StartError
+        {
+            error("Missing name after %declare.",
+                  ctxt.getLineNumber());
+        }
+}
+
+// Remain in this state until a known good token is found.
+StartError
+{
+    START_STATE(token : SmcLexer.Token)
+        StartState
+        {
+            setHeaderLine(token.getLineNumber());
+        }
+
+    CLASS_NAME(token : SmcLexer.Token)
+        Context
+        {
+            setHeaderLine(token.getLineNumber());
+        }
+
+    HEADER_FILE(token : SmcLexer.Token)
+        HeaderFile
+        {
+            setHeaderLine(token.getLineNumber());
+        }
+
+    PACKAGE_NAME(token : SmcLexer.Token)
+        Package
+        {}
+
+    IMPORT(token : SmcLexer.Token)
+        Import
+        {
+            setHeaderLine(token.getLineNumber());
+        }
+
+    DECLARE(token: SmcLexer.Token)
+      [Smc._targetLanguage != Smc.C_PLUS_PLUS &&
+       Smc._targetLanguage != Smc.TABLE &&
+       Smc._targetLanguage != Smc.GRAPH]
+        nil
+        {
+            error(
+                "%declare may only be used with -c++, -table or -graph options.",
+                token.getLineNumber());
+        }
+
+    DECLARE(token : SmcLexer.Token)
+        Declare
+        {
+            setHeaderLine(token.getLineNumber());
+        }
+
+    MAP_NAME(token : SmcLexer.Token)
+      [ctxt.isValidHeader() == true]
+        MapName
+        {
+            setHeaderLine(token.getLineNumber());
+        }
+
+    MAP_NAME(token : SmcLexer.Token)
+        StartError
+        {
+            error("%map not preceded by %start and %class.",
+                  token.getLineNumber());
+        }
+
+    Default
+        nil
+        {}
 }
 
 MapStart
 {
     MAP_NAME(token : SmcLexer.Token)
-                    MapName             {}
+        MapName
+        {}
 
-    Default         MapStartError       {error("Expecting %map.", false);}
+    Default
+        MapStartError
+        {
+            error("Expecting %map.", ctxt.getLineNumber());
+        }
 }
 
 MapStartError
 {
     MAP_NAME(token : SmcLexer.Token)
-                    MapName             {}
+        MapName
+        {}
 
-    Default         nil                 {}
+    Default
+        nil
+        {}
 }
 
 MapName
 {
-    WORD(token : SmcLexer.Token) [isDuplicateMap(token);]
-                    MapStates           {error("Duplicate map name.", false);
-                                         createMap(token);}
+    WORD(token : SmcLexer.Token)
+      [ctxt.isDuplicateMap(token.getValue()) == true]
+        MapStates
+        {
+            error("Duplicate map name.", token.getLineNumber());
+            createMap(token.getValue(), token.getLineNumber());
+        }
 
     // The next word transition is the map's name.
     WORD(token : SmcLexer.Token)
-                    MapStates           {createMap(token);}
+        MapStates
+        {
+            createMap(token.getValue(), token.getLineNumber());
+        }
 
     EOD(token : SmcLexer.Token)
-                    States              {error("Name expected after \"%map\".", false);
-                                         createMap(token);}
-    Default         nil                 {error("Name expected after \"%map\".", false);}
+        States
+        {
+            error("Name expected after \"%map\".",
+                  token.getLineNumber());
+            createMap(token.getValue(), token.getLineNumber());
+        }
+
+    Default
+        nil
+        {
+            error("Name expected after \"%map\".",
+                  ctxt.getLineNumber());
+        }
 }
 
 MapStates
 {
     // %% marks the start of the map states.
     EOD(token : SmcLexer.Token)
-                    States              {}
+        States
+        {}
 
     WORD(token : SmcLexer.Token)
-                    StateStart          {error("Expecting %% after \"%map mapname\".", false);
-                                         createState(token);}
+        StateStart
+        {
+            error("Expecting %% after \"%map mapname\".",
+                  token.getLineNumber());
+            createState(token.getValue(), token.getLineNumber());
+        }
 
-    Default         MapStatesError      {error("Expecting %% after \"%map mapname\".", false);}
+    Default
+        MapStatesError
+        {
+            error("Expecting %% after \"%map mapname\".",
+                  ctxt.getLineNumber());
+        }
 }
 
 MapStatesError
 {
     EOD(token : SmcLexer.Token)
-                    States              {}
+        States
+        {}
 
     MAP_NAME(token : SmcLexer.Token)
-                    MapName             {addMap();}
-    WORD(token : SmcLexer.Token)
-                    StateStart          {createState(token);}
+        MapName
+        {
+            addMap();
+        }
 
-    Default         nil                 {}
+    WORD(token : SmcLexer.Token)
+        StateStart
+        {
+            createState(token.getValue(), token.getLineNumber());
+        }
+
+    Default
+        nil
+        {}
 }
 
 States
 {
-    // The "%%" means we have reached the end of this map's definition.
+    // The "%%" means we have reached the end of this map's
+    // definition.
     EOD(token : SmcLexer.Token)
-                    MapStart            {addMap();}
+        MapStart
+        {
+            addMap();
+        }
 
     // A word is the next state's name.
-    WORD(token : SmcLexer.Token) [isDuplicateState(token);]
-                    StateStart          {error("Duplicate state name.", false);
-                                         createState(token);}
+    WORD(token : SmcLexer.Token)
+      [ctxt.isDuplicateState(token.getValue()) == true]
+        StateStart
+        {
+            error("Duplicate state name.",
+                  token.getLineNumber());
+            createState(token.getValue(), token.getLineNumber());
+        }
 
     WORD(token : SmcLexer.Token)
-                    StateStart          {createState(token);}
+        StateStart
+        {
+            createState(token.getValue(), token.getLineNumber());
+        }
 
     // Error transitions.
     ENTRY(token : SmcLexer.Token)
-                    EntryStart          {error("Expecting either a new state definition or end of map (%%).", false);
-                                         createState(token);}
+        EntryStart
+        {
+            error(
+                "Expecting either a new state definition or end of map (%%).",
+                token.getLineNumber());
+            createState(token.getValue(), token.getLineNumber());
+        }
 
     EXIT(token : SmcLexer.Token)
-                    ExitStart           {error("Expecting either a new state definition or end of map (%%).", false);
-                                         createState(token);}
+        ExitStart
+        {
+            error(
+              "Expecting either a new state definition or end of map (%%).",
+              token.getLineNumber());
+            createState(token.getValue(), token.getLineNumber());
+        }
 
     LEFT_BRACE(token : SmcLexer.Token)
-                    Transitions         {error("Expecting either a new state definition or end of map (%%).", false);
-                                         createState(token);}
-    MAP_NAME(token : SmcLexer.Token)
-                    MapName             {error("Expecting \"%%\" before another \"%map\".", false);
-                                         addMap();}
+        Transitions
+        {
+            error(
+                "Expecting either a new state definition or end of map (%%).",
+                token.getLineNumber());
+            createState(token.getValue(), token.getLineNumber());
+        }
 
-    Default         nil                 {error("Expecting either a new state definition or end of map (%%).", false);}
+    EQUAL(token: SmcLexer.Token)
+        Transitions
+        {
+            error(
+                "Expecting either a new state definition or end of map (%%).",
+                token.getLineNumber());
+            createState(token.getValue(), token.getLineNumber());
+        }
+
+    MAP_NAME(token : SmcLexer.Token)
+        MapName
+        {
+            error("Expecting \"%%\" before another \"%map\".",
+                  token.getLineNumber());
+            addMap();
+        }
+
+    Default
+        nil
+        {
+            error(
+                "Expecting either a new state definition or end of map (%%).",
+                ctxt.getLineNumber());
+        }
 }
 
 StateStart
 {
-    // Check for repeat errors.
-    ENTRY(token : SmcLexer.Token) [isEntrySet();]
-                    StateStartError     {warning("This state already has an entry action defined - ignoring this entry action.");}
-
-    EXIT(token : SmcLexer.Token) [isExitSet();]
-                    StateStartError     {warning("This state already has an exit action defined - ignoring this exit action.");}
-
     // This state has an entry actions.
     ENTRY(token : SmcLexer.Token)
-                    EntryStart          {}
+        EntryStart
+        {}
 
     // This state has an exit action.
     EXIT(token : SmcLexer.Token)
-                    ExitStart           {}
+        ExitStart
+        {}
 
     // The left brace marks the start of the transitions.
     LEFT_BRACE(token : SmcLexer.Token)
-                    Transitions         {}
+        Transitions
+        {}
 
-    Default         StateStartError     {error("After the state name is given, then either an entry action, exit action or '{' is expected.", false);}
+    Default
+        StateStartError
+        {
+            error(
+                "After the state name is given, then either an entry action, exit action or '{' is expected.",
+                ctxt.getLineNumber());
+        }
 }
 
 StateStartError
 {
-    ENTRY(token : SmcLexer.Token) [isEntrySet();]
-                    StateStartError     {}
-    EXIT(token : SmcLexer.Token) [isExitSet();]
-                    StateStartError     {}
-
     ENTRY(token : SmcLexer.Token)
-                    EntryStart          {}
+        EntryStart
+        {}
 
     EXIT(token : SmcLexer.Token)
-                    ExitStart           {}
+        ExitStart
+        {}
 
     LEFT_BRACE(token : SmcLexer.Token)
-                    Transitions         {}
+        Transitions
+        {}
 
-    Default     nil         {}
+    Default
+        nil
+        {}
 }
 
 EntryStart
 {
     LEFT_BRACE(token : SmcLexer.Token)
-                    push(ActionMap::MultiStart)
-                                        {}
+        EntryEnd/push(ActionMap::Start)
+        {
+			createActionList();
+		}
 
-    // One entry action has been found. Check for more.
-    action_done     push(ActionMap::MultiStart)
-                                        {addEntryAction();}
+    Default
+        StateStartError
+        {
+            error("A '{' is expected after Entry.",
+                  ctxt.getLineNumber());
+        }
+}
 
-    // All actions have been found. Now go parse the
-    // state's transitions.
-    actions_done    StateStart          {}
+EntryEnd
+{
+	actionsDone(actions: List, lineNumber: int)
+		StateStart
+		{
+			setEntryAction(actions);
+		}
 
-    Default         StateStartError     {error("A '{' is expected after Entry.", false);}
+	actionsError
+		StartState
+		{}
 }
 
 ExitStart
 {
     LEFT_BRACE(token : SmcLexer.Token)
-                    push(ActionMap::MultiStart)
-                                        {}
+        ExitEnd/push(ActionMap::Start)
+        {
+			createActionList();
+		}
 
-    // One exit action has been found. Check for others.
-    action_done     push(ActionMap::MultiStart)
-                                        {addExitAction();}
+    Default
+        StateStartError
+        {
+            error("A '{' is expected after Exit.",
+                  ctxt.getLineNumber());
+        }
+}
 
-    // All exit actions have been found. Now parse the rest
-    // of the state.
-    actions_done    StateStart          {}
+ExitEnd
+{
+	actionsDone(actions: List, lineNumber: int)
+		StateStart
+		{
+			setExitAction(actions);
+		}
 
-    Default         StateStartError     {error("A '{' is expected after Exit.", false);}
+	actionsError
+		StateStart
+		{}
 }
 
 Transitions
@@ -494,415 +692,370 @@ Transitions
     // A '}' is the end of the transitions.
     // Look for the next state.
     RIGHT_BRACE(token : SmcLexer.Token)
-                    States              {addState();}
+        States
+        {
+            addState();
+        }
 
     // This is the transition name.
     WORD(token : SmcLexer.Token)
-                    TransStart          {storeTransitionName(token);}
+        TransStart
+        {
+            storeTransitionName(token.getValue());
+        }
 
-    Default         TransError          {error("Expecting either a new transition or a '}'.", false);}
+    Default
+        TransError
+        {
+            error("Expecting either a new transition or a '}'.",
+                  ctxt.getLineNumber());
+        }
 }
 
 TransError
 {
     RIGHT_BRACE(token : SmcLexer.Token)
-                    States              {addState();}
-    WORD(token : SmcLexer.Token)
-                    TransStart          {storeTransitionName(token);}
+        States
+        {
+            addState();
+        }
 
-    Default         nil                 {}
+    WORD(token : SmcLexer.Token)
+        TransStart
+        {
+            storeTransitionName(token.getValue());
+        }
+
+    Default
+        nil
+        {}
 }
 
 TransStart
 {
     // A '(' means this transition has parameters.
     LEFT_PAREN(token : SmcLexer.Token)
-                    TransParams         {createParameterList();}
+        TransParams/push(ParamMap::Start)
+        {}
 
-    // A '[' denotes a guard.
+    // A '[' denotes a guard. Since the code between the brackets
+    // may be raw source code, place the lexer in raw source code
+    // mode. This means the lexer will not process the characters
+    // by passing them through the lexer FSM.
     LEFT_BRACKET(token : SmcLexer.Token)
-                    push(ActionMap::Start)
-                                        {createTransition();}
+        TransGuard
+        {
+            createTransition(token.getLineNumber());
+        }
 
-    // The guard's condition has been found.
-    action_done     GuardEnd            {}
-
-    // Check for duplicate transitions.
-    PUSH(token : SmcLexer.Token) [isDuplicateGuard();]
-                    PushStart           {error("Duplicate transition - duplicate ignored.", false);
-                                         createTransition();
-                                         createGuard();
-                                         setTransType(Smc.TRANS_PUSH);
-										 setEndState("nil");}
-
-    POP(token : SmcLexer.Token) [isDuplicateGuard();]
-                    PopStart            {error("Duplicate transition - duplicate ignored.", false);
-                                         createTransition();
-                                         createGuard();
-                                         setTransType(Smc.TRANS_POP);}
-
-    WORD(token : SmcLexer.Token) [isDuplicateGuard();]
-                    EndState1           {error("Duplicate transition - duplicate ignored.", false);
-                                         createTransition();
-                                         createGuard();
-                                         setTransType(Smc.TRANS_SET);
-                                         setEndState(token);}
+    // NOTE: Now that SMC allows guards to be complex condition
+    // expressions, it is no longer possible to check for
+    // duplicate guards.
 
     PUSH(token : SmcLexer.Token)
-                    PushStart           {createTransition();
-                                         createGuard();
-                                         setTransType(Smc.TRANS_PUSH);
-										 setEndState("nil");}
+        PushStart
+        {
+            createTransition(token.getLineNumber());
+            createGuard(ctxt.getTransitionName(),
+                        "",
+                        token.getLineNumber());
+            setTransType(Smc.TRANS_PUSH);
+			setEndState("nil");
+        }
 
     POP(token : SmcLexer.Token)
-                    PopStart            {createTransition();
-                                         createGuard();
-                                         setTransType(Smc.TRANS_POP);}
+        PopStart
+        {
+            createTransition(token.getLineNumber());
+            createGuard(ctxt.getTransitionName(),
+                        "",
+                        token.getLineNumber());
+            setTransType(Smc.TRANS_POP);
+        }
 
-    // This word is the end state. Go to EndState1 in case this
-    // is a fully qualified state name.
+    // This word is the end state. Now get the actions.
     WORD(token : SmcLexer.Token)
-                    EndState1           {createTransition();
-                                         createGuard();
-                                         setTransType(Smc.TRANS_SET);
-                                         setEndState(token);}
+        SimpleTrans
+        {
+            createTransition(token.getLineNumber());
+            createGuard(ctxt.getTransitionName(),
+                        "",
+                        token.getLineNumber());
+            setTransType(Smc.TRANS_SET);
+            setEndState(token.getValue());
+        }
 
-    Default         TransStartError     {error("Expecting either a guard, push, pop or end state.", false);}
+    Default
+        TransStartError
+        {
+            error("Expecting either a guard, push, pop or end state.",
+                  ctxt.getLineNumber());
+        }
 }
 
 TransStartError
 {
     // A '(' means this transition has parameters.
     LEFT_PAREN(token : SmcLexer.Token)
-                    TransParams         {createParameterList();}
+        TransParams/push(ParamMap::Start)
+        {}
 
-    // A '[' means this transition is guarded.
+    // A '[' means this transition is guarded. Have the lexer
+    // collect the raw source code.
     LEFT_BRACKET(token : SmcLexer.Token)
-                    push(ActionMap::Start)
-                                        {}
-    action_done     GuardEnd            {}
+        TransGuard
+        {}
 
     PUSH(token : SmcLexer.Token)
-                    PushStart           {createGuard();
-                                         setTransType(Smc.TRANS_PUSH);
-										 setEndState("nil");}
+        PushStart
+        {
+            createGuard(ctxt.getTransitionName(),
+                        "",
+                        token.getLineNumber());
+            setTransType(Smc.TRANS_PUSH);
+			setEndState("nil");
+        }
 
     POP(token : SmcLexer.Token)
-                    PopStart            {createGuard();
-                                         setTransType(Smc.TRANS_POP);}
+        PopStart
+        {
+            createGuard(ctxt.getTransitionName(),
+                        "",
+                        token.getLineNumber());
+            setTransType(Smc.TRANS_POP);
+        }
 
     WORD(token : SmcLexer.Token)
-                    EndState1           {createGuard();
-                                         setTransType(Smc.TRANS_SET);
-                                         setEndState(token);}
+        SimpleTrans
+        {
+            createGuard(ctxt.getTransitionName(),
+                        "",
+                        token.getLineNumber());
+            setTransType(Smc.TRANS_SET);
+            setEndState(token.getValue());
+        }
 
-    Default         nil                 {}
+    Default
+        nil
+        {}
+}
+
+// Wait here for the transition parameter list to be returned.
+TransParams
+{
+    // The "Default" transition may not have parameters.
+    // But create a bogus transition before continuing.
+    paramsDone(params: java.util.List, lineNumber: int)
+      [ctxt.getTransitionName().equalsIgnoreCase("Default")
+           == true &&
+       params.isEmpty() == false]
+        TransNext
+        {
+            error("Default transitions may not have parameters.",
+                  lineNumber);
+            createTransition(params, lineNumber);
+        }
+
+    paramsDone(params: java.util.List, lineNumber: int)
+        TransNext
+        {
+            createTransition(params, lineNumber);
+        }
+
+    // Create a bogus transition and keep going.
+    paramsError(params: java.util.List, lineNumber: int)
+        TransNext
+        {
+            createTransition(params, lineNumber);
+        }
 }
 
 TransNext
 {
-    // A parethesis means this transition has parameters.
-    LEFT_PAREN(token : SmcLexer.Token)
-                    TransNextError      {error("Transition parameters previously defined.", false);}
-
     // A bracket denotes a guard.
     LEFT_BRACKET(token : SmcLexer.Token)
-                    push(ActionMap::Start)
-                                        {}
+        TransGuard
+        {}
 
-    // The guard's condition has been found.
-    // Create a new guard object.
-    action_done     GuardEnd            {}
-
-    // Check for duplicate transitions.
-    PUSH(token : SmcLexer.Token) [isDuplicateGuard();]
-                    PushStart           {error("Duplicate transition - duplicate ignored.", false);
-                                         createGuard();
-                                         setTransType(Smc.TRANS_PUSH);
-										 setEndState("nil");}
-
-    POP(token : SmcLexer.Token) [isDuplicateGuard();]
-                    PopStart            {error("Duplicate transition - duplicate ignored.", false);
-                                         createGuard();
-                                         setTransType(Smc.TRANS_POP);}
-
-    WORD(token : SmcLexer.Token) [isDuplicateGuard();]
-                    EndState1           {error("Duplicate transition - duplicate ignored.", false);
-                                         createGuard();
-                                         setTransType(Smc.TRANS_SET);
-                                         setEndState(token);}
+    // NOTE: Now that SMC allows guards to be complex condition
+    // expressions, it is no longer possible to check for
+    // duplicate guards.
 
     PUSH(token : SmcLexer.Token)
-                    PushStart           {createGuard();
-                                         setTransType(Smc.TRANS_PUSH);
-										 setEndState("nil");}
+        PushStart
+        {
+            createGuard(ctxt.getTransitionName(),
+                        "",
+                        token.getLineNumber());
+            setTransType(Smc.TRANS_PUSH);
+			setEndState("nil");
+        }
 
     POP(token : SmcLexer.Token)
-                    PopStart            {createGuard();
-                                         setTransType(Smc.TRANS_POP);}
+        PopStart
+        {
+            createGuard(ctxt.getTransitionName(),
+                        "",
+                        token.getLineNumber());
+            setTransType(Smc.TRANS_POP);
+        }
 
-    // This word is the end state. Go to EndState1 in case this
-    // is a fully qualified state name.
+    // This word is the end state. Now get the actions.
     WORD(token : SmcLexer.Token)
-                    EndState1           {createGuard();
-                                         setTransType(Smc.TRANS_SET);
-                                         setEndState(token);}
+        SimpleTrans
+        {
+            createGuard(ctxt.getTransitionName(),
+                        "",
+                        token.getLineNumber());
+            setTransType(Smc.TRANS_SET);
+            setEndState(token.getValue());
+        }
 
-    Default         TransNextError      {error("Expecting either a guard, push, pop or end state.", false);}
+    Default
+        TransNextError
+        {
+            error("Expecting either a guard, push, pop or end state.",
+                  ctxt.getLineNumber());
+        }
 }
 
 TransNextError
 {
     // Transition parameters have already been defined.
     LEFT_PAREN(token : SmcLexer.Token)
-                    nil                 {}
+        nil
+        {}
 
     // A bracket means this transition is guarded.
     LEFT_BRACKET(token : SmcLexer.Token)
-                    push(ActionMap::Start)
-                                        {}
-    action_done     GuardEnd            {}
+        TransGuard
+        {}
 
     PUSH(token : SmcLexer.Token)
-                    PushStart           {createGuard();
-                                         setTransType(Smc.TRANS_PUSH);
-										 setEndState("nil");}
+        PushStart
+        {
+            createGuard(ctxt.getTransitionName(),
+                        "",
+                        token.getLineNumber());
+            setTransType(Smc.TRANS_PUSH);
+			setEndState("nil");
+        }
 
     POP(token : SmcLexer.Token)
-                    PopStart            {createGuard();
-                                         setTransType(Smc.TRANS_POP);}
+        PopStart
+        {
+            createGuard(ctxt.getTransitionName(),
+                        "",
+                        token.getLineNumber());
+            setTransType(Smc.TRANS_POP);
+        }
 
     WORD(token : SmcLexer.Token)
-                    EndState1           {createGuard();
-                                         setTransType(Smc.TRANS_SET);
-                                         setEndState(token);}
+        SimpleTrans
+        {
+            createGuard(ctxt.getTransitionName(),
+                        "",
+                        token.getLineNumber());
+            setTransType(Smc.TRANS_SET);
+            setEndState(token.getValue());
+        }
 
-    Default         nil                 {}
+    Default
+        nil
+        {}
 }
 
-TransParams
+// Because the lexer is operating in raw mode, the lexer will
+// return either a SOURCE token or an ERROR token. Since ERROR
+// tokens are not passed into this FSM, then only the SOURCE
+// token must be handled.
+TransGuard
+    Entry
+    {
+        setRawMode("[", "]");
+    }
+    Exit
+    {
+        setCookedMode();
+    }
 {
-    // A parethesis marks the end of the parameters. This only
-    // acceptable here if the parameter list is empty. Otherwise
-    // we are expecting more parameters.
-    RIGHT_PAREN(token : SmcLexer.Token)
-        [isTransParametersEmpty();]
-                    TransNext           {createTransition();
-                                         createGuard();}
-    RIGHT_PAREN(token : SmcLexer.Token)
-                    TransNext           {error("Expecting parameter name.", false);
-                                         createTransition();
-                                         createGuard();}
-
-    WORD(token : SmcLexer.Token)
-                    TransParamName      {createParameter(token);}
-
-    Default         TransParamsError    {error("Expecting parameter name.", false);}
-}
-
-TransParamName
-{
-    // Parameter name must be followed by a ':'.
-    COLON(token : SmcLexer.Token)
-                    TransParamType      {}
-
-    Default         TransParamsError    {error("A ':' must follow a paramater name.", false);}
-}
-
-TransParamType
-{
-    WORD(token : SmcLexer.Token)
-                    TransParamType2     {appendParameterType(token, "");}
-
-    // Have to see at least one type name before a ')' or a ','.
-    Default         TransParamsError    {error("Expecting type name.", false);}
-}
-
-TransParamType2
-{
-    // A parenthesis marks the end of the parameters.
-    RIGHT_PAREN(token : SmcLexer.Token)
-                    TransNext           {addTransitionParameter();
-                                         createTransition();}
-
-    // A ',' marks the end of this parameter, to be followed by others.
-    COMMA(token : SmcLexer.Token)
-                    TransParams         {addTransitionParameter();}
-
-    WORD(token : SmcLexer.Token)
-                    TransParamType2     {appendParameterType(token, " ");}
-
-    // Non-word symbols may be appended only to the last type.
-    LEFT_BRACKET(token : SmcLexer.Token)
-                    TransParamType3     {appendParameterType(token, "");}
-
-    ASTERISK(token : SmcLexer.Token)
-                    TransParamType3     {appendParameterType(token, "");}
-
-    AMPERSAND(token : SmcLexer.Token)
-                    TransParamType3     {appendParameterType(token, "");}
-
-    Default         TransParamsError    {error("Invalid type.", false);}
-}
-
-TransParamType3
-{
-    // At this point, only other non-word symbols or an
-    // end-of-type terminator will be accepted.
-    RIGHT_PAREN(token : SmcLexer.Token)
-                    TransNext           {addTransitionParameter();
-                                         createTransition();}
-
-    COMMA(token : SmcLexer.Token)
-                    TransParams         {addTransitionParameter();}
-
-    RIGHT_BRACKET(token : SmcLexer.Token)
-                    nil                 {appendParameterType(token, "");}
-
-    ASTERISK(token : SmcLexer.Token)
-                    nil                 {appendParameterType(token, "");}
-
-    AMPERSAND(token : SmcLexer.Token)
-                    nil                 {appendParameterType(token, "");}
-
-    Default         TransParamsError    {error("Invalid type.", false);}
-}
-
-TransParamsError
-{
-    RIGHT_PAREN(token : SmcLexer.Token)
-                    TransNext           {addTransitionParameter();
-                                         createTransition();}
-
-    LEFT_BRACKET(token : SmcLexer.Token)
-                    push(ActionMap::Start)
-                                        {addTransitionParameter();}
-    action_done     GuardEnd            {}
-
-    Default         nil                 {}
-}
-
-GuardEnd
-{
-    // A backet denotes the end of the guard condition.
-    RIGHT_BRACKET(token : SmcLexer.Token)
-                    EndState            {}
-
-    Default         GuardEndError       {error("A ']' must terminate a transition guard", false);}
-}
-
-GuardEndError
-{
-    RIGHT_BRACKET(token : SmcLexer.Token)
-                    EndState            {}
-
-    Default         nil                 {}
+    SOURCE(token: SmcLexer.Token)
+        EndState
+        {
+            createGuard(ctxt.getTransitionName(),
+                        token.getValue(),
+                        token.getLineNumber());
+        }
 }
 
 EndState
 {
-    // Check for a duplicate guard.
-    PUSH(token : SmcLexer.Token) [isDuplicateGuard();]
-                    PushStart           {error("Duplicate transition - duplicate ignored.", false);
-                                         createGuard();
-                                         setTransType(Smc.TRANS_PUSH);
-										 setEndState("nil");}
-
-    POP(token : SmcLexer.Token) [isDuplicateGuard();]
-                    PopStart            {error("Duplicate transition - duplicate ignored.", false);
-                                         createGuard();
-                                         setTransType(Smc.TRANS_POP);}
-
-    WORD(token : SmcLexer.Token) [isDuplicateGuard();]
-                    EndState1           {error("Duplicate transition - duplicate ignored.", false);
-                                         createGuard();
-                                         setTransType(Smc.TRANS_SET);
-                                         setEndState(token);}
-
+    // NOTE: Now that SMC allows guards to be complex condition
+    // expressions, it is no longer possible to check for
+    // duplicate guards.
     PUSH(token : SmcLexer.Token)
-                    PushStart           {createGuard();
-                                         setTransType(Smc.TRANS_PUSH);
-										 setEndState("nil");}
+        PushStart
+        {
+            setTransType(Smc.TRANS_PUSH);
+			setEndState("nil");
+        }
 
     POP(token : SmcLexer.Token)
-                    PopStart            {createGuard();
-                                         setTransType(Smc.TRANS_POP);}
+        PopStart
+        {
+            setTransType(Smc.TRANS_POP);
+        }
 
     WORD(token : SmcLexer.Token)
-                    EndState1           {createGuard();
-                                         setTransType(Smc.TRANS_SET);
-                                         setEndState(token);}
+        SimpleTrans
+        {
+            setTransType(Smc.TRANS_SET);
+            setEndState(token.getValue());
+        }
 
-    Default         EndStateError       {error("Expecting either \"push\", \"pop\" or end state.", false);}
+    Default
+        EndStateError
+        {
+            error("Expecting either \"push\", \"pop\" or end state.",
+                  ctxt.getLineNumber());
+        }
 }
 
 EndStateError
 {
     LEFT_BRACE(token : SmcLexer.Token)
-                    push(ActionMap::MultiStart)
-                                        {}
-    action_done     push(ActionMap::MultiStart)
-                                        {addAction();}
-    actions_done    Transitions         {addGuard();
-                                         addTransition();}
+        ActionEnd/push(ActionMap::Start)
+        {
+			createActionList();
+		}
 
-    RIGHT_BRACE(token : SmcLexer.Token)
-                    Transitions         {addGuard();
-                                         addTransition();}
-
-    Default         nil                 {}
+    Default
+        nil
+        {}
 }
 
-EndState1
+SimpleTrans
 {
-    // This must be a fully qualified state name.
-    COLON(token : SmcLexer.Token)
-                    EndState2           {appendEndState(token);}
-
-    // v. 1.3.2
-    // A push transition may now be specified using the form
-    //   <state1>/push(<state2>)
-	// which means: this transition ends at <state1> but then
-    // pushes to <state2>. This syntax change is necessary if
-    // two different transitions need to push the <state2>
-    // and then need to process the pop differently. Without this
-    // new syntax, there is no way to distinguish between pops
-    // and their respective pushes from transitions from the same
-    // state.
-    SLASH(token : SmcLexer.Token)
-				    PushTransition		{setTransType(Smc.TRANS_PUSH);}
+    // A slash means that this is really a push transition.
+    SLASH(token: SmcLexer.Token)
+        PushTransition
+        {
+            setTransType(Smc.TRANS_PUSH);
+        }
 
     // A brace denotes the start of the actions.
     LEFT_BRACE(token : SmcLexer.Token)
-                    push(ActionMap::MultiStart)
-                                        {}
+        ActionEnd/push(ActionMap::Start)
+        {
+			createActionList();
+		}
 
-    // There are still more actions to parse. Add this action to
-    // the in-progress guard's list.
-    action_done     push(ActionMap::MultiStart)
-                                        {addAction();}
-
-    // All actions have been parsed. Go on to the next transition.
-    actions_done    Transitions         {addGuard();
-                                         addTransition();}
-
-    Default         EndStateError       {error("Expecting a '{'.", false);}
-}
-
-EndState2
-{
-    COLON(token : SmcLexer.Token)
-                    EndState3           {appendEndState(token);}
-
-    Default         EndStateError       {error("Expecting another ':' (as in map::state).", false);}
-}
-
-EndState3
-{
-    WORD(token : SmcLexer.Token)
-                    ActionStart         {appendEndState(token);}
-
-    Default         EndStateError       {error("Expecting a state name (as in map::state)", false);}
+    Default
+        ActionStartError
+        {
+            error("A '{' must proceed any action definitions.",
+                  ctxt.getLineNumber());
+        }
 }
 
 // This is the push part of a "<state1>/push(<state2>)" end statefd
@@ -910,502 +1063,580 @@ EndState3
 PushTransition
 {
     PUSH(token : SmcLexer.Token)
-				    PushStart			{}
+        PushStart
+        {}
 
-    Default			PushError			{error("\"push\" must follow a '/'.", false);}
+    Default
+        PushError
+        {
+            error("\"push\" must follow a '/'.",
+                  ctxt.getLineNumber());
+        }
 }
 
 PushStart
 {
     LEFT_PAREN(token : SmcLexer.Token)
-                    PushMap             {}
+        PushMap
+        {}
 
-    Default         PushError           {error("\"push\" must be followed by a '\'.", false);}
+    Default
+        PushError
+        {
+            error("\"push\" must be followed by a '\'.",
+                  ctxt.getLineNumber());
+        }
 }
 
 PushError
 {
     RIGHT_PAREN(token : SmcLexer.Token)
-                    ActionStart         {}
+        ActionStart
+        {}
+
     LEFT_BRACE(token : SmcLexer.Token)
-                    push(ActionMap::MultiStart)
-                                        {}
-    action_done     push(ActionMap::MultiStart)
-                                        {addAction();}
-    actions_done    Transitions         {addGuard();
-                                         addTransition();}
+        ActionEnd/push(ActionMap::Start)
+        {
+			createActionList();
+		}
 
-    RIGHT_BRACE(token : SmcLexer.Token)
-                    Transitions         {addGuard();
-                                         addTransition();}
-
-    Default         nil                 {}
+    Default
+        nil
+        {}
 }
 
 PushMap
 {
-    // Is this a map name or a state name?
     WORD(token : SmcLexer.Token)
-                    PushState1          {setPushState(token);}
+        PushEnd
+        {
+            setPushState(token.getValue());
+        }
 
-    Default         PushError           {error("Expecting a state name.", false);}
-}
-
-PushState1
-{
-    // Just the state name was provided.
-    RIGHT_PAREN(token : SmcLexer.Token)
-                    ActionStart         {}
-
-    // We have seen the map name. Now we are looking for the state.
-    COLON(token : SmcLexer.Token)
-                    PushState2          {appendPushState(token);}
-
-    Default         PushError           {error("Expecting either ')' or ':' (as in map::state).", false);}
-}
-
-PushState2
-{
-    COLON(token : SmcLexer.Token)
-                    PushState3          {appendPushState(token);}
-
-    Default         PushError           {error("Expecting ':' (as in map::state).", false);}
-}
-
-PushState3
-{
-    WORD(token : SmcLexer.Token)
-                    PushEnd             {appendPushState(token);}
-
-    Default         PushError           {error("Expecting a state name (as in map::state).", false);}
+    Default
+        PushError
+        {
+            error("Expecting a state name.",
+                  ctxt.getLineNumber());
+        }
 }
 
 PushEnd
 {
     RIGHT_PAREN(token : SmcLexer.Token)
-                    ActionStart         {}
+        ActionStart
+        {}
 
-    Default         PushError           {error("push transition must end in ')' (push(state)).", false);}
+    Default
+        PushError
+        {
+            error("push transition missing closing paren.",
+                  ctxt.getLineNumber());
+        }
 }
 
 PopStart
 {
     LEFT_PAREN(token : SmcLexer.Token)
-                    PopAction           {}
+        PopAction
+        {}
 
     // A brace denotes the start of the actions.
     // It is acceptable not to provide a pop transition.
     LEFT_BRACE(token : SmcLexer.Token)
-                    push(ActionMap::MultiStart)
-                                        {}
-    action_done     push(ActionMap::MultiStart)
-                                        {addAction();}
-    actions_done    Transitions         {addGuard();
-                                         addTransition();}
+        ActionEnd/push(ActionMap::Start)
+        {
+			createActionList();
+		}
 
-    Default         PopError            {error("Expecting '(trans)' or '{' after pop.", false);}
+    Default
+        PopError
+        {
+            error("Expecting '(trans)' or '{' after pop.",
+                  ctxt.getLineNumber());
+        }
 }
 
 PopError
 {
     RIGHT_PAREN(token : SmcLexer.Token)
-                    ActionStart         {}
+        ActionStart
+        {}
 
     LEFT_BRACE(token : SmcLexer.Token)
-                    push(ActionMap::MultiStart)
-                                        {}
-    action_done     push(ActionMap::MultiStart)
-                                        {addAction();}
-    actions_done    Transitions         {addGuard();
-                                         addTransition();}
+        ActionEnd/push(ActionMap::Start)
+        {
+			createActionList();
+		}
 
-    RIGHT_BRACE(token : SmcLexer.Token)
-                    Transitions         {addGuard();
-                                         addTransition();}
-
-    Default         nil                 {}
+    Default
+        nil
+        {}
 }
 
 PopAction
 {
     RIGHT_PAREN(token : SmcLexer.Token)
-                    ActionStart         {}
+        ActionStart
+        {}
 
     WORD(token : SmcLexer.Token)
-                    PopArgs             {setEndState(token);}
+        PopArgs
+        {
+            setEndState(token.getValue());
+        }
 
-    Default         PopError            {error("Expecting either a pop transition or ')'.", false);}
+    Default
+        PopError
+        {
+            error("Expecting either a pop transition or closing paren.",
+                  ctxt.getLineNumber());
+        }
 }
 
 PopArgs
 {
     // No more pop arguments. Start collecting the actions.
     RIGHT_PAREN(token : SmcLexer.Token)
-                    ActionStart         {}
+        ActionStart
+        {}
 
-    // A comma signifies there are more arguments
-    // in this transition.
+    // A comma signifies there are more arguments in this
+    // transition.
     COMMA(token : SmcLexer.Token)
-                    push(ArgMap::ArgsStart)
-                                        {}
-    ArgsDone(argList : List)
-                    ActionStart         {setPopArgs(argList);}
+        PopArgsEnd
+        {}
 
-    ArgsError       ActionStart         {}
+    Default
+        PopError
+        {
+            error("Pop transition missing closing paren.",
+                  ctxt.getLineNumber());
+        }
+}
 
-    Default         PopError            {error("Expecting ')' to end the pop transition.", false);}
+PopArgsEnd
+    Entry
+    {
+        setRawMode("(", ")");
+    }
+    Exit
+    {
+        setCookedMode();
+    }
+{
+    SOURCE(token: SmcLexer.Token)
+        ActionStart
+        {
+            setPopArgs(token.getValue());
+        }
 }
 
 ActionStart
 {
     // A brace denotes the start of the actions.
     LEFT_BRACE(token : SmcLexer.Token)
-                    push(ActionMap::MultiStart)
-                                        {}
+        ActionEnd/push(ActionMap::Start)
+        {
+			createActionList();
+		}
 
-    // There are still more actions to parse. Add this action to
-    // the in-progress guard's list.
-    action_done     push(ActionMap::MultiStart)
-                                        {addAction();}
+    Default
+        ActionStartError
+        {
+            error("A '{' must proceed any action definitions.",
+                  ctxt.getLineNumber());
+        }
+}
 
-    // All actions have been parsed. Go on to the next transition.
-    actions_done    Transitions         {addGuard();
-                                         addTransition();}
+ActionEnd
+{
+    actionsDone(actions: List, lineNumber: int)
+		Transitions
+	    {
+			setActions(actions);
+			addGuard();
+			addTransition();
+		}
 
-    Default         ActionStartError    {error("A '{' must proceed any action definitions.", false);}
+	actionsError
+		Transitions
+		{}
 }
 
 ActionStartError
 {
     LEFT_BRACE(token : SmcLexer.Token)
-                    push(ActionMap::MultiStart)
-                                        {}
-    action_done     push(ActionMap::MultiStart)
-                                        {addAction();}
-    actions_done    Transitions         {addGuard();
-                                         addTransition();}
+        ActionEnd/push(ActionMap::Start)
+        {
+			createActionList();
+		}
 
-    RIGHT_BRACE(token : SmcLexer.Token)
-                    Transitions         {addGuard();
-                                         addTransition();}
+    Default
+        nil
+        {}
+}
+%%
 
-    Default         nil                 {}
+// This map parses transition parameters.
+%map ParamMap
+%%
+Start
+    Entry
+    {
+        createParamList();
+    }
+{
+    // This is the parameter name.
+    WORD(token: SmcLexer.Token)
+        ParamSeparator
+        {
+            createParameter(token.getValue(),
+                            token.getLineNumber());
+        }
+
+    // Empty parameter lists are fine.
+    RIGHT_PAREN(token: SmcLexer.Token)
+        pop(paramsDone,
+            ctxt.getParamList(),
+            token.getLineNumber())
+        {}
+
+    // Anything else is an error. Go to the error state and
+    // read in all remaining characters until the end paren
+    // is found.
+    Default
+        Error
+        {
+            error("Invalid parameter syntax.",
+                  ctxt.getLineNumber());
+        }
+}
+
+ParamSeparator
+{
+    // The parameter name and type are separated by a colon.
+    COLON(token: SmcLexer.Token)
+        ParamType
+        {}
+
+    // The parameter does *not* need a type if the target
+    // language is typeless.
+    COMMA(token: SmcLexer.Token)
+      [Smc._targetLanguage == Smc.TCL]
+        Start
+        {
+            addParameter();
+        }
+
+    RIGHT_PAREN(token: SmcLexer.Token)
+      [Smc._targetLanguage == Smc.TCL]
+        pop(paramsDone,
+            ctxt.getParamList(),
+            token.getLineNumber())
+        {
+            addParameter();
+        }
+
+    // The target language is typed. This is not allowed.
+    COMMA(token: SmcLexer.Token)
+        Error
+        {
+            error("Parameter type missing.",
+                  token.getLineNumber());
+        }
+
+    RIGHT_PAREN(token: SmcLexer.Token)
+        pop(paramsError,
+            ctxt.getParamList(),
+            token.getLineNumber())
+        {
+            error("Parameter type missing.",
+                  token.getLineNumber());
+        }
+
+    Default
+        Error
+        {
+            error("Invalid parameter syntax.",
+                  ctxt.getLineNumber());
+        }
+}
+
+ParamType
+    Entry
+    {
+	    setRawMode("(", ")", ",");
+    }
+    Exit
+    {
+	    setCookedMode();
+    }
+{
+    SOURCE(token: SmcLexer.Token)
+        NextParam
+        {
+            setParamType(token.getValue());
+        }
+}
+
+NextParam
+{
+    COMMA(token: SmcLexer.Token)
+        Start
+        {
+            addParameter();
+        }
+
+    RIGHT_PAREN(token: SmcLexer.Token)
+        pop(paramsDone,
+            ctxt.getParamList(),
+            token.getLineNumber())
+        {
+            addParameter();
+        }
+
+    Default
+        Error
+        {
+            error("Invalid parameter syntax.",
+                  ctxt.getLineNumber());
+        }
+}
+
+Error
+    Entry
+    {
+        setRawMode("(", ")");
+        clearParameter();
+    }
+    Exit
+    {
+	    setCookedMode();
+    }
+{
+    // Delete any collected parameters.
+    SOURCE(token: SmcLexer.Token)
+        pop(paramsError,
+            ctxt.getParamList(),
+            token.getLineNumber())
+        {}
 }
 
 %%
 
-//===============================================================
-// ActionMap
-// This map is used to parse a single action. Actions are of the
-// form:
-// WORD '(' {args} ')' ';'
+// This map parses transition actions.
+// Transition actions are of the form:
+//   WORD '(' SOURCE ')' ';'
+//
+// VB and C#: Transition actions may also have the form:
+//   WORD '=' SOURCE ';'
 //
 %map ActionMap
 %%
-
-// Start here if you are looking for muliple actions.
-MultiStart
-{
-    RIGHT_BRACE(token : SmcLexer.Token)
-                    pop(actions_done)   {}
-
-    // This word is the action name.
-    WORD(token : SmcLexer.Token)
-                    ArgsStart           {createAction(token);}
-
-    Default         ActionStartError    {error("Expecting either a new action or a '}'.", false);}
-}
-
-// Start here if you are looking for a single action.
 Start
 {
-    // This word is the action name.
-    WORD(token : SmcLexer.Token)
-                    ArgsStart           {createAction(token);}
+	// This word is the action name.
+	WORD(token: SmcLexer.Token)
+	    ActionName
+		{
+			createAction(token.getValue(),
+						 token.getLineNumber());
+		}
 
-    // A "!" means that this action is being negated.
-    // Probably being used as a guard.
-    EXCLAMATION(token : SmcLexer.Token)
-                    nil                 {setActionNegation();}
+    RIGHT_BRACE(token: SmcLexer.Token)
+		pop(actionsDone,
+			ctxt.getActionList(),
+			token.getLineNumber())
+		{}
 
-    Default         ActionStartError    {error("Expecting action name.", false);}
+    Default
+		ActionError
+		{
+			clearActions();
+			error("Expecting either a method name or a '}'",
+				  ctxt.getLineNumber());
+		}
 }
 
-ActionStartError
+ActionName
 {
-    WORD(token : SmcLexer.Token)
-                    ArgsStart           {createAction(token);}
+	LEFT_PAREN(token: SmcLexer.Token)
+		ActionArgs/push(ArgsMap::Start)
+		{
+			createArgList();
+		}
 
-    EXCLAMATION(token : SmcLexer.Token)
-                    Start               {createAction(token);
-                                         setActionNegation();}
+    // .Net uses some syntactic sugar instead of getter/setter
+    // methods. Let say a class has a member data _name. In Java
+    // and C++ you do "name = obj.getName();" to retrieve _name
+    // and "obj.setName(name);" to set _name.
+    // In .Net you do "name = obj.Name" and "obj.Name = name"
+    // where Name is a property with Get and Set routines.
+    // So you are still doing method calls but .Net uses the
+    // "=" operator to hide the fact.
+    //
+    // I don't like that.
+    //
+    // Either way, it is part of .Net languages and SMC must
+    // allow .Net users to access this capability.
+    EQUAL(token: SmcLexer.Token)
+      [Smc._targetLanguage != Smc.VB &&
+       Smc._targetLanguage != Smc.C_SHARP]
+        ActionError
+        {
+			clearActions();
+            error("'=' property assignment may only be used with -vb or -csharp.",
+                  token.getLineNumber());
+        }
 
-    LEFT_PAREN(token : SmcLexer.Token)
-                    ArgsStart           {createAction(token);}
+    EQUAL(token: SmcLexer.Token)
+        PropertyAssignment
+        {
+            setProperty(true);
+			createArgList();
+        }
 
-    RIGHT_PAREN(token : SmcLexer.Token)
-                    ArgsEnd             {}
-
-    SEMICOLON(token : SmcLexer.Token)
-                    pop(action_done)    {}
-
-    RIGHT_BRACE(token : SmcLexer.Token)
-                    pop(actions_done)   {}
-
-    Default         nil                 {}
+    Default
+		ActionError
+		{
+			clearActions();
+			error(
+                "Expecting an open paren after the method name",
+				ctxt.getLineNumber());
+		}
 }
 
-ArgsStart
+ActionArgs
 {
-    LEFT_PAREN(token : SmcLexer.Token)
-                    push(ArgMap::ArgsStart)
-                                        {}
-    ArgsDone(argList : List)
-                    ArgsEnd             {setActionArgs(argList);}
+	argsDone(args: List)
+		ActionEnd
+		{
+			setActionArgs(args);
+		}
 
-    ArgsError       ArgsEndError        {}
-
-    // Error transitions.
-    RIGHT_PAREN(token : SmcLexer.Token)
-                    ArgsEnd             {error("Expecting '(' after the action name.", false);}
-    SEMICOLON(token : SmcLexer.Token)
-                    pop(action_done)    {error("Expecting '(' after the action name.", false);}
-    RIGHT_BRACE(token : SmcLexer.Token)
-                    pop(actions_done)   {error("Expecting '(' after the action name.", false);}
-
-    Default         ArgsStartError      {error("Expecting '(' after the action name.", false);}
+	argsError
+		ActionError
+		{}
 }
 
-ArgsStartError
+ActionEnd
 {
-    LEFT_PAREN(token : SmcLexer.Token)
-                    push(ArgMap::ArgsStart)
-                                        {}
-    ArgsDone(argList : List)
-                    ArgsEnd             {setActionArgs(argList);}
-    ArgsError       ArgsEndError        {}
+	// Look for the semicolon.
+	SEMICOLON(token: SmcLexer.Token)
+		Start
+		{
+			addAction();
+		}
 
-    RIGHT_PAREN(token : SmcLexer.Token)
-                    ArgsEnd             {}
-    SEMICOLON(token : SmcLexer.Token)
-                    pop(action_done)    {}
-
-    Default         nil                 {}
+	Default
+		ActionError
+		{
+			error("Expecting a ';' after closing paren",
+                  ctxt.getLineNumber());
+		}
 }
 
-ArgsEnd
+PropertyAssignment
+    Entry
+    {
+        setRawMode(";");
+    }
+    Exit
+    {
+        setCookedMode();
+    }
 {
-    SEMICOLON(token : SmcLexer.Token)
-                    pop(action_done)    {}
+    // .Net property assignment takes only one argument.
+    SOURCE(token: SmcLexer.Token)
+        Start
+        {
+            createArgument(token.getValue(),
+                           token.getLineNumber());
+            addArgument();
+			setActionArgs(ctxt.getArgsList());
+            addAction();
+        }
 
-    Default         ArgsEndError        {error("Actions must be terminated with a ';'.", false);}
+	Default
+		ActionError
+		{
+			error("Missing ';' at end of property assignment",
+                  ctxt.getLineNumber());
+		}
 }
 
-ArgsEndError
+// Wait here for a right brace which we will assume to be the
+// action body's end.
+ActionError
 {
-    SEMICOLON(token : SmcLexer.Token)
-                    pop(action_done)    {}
+	RIGHT_BRACE(token: SmcLexer.Token)
+		pop(actionsError)
+		{}
 
-    Default         nil                 {}
+	Default
+		nil
+		{}
 }
 
 %%
 
-//===============================================================
-// Argument Map
-// This map is used to collect action and pop arguments.
-//
-%map ArgMap
+// This map parses an action's arguments.
+%map ArgsMap
 %%
-ArgsStart
-Entry {pushArgStack();}
+Start
+    Entry
+    {
+	    setRawMode("(", ")", ",");
+    }
+    Exit
+    {
+	    setCookedMode();
+    }
 {
-    // Look for scoped variable names.
-    WORD(token : SmcLexer.Token)
-                    VarArg1             {createVariable(token);}
-
-    VARIABLE(token : SmcLexer.Token)
-                    NextArgument        {addSimpleArgument(token);}
-    INTEGER(token : SmcLexer.Token)
-                    NextArgument        {addSimpleArgument(token);}
-    FLOAT(token : SmcLexer.Token)
-                    NextArgument        {addSimpleArgument(token);}
-    STRING(token : SmcLexer.Token)
-                    NextArgument        {addSimpleArgument(token);}
-
-    // There are no arguments.
-    RIGHT_PAREN(token : SmcLexer.Token)
-                    pop(ArgsDone, ctxt.getArgsResult())
-                                        {setArgsResult();
-										 popArgStack();}
-
-    Default         ArgsError           {error("Expecting either a valid argument or a ')'.", false);}
+	SOURCE(token: SmcLexer.Token)
+		NextArg
+		{
+			createArgument(token.getValue(),
+						   token.getLineNumber());
+		}
 }
 
-ArgsContinue
+NextArg
 {
-    // Look for scoped variable names.
-    WORD(token : SmcLexer.Token)
-                    VarArg1             {createVariable(token);}
+	COMMA(token: SmcLexer.Token)
+		Start
+		{
+			addArgument();
+		}
 
-    VARIABLE(token : SmcLexer.Token)
-                    NextArgument        {addSimpleArgument(token);}
-    INTEGER(token : SmcLexer.Token)
-                    NextArgument        {addSimpleArgument(token);}
-    FLOAT(token : SmcLexer.Token)
-                    NextArgument        {addSimpleArgument(token);}
-    STRING(token : SmcLexer.Token)
-                    NextArgument        {addSimpleArgument(token);}
+	RIGHT_PAREN(token: SmcLexer.Token)
+		pop(argsDone, ctxt.getArgsList())
+		{
+			addArgument();
+		}
 
-    // There are no arguments.
-    RIGHT_PAREN(token : SmcLexer.Token)
-                    pop(ArgsDone, ctxt.getArgsResult())
-                                        {setArgsResult();
-										 popArgStack();}
-
-    Default         ArgsError           {error("Expecting either a valid argument or a ')'.", false);}
+	Default
+		Error
+		{
+			error("Missing ',' or closing paren after argument.",
+                  ctxt.getLineNumber());
+		}
 }
 
-VarArg1
+Error
+    Entry
+    {
+	    setRawMode("{", "}");
+    	clearArguments();
+    }
+    Exit
+    {
+	    setCookedMode();
+    }
 {
-    // A colon means that this argument is scoped.
-    // (Identifiers using the period scope are handled in the
-    //  lexer.)
-    COLON(token : SmcLexer.Token)
-                    VarArg2             {appendVariable(token);}
-
-    // End of arguments.
-    RIGHT_PAREN(token : SmcLexer.Token)
-                    pop(ArgsDone, ctxt.getArgsResult())
-										{addVariableArgument();
-										 setArgsResult();
-										 popArgStack();}
-
-    // A left paren denotes that this identifier is a function
-	// call. 
-    LEFT_PAREN(token : SmcLexer.Token)
-                    push(ArgsStart)		{}
-    ArgsDone(argList : List)
-					NextArgument		{addMethodArgument(argList);}
-	ArgsError		ArgsError			{}
-
-    // A new argument.
-    COMMA(token : SmcLexer.Token)
-                    ArgsContinue        {addVariableArgument();}
-
-    Default         ArgsError           {error("Expecting either ',' or ')'.", false);}
+	SOURCE(token: SmcLexer.Token)
+		pop(argsError)
+		{}
 }
-
-VarArg2
-{
-    COLON(token : SmcLexer.Token)
-                    VarArgEnd           {appendVariable(token);}
-
-    Default         ArgsError           {error("Expecting ':' after first ':'.", false);}
-}
-
-VarArgEnd
-{
-    // Handle multiply scoped variables.
-    WORD(token : SmcLexer.Token)
-                    VarArg1             {appendVariable(token);}
-}
-
-NextArgument
-{
-    RIGHT_PAREN(token : SmcLexer.Token)
-                    pop(ArgsDone, ctxt.getArgsResult())
-										{setArgsResult();
-										 popArgStack();}
-
-    COMMA(token : SmcLexer.Token)
-                    ArgsContinue        {}
-
-    Default         ArgsError           {error("Expecting either ',' or ')'.", false);}
-}
-
-ArgsError
-{
-    RIGHT_PAREN(token : SmcLexer.Token)
-                    pop(ArgsError)      {popArgStack();}
-
-    Default         nil                 {}
-}
-
-%%
-
-//===============================================================
-// Name Map
-// This map parses fully qualified class names.
-//
-%map NameMap
-%%
-// Get the owning object's class name.
-FQName
-{
-    // The next token must be the class name. The class name may
-    // begin with a colon.
-    COLON(token : SmcLexer.Token)
-                Colon1          {appendClassName(token);}
-    WORD(token : SmcLexer.Token)
-                ClassName       {appendClassName(token);}
-
-    Default     pop(FQNameError)
-                                {error("Missing class name after %keyword.", false);}
-}
-
-ClassName
-{
-    // If there is a ':', then this is a FQ name.
-    COLON(token : SmcLexer.Token)
-                    Colon1              {appendClassName(token);}
-
-    // Look for a '%' keyword to mark the end of the class name.
-    START_STATE(token : SmcLexer.Token)
-                    pop(FQNameDone, ctxt.getFQName())
-										{pushBack(token);}
-
-    HEADER_FILE(token : SmcLexer.Token)
-                    pop(FQNameDone, ctxt.getFQName())
-										{pushBack(token);}
-
-    PACKAGE_NAME(token : SmcLexer.Token)
-                    pop(FQNameDone, ctxt.getFQName())
-										{pushBack(token);}
-
-    IMPORT(token : SmcLexer.Token)
-                    pop(FQNameDone, ctxt.getFQName())
-										{pushBack(token);}
-
-    MAP_NAME(token : SmcLexer.Token)
-                    pop(FQNameDone, ctxt.getFQName())
-										{pushBack(token);}
-
-    Default         nil                 {error("Expecting \"%start\", \"%header\", \"%package\" or \"%map\".", false);}
-}
-
-// Each part of the class name is separated by two (or more)
-// colons.
-Colon1
-{
-    COLON(token : SmcLexer.Token)
-                    Colon2              {appendClassName(token);}
-
-    // Anything else is an error.
-    Default         nil                 {error("Expecting \"::\" in fully qualified class name.", false);}
-}
-
-// A word *may* follow the two colons.
-Colon2
-{
-    WORD(token : SmcLexer.Token)
-                    ClassName           {appendClassName(token);}
-
-    // Ignore excess colons.
-    COLON(token : SmcLexer.Token)
-                    nil                 {}
-
-    Default         nil                 {error("Expecting a string after \"::\" in fully qualified class name.", false);}
-}
-
 %%

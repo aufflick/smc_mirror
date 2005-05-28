@@ -13,92 +13,21 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 Charles W. Rapp.
+// Copyright (C) 2000 - 2005. Charles W. Rapp.
 // All Rights Reserved.
 // 
-// Contributor(s): 
+// Contributor(s):
+//   Eitan Suez contributed examples/Ant.
+//   (Name withheld) contributed the C# code generation and
+//   examples/C#.
+//   Francois Perrad contributed the Python code generation and
+//   examples/Python.
 //
 // RCS ID
 // $Id$
 //
 // CHANGE LOG
-// $Log$
-// Revision 1.4  2002/05/07 00:10:20  cwrapp
-// Changes in release 1.3.2:
-// Add the following feature:
-// + 528321: Modified push transition syntax to be:
-//
-// 	  <transname> <state1>/push(<state2>)  {<actions>}
-//
-// 	  which means "transition to <state1> and then
-// 	  immediately push to <state2>". The current
-// 	  syntax:
-//
-// 	  <transname> push(<state2>)  {<actions>}
-//
-//           is still valid and <state1> is assumed to be "nil".
-//
-// No bug fixes.
-//
-// Revision 1.2  2001/12/14 20:10:37  cwrapp
-// Changes in release 1.1.0:
-// Add the following features:
-// + 486786: Added the %package keyword which specifies the
-//           Java package/C++ namespace/Tcl namespace
-//           the SMC-generated classes will be placed.
-// + 486471: The %class keyword accepts fully qualified
-//           class names.
-// + 491135: Add FSMContext methods getDebugStream and
-//           setDebugStream.
-// + 492165: Added -sync command line option which causes
-//           the transition methods to be synchronized
-//           (this option may only be used with -java).
-//
-// Revision 1.1  2001/12/03 14:14:03  cwrapp
-// Changes in release 1.0.2:
-// + Placed the class files in Smc.jar in the net.sf.smc package.
-// + Moved Java source files from smc/bin to net/sf/smc.
-// + Corrected a C++ generation bug wherein arguments were written
-//   to the .h file rather than the .cpp file.
-//
-// Revision 1.1.1.2  2001/03/26 14:41:46  cwrapp
-// Corrected Entry/Exit action semantics. Exit actions are now
-// executed only by simple transitions and pop transitions.
-// Entry actions are executed by simple transitions and push
-// transitions. Loopback transitions do not execute either Exit
-// actions or entry actions. See SMC Programmer's manual for
-// more information.
-//
-// Revision 1.1.1.1  2001/01/03 03:13:59  cwrapp
-//
-// ----------------------------------------------------------------------
-// SMC - The State Map Compiler
-// Version: 1.0, Beta 3
-//
-// SMC compiles state map descriptions into a target object oriented
-// language. Currently supported languages are: C++, Java and [incr Tcl].
-// SMC finite state machines have such features as:
-// + Entry/Exit actions for states.
-// + Transition guards
-// + Transition arguments
-// + Push and Pop transitions.
-// + Default transitions. 
-// ----------------------------------------------------------------------
-//
-// Revision 1.2  2000/09/01 15:32:11  charlesr
-// Changes for v. 1.0, Beta 2:
-//
-// + Removed order dependency on "%start", "%class" and "%header"
-//   appearance. These three tokens may now appear in any order but
-//   still must appear before the first map definition.
-//
-// + Modified SMC parser so that it will continue after finding an
-//   error. Also improved the error message quality.
-//
-// + Made error messages so emacs is able to parse them.
-//
-// Revision 1.1.1.1  2000/08/02 12:50:56  charlesr
-// Initial source import, SMC v. 1.0, Beta 1.
+// (See the bottom of this file.)
 //
 
 package net.sf.smc;
@@ -107,30 +36,31 @@ import java.io.PrintStream;
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 
-public abstract class SmcMap
+public final class SmcMap
+    extends SmcElement
 {
-// Member Methods
+//---------------------------------------------------------------
+// Member methods
+//
 
-    public SmcMap(String name, int line_number)
+    public SmcMap(String name,
+                  int lineNumber,
+                  SmcFSM fsm)
     {
-        _name = name;
-        _line_number = line_number;
-        _default_state = null;
+        super (name, lineNumber);
+
+        _fsm = fsm;
+        _defaultState = null;
         _states = (List) new LinkedList();
     }
 
-    public String getName()
+    public SmcFSM getFSM()
     {
-        return(_name);
-    }
-
-    public int getLineNumber()
-    {
-        return(_line_number);
+        return (_fsm);
     }
 
     public List getStates()
@@ -142,7 +72,7 @@ public abstract class SmcMap
     {
         if (state.getInstanceName().compareTo("DefaultState") == 0)
         {
-            _default_state = state;
+            _defaultState = state;
         }
         else
         {
@@ -155,15 +85,16 @@ public abstract class SmcMap
     public boolean findState(SmcState state)
     {
         SmcState state2;
-        ListIterator it;
+        Iterator it;
         boolean retval;
 
-        for (it = _states.listIterator(), retval = false;
+        for (it = _states.iterator(), retval = false;
              it.hasNext() == true && retval == false;
             )
         {
             state2 = (SmcState) it.next();
-            if (state.getInstanceName().compareTo(state2.getInstanceName()) == 0)
+            if (state.getInstanceName().equals(
+                    state2.getInstanceName()) == true)
             {
                 retval = true;
             }
@@ -172,51 +103,52 @@ public abstract class SmcMap
         return(retval);
     }
 
-    public boolean findState(String state)
+    public boolean isKnownState(String stateName)
     {
-        SmcState state2;
-        ListIterator it;
+        SmcState state;
+        Iterator it;
         boolean retval;
 
-        for (it = _states.listIterator(), retval = false;
+        for (it = _states.iterator(), retval = false;
              it.hasNext() == true && retval == false;
             )
         {
-            state2 = (SmcState) it.next();
-            if (state.compareTo(state2.getInstanceName()) == 0)
+            state = (SmcState) it.next();
+            if (stateName.equals(
+                    state.getInstanceName()) == true)
             {
                 retval = true;
             }
         }
 
-        return(retval);
+        return (retval);
     }
 
     public boolean hasDefaultState()
     {
-        return(_default_state == null ? false : true);
+        return(_defaultState == null ? false : true);
     }
 
     public SmcState getDefaultState()
     {
-        return(_default_state);
+        return(_defaultState);
     }
 
     // Return all transitions appearing in this map.
     public List getTransitions()
     {
         SmcState state;
-        ListIterator stateIt;
+        Iterator stateIt;
         List trans_list;
         List retval;
 
         // If this map has a default state, then initialize the
         // transition list to the default state's transitions.
         // Otherwise, set it to the empty list.
-        if (_default_state != null)
+        if (_defaultState != null)
         {
             retval =
-                (List) new LinkedList(_default_state.getTransitions());
+                (List) new LinkedList(_defaultState.getTransitions());
         }
         else
         {
@@ -225,20 +157,24 @@ public abstract class SmcMap
 
         // Get each state's transition list and merge it into the
         // results.
-        for (stateIt = _states.listIterator();
+        for (stateIt = _states.iterator();
              stateIt.hasNext() == true;
             )
         {
             state = (SmcState) stateIt.next();
             trans_list = state.getTransitions();
-            retval = Smc.merge(trans_list,
-                               retval,
-                               new Comparator() {
-                                   public int compare(Object o1,
-                                                      Object o2) {
-                                       return(((SmcTransition) o1).compareTo(((SmcTransition) o2)));
-                                   }
-                               });
+            retval =
+                Smc.merge(
+                    trans_list,
+                    retval,
+                    new Comparator() {
+                        public int compare(Object o1,
+                                           Object o2) {
+                            return(
+                                ((SmcTransition) o1).compareTo(
+                                    ((SmcTransition) o2)));
+                        }
+                    });
         }
 
         return(retval);
@@ -248,38 +184,40 @@ public abstract class SmcMap
     {
         List retval = (List) new LinkedList();
         List definedDefaultTransitions;
-        ListIterator stateIt;
-        ListIterator transIt;
+        Iterator stateIt;
+        Iterator transIt;
         SmcTransition transition;
         SmcState state;
 
-        if (_default_state == null)
+        if (_defaultState == null)
         {
             definedDefaultTransitions = (List) new LinkedList();
         }
         else
         {
             definedDefaultTransitions =
-                    _default_state.getTransitions();
-            Collections.sort(definedDefaultTransitions,
-                             new Comparator() {
-                                 public int compare(Object o1,
-                                                    Object o2) {
-                                     return(((SmcTransition) o1).compareTo((SmcTransition) o2));
-                                 }
-                             });
+                    _defaultState.getTransitions();
+            Collections.sort(
+                definedDefaultTransitions,
+                new Comparator() {
+                    public int compare(Object o1,
+                                       Object o2) {
+                        return(((SmcTransition) o1).compareTo(
+                                   (SmcTransition) o2));
+                    }
+                });
         }
 
         // Make a transitions list in all the states.
         // For each transition that is *not* defined in the
         // default state, create a default definition for that
         // transition.
-        for (stateIt = _states.listIterator();
+        for (stateIt = _states.iterator();
              stateIt.hasNext() == true;
             )
         {
             state = (SmcState) stateIt.next();
-            for (transIt = state.getTransitions().listIterator();
+            for (transIt = state.getTransitions().iterator();
                  transIt.hasNext() == true;
                 )
             {
@@ -287,8 +225,10 @@ public abstract class SmcMap
                 // not already in the default transition list.
                 // DO NOT ADD TRANSITIONS NAMED "DEFAULT".
                 transition = (SmcTransition) transIt.next();
-                if (transition.getName().compareTo("Default") != 0 &&
-                    definedDefaultTransitions.contains(transition) == false &&
+                if (transition.getName().equals(
+                        "Default") != false &&
+                    definedDefaultTransitions.contains(
+                        transition) == false &&
                     retval.contains(transition) == false)
                 {
                     retval.add(transition);
@@ -302,16 +242,16 @@ public abstract class SmcMap
     public String toString()
     {
         String retval;
-        ListIterator state_it;
+        Iterator state_it;
         SmcState state;
 
         retval = "%map " + _name;
-        if (_default_state != null)
+        if (_defaultState != null)
         {
-            retval += "\n" + _default_state;
+            retval += "\n" + _defaultState;
         }
 
-        for (state_it = _states.listIterator();
+        for (state_it = _states.iterator();
              state_it.hasNext() == true;
             )
         {
@@ -322,17 +262,66 @@ public abstract class SmcMap
         return(retval);
     }
 
-    public abstract void generateCode(PrintStream header,
-                                      PrintStream source,
-                                      String context,
-                                      String pkg,
-                                      String indent)
-        throws ParseException;
+    // Returns the next unique state identifier.
+    public static int getNextStateId()
+    {
+        return (_StateId++);
+    }
 
-// Member Data
+    //-----------------------------------------------------------
+    // SmcElement Abstract Methods.
+    //
 
-    protected String _name;
-    protected int _line_number;
-    protected List _states;
-    protected SmcState _default_state;
+    public void accept(SmcVisitor visitor)
+    {
+        visitor.visit(this);
+        return;
+    }
+
+    //
+    // end of SmcElement Abstract Methods.
+    //-----------------------------------------------------------
+
+//---------------------------------------------------------------
+// Member data
+//
+
+    private SmcFSM _fsm;
+    private List _states;
+    private SmcState _defaultState;
+
+    //-----------------------------------------------------------
+    // Statics.
+    //
+
+    // Use this to generate unique state IDs.
+    private static int _StateId = 0;
 }
+
+//
+// CHANGE LOG
+// $Log$
+// Revision 1.5  2005/05/28 19:28:42  cwrapp
+// Moved to visitor pattern.
+//
+// Revision 1.5  2005/02/21 15:36:20  charlesr
+// Added Francois Perrad to Contributors section for Python work.
+//
+// Revision 1.4  2005/02/03 16:46:46  charlesr
+// In implementing the Visitor pattern, the generateCode()
+// methods have been moved to the appropriate Visitor
+// subclasses (e.g. SmcJavaGenerator). This class now extends
+// SmcElement.
+//
+// Revision 1.3  2004/10/30 16:06:07  charlesr
+// Added Graphviz DOT file generation.
+//
+// Revision 1.2  2004/09/06 16:40:32  charlesr
+// Added C# support.
+//
+// Revision 1.1  2004/05/31 13:55:06  charlesr
+// Added support for VB.net code generation.
+//
+// Revision 1.0  2003/12/14 21:04:18  charlesr
+// Initial revision
+//

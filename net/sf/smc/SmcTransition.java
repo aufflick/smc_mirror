@@ -13,113 +13,46 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 Charles W. Rapp.
+// Copyright (C) 2000 - 2005. Charles W. Rapp.
 // All Rights Reserved.
 // 
-// Contributor(s): 
+// Contributor(s):
+//   Eitan Suez contributed examples/Ant.
+//   (Name withheld) contributed the C# code generation and
+//   examples/C#.
+//   Francois Perrad contributed the Python code generation and
+//   examples/Python.
 //
 // RCS ID
 // $Id$
 //
 // CHANGE LOG
-// $Log$
-// Revision 1.4  2002/05/07 00:10:20  cwrapp
-// Changes in release 1.3.2:
-// Add the following feature:
-// + 528321: Modified push transition syntax to be:
-//
-// 	  <transname> <state1>/push(<state2>)  {<actions>}
-//
-// 	  which means "transition to <state1> and then
-// 	  immediately push to <state2>". The current
-// 	  syntax:
-//
-// 	  <transname> push(<state2>)  {<actions>}
-//
-//           is still valid and <state1> is assumed to be "nil".
-//
-// No bug fixes.
-//
-// Revision 1.2  2001/12/14 20:10:37  cwrapp
-// Changes in release 1.1.0:
-// Add the following features:
-// + 486786: Added the %package keyword which specifies the
-//           Java package/C++ namespace/Tcl namespace
-//           the SMC-generated classes will be placed.
-// + 486471: The %class keyword accepts fully qualified
-//           class names.
-// + 491135: Add FSMContext methods getDebugStream and
-//           setDebugStream.
-// + 492165: Added -sync command line option which causes
-//           the transition methods to be synchronized
-//           (this option may only be used with -java).
-//
-// Revision 1.1  2001/12/03 14:14:03  cwrapp
-// Changes in release 1.0.2:
-// + Placed the class files in Smc.jar in the net.sf.smc package.
-// + Moved Java source files from smc/bin to net/sf/smc.
-// + Corrected a C++ generation bug wherein arguments were written
-//   to the .h file rather than the .cpp file.
-//
-// Revision 1.1.1.2  2001/03/26 14:41:46  cwrapp
-// Corrected Entry/Exit action semantics. Exit actions are now
-// executed only by simple transitions and pop transitions.
-// Entry actions are executed by simple transitions and push
-// transitions. Loopback transitions do not execute either Exit
-// actions or entry actions. See SMC Programmer's manual for
-// more information.
-//
-// Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
-//
-// ----------------------------------------------------------------------
-// SMC - The State Map Compiler
-// Version: 1.0, Beta 3
-//
-// SMC compiles state map descriptions into a target object oriented
-// language. Currently supported languages are: C++, Java and [incr Tcl].
-// SMC finite state machines have such features as:
-// + Entry/Exit actions for states.
-// + Transition guards
-// + Transition arguments
-// + Push and Pop transitions.
-// + Default transitions. 
-// ----------------------------------------------------------------------
-//
-// Revision 1.2  2000/09/01 15:32:21  charlesr
-// Changes for v. 1.0, Beta 2:
-//
-// + Removed order dependency on "%start", "%class" and "%header"
-//   appearance. These three tokens may now appear in any order but
-//   still must appear before the first map definition.
-//
-// + Modified SMC parser so that it will continue after finding an
-//   error. Also improved the error message quality.
-//
-// + Made error messages so emacs is able to parse them.
-//
-// Revision 1.1.1.1  2000/08/02 12:50:57  charlesr
-// Initial source import, SMC v. 1.0, Beta 1.
+// (See the bottom of this file.)
 //
 
 package net.sf.smc;
 
-import java.io.PrintStream;
-import java.text.ParseException;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 
-public abstract class SmcTransition
+public final class SmcTransition
+    extends SmcElement
+    implements Comparable
 {
-// Member Methods
+//---------------------------------------------------------------
+// Member methods
+//
 
     public SmcTransition(String name,
                          List parameters,
-                         int line_number)
+                         int lineNumber,
+                         SmcState state)
     {
-        _name = name;
+        super (name, lineNumber);
+
+        _state = state;
         _parameters = parameters;
-        _line_number = line_number;
         _guards = (List) new LinkedList();
     }
 
@@ -131,31 +64,9 @@ public abstract class SmcTransition
         {
             SmcTransition trans = (SmcTransition) obj;
 
-            if (_name.compareTo(trans.getName()) != 0 ||
-                _parameters.size() != trans.getParameters().size())
-            {
-                retval = false;
-            }
-            else
-            {
-                ListIterator it1;
-                ListIterator it2;
-                SmcParameter param1;
-                SmcParameter param2;
-
-                // The two parameter lists are equal until proven
-                // otherwise.
-                for (it1 = _parameters.listIterator(),
-                         it2 = trans.getParameters().listIterator(),
-                         retval = true;
-                     it1.hasNext() == true && retval == true;
-                    )
-                {
-                    param1 = (SmcParameter) it1.next();
-                    param2 = (SmcParameter) it2.next();
-                    retval = param1.equals(param2);
-                }
-            }
+            retval =
+                (_name.equals(trans.getName()) == true &&
+                 _compareParams(trans.getParameters()) == 0);
         }
         catch (Exception jex)
         {
@@ -165,49 +76,40 @@ public abstract class SmcTransition
         return(retval);
     }
 
-    public int compareTo(SmcTransition trans)
+    public int compareTo(Object o)
+        throws ClassCastException
     {
+        SmcTransition trans = (SmcTransition) o;
         int retval;
 
         if ((retval = _name.compareTo(trans.getName())) == 0)
         {
-            retval = _parameters.size() - trans.getParameters().size();
-            if (retval == 0)
-            {
-                ListIterator it1;
-                ListIterator it2;
-                SmcParameter param1;
-                SmcParameter param2;
-
-                // Compare each parameter's name ONLY.
-                for (it1 = _parameters.listIterator(),
-                         it2 = trans.getParameters().listIterator();
-                     it1.hasNext() == true && retval == 0;
-                    )
-                {
-                    param1 = (SmcParameter) it1.next();
-                    param2 = (SmcParameter) it2.next();
-                    retval = param1.compareTo(param2);
-                }
-            }
+            retval = _compareParams(trans.getParameters());
         }
 
         return(retval);
     }
 
-    public String getName()
+    public int compareTo(String name, List parameters)
     {
-        return(_name);
+        int retval;
+
+        if ((retval = _name.compareTo(name)) == 0)
+        {
+            retval = _compareParams(parameters);
+        }
+
+        return (retval);
+    }
+
+    public SmcState getState()
+    {
+        return (_state);
     }
 
     public List getParameters()
     {
         return(_parameters);
-    }
-
-    public int getLineNumber()
-    {
-        return(_line_number);
     }
 
     public void addGuard(SmcGuard guard)
@@ -221,59 +123,162 @@ public abstract class SmcTransition
         return(_guards);
     }
 
+    // Determine if this transition references the ctxt local
+    // variable.
+    public boolean hasCtxtReference()
+    {
+        Iterator guardIt;
+        boolean retcode;
+
+        // Stop as soon as we know that ctxt is referenced.
+        for (guardIt = _guards.iterator(), retcode = false;
+             guardIt.hasNext() == true && retcode == false;
+            )
+        {
+            retcode =
+                ((SmcGuard) guardIt.next()).hasCtxtReference();
+        }
+
+        return (retcode);
+    }
+
+    // Determine if this transition references a non-nil
+    // end state.
+    public boolean hasNonNilEndState()
+    {
+        Iterator guardIt;
+        SmcGuard guard;
+        boolean retcode;
+
+        // Stop as soon as we know that a non-nill end state
+        // is referenced.
+        for (guardIt = _guards.iterator(), retcode = false;
+             guardIt.hasNext() == true && retcode == false;
+            )
+        {
+            guard = (SmcGuard) guardIt.next();
+            retcode =
+                !guard.getEndState().equals(SmcGuard.NIL_STATE);
+        }
+
+        return (retcode);
+    }
+
     public String toString()
     {
-        String retval;
-        ListIterator it;
+        StringBuffer retval = new StringBuffer(512);
+        String sep;
+        Iterator it;
 
-        retval = _name;
+        retval.append(_name);
+        retval.append("(");
 
-        if (_parameters.size() > 0)
+        for (it = _parameters.iterator(), sep = "";
+             it.hasNext() == true;
+             sep = ", ")
         {
-            String separator;
-            SmcParameter param;
-
-            retval += "(";
-            for (it = _parameters.listIterator(),
-                     separator = "";
-                 it.hasNext() == true;
-                 separator = ", ")
-            {
-                param = (SmcParameter) it.next();
-                retval += separator + param;
-            }
-            retval += ")";
+            retval.append(sep);
+            retval.append((SmcParameter) it.next());
         }
+
+        retval.append(")");
 
         if (_guards.size() > 0)
         {
             SmcGuard guard;
 
-            for (it = _guards.listIterator();
+            for (it = _guards.iterator();
                  it.hasNext() == true;
                 )
             {
                 guard = (SmcGuard) it.next();
-                retval += "\n" + guard;
+                retval.append("\n");
+                retval.append(guard);
             }
         }
 
-        return(retval);
+        return(retval.toString());
     }
 
-    public abstract void generateCode(PrintStream header,
-                                      PrintStream source,
-                                      String context,
-                                      String pkg,
-                                      String mapName,
-                                      String stateName,
-                                      String indent)
-        throws ParseException;
+    //-----------------------------------------------------------
+    // SmcElement Abstract Methods.
+    //
 
-// Member Data
+    public void accept(SmcVisitor visitor)
+    {
+        visitor.visit(this);
+    }
 
-    protected String _name;
-    protected int _line_number;
-    protected List _parameters;
-    protected List _guards;
+    //
+    // end of SmcElement Abstract Methods.
+    //-----------------------------------------------------------
+
+    // Compare this transition's parameters with the given list.
+    private int _compareParams(List params)
+    {
+        Iterator pit1;
+        Iterator pit2;
+        SmcParameter param1;
+        SmcParameter param2;
+        int retval;
+
+        retval = _parameters.size() - params.size();
+        if (retval == 0)
+        {
+            for (pit1 = _parameters.iterator(),
+                     pit2 = params.iterator(),
+                     retval = 0;
+                 pit1.hasNext() == true &&
+                     pit2.hasNext() == true &&
+                     retval == 0;
+                )
+            {
+                param1 = (SmcParameter) pit1.next();
+                param2 = (SmcParameter) pit2.next();
+                retval = param1.compareTo(param2);
+            }
+        }
+        
+
+        return (retval);
+    }
+
+//---------------------------------------------------------------
+// Member data
+//
+
+    private SmcState _state;
+    private List _parameters;
+    private List _guards;
 }
+
+//
+// CHANGE LOG
+// $Log$
+// Revision 1.5  2005/05/28 19:28:42  cwrapp
+// Moved to visitor pattern.
+//
+// Revision 1.6  2005/02/21 15:38:43  charlesr
+// Added Francois Perrad to Contributors section for Python work.
+//
+// Revision 1.5  2005/02/03 16:52:21  charlesr
+// In implementing the Visitor pattern, the generateCode()
+// methods have been moved to the appropriate Visitor
+// subclasses (e.g. SmcJavaGenerator). This class now extends
+// SmcElement.
+//
+// Revision 1.4  2004/10/30 16:08:54  charlesr
+// Added Graphviz DOT file generation.
+//
+// Revision 1.3  2004/10/02 19:54:57  charlesr
+// Full-qualified all std namespace references with "std::".
+//
+// Revision 1.2  2004/09/06 16:41:48  charlesr
+// Added C# support.
+//
+// Revision 1.1  2004/05/31 13:57:17  charlesr
+// Added support for VB.net code generation.
+//
+// Revision 1.0  2003/12/14 21:07:01  charlesr
+// Initial revision
+//

@@ -1,4 +1,5 @@
-// -*- mode: text; tab-width: 4; mode: auto-fill; -*-
+// -*- tab-width: 4; -*-
+
 %{
 /*
  * The contents of this file are subject to the Mozilla Public
@@ -15,10 +16,15 @@
  * 
  * The Initial Developer of the Original Code is Charles W. Rapp.
  * Portions created by Charles W. Rapp are
- * Copyright (C) 2000 Charles W. Rapp.
+ * Copyright (C) 2000 - 2004. Charles W. Rapp.
  * All Rights Reserved.
  * 
- * Contributor(s): 
+ * Contributor(s):
+ *   Eitan Suez contributed examples/Ant.
+ *   (Name withheld) contributed the C# code generation and
+ *   examples/C#.
+ *   Francois Perrad contributed the Python code generation and
+ *   examples/Python.
  *
  * smcLexer --
  *
@@ -29,82 +35,28 @@
  *
  * CHANGE LOG
  * $Log$
- * Revision 1.4  2002/05/07 00:10:20  cwrapp
- * Changes in release 1.3.2:
- * Add the following feature:
- * + 528321: Modified push transition syntax to be:
+ * Revision 1.5  2005/05/28 19:28:42  cwrapp
+ * Moved to visitor pattern.
  *
- * 	  <transname> <state1>/push(<state2>)  {<actions>}
+ * Revision 1.5  2005/02/21 18:14:01  charlesr
+ * Removed unknown FSM transition, using unicode transition
+ * instead.
  *
- * 	  which means "transition to <state1> and then
- * 	  immediately push to <state2>". The current
- * 	  syntax:
+ * Revision 1.4  2005/02/21 15:36:08  charlesr
+ * Added Francois Perrad to Contributors section for Python work.
  *
- * 	  <transname> push(<state2>)  {<actions>}
+ * Revision 1.3  2004/10/30 16:05:34  charlesr
+ * Added unicode support.
  *
- *           is still valid and <state1> is assumed to be "nil".
+ * Revision 1.2  2004/09/06 16:40:22  charlesr
+ * Added C# support.
  *
- * No bug fixes.
+ * Revision 1.1  2004/01/29 02:14:49  charlesr
+ * Add Default state containing single transition which
+ * handles an unexpected asterisk.
  *
- * Revision 1.2  2001/12/14 20:10:37  cwrapp
- * Changes in release 1.1.0:
- * Add the following features:
- * + 486786: Added the %package keyword which specifies the
- *           Java package/C++ namespace/Tcl namespace
- *           the SMC-generated classes will be placed.
- * + 486471: The %class keyword accepts fully qualified
- *           class names.
- * + 491135: Add FSMContext methods getDebugStream and
- *           setDebugStream.
- * + 492165: Added -sync command line option which causes
- *           the transition methods to be synchronized
- *           (this option may only be used with -java).
- *
- * Revision 1.1  2001/12/03 14:14:03  cwrapp
- * Changes in release 1.0.2:
- * + Placed the class files in Smc.jar in the net.sf.smc package.
- * + Moved Java source files from smc/bin to net/sf/smc.
- * + Corrected a C++ generation bug wherein arguments were written
- *   to the .h file rather than the .cpp file.
- *
- * Revision 1.1.1.2  2001/03/26 14:41:46  cwrapp
- * Corrected Entry/Exit action semantics. Exit actions are now
- * executed only by simple transitions and pop transitions.
- * Entry actions are executed by simple transitions and push
- * transitions. Loopback transitions do not execute either Exit
- * actions or entry actions. See SMC Programmer's manual for
- * more information.
- *
- * Revision 1.1.1.1  2001/01/03 03:13:59  cwrapp
- *
- * ----------------------------------------------------------------------
- * SMC - The State Map Compiler
- * Version: 1.0, Beta 3
- *
- * SMC compiles state map descriptions into a target object oriented
- * language. Currently supported languages are: C++, Java and [incr Tcl].
- * SMC finite state machines have such features as:
- * + Entry/Exit actions for states.
- * + Transition guards
- * + Transition arguments
- * + Push and Pop transitions.
- * + Default transitions. 
- * ----------------------------------------------------------------------
- *
- * Revision 1.2  2000/09/01 15:32:11  charlesr
- * Changes for v. 1.0, Beta 2:
- *
- * + Removed order dependency on "%start", "%class" and "%header"
- *   appearance. These three tokens may now appear in any order but
- *   still must appear before the first map definition.
- *
- * + Modified SMC parser so that it will continue after finding an
- *   error. Also improved the error message quality.
- *
- * + Made error messages so emacs is able to parse them.
- *
- * Revision 1.1.1.1  2000/08/02 12:50:56  charlesr
- * Initial source import, SMC v. 1.0, Beta 1.
+ * Revision 1.0  2003/12/14 21:04:00  charlesr
+ * Initial revision
  *
  */
 %}
@@ -115,484 +67,294 @@
 
 %map TokenMap
 %%
-
-//-----------------+---------------+-------------------+-------------+
-//      Start      |               |        End        |             |
-//      State      |   Transition  |       State       |   Actions   |
-//-----------------+---------------+-------------------+-------------+
 Start
 {
 	// Is this the start of a comment?
-	slash			CommentStart		{}
+	slash           CommentStart		{}
 
 	// Multi-character tokens.
-	percent			PercentStart		{startToken();
-										 addCurrentCharToToken();}
-	alpha			Word				{startToken();
-										 addCurrentCharToToken();}
-	underscore		Word				{startToken();
-										 addCurrentCharToToken();}
-	dollarsign		Variable			{startToken();
-										 addCurrentCharToToken();}
-	digit			Number				{startToken();
-										 addCurrentCharToToken();}
-	dash			Number				{startToken();
-										 addCurrentCharToToken();}
-	doublequote		String				{startToken();
-										 addCurrentCharToToken();}
+	percent 		PercentStart		{startToken();
+                                         addToToken();}
+	alpha           Word				{startToken();
+                                         addToToken();}
+	underscore      Word				{startToken();
+                                         addToToken();}
+    colon           Colon               {startToken();
+                                         addToToken();}
 
 	// Single character tokens.
-	left_brace		nil					{startToken();
-										 addCurrentCharToToken();
+	left_brace      nil					{startToken();
+                                         addToToken();
 										 endToken(SmcLexer.LEFT_BRACE);}
-	right_brace		nil					{startToken();
-										 addCurrentCharToToken();
+	right_brace     nil					{startToken();
+                                         addToToken();
 										 endToken(SmcLexer.RIGHT_BRACE);}
 	left_bracket	nil					{startToken();
-										 addCurrentCharToToken();
+                                         addToToken();
 										 endToken(SmcLexer.LEFT_BRACKET);}
-	right_bracket	nil					{startToken();
-										 addCurrentCharToToken();
-										 endToken(SmcLexer.RIGHT_BRACKET);}
-	left_paren		nil					{startToken();
-										 addCurrentCharToToken();
+	left_paren      nil					{startToken();
+                                         addToToken();
 										 endToken(SmcLexer.LEFT_PAREN);}
-	right_paren		nil					{startToken();
-										 addCurrentCharToToken();
+	right_paren     nil					{startToken();
+                                         addToToken();
 										 endToken(SmcLexer.RIGHT_PAREN);}
-	semicolon		nil					{startToken();
-										 addCurrentCharToToken();
-										 endToken(SmcLexer.SEMICOLON);}
-	colon			nil					{startToken();
-										 addCurrentCharToToken();
-										 endToken(SmcLexer.COLON);}
-	comma			nil					{startToken();
-										 addCurrentCharToToken();
+	comma           nil					{startToken();
+                                         addToToken();
 										 endToken(SmcLexer.COMMA);}
-	exclamation		nil					{startToken();
-										 addCurrentCharToToken();
-										 endToken(SmcLexer.EXCLAMATION);}
-	asterisk		CommentEnd			{startToken();
-										 addCurrentCharToToken();}
-	ampersand		nil     			{startToken();
-										 addCurrentCharToToken();
-										 endToken(SmcLexer.AMPERSAND);}
+	semicolon       nil					{startToken();
+                                         addToToken();
+										 endToken(SmcLexer.SEMICOLON);}
+    equal           nil                 {startToken();
+                                         addToToken();
+                                         endToken(SmcLexer.EQUAL);}
 
 	// Ignore whitespace and end-of-line.
-	whitespace		nil					{}
-	EOL				nil					{}
+	whitespace      nil					{}
+	EOL             nil					{}
 
-	unknown			nil					{addCurrentCharToToken();
+	unicode  		nil					{startToken();
+                                         addToToken();
 									     badToken("Unknown character");}
 }
 
 CommentStart
 {
-	asterisk		push(OldCommentMap::Start)	{}
-	slash			push(NewCommentMap::Start)	{}
-	commentDone		Start				{}
+	asterisk	    push(OldCommentMap::Start)	{}
+	slash           push(NewCommentMap::Start)
+                                        {}
+	commentDone     Start				{}
 
 	// Any other character following a slash means this is
     // a plain-old slash.
-	Default		    Start			    {ungetChar();
+	Default 	   Start			    {ungetChar();
 										 endToken(SmcLexer.SLASH);}
-}
-
-CommentEnd
-{
-	slash			Start				{addCurrentCharToToken();
-										 badToken("End-of-comment appears without matching start-of-comment");}
-
-    asterisk        nil                 {endToken(SmcLexer.ASTERISK);
-                                         startToken();
-                                         addCurrentCharToToken();}
-
-    Default         Start               {ungetChar();
-                                         endToken(SmcLexer.ASTERISK);}
 }
 
 PercentStart
 {
 	// This the start of a source code.
-	left_brace		push(SourceMap::Start)	{startToken();}
-	sourceDone		Start				{}
+	left_brace      push(SourceMap::Start)
+                                        {startToken();}
+	sourceDone      Start				{}
 
 	// This is the map delimiter.
-	percent			Start				{addCurrentCharToToken();
+	percent 		Start				{addToToken();
 										 endToken(SmcLexer.EOD);}
 
 	// Look for %start, %map, %class, %header or %package.
-	alpha			Map					{addCurrentCharToToken();}
+	alpha            PercentKeyword		{addToToken();}
 
 	// Any other character following a percent is a malformed token.
-	right_brace		Start				{addCurrentCharToToken();
+	right_brace     Start				{addToToken();
 										 badToken("End-of-source appears without matching start-of-source");}
 
-	Default		    Start			    {addCurrentCharToToken();
+	Default         Start			    {addToToken();
 										 badToken("Unknown % directive");}
 }
 
-Map
+PercentKeyword
 {
 	// Keep collecting characters until whitespace or EOL is reached.
-	whitespace		Start				{checkPercentKeyword();}
-	EOL				Start				{checkPercentKeyword();}
+	whitespace      Start				{checkPercentKeyword();}
+	EOL             Start				{checkPercentKeyword();}
 
 	// Only letters are allowed after the percent.
-	alpha			nil					{addCurrentCharToToken();}
+	alpha           nil					{addToToken();}
 
 	// Anything else is a bad token.
-	Default		    Start				{addCurrentCharToToken();
+	Default         Start				{addToToken();
 										 badToken("Unknown % directive");}
 }
 
 Word
 {
-	alpha			nil					{addCurrentCharToToken();}
-	digit			nil					{addCurrentCharToToken();}
-	underscore		nil					{addCurrentCharToToken();}
-	period			nil					{addCurrentCharToToken();}
+	alpha           nil					{addToToken();}
+	digit           nil					{addToToken();}
+	underscore      nil					{addToToken();}
+	period          nil					{addToToken();}
+    colon           Scope               {}
 
-	whitespace		Start				{checkKeyword();}
-	EOL				Start				{checkKeyword();}
-
-	// All other characters are a part of other tokens. "Unread"
-	// the tokens so they can be read the next call to nextToken()
-	// and then pass this token back.
-	left_brace		Start				{ungetChar();
-										 checkKeyword();}
-	right_brace		Start				{ungetChar();
-										 checkKeyword();}
-	left_bracket	Start				{ungetChar();
-										 checkKeyword();}
-	right_bracket	Start				{ungetChar();
-										 checkKeyword();}
-	left_paren		Start				{ungetChar();
-										 checkKeyword();}
-	right_paren		Start				{ungetChar();
-										 checkKeyword();}
-	semicolon		Start				{ungetChar();
-										 checkKeyword();}
-	colon			Start				{ungetChar();
-										 checkKeyword();}
-	comma			Start				{ungetChar();
-										 checkKeyword();}
-	exclamation		Start				{ungetChar();
-										 checkKeyword();}
-	doublequote		Start				{ungetChar();
-										 checkKeyword();}
-	slash			Start				{ungetChar();
-										 checkKeyword();}
-	asterisk		Start				{ungetChar();
-										 checkKeyword();}
-	dollarsign		Start				{ungetChar();
-										 checkKeyword();}
-    ampersand       Start               {ungetChar();
-										 checkKeyword();}
-    dash            Start               {ungetChar();
-										 checkKeyword();}
-    
-
-	// The remaining characters form an invalid token.
-	Default			Start				{addCurrentCharToToken();
-										 badToken("Unknown token");}
-}
-
-Variable
-{
-	// Need to seen an alpha character before a digit can be accepted.
-	alpha			Variable2			{addCurrentCharToToken();}
-
-	// Wait here for an alpha.
-	underscore		nil					{addCurrentCharToToken();}
-
-	// Any other character represents a malformed variable.
-	Default			Start				{addCurrentCharToToken();
-										 badToken("Malformed variable.");}
-}
-
-Variable2
-{
-	alpha			nil					{addCurrentCharToToken();}
-	digit			nil					{addCurrentCharToToken();}
-	underscore		nil					{addCurrentCharToToken();}
-
-	whitespace		Start				{endToken(SmcLexer.VARIABLE);}
-	EOL				Start				{endToken(SmcLexer.VARIABLE);}
-
-	Default			Start				{addCurrentCharToToken();
-										 badToken("Malformed variable.");}
-}
-
-Number
-{
-	digit			nil					{addCurrentCharToToken();}
-
-	// This must be a float number instead of an integer.
-	period			FloatNumber			{addCurrentCharToToken();}
-
-	whitespace		Start				{endToken(SmcLexer.INTEGER);}
-	EOL				Start				{endToken(SmcLexer.INTEGER);}
+	whitespace      Start				{checkKeyword();}
+	EOL             Start				{checkKeyword();}
 
 	// All other characters are a part of other tokens. "Unread"
 	// the tokens so they can be read the next call to nextToken()
 	// and then pass this token back.
-	left_brace		Start				{ungetChar();
-										 endToken(SmcLexer.INTEGER);}
-	right_brace		Start				{ungetChar();
-										 endToken(SmcLexer.INTEGER);}
+	left_brace      Start				{ungetChar();
+										 checkKeyword();}
+	right_brace  	Start				{ungetChar();
+										 checkKeyword();}
 	left_bracket	Start				{ungetChar();
-										 endToken(SmcLexer.INTEGER);}
-	right_bracket	Start				{ungetChar();
-										 endToken(SmcLexer.INTEGER);}
-	left_paren		Start				{ungetChar();
-										 endToken(SmcLexer.INTEGER);}
-	right_paren		Start				{ungetChar();
-										 endToken(SmcLexer.INTEGER);}
-	semicolon		Start				{ungetChar();
-										 endToken(SmcLexer.INTEGER);}
-	colon			Start				{ungetChar();
-										 endToken(SmcLexer.INTEGER);}
-	comma			Start				{ungetChar();
-										 endToken(SmcLexer.INTEGER);}
-	exclamation		Start				{ungetChar();
-										 endToken(SmcLexer.INTEGER);}
-	doublequote		Start				{ungetChar();
-										 endToken(SmcLexer.INTEGER);}
-	slash			Start				{ungetChar();
-										 endToken(SmcLexer.INTEGER);}
-	asterisk		Start				{ungetChar();
-										 endToken(SmcLexer.INTEGER);}
-	dollarsign		Start				{ungetChar();
-										 endToken(SmcLexer.INTEGER);}
+										 checkKeyword();}
+	left_paren      Start				{ungetChar();
+										 checkKeyword();}
+	right_paren     Start				{ungetChar();
+										 checkKeyword();}
+	comma           Start				{ungetChar();
+										 checkKeyword();}
+	semicolon       Start				{ungetChar();
+										 checkKeyword();}
+	slash           Start				{ungetChar();
+										 checkKeyword();}
+	asterisk        Start               {ungetChar();
+                                         checkKeyword();}
+	equal           Start               {ungetChar();
+                                         checkKeyword();}
 
 	// The remaining characters form an invalid token.
-	Default			Start				{addCurrentCharToToken();
-										 badToken("Unknown token");}
+	Default         Start				{badToken("Unknown token");}
 }
 
-FloatNumber
+Scope
 {
-	digit			nil					{addCurrentCharToToken();}
-
-	whitespace		Start				{endToken(SmcLexer.FLOAT);}
-	EOL				Start				{endToken(SmcLexer.FLOAT);}
-
-	// All other characters are a part of other tokens. "Unread"
-	// the tokens so they can be read the next call to nextToken()
-	// and then pass this token back.
-	left_brace		Start				{ungetChar();
-										 endToken(SmcLexer.FLOAT);}
-	right_brace		Start				{ungetChar();
-										 endToken(SmcLexer.FLOAT);}
-	left_bracket	Start				{ungetChar();
-										 endToken(SmcLexer.FLOAT);}
-	right_bracket	Start				{ungetChar();
-										 endToken(SmcLexer.FLOAT);}
-	left_paren		Start				{ungetChar();
-										 endToken(SmcLexer.FLOAT);}
-	right_paren		Start				{ungetChar();
-										 endToken(SmcLexer.FLOAT);}
-	semicolon		Start				{ungetChar();
-										 endToken(SmcLexer.FLOAT);}
-	colon			Start				{ungetChar();
-										 endToken(SmcLexer.FLOAT);}
-	comma			Start				{ungetChar();
-										 endToken(SmcLexer.FLOAT);}
-	exclamation		Start				{ungetChar();
-										 endToken(SmcLexer.FLOAT);}
-	doublequote		Start				{ungetChar();
-										 endToken(SmcLexer.FLOAT);}
-	slash			Start				{ungetChar();
-										 endToken(SmcLexer.FLOAT);}
-	asterisk		Start				{ungetChar();
-										 endToken(SmcLexer.FLOAT);}
-	dollarsign		Start				{ungetChar();
-										 endToken(SmcLexer.FLOAT);}
-
-	// The remaining characters form an invalid token.
-	Default			Start				{addCurrentCharToToken();
-										 badToken("Unknown token");}
+    colon           Word                {addToToken("::");}
+    Default         Start               {ungetChar();
+                                         ungetChar();
+                                         checkKeyword();}
 }
 
-String
+Colon
 {
-	// Look for the double quote to end this string.
-	doublequote		Start				{addCurrentCharToToken();
-										 endToken(SmcLexer.STRING);}
+    colon           Word                {addToToken("::");}
 
-	// A backslash escapes the next character.
-	backslash	    Escape				{addCurrentCharToToken();}
-
-	// An end-of-line before the end of the string is wrong.
-	EOL				Start				{badToken("String contains a new line.");}
-
-	// Any other character is simply added to the string.
-	Default		    nil					{addCurrentCharToToken();}
-}
-
-Escape
-{
-	// Whatever this character is, add it to the string.
-	Default			String				{addCurrentCharToToken();}
+    // This is a token by itself.
+    Default         Start               {ungetChar();
+                                         addToToken(":");
+                                         endToken(SmcLexer.COLON);}
 }
 
 Default
 {
-	// Backslashes can only appear in strings.
-	backslash	    nil				   {badToken("Backslash can only be used in strings.");}
+    asterisk        Start               {badToken("Unknown token");}
 }
-
 %%
 
 %map OldCommentMap
 %%
-
 Start
 {
-	slash			CommentStart		{}
-	asterisk		CommentEnd			{}
+    // This grammar correctly handles nested comments!
+	slash           CommentStart		{}
+
+    // A comment's end is */.
+	asterisk	    CommentEnd			{}
 }
 
 CommentStart
 {
 	asterisk		push(OldCommentMap::Start)	{}
-	slash			push(NewCommentMap::Start)	{}
+	slash           push(NewCommentMap::Start)	{}
 	commentDone		Start				{}
 }
 
 CommentEnd
 {
-	asterisk		nil					{}
-	slash			pop(commentDone)	{}
+	asterisk	    nil					{}
+	slash           pop(commentDone)	{}
 }
 
 Default
 {
-	alpha			Start				{}
-	digit			Start				{}
-	percent			Start				{}
-	slash			Start				{}
-	backslash		Start				{}
+	alpha           Start				{}
+	digit           Start				{}
+	percent         Start				{}
+	slash           Start				{}
 	asterisk		Start				{}
-	left_brace		Start				{}
-	right_brace		Start				{}
+	left_brace      Start				{}
+	right_brace     Start				{}
 	left_bracket	Start				{}
-	right_bracket	Start				{}
-	left_paren		Start				{}
-	right_paren		Start				{}
-	period			Start				{}
+	left_paren      Start				{}
+	right_paren     Start				{}
+	period          Start				{}
+	colon           Start				{}
+	comma           Start				{}
 	semicolon		Start				{}
-	colon			Start				{}
-	comma			Start				{}
-	exclamation		Start				{}
-	underscore		Start				{}
-	ampersand		Start				{}
-	dollarsign		Start				{}
-	doublequote		Start				{}
-	whitespace		Start				{}
-	EOL				Start				{}
-    dash            Start               {}
-	unknown			Start				{}
+	underscore      Start				{}
+    equal           Start               {}
+	whitespace   	Start				{}
+	EOL             Start				{}
+    unicode         Start               {}
 }
-
 %%
 
 %map NewCommentMap
 %%
-
 // Wait here for the end of the // comment.
 Start
 {
 	// The end of line marks the end of the comment.
-	EOL				pop(commentDone)	{}
+	EOL             pop(commentDone)	{}
 }
 
 Default
 {
-	alpha			Start				{}
-	digit			Start				{}
-	percent			Start				{}
-	slash			Start				{}
-	backslash		Start				{}
-	asterisk		Start				{}
-	left_brace		Start				{}
-	right_brace		Start				{}
+	alpha           Start				{}
+	digit           Start				{}
+	percent  		Start				{}
+	slash           Start				{}
+	asterisk	    Start				{}
+	left_brace      Start				{}
+	right_brace     Start				{}
 	left_bracket	Start				{}
-	right_bracket	Start				{}
-	left_paren		Start				{}
-	right_paren		Start				{}
-	period			Start				{}
+	left_paren      Start				{}
+	right_paren     Start				{}
+	period          Start				{}
+	colon           Start				{}
+	comma           Start				{}
 	semicolon		Start				{}
-	colon			Start				{}
-	comma			Start				{}
-	exclamation		Start				{}
-	underscore		Start				{}
-	ampersand		Start				{}
-	dollarsign		Start				{}
-	doublequote		Start				{}
-	whitespace		Start				{}
-    dash            Start               {}
-	unknown			Start				{}
+	underscore      Start				{}
+    equal           Start               {}
+	whitespace      Start				{}
+    unicode         Start               {}
 }
-
 %%
 
 %map SourceMap
 %%
-
 // Look for the end of the source block.
 Start
 {
 	// Is this the end of the raw source code?
-	percent			SourceEnd			{}
+	percent 		SourceEnd			{}
 
 	// No, the end has not come.
-	Default		    Start				{addCurrentCharToToken();}
+	Default		    Start               {addToToken();}
 }
 
 SourceEnd
 {
 	// Yes, we are add the end of the raw source code.
-	right_brace		pop(sourceDone)		{endToken(SmcLexer.SOURCE);}
+	right_brace     pop(sourceDone)		{endToken(SmcLexer.SOURCE);}
 
 	// Perhaps this is the end of the raw source.
-	percent			nil					{addCharToToken("%");}
+	percent 		nil					{addToToken("%");}
 
 	// Nope, this is not the end of the raw source.
-	Default		    Start				{addCharToToken("%");
-										 addCurrentCharToToken();}
+	Default		    Start				{addToToken("%");
+										 addToToken();}
 }
 
-// This state is never used. It is here to force smc to generate all the
-// necessary default transitions.
+// This state is never used. It is here to force smc to generate
+// all the necessary default transitions.
 NeverUsed
 {
-
-	alpha			nil					{}
-	digit			nil					{}
-	slash			nil					{}
-	backslash		nil					{}
-	asterisk		nil					{}
-    ampersand       nil                 {}
-	left_brace		nil					{}
-	right_brace		nil					{}
+	alpha           nil					{}
+	digit           nil					{}
+	slash           nil					{}
+	asterisk	    nil					{}
+	left_brace      nil					{}
+	right_brace     nil					{}
 	left_bracket	nil					{}
-	right_bracket	nil					{}
-	left_paren		nil					{}
-	right_paren		nil					{}
-	period			nil					{}
+	left_paren      nil					{}
+	right_paren     nil					{}
+	period          nil					{}
+	colon           nil					{}
+	comma           nil					{}
 	semicolon		nil					{}
-	colon			nil					{}
-	comma			nil					{}
-	exclamation		nil					{}
-	underscore		nil					{}
-	dollarsign		nil					{}
-	doublequote		nil					{}
-	whitespace		nil					{}
-    dash            nil                 {}
-	unknown			nil					{}
-	EOL				nil					{}
+	underscore      nil					{}
+    equal           nil                 {}
+	whitespace      nil					{}
+    unicode         nil                 {}
+	EOL             nil					{}
 }
-
 %%

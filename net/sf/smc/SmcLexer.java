@@ -13,265 +13,128 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 Charles W. Rapp.
+// Copyright (C) 2000 - 2005. Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
-//
-// SmcLexer --
-//
+//   Eitan Suez contributed examples/Ant.
+//   (Name withheld) contributed the C# code generation and
+//   examples/C#.
+//   Francois Perrad contributed the Python code generation and
+//   examples/Python.
 //
 // RCS ID
 // $Id$
 //
 // CHANGE LOG
-// $Log$
-// Revision 1.4  2002/05/07 00:10:20  cwrapp
-// Changes in release 1.3.2:
-// Add the following feature:
-// + 528321: Modified push transition syntax to be:
-//
-// 	  <transname> <state1>/push(<state2>)  {<actions>}
-//
-// 	  which means "transition to <state1> and then
-// 	  immediately push to <state2>". The current
-// 	  syntax:
-//
-// 	  <transname> push(<state2>)  {<actions>}
-//
-//           is still valid and <state1> is assumed to be "nil".
-//
-// No bug fixes.
-//
-// Revision 1.2  2001/12/14 20:10:37  cwrapp
-// Changes in release 1.1.0:
-// Add the following features:
-// + 486786: Added the %package keyword which specifies the
-//           Java package/C++ namespace/Tcl namespace
-//           the SMC-generated classes will be placed.
-// + 486471: The %class keyword accepts fully qualified
-//           class names.
-// + 491135: Add FSMContext methods getDebugStream and
-//           setDebugStream.
-// + 492165: Added -sync command line option which causes
-//           the transition methods to be synchronized
-//           (this option may only be used with -java).
-//
-// Revision 1.1  2001/12/03 14:14:03  cwrapp
-// Changes in release 1.0.2:
-// + Placed the class files in Smc.jar in the net.sf.smc package.
-// + Moved Java source files from smc/bin to net/sf/smc.
-// + Corrected a C++ generation bug wherein arguments were written
-//   to the .h file rather than the .cpp file.
-//
-// Revision 1.2  2001/06/16 19:52:43  cwrapp
-// Changes in release 1.0, beta 7:
-// Fixes the minor code generation bugs and introduces a new
-// example Java program (found at examples/Java/EX7). This
-// example program is also a Java applet and can be seen at
-// http://smc.sourceforge.net/SmcDemo.htm.
-//
-// Revision 1.1.1.2  2001/03/26 14:41:46  cwrapp
-// Corrected Entry/Exit action semantics. Exit actions are now
-// executed only by simple transitions and pop transitions.
-// Entry actions are executed by simple transitions and push
-// transitions. Loopback transitions do not execute either Exit
-// actions or entry actions. See SMC Programmer's manual for
-// more information.
-//
-// Revision 1.1.1.1  2001/01/03 03:13:59  cwrapp
-//
-// ----------------------------------------------------------------------
-// SMC - The State Map Compiler
-// Version: 1.0, Beta 3
-//
-// SMC compiles state map descriptions into a target object oriented
-// language. Currently supported languages are: C++, Java and [incr Tcl].
-// SMC finite state machines have such features as:
-// + Entry/Exit actions for states.
-// + Transition guards
-// + Transition arguments
-// + Push and Pop transitions.
-// + Default transitions. 
-// ----------------------------------------------------------------------
-//
-// Revision 1.2  2000/09/01 15:32:10  charlesr
-// Changes for v. 1.0, Beta 2:
-//
-// + Removed order dependency on "%start", "%class" and "%header"
-//   appearance. These three tokens may now appear in any order but
-//   still must appear before the first map definition.
-//
-// + Modified SMC parser so that it will continue after finding an
-//   error. Also improved the error message quality.
-//
-// + Made error messages so emacs is able to parse them.
-//
-// Revision 1.1.1.1  2000/08/02 12:50:56  charlesr
-// Initial source import, SMC v. 1.0, Beta 1.
+// (See the bottom of this file.)
 //
 
 package net.sf.smc;
 
-import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.IOException;
 import java.io.EOFException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.Map;
 
-public final class SmcLexer
+/* package */ final class SmcLexer
 {
-// Member Methods
+//---------------------------------------------------------------
+// Member Methods.
+//
 
-    public SmcLexer(FileInputStream stream)
+    /* package */ SmcLexer(InputStream stream, boolean debugFlag)
     {
         _stream = stream;
         _token = new Token();
-        _token_buffer = new StringBuffer(50);
-        _line_number = 1;
-        _read_buffer = new byte[READ_BUFFER_LEN];
-        _buffer_size = 0;
-        _read_index = 0;
+        _tokenBuffer = new StringBuffer(50);
+        _lineNumber = 1;
+        _readBuffer = new byte[READ_BUFFER_LEN];
+        _bufferSize = 0;
+        _readIndex = 0;
 
-        _lexer_map = new SmcLexerContext(this);
+        _lexerFSM = new SmcLexerContext(this);
+        _lexerFSM.setDebugFlag(debugFlag);
     }
 
     // Return the current line being parsed.
-    public int getLineNumber()
+    /* package */ int getLineNumber()
     {
-        return(_line_number);
+        return(_lineNumber);
     }
 
     // Return the next token and its token name.
-    public Token nextToken()
-        throws IOException
+    /* package */ Token nextToken()
+        throws IOException,
+               IllegalAccessException,
+               InvocationTargetException
     {
-        // Keep reading until told to stop or the
-        // end-of-file is reached.
-        try
-        {
-            _stop_flag = false;
-            while (_stop_flag == false)
-            {
-                 _current_char = readChar();
+        Token retval;
 
-                // Translate this character into a transition.
-                if (Character.isLetter(_current_char) == true)
-                {
-                    _lexer_map.alpha();
-                }
-                else if (Character.isDigit(_current_char) == true)
-                {
-                    _lexer_map.digit();
-                }
-                else if (Character.isWhitespace(_current_char) == true)
-                {
-                    // If this character is a newline, then increment
-                    // the current line number.
-                    if (_current_char == '\n')
-                    {
-                        ++_line_number;
-                        _lexer_map.EOL();
-                    }
-                    else
-                    {
-                        _lexer_map.whitespace();
-                    }
-                }
-                else if (_current_char == ';')
-                {
-                    _lexer_map.semicolon();
-                }
-                else if (_current_char == '/')
-                {
-                    _lexer_map.slash();
-                }
-                else if (_current_char == '\\')
-                {
-                    _lexer_map.backslash();
-                }
-                else if (_current_char == '*')
-                {
-                    _lexer_map.asterisk();
-                }
-                else if (_current_char == '{')
-                {
-                    _lexer_map.left_brace();
-                }
-                else if (_current_char == '}')
-                {
-                    _lexer_map.right_brace();
-                }
-                else if (_current_char == '[')
-                {
-                    _lexer_map.left_bracket();
-                }
-                else if (_current_char == ']')
-                {
-                    _lexer_map.right_bracket();
-                }
-                else if (_current_char == '(')
-                {
-                    _lexer_map.left_paren();
-                }
-                else if (_current_char == ')')
-                {
-                    _lexer_map.right_paren();
-                }
-                else if (_current_char == '%')
-                {
-                    _lexer_map.percent();
-                }
-                else if (_current_char == '"')
-                {
-                    _lexer_map.doublequote();
-                }
-                else if (_current_char == ',')
-                {
-                    _lexer_map.comma();
-                }
-                else if (_current_char == ':')
-                {
-                    _lexer_map.colon();
-                }
-                else if (_current_char == '.')
-                {
-                    _lexer_map.period();
-                }
-                else if (_current_char == '!')
-                {
-                    _lexer_map.exclamation();
-                }
-                else if (_current_char == '_')
-                {
-                    _lexer_map.underscore();
-                }
-                else if (_current_char == '$')
-                {
-                    _lexer_map.dollarsign();
-                }
-                else if (_current_char == '&')
-                {
-                    _lexer_map.ampersand();
-                }
-                else if (_current_char == '-')
-                {
-                    _lexer_map.dash();
-                }
-                else
-                {
-                    _lexer_map.unknown();
-                }
-            }
-        }
-        catch (EOFException e)
+        if (_mode == COOKED)
         {
-            // If this is the end of the source file, let
-            // the parser know.
-            _token.setType(DONE_SUCCESS);
-            _token.setValue("");
+            retval = nextCookedToken();
+        }
+        else if (_mode == RAW)
+        {
+            retval = nextRawToken();
+        }
+        else if (_mode == RAW2)
+        {
+            retval = nextParamTypeToken();
+        }
+        // Mode RAW3.
+        else
+        {
+            retval = nextRaw3Token();
         }
 
-        return(_token);
+        return (retval);
+    }
+
+    // Put the lexer in raw mode. This means the characters are
+    // *not* passed through the FSM.
+    /* package */ void setRawMode(char openChar, char closeChar)
+    {
+        _mode = RAW;
+        _openChar = openChar;
+        _closeChar = closeChar;
+
+        return;
+    }
+
+    // Put the lexer in raw mode 2. This is used to collect
+    // parameter type declarations.
+    /* package */ void setRawMode(char openChar,
+                                  char closeChar,
+                                  char separator)
+    {
+        _mode = RAW2;
+        _openChar = openChar;
+        _closeChar = closeChar;
+        _separator = separator;
+
+        return;
+    }
+
+    // Put the lexer in raw mode 3. Collect all characters
+    // until the close character is seen.
+    /* package */ void setRawMode(String closeChars)
+    {
+        _mode = RAW3;
+        _closeChars = closeChars;
+
+        return;
+    }
+
+    // Put the lexer in cooked mode.
+    /* package */ void setCookedMode()
+    {
+        _mode = COOKED;
+        return;
     }
 
     //-----------------------------------------------------------
@@ -281,32 +144,32 @@ public final class SmcLexer
     /* package */ void startToken()
     {
         _token.reset();
-        _token_buffer.delete(0, _token_buffer.length());
+        _tokenBuffer.delete(0, _tokenBuffer.length());
 
         // The token's line number is the line on which the
         // token begins.
-        _token.setLineNumber(_line_number);
+        _token.setLineNumber(_lineNumber);
 
         return;
     }
 
-    /* package */ void addCurrentCharToToken()
+    /* package */ void addToToken()
     {
-        _token_buffer.append(_current_char);
+        _tokenBuffer.append(_currentChar);
         return;
     }
 
-    /* package */ void addCharToToken(String character)
+    /* package */ void addToToken(String s)
     {
-        _token_buffer.append(character);
+        _tokenBuffer.append(s);
         return;
     }
 
     /* package */ void endToken(int type)
     {
         _token.setType(type);
-        _token.setValue(_token_buffer.toString());
-        _stop_flag = true;
+        _token.setValue(_tokenBuffer.toString());
+        _stopFlag = true;
         return;
     }
 
@@ -316,9 +179,9 @@ public final class SmcLexer
         _token.setType(DONE_FAILED);
         _token.setValue(error_msg +
                         " (token: " +
-                        _token_buffer.toString() +
+                        _tokenBuffer.toString() +
                         ")");
-        _stop_flag = true;
+        _stopFlag = true;
         return;
     }
 
@@ -328,10 +191,10 @@ public final class SmcLexer
     {
         Integer tokenType;
 
-        _token.setValue(_token_buffer.toString());
-        _stop_flag = true;
+        _token.setValue(_tokenBuffer.toString());
+        _stopFlag = true;
 
-        tokenType = (Integer) _keywordMap.get(_token.getValue());
+        tokenType = (Integer) _KeywordMap.get(_token.getValue());
         if (tokenType != null)
         {
             _token.setType(tokenType.intValue());
@@ -350,39 +213,16 @@ public final class SmcLexer
 
     /* package */ void checkPercentKeyword()
     {
-        String tokenStr = _token_buffer.toString();
+        Integer tokenType;
 
-        _token.setValue(tokenStr);
+        _token.setValue(_tokenBuffer.toString());
+        _stopFlag = true;
 
-        if (tokenStr.compareTo("%start") == 0)
+        tokenType =
+            (Integer) _PercentKeywordMap.get(_token.getValue());
+        if (tokenType != null)
         {
-            _token.setType(SmcLexer.START_STATE);
-            _stop_flag = true;
-        }
-        else if (tokenStr.compareTo("%map") == 0)
-        {
-            _token.setType(SmcLexer.MAP_NAME);
-            _stop_flag = true;
-        }
-        else if (tokenStr.compareTo("%class") == 0)
-        {
-            _token.setType(SmcLexer.CLASS_NAME);
-            _stop_flag = true;
-        }
-        else if (tokenStr.compareTo("%header") == 0)
-        {
-            _token.setType(SmcLexer.HEADER_FILE);
-            _stop_flag = true;
-        }
-        else if (tokenStr.compareTo("%package") == 0)
-        {
-            _token.setType(SmcLexer.PACKAGE_NAME);
-            _stop_flag = true;
-        }
-        else if (tokenStr.compareTo("%import") == 0)
-        {
-            _token.setType(SmcLexer.IMPORT);
-            _stop_flag = true;
+            _token.setType(tokenType.intValue());
         }
         else
         {
@@ -397,41 +237,359 @@ public final class SmcLexer
     // usually done when one token is terminated by another.
     /* package */ void ungetChar()
     {
-        --_read_index;
+        // Make sure there is a character to unget first.
+        if (_readIndex > 0)
+        {
+            --_readIndex;
+        }
+
         return;
+    }
+
+    // End of State Machine Actions.
+    //-----------------------------------------------------------
+
+    // Return the next cooked token.
+    /* package */ Token nextCookedToken()
+        throws IOException,
+               IllegalAccessException,
+               InvocationTargetException
+    {
+        // Keep reading until told to stop or the
+        // end-of-file is reached.
+        try
+        {
+            Object[] args = new Object[0];
+
+            _stopFlag = false;
+            while (_stopFlag == false)
+            {
+                _currentChar = readChar();
+
+                // If the character's integer value is greater
+                // than 127, then throw an exception.
+                if (_currentChar >= _TransMethod.length)
+                {
+                    // Issue a unicode transition and let the
+                    // lexer FSM decide whether it is acceptable
+                    // or not.
+                    _lexerFSM.unicode();
+                }
+                else
+                {
+                    // If this is an end-of-line character, add
+                    // one to the current line number. CR-LF is
+                    // a single end-of-line.
+                    if (_currentChar == 10)
+                    {
+                        ++_lineNumber;
+                    }
+
+                    // Translate character into a transition.
+                    _TransMethod[_currentChar].invoke(_lexerFSM,
+                                                      args);
+                }
+            }
+        }
+        catch (EOFException e)
+        {
+            // If this is the end of the source file, let
+            // the parser know.
+            _token.setType(DONE_SUCCESS);
+            _token.setValue("");
+        }
+        catch (InvocationTargetException invokex)
+        {
+            badToken("Unknown token");
+        }
+
+        return(_token);
+    }
+
+    // Keep reading in characters until the close character is
+    // found.
+    private Token nextRawToken()
+        throws IOException
+    {
+        int startLine = _lineNumber;
+
+        // Clear out the token and get ready to work.
+        startToken();
+
+        // Keep reading until told to stop or the
+        // end-of-file is reached.
+        try
+        {
+            int depth = 0;
+
+            _stopFlag = false;
+            while (_stopFlag == false)
+            {
+                _currentChar = readChar();
+
+                // When working in RAW mode, the close character
+                // may naturally occur. The only way we have of
+                // knowing if the close character is for us or
+                // not is by keeping track of the matching open
+                // characters seen. When an open character is
+                // seen, add one to the depth. When a close
+                // character is seen, then either:
+                // + if the depth is zero, this is the end of the
+                //   raw code; return the token.
+                // + if the depth is greater than zero, then
+                //   subtract one from the depth.
+                if (_currentChar == _closeChar && depth == 0)
+                {
+                    _stopFlag = true;
+                }
+                else
+                {
+                    _tokenBuffer.append(_currentChar);
+
+                    // Only RAW and RAW2 use the concept of depth.
+                    if (_mode != RAW3)
+                    {
+                        if (_currentChar == _closeChar)
+                        {
+                            --depth;
+                        }
+                        // If this is the open character, then
+                        // add one to the depth which lets us
+                        // know that the next close character
+                        // does *not* end the raw code section.
+                        else if (_currentChar == _openChar)
+                        {
+                            ++depth;
+                        }
+                        // If this is an end-of-line character,
+                        // add one to the current line number.
+                        // CR-LF is a single end-of-line.
+                        else if (_currentChar == 10)
+                        {
+                            ++_lineNumber;
+                        }
+                    }
+                }
+            }
+
+            _token.setType(SOURCE);
+            _token.setValue(_tokenBuffer.toString());
+            _token.setLineNumber(startLine);
+        }
+        catch (EOFException e)
+        {
+            StringBuffer msg = new StringBuffer(80);
+
+            msg.append("User source code contains an unbalanced ");
+            msg.append(_openChar);
+            msg.append(", ");
+            msg.append(_closeChar);
+            msg.append(" pair.");
+
+            // If this is the end of the source file, then the
+            // raw code section has an unbalanced open character/
+            // close character pair.
+            _token.setType(DONE_FAILED);
+            _token.setValue(msg.toString());
+        }
+
+        return (_token);
+    }
+
+    // Keep reading in characters until one of the close
+    // characters is found.
+    private Token nextRaw3Token()
+        throws IOException
+    {
+        int startLine = _lineNumber;
+
+        // Clear out the token and get ready to work.
+        startToken();
+
+        // Keep reading until told to stop or the
+        // end-of-file is reached.
+        try
+        {
+            _stopFlag = false;
+            while (_stopFlag == false)
+            {
+                _currentChar = readChar();
+
+                // If this is an end-of-line character, add one
+                // to the current line number. CR-LF is a single
+                // end-of-line.
+                if (_currentChar == 10)
+                {
+                    ++_lineNumber;
+                }
+
+                // Keep reading until one of the specified close
+                // characters is found.
+                if (_closeChars.indexOf(_currentChar) >= 0)
+                {
+                    _stopFlag = true;
+                }
+                else
+                {
+                    _tokenBuffer.append(_currentChar);
+                }
+            }
+
+            _token.setType(SOURCE);
+            _token.setValue(_tokenBuffer.toString());
+            _token.setLineNumber(startLine);
+        }
+        catch (EOFException e)
+        {
+            // EOF is always a valid end-of-token marker.
+            // Return what has been collected.
+            _token.setType(SOURCE);
+            _token.setValue(_tokenBuffer.toString());
+            _token.setLineNumber(startLine);
+        }
+
+        return (_token);
+    }
+
+    // Read in a parameter type declaration as raw source code.
+    private Token nextParamTypeToken()
+        throws IOException
+    {
+        int startLine = _lineNumber;
+
+        // Clear out the token and get ready to work.
+        startToken();
+
+        // Keep reading until told to stop or the
+        // end-of-file is reached.
+        try
+        {
+            int depth = 0;
+
+            _stopFlag = false;
+            while (_stopFlag == false)
+            {
+                _currentChar = readChar();
+
+                if ((_currentChar == _closeChar ||
+                     _currentChar == _separator) &&
+                    depth == 0)
+                {
+                    _stopFlag = true;
+
+                    // Unlike nextRawToken() it is very important
+                    // *not* to consume the ',' or ')' because
+                    // the parser needs to see that token.
+                    ungetChar();
+                }
+                else
+                {
+                    _tokenBuffer.append(_currentChar);
+
+                    if (_currentChar == _closeChar)
+                    {
+                        --depth;
+                    }
+                    else if (_currentChar == _openChar)
+                    {
+                        ++depth;
+                    }
+                    else if (_currentChar == 10)
+                    {
+                        ++_lineNumber;
+                    }
+                }
+            }
+
+            _token.setType(SOURCE);
+            _token.setValue(_tokenBuffer.toString());
+            _token.setLineNumber(startLine);
+        }
+        catch (EOFException e)
+        {
+            StringBuffer msg = new StringBuffer(80);
+
+            msg.append("User source code contains an unbalanced ");
+            msg.append(_openChar);
+            msg.append(", ");
+            msg.append(_closeChar);
+            msg.append(" pair.");
+
+            // If this is the end of the source file, then the
+            // raw code section has an unbalanced open character/
+            // close character pair.
+            _token.setType(DONE_FAILED);
+            _token.setValue(msg.toString());
+        }
+
+        return (_token);
     }
 
     // Read the next character. Actually, this routine reads in
     // a large buffer and data returns the next character from
     // there. The idea is to do a few large, efficient reads and
     // make single character reads to be array retrievals.
+    // NOTE: this lexer backs up at most two characters. So
+    // when reading in a new buffer, copy the last two characters
+    // to the first two bytes and read in the next maximum number
+    // of bytes.
     private char readChar()
         throws IOException,
                EOFException
     {
+        int size;
+        int offset = 0;
         char retval;
 
         // If we are at the end of the buffer, read the
         // next buffer-full.
-        if (_read_index == _buffer_size)
+        if (_readIndex == _bufferSize)
         {
-            _read_index = 0;
-            _buffer_size = _stream.read(_read_buffer);
+            // Copy the last two bytes to the first two bytes.
+            if (_bufferSize > 2)
+            {
+                offset = 2;
+
+                _readBuffer[0] = _readBuffer[_bufferSize - 2];
+                _readBuffer[1] = _readBuffer[_bufferSize - 1];
+            }
+            else if (_bufferSize > 1)
+            {
+                offset = 1;
+
+                _readBuffer[0] = _readBuffer[_bufferSize - 1];
+            }
+
+            size =
+                _stream.read(_readBuffer,
+                             offset,
+                             MAX_BUFFER_LEN);
+
+            // End of file has been reached.
+            if (size < 0)
+            {
+                _bufferSize = 0;
+                throw (new EOFException("end-of-file reached"));
+            }
+            else
+            {
+                // The buffer's true size is the number of bytes
+                // read plus the offset.
+                _bufferSize = size + offset;
+                _readIndex = offset;
+            }
         }
 
         // End of file has been reached.
-        if (_buffer_size < 0)
+        if (_bufferSize < 0)
         {
-            EOFException e = new EOFException();
-
-            _buffer_size = 0;
-            throw e;
-            
+            _bufferSize = 0;
+            throw (new EOFException("end-of-file reached"));
         }
         else
         {
-            retval = (char) _read_buffer[_read_index];
-            ++_read_index;
+            retval = (char) _readBuffer[_readIndex];
+            ++_readIndex;
         }
 
         return(retval);
@@ -446,8 +604,8 @@ public final class SmcLexer
         // We are at the end-of-file if 1) the buffer's actual
         // size is less than the buffer's total size and the
         // buffer index is at the end of the actual size.
-        if (_buffer_size < _read_buffer.length &&
-            _read_index == _buffer_size)
+        if (_bufferSize < _readBuffer.length &&
+            _readIndex == _bufferSize)
         {
             retval = true;
         }
@@ -459,19 +617,24 @@ public final class SmcLexer
         return(retval);
     }
 
+//---------------------------------------------------------------
 // Member Data
+//
 
     // The lexer's state map.
-    private SmcLexerContext _lexer_map;
+    private SmcLexerContext _lexerFSM;
 
     // The file being parsed.
-    private FileInputStream _stream;
+    private InputStream _stream;
 
-    // Store the event loop - a token has been found.
-    private boolean _stop_flag;
+    // Specifies whether this lexer is in raw or cooked mode.
+    private int _mode;
+
+    // Stop the event loop - a token has been found.
+    private boolean _stopFlag;
 
     // The character currently being processed.
-    private char _current_char;
+    private char _currentChar;
 
     // Token name is an int. Token value is a string.
     // Place the token's name and value into the array's first
@@ -480,25 +643,77 @@ public final class SmcLexer
 
     // Collect the token in a string buffer before making a
     // string out of it.
-    private StringBuffer _token_buffer;
+    private StringBuffer _tokenBuffer;
 
     // Keep track of the source line being parsed. This is needed
     // for error messages.
-    private int _line_number;
+    private int _lineNumber;
 
     // Read in a buffer-full of data rather than one character
     // at a time.
-    private byte[] _read_buffer;
+    private byte[] _readBuffer;
 
     // The actual number of read characters in the buffer.
     // May be less than the buffer's size.
-    private int _buffer_size;
+    private int _bufferSize;
 
-    // The next character to be read from the _read_buffer.
-    private int _read_index;
+    // The next character to be read from the _readBuffer.
+    private int _readIndex;
+
+    // When working in RAW mode, the characters are *not*
+    // processed by the FSM. Instead, they are blindly
+    // collected until the close character is seen. Store the
+    // close character and its matching open character here.
+    private char _openChar;
+    private char _closeChar;
+    private char _separator;
+    private String _closeChars;
+
+    //-----------------------------------------------------------
+    // Statics.
+    //
+
+    private static String[] _TypeName;
+    private static Map _KeywordMap;
+
+    // Maps % keywords to an integer value.
+    private static Map _PercentKeywordMap;
+
+    // Create an array which maps ASCII characters to transitions.
+    private static Method[] _TransMethod;
+
+    //-----------------------------------------------------------
+    // Constants.
+    //
+
+    // Read in this many bytes at a time into the buffer.
+    private static final int MAX_BUFFER_LEN = 4096;
+
+    // Read into the input buffer starting at this offset.
+    private static final int BUFFER_OFFSET = 2;
 
     // The read buffer's allocated size in bytes.
-    private static final int READ_BUFFER_LEN = 4096;
+    private static final int READ_BUFFER_LEN =
+        MAX_BUFFER_LEN + BUFFER_OFFSET;
+
+    // When in cooked mode, run the characters through the
+    // lexer FSM.
+    /* package */ static final int COOKED = 1;
+
+    // When in raw mode, collect characters until the ending
+    // character is seen.
+    // RAW is used to read in all characters between parens,
+    // braces, etc. RAW mode will read in an entire .sm file
+    // if the parens are mismatched.
+    /* package */ static final int RAW = 2;
+
+    // RAW2 reads in all characters between parens or until
+    // a comma (or some other separator) is reached.
+    /* package */ static final int RAW2 = 3;
+
+    // RAW3 is like RAW but does not match open and closing
+    // bracket characters.
+    /* package */ static final int RAW3 = 4;
 
     // Each token type has an integer value. These token type
     // values are package-wide scope so the parser can access
@@ -515,78 +730,254 @@ public final class SmcLexer
     /* package */ static final int MAP_NAME = 9;
     /* package */ static final int CLASS_NAME = 10;
     /* package */ static final int HEADER_FILE = 11;
-    /* package */ static final int PACKAGE_NAME = 12;
-    /* package */ static final int IMPORT = 13;
-    /* package */ static final int LEFT_BRACE = 14;
-    /* package */ static final int RIGHT_BRACE = 15;
-    /* package */ static final int LEFT_BRACKET = 16;
-    /* package */ static final int RIGHT_BRACKET = 17;
-    /* package */ static final int LEFT_PAREN = 18;
-    /* package */ static final int RIGHT_PAREN = 19;
-    /* package */ static final int SEMICOLON = 20;
-    /* package */ static final int COLON = 21;
-    /* package */ static final int COMMA = 22;
-    /* package */ static final int EXCLAMATION = 23;
+    /* package */ static final int INCLUDE_FILE = 12;
+    /* package */ static final int PACKAGE_NAME = 13;
+    /* package */ static final int IMPORT = 14;
+    /* package */ static final int DECLARE = 15;
+    /* package */ static final int LEFT_BRACE = 16;
+    /* package */ static final int RIGHT_BRACE = 17;
+    /* package */ static final int LEFT_BRACKET = 18;
+    // Right bracket is not needed as it is consumed by raw text
+    // processing.
+    /* package */ static final int LEFT_PAREN = 19;
+    /* package */ static final int RIGHT_PAREN = 20;
+    /* package */ static final int COMMA = 21;
+    /* package */ static final int COLON = 22;
+    /* package */ static final int SEMICOLON = 23;
     /* package */ static final int SOURCE = 24;
     /* package */ static final int EOD = 25;
-    /* package */ static final int VARIABLE = 26;
-    /* package */ static final int INTEGER = 27;
-    /* package */ static final int FLOAT = 28;
-    /* package */ static final int STRING = 29;
-    /* package */ static final int ASTERISK = 30;
-    /* package */ static final int AMPERSAND = 31;
-    /* package */ static final int SLASH = 32;
-    /* package */ static final int TOKEN_COUNT = SLASH + 1;
+    /* package */ static final int SLASH = 26;
+    /* package */ static final int EQUAL = 27;
+    /* package */ static final int TOKEN_COUNT = EQUAL + 1;
+
+    // There are four SMC keywords: entry, exit, push and pop.
     private static final int KEYWORD_COUNT = 4;
 
-    private static String[] _typeName = null;
-    private static HashMap _keywordMap = null;
+    // There are eight percent keywords.
+    private static final int PERCENT_KEYWORD_COUNT = 8;
+
+    // The ASCII characters all have explicit transitions.
+    // Unicode characters are simply given the unicode
+    // transition.
+    private static final int MIN_ASCII_CHAR = 0;
+    private static final int MAX_ASCII_CHAR = 128;
 
     static
     {
-        _typeName = new String[TOKEN_COUNT];
-        _typeName[SmcLexer.TOKEN_NOT_SET] = "TOKEN_NOT_SET";
-        _typeName[SmcLexer.DONE_FAILED] = "DONE_FAILED";
-        _typeName[SmcLexer.DONE_SUCCESS] = "DONE_SUCCESS";
-        _typeName[SmcLexer.ENTRY] = "ENTRY";
-        _typeName[SmcLexer.EXIT] = "EXIT";
-        _typeName[SmcLexer.POP] = "POP";
-        _typeName[SmcLexer.PUSH] = "PUSH";
-        _typeName[SmcLexer.WORD] = "WORD";
-        _typeName[SmcLexer.START_STATE] = "START_STATE";
-        _typeName[SmcLexer.MAP_NAME] = "MAP_NAME";
-        _typeName[SmcLexer.CLASS_NAME] = "CLASS_NAME";
-        _typeName[SmcLexer.HEADER_FILE] = "HEADER_FILE";
-        _typeName[SmcLexer.PACKAGE_NAME] = "PACKAGE_NAME";
-        _typeName[SmcLexer.IMPORT] = "IMPORT";
-        _typeName[SmcLexer.LEFT_BRACE] = "LEFT_BRACE";
-        _typeName[SmcLexer.RIGHT_BRACE] = "RIGHT_BRACE";
-        _typeName[SmcLexer.LEFT_BRACKET] = "LEFT_BRACKET";
-        _typeName[SmcLexer.RIGHT_BRACKET] = "RIGHT_BRACKET";
-        _typeName[SmcLexer.LEFT_PAREN] = "LEFT_PAREN";
-        _typeName[SmcLexer.RIGHT_PAREN] = "RIGHT_PAREN";
-        _typeName[SmcLexer.SEMICOLON] = "SEMICOLON";
-        _typeName[SmcLexer.COLON] = "COLON";
-        _typeName[SmcLexer.COMMA] = "COMMA";
-        _typeName[SmcLexer.EXCLAMATION] = "EXCLAMATION";
-        _typeName[SmcLexer.SOURCE] = "SOURCE";
-        _typeName[SmcLexer.EOD] = "EOD";
-        _typeName[SmcLexer.VARIABLE] = "VARIABLE";
-        _typeName[SmcLexer.INTEGER] = "INTEGER";
-        _typeName[SmcLexer.FLOAT] = "FLOAT";
-        _typeName[SmcLexer.STRING] = "STRING";
-        _typeName[SmcLexer.ASTERISK] = "ASTERISK";
-        _typeName[SmcLexer.AMPERSAND] = "AMPERSAND";
-        _typeName[SmcLexer.SLASH] = "SLASH";
+        String transName = "<not set>";
 
-        _keywordMap = new HashMap(KEYWORD_COUNT);
-        _keywordMap.put("Entry", new Integer(SmcLexer.ENTRY));
-        _keywordMap.put("Exit", new Integer(SmcLexer.EXIT));
-        _keywordMap.put("pop", new Integer(SmcLexer.POP));
-        _keywordMap.put("push", new Integer(SmcLexer.PUSH));
+        _TypeName = new String[TOKEN_COUNT];
+        _TypeName[SmcLexer.TOKEN_NOT_SET] = "TOKEN_NOT_SET";
+        _TypeName[SmcLexer.DONE_FAILED] = "DONE_FAILED";
+        _TypeName[SmcLexer.DONE_SUCCESS] = "DONE_SUCCESS";
+        _TypeName[SmcLexer.ENTRY] = "ENTRY";
+        _TypeName[SmcLexer.EXIT] = "EXIT";
+        _TypeName[SmcLexer.POP] = "POP";
+        _TypeName[SmcLexer.PUSH] = "PUSH";
+        _TypeName[SmcLexer.WORD] = "WORD";
+        _TypeName[SmcLexer.START_STATE] = "START_STATE";
+        _TypeName[SmcLexer.MAP_NAME] = "MAP_NAME";
+        _TypeName[SmcLexer.CLASS_NAME] = "CLASS_NAME";
+        _TypeName[SmcLexer.HEADER_FILE] = "HEADER_FILE";
+        _TypeName[SmcLexer.INCLUDE_FILE] = "INCLUDE_FILE";
+        _TypeName[SmcLexer.PACKAGE_NAME] = "PACKAGE_NAME";
+        _TypeName[SmcLexer.IMPORT] = "IMPORT";
+        _TypeName[SmcLexer.DECLARE] = "DECLARE";
+        _TypeName[SmcLexer.LEFT_BRACE] = "LEFT_BRACE";
+        _TypeName[SmcLexer.RIGHT_BRACE] = "RIGHT_BRACE";
+        _TypeName[SmcLexer.LEFT_BRACKET] = "LEFT_BRACKET";
+        // Right bracket is not needed as it is consumed by
+        // raw text processing.
+        _TypeName[SmcLexer.LEFT_PAREN] = "LEFT_PAREN";
+        _TypeName[SmcLexer.RIGHT_PAREN] = "RIGHT_PAREN";
+        _TypeName[SmcLexer.COMMA] = "COMMA";
+        _TypeName[SmcLexer.COLON] = "COLON";
+        _TypeName[SmcLexer.COLON] = "SEMICOLON";
+        _TypeName[SmcLexer.SOURCE] = "SOURCE";
+        _TypeName[SmcLexer.EOD] = "EOD";
+        _TypeName[SmcLexer.SLASH] = "SLASH";
+        _TypeName[SmcLexer.EQUAL] = "EQUAL";
+
+        // Set up the keyword |-> token value map.
+        _KeywordMap = (Map) new HashMap(KEYWORD_COUNT);
+        _KeywordMap.put("Entry", new Integer(SmcLexer.ENTRY));
+        _KeywordMap.put("Exit", new Integer(SmcLexer.EXIT));
+        _KeywordMap.put("pop", new Integer(SmcLexer.POP));
+        _KeywordMap.put("push", new Integer(SmcLexer.PUSH));
+
+        // Set up the percent keyword |-> token value map.
+        _PercentKeywordMap =
+            (Map) new HashMap(PERCENT_KEYWORD_COUNT);
+        _PercentKeywordMap.put(
+            "%start", new Integer(SmcLexer.START_STATE));
+        _PercentKeywordMap.put(
+            "%map", new Integer(SmcLexer.MAP_NAME));
+        _PercentKeywordMap.put(
+            "%class", new Integer(SmcLexer.CLASS_NAME));
+        _PercentKeywordMap.put(
+            "%header", new Integer(SmcLexer.HEADER_FILE));
+        _PercentKeywordMap.put(
+            "%include", new Integer(SmcLexer.INCLUDE_FILE));
+        _PercentKeywordMap.put(
+            "%package", new Integer(SmcLexer.PACKAGE_NAME));
+        _PercentKeywordMap.put(
+            "%import", new Integer(SmcLexer.IMPORT));
+        _PercentKeywordMap.put(
+            "%declare", new Integer(SmcLexer.DECLARE));
+
+        // Set up the transition map.
+        _TransMethod = new Method[SmcLexer.MAX_ASCII_CHAR];
+
+        try
+        {
+            int i;
+            Class fsmClass = SmcLexerContext.class;
+            Class[] paramTypes = new Class[0];
+            Method unicode;
+            Method whitespace;
+            Method alpha;
+            Method digit;
+
+            transName = "unicode";
+            unicode =
+                fsmClass.getDeclaredMethod("unicode",
+                                           paramTypes);
+
+            transName = "whitespace";
+            whitespace =
+                fsmClass.getDeclaredMethod("whitespace",
+                                           paramTypes);
+
+            transName = "alpha";
+            alpha =
+                fsmClass.getDeclaredMethod("alpha", paramTypes);
+
+            transName = "digit";
+            digit =
+                fsmClass.getDeclaredMethod("digit", paramTypes);
+
+            // Set all transitions to unicode and then set known
+            // characters to other transitions.
+            for (i = MIN_ASCII_CHAR; i < MAX_ASCII_CHAR; ++i)
+            {
+                _TransMethod[i] = unicode;
+            }
+
+            // Whitespace characters.
+            _TransMethod[ 9] = whitespace;
+            _TransMethod[11] = whitespace;
+            _TransMethod[12] = whitespace;
+            _TransMethod[28] = whitespace;
+            _TransMethod[29] = whitespace;
+            _TransMethod[30] = whitespace;
+            _TransMethod[31] = whitespace;
+            _TransMethod[32] = whitespace;
+
+            // New line characters.
+            _TransMethod[10] =
+                fsmClass.getDeclaredMethod("EOL", paramTypes);
+            _TransMethod[13] = _TransMethod[10];
+
+            // Alphabetic characters.
+            for (i = 'a'; i <= 'z'; ++i)
+            {
+                _TransMethod[i] = alpha;
+            }
+
+            for (i = 'A'; i <= 'Z'; ++i)
+            {
+                _TransMethod[i] = alpha;
+            }
+
+            // Digits
+            for (i = '0'; i <= '9'; ++i)
+            {
+                _TransMethod[i] = digit;
+            }
+
+            // Visible characters.
+            transName = "percent";
+            _TransMethod['%'] =
+                fsmClass.getDeclaredMethod("percent",
+                                           paramTypes);
+            transName = "left_paren";
+            _TransMethod['('] =
+                fsmClass.getDeclaredMethod("left_paren",
+                                           paramTypes);
+            transName = "right_paren";
+            _TransMethod[')'] =
+                fsmClass.getDeclaredMethod("right_paren",
+                                           paramTypes);
+            transName = "asterisk";
+            _TransMethod['*'] =
+                fsmClass.getDeclaredMethod("asterisk",
+                                           paramTypes);
+            transName = "comma";
+            _TransMethod[','] =
+                fsmClass.getDeclaredMethod("comma",
+                                           paramTypes);
+            transName = "period";
+            _TransMethod['.'] =
+                fsmClass.getDeclaredMethod("period",
+                                           paramTypes);
+            transName = "slash";
+            _TransMethod['/'] =
+                fsmClass.getDeclaredMethod("slash",
+                                           paramTypes);
+            transName = "colon";
+            _TransMethod[':'] =
+                fsmClass.getDeclaredMethod("colon",
+                                           paramTypes);
+            transName = "semicolon";
+            _TransMethod[';'] =
+                fsmClass.getDeclaredMethod("semicolon",
+                                           paramTypes);
+            transName = "left_bracket";
+            _TransMethod['['] =
+                fsmClass.getDeclaredMethod("left_bracket",
+                                           paramTypes);
+            // Right bracket is not needed as it is consumed by
+            // raw text processing.
+            transName = "underscore";
+            _TransMethod['_'] =
+                fsmClass.getDeclaredMethod("underscore",
+                                           paramTypes);
+            transName = "left_brace";
+            _TransMethod['{'] =
+                fsmClass.getDeclaredMethod("left_brace",
+                                           paramTypes);
+            transName = "right_brace";
+            _TransMethod['}'] =
+                fsmClass.getDeclaredMethod("right_brace",
+                                           paramTypes);
+
+            transName = "equal";
+            _TransMethod['='] =
+                fsmClass.getDeclaredMethod("equal",
+                                           paramTypes);
+        }
+        catch (NoSuchMethodException ex1)
+        {
+            System.err.println(
+                "INITIALIZATION ERROR! No such method as " +
+                "SmcLexerContext." +
+                transName +
+                ".");
+            System.exit(1);
+        }
+        catch (SecurityException ex2)
+        {
+            System.err.println(
+                "INITIALIZATION ERROR! Not allowed to access SmcLexerContext." +
+                transName +
+                ".");
+            System.exit(1);
+        }
     }
 
-// INNER CLASSES
+//---------------------------------------------------------------
+// Inner classes.
+//
 
     /* package */ final class Token
     {
@@ -594,7 +985,7 @@ public final class SmcLexer
         {
             _type = TOKEN_NOT_SET;
             _value = null;
-            _line_number = -1;
+            _lineNumber = -1;
         }
 
         /* package */ int getType()
@@ -620,12 +1011,12 @@ public final class SmcLexer
 
         /* package */ int getLineNumber()
         {
-            return (_line_number);
+            return (_lineNumber);
         }
 
         /* package */ void setLineNumber(int line_number)
         {
-            _line_number = line_number;
+            _lineNumber = line_number;
             return;
         }
 
@@ -635,6 +1026,7 @@ public final class SmcLexer
 
             retval.setType(_type);
             retval.setValue(_value);
+            retval.setLineNumber(_lineNumber);
 
             return (retval);
         }
@@ -643,7 +1035,7 @@ public final class SmcLexer
         {
             String output = new String("{");
 
-            output += SmcLexer._typeName[_type];
+            output += SmcLexer._TypeName[_type];
             output += ", " + _value + "}";
 
             return(output);
@@ -653,11 +1045,64 @@ public final class SmcLexer
         {
             _type = TOKEN_NOT_SET;
             _value = null;
-            _line_number = -1;
+            _lineNumber = -1;
         }
 
         private int _type;
         private String _value;
-        private int _line_number;
+        private int _lineNumber;
     }
 }
+
+//
+// CHANGE LOG
+// $Log$
+// Revision 1.5  2005/05/28 19:28:42  cwrapp
+// Moved to visitor pattern.
+//
+// Revision 1.8  2005/02/21 18:13:40  charlesr
+// Added separate _PercentKeywordMap like _KeywordMap and
+// modified _checkPercentKeyword() method to use it.
+//
+// Corrected nextRaw3Token() which did not increment the current
+// line number when end-of-line was reached.
+//
+// Removed unknown FSM transition, using unicode transition
+// instead.
+//
+// General variable name clean up.
+//
+// Revision 1.7  2005/02/21 15:35:58  charlesr
+// Added Francois Perrad to Contributors section for Python work.
+//
+// Revision 1.6  2005/02/03 16:56:21  charlesr
+// Changed lexer and parser constructors so that the parser
+// instantiates the lexer rather than the application. This
+// change was done as part of an ongoing project to make the
+// SMC parser self-contained with the goal of releasing a
+// separate SMC parser library.
+//
+// Also tightened up the permissions from public to package.
+//
+// Revision 1.5  2004/10/30 16:05:08  charlesr
+// Added support for unicode.
+//
+// Revision 1.4  2004/10/02 19:52:16  charlesr
+// Corrected error when lexer needed to back up to a character in
+// the previous buffer-full of data. Since the lexer backs up at
+// most two characters, the previous two characters are carried
+// over from the previous buffer to the new buffer.
+//
+// Revision 1.3  2004/09/06 16:40:11  charlesr
+// Added C# support.
+//
+// Revision 1.2  2004/05/31 13:54:25  charlesr
+// Added support for VB.net code generation.
+//
+// Revision 1.1  2004/01/29 02:16:22  charlesr
+// Added InvocationTargetException catch to nextCookedToken()
+// method which converts exception to a "bad token".
+//
+// Revision 1.0  2003/12/14 21:03:41  charlesr
+// Initial revision
+//

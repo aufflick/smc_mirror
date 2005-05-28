@@ -13,149 +13,83 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 Charles W. Rapp.
+// Copyright (C) 2000 - 2005. Charles W. Rapp.
 // All Rights Reserved.
 // 
-// Contributor(s): 
+// Contributor(s):
+//   Eitan Suez contributed examples/Ant.
+//   (Name withheld) contributed the C# code generation and
+//   examples/C#.
+//   Francois Perrad contributed the Python code generation and
+//   examples/Python.
 //
 // RCS ID
 // $Id$
 //
 // CHANGE LOG
-// $Log$
-// Revision 1.4  2002/05/07 00:10:20  cwrapp
-// Changes in release 1.3.2:
-// Add the following feature:
-// + 528321: Modified push transition syntax to be:
-//
-// 	  <transname> <state1>/push(<state2>)  {<actions>}
-//
-// 	  which means "transition to <state1> and then
-// 	  immediately push to <state2>". The current
-// 	  syntax:
-//
-// 	  <transname> push(<state2>)  {<actions>}
-//
-//           is still valid and <state1> is assumed to be "nil".
-//
-// No bug fixes.
-//
-// Revision 1.2  2001/12/14 20:10:37  cwrapp
-// Changes in release 1.1.0:
-// Add the following features:
-// + 486786: Added the %package keyword which specifies the
-//           Java package/C++ namespace/Tcl namespace
-//           the SMC-generated classes will be placed.
-// + 486471: The %class keyword accepts fully qualified
-//           class names.
-// + 491135: Add FSMContext methods getDebugStream and
-//           setDebugStream.
-// + 492165: Added -sync command line option which causes
-//           the transition methods to be synchronized
-//           (this option may only be used with -java).
-//
-// Revision 1.1  2001/12/03 14:14:03  cwrapp
-// Changes in release 1.0.2:
-// + Placed the class files in Smc.jar in the net.sf.smc package.
-// + Moved Java source files from smc/bin to net/sf/smc.
-// + Corrected a C++ generation bug wherein arguments were written
-//   to the .h file rather than the .cpp file.
-//
-// Revision 1.1.1.2  2001/03/26 14:41:46  cwrapp
-// Corrected Entry/Exit action semantics. Exit actions are now
-// executed only by simple transitions and pop transitions.
-// Entry actions are executed by simple transitions and push
-// transitions. Loopback transitions do not execute either Exit
-// actions or entry actions. See SMC Programmer's manual for
-// more information.
-//
-// Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
-//
-// ----------------------------------------------------------------------
-// SMC - The State Map Compiler
-// Version: 1.0, Beta 3
-//
-// SMC compiles state map descriptions into a target object oriented
-// language. Currently supported languages are: C++, Java and [incr Tcl].
-// SMC finite state machines have such features as:
-// + Entry/Exit actions for states.
-// + Transition guards
-// + Transition arguments
-// + Push and Pop transitions.
-// + Default transitions. 
-// ----------------------------------------------------------------------
-//
-// Revision 1.2  2000/09/01 15:32:19  charlesr
-// Changes for v. 1.0, Beta 2:
-//
-// + Removed order dependency on "%start", "%class" and "%header"
-//   appearance. These three tokens may now appear in any order but
-//   still must appear before the first map definition.
-//
-// + Modified SMC parser so that it will continue after finding an
-//   error. Also improved the error message quality.
-//
-// + Made error messages so emacs is able to parse them.
-//
-// Revision 1.1.1.1  2000/08/02 12:50:56  charlesr
-// Initial source import, SMC v. 1.0, Beta 1.
+// (See the bottom of this file.)
 //
 
 package net.sf.smc;
 
 import java.io.PrintStream;
 import java.text.ParseException;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 
-public abstract class SmcState
+public final class SmcState
+    extends SmcElement
 {
-// Member Methods
+//---------------------------------------------------------------
+// Member methods
+//
 
-    public SmcState(String name, int line_number)
+    public SmcState(String name, int lineNumber, SmcMap map)
     {
-        _line_number = line_number;
+        super (name, lineNumber);
+
+        _map = map;
 
         if (name.compareTo("Default") == 0)
         {
-            _instance_name = "DefaultState";
+            _instanceName = "DefaultState";
         }
         else
         {
-            _instance_name = name;
+            _instanceName = name;
         }
 
         // Make sure the first character in the class name is
         // upper case.
-        String first_letter = name.substring(0, 1);
+        String firstLetter = name.substring(0, 1);
         String remainder = name.substring(1);
 
-        _class_name = first_letter.toUpperCase() + remainder;
+        _className = firstLetter.toUpperCase() + remainder;
 
-        _entryActions = (List) new LinkedList();
-        _exitActions = (List) new LinkedList();
+        _entryActions = null;
+        _exitActions = null;
         _transitions = (List) new LinkedList();
+    }
+
+    public SmcMap getMap()
+    {
+        return (_map);
     }
 
     public String getName()
     {
-        return(_class_name + "." + _instance_name);
-    }
-
-    public int getLineNumber()
-    {
-        return(_line_number);
+        return(_className + "." + _instanceName);
     }
 
     public String getClassName()
     {
-        return(_class_name);
+        return(_className);
     }
 
     public String getInstanceName()
     {
-        return(_instance_name);
+        return(_instanceName);
     }
 
     public List getEntryActions()
@@ -163,20 +97,20 @@ public abstract class SmcState
         return(_entryActions);
     }
 
+    public void setEntryActions(List actions)
+    {
+        _entryActions = (List) ((LinkedList) actions).clone();;
+        return;
+    }
+
     public List getExitActions()
     {
         return(_exitActions);
     }
 
-    public void addEntryAction(SmcAction action)
+    public void setExitActions(List actions)
     {
-        _entryActions.add(action);
-        return;
-    }
-
-    public void addExitAction(SmcAction action)
-    {
-        _exitActions.add(action);
+        _exitActions = (List) ((LinkedList) actions).clone();;
         return;
     }
 
@@ -188,44 +122,26 @@ public abstract class SmcState
     public SmcTransition findTransition(String name,
                                         List parameters)
     {
-        SmcTransition retval;
-        boolean match;
-        ListIterator transIt;
-        ListIterator paramIt1;
-        ListIterator paramIt2;
+        Iterator transIt;
         SmcTransition transition;
-        SmcParameter param1;
-        SmcParameter param2;
+        Iterator pit;
+        SmcParameter parameter;
+        SmcTransition retval;
 
-        for (transIt = _transitions.listIterator(),
+        for (transIt = _transitions.iterator(),
                      retval = null;
              transIt.hasNext() == true && retval == null;
             )
         {
             transition = (SmcTransition) transIt.next();
-            if (name.compareTo(transition.getName()) == 0 &&
-                parameters.size() == transition.getParameters().size())
+            if (name.equals(transition.getName()) == true &&
+                transition.compareTo(name, parameters) == 0)
             {
-                
-                for (paramIt1 = parameters.listIterator(),
-                         paramIt2 = transition.getParameters().listIterator(),
-                         match = true;
-                     paramIt1.hasNext() == true && match == true;
-                    )
-                {
-                    param1 = (SmcParameter) paramIt1.next();
-                    param2 = (SmcParameter) paramIt2.next();
-                    match = param1.equals(param2);
-                }
-
-                if (match == true)
-                {
-                    retval = transition;
-                }
+                retval = transition;
             }
         }
 
-        return(retval);
+        return (retval);
     }
 
     public void addTransition(SmcTransition transition)
@@ -242,67 +158,101 @@ public abstract class SmcState
 
     public String toString()
     {
-        String retval;
-        String separator;
-        ListIterator it;
-        SmcAction action;
-        SmcTransition transition;
+        Iterator it;
+        StringBuffer retval = new StringBuffer(512);
 
-        retval = _instance_name;
+        retval.append(_instanceName);
 
-        if (_entryActions.size() > 0)
+        if (_entryActions != null && _entryActions.size() > 0)
         {
-            retval += "\n\tEntry {";
-            for (it = _entryActions.listIterator(),
-                     separator = "";
+            retval.append("\n\tEntry {");
+            for (it = _entryActions.iterator();
                  it.hasNext() == true;
-                 separator = " ")
+                )
             {
-                action = (SmcAction) it.next();
-                retval += separator + action;
+                retval.append((SmcAction) it.next());
+                retval.append('\n');
             }
-            retval += "}";
+            retval.append("}");
         }
 
-        if (_exitActions.size() > 0)
+        if (_exitActions != null && _exitActions.size() > 0)
         {
-            retval += "\n\tExit {";
-            for (it = _exitActions.listIterator(),
-                     separator = "";
+            retval.append("\n\tExit {");
+            for (it = _exitActions.iterator();
                  it.hasNext() == true;
-                 separator = " ")
+                )
             {
-                action = (SmcAction) it.next();
-                retval += separator + action;
+                retval.append((SmcAction) it.next());
+                retval.append('\n');
             }
-            retval += "}";
+            retval.append("}");
         }
 
-        for (it = _transitions.listIterator();
+        for (it = _transitions.iterator();
              it.hasNext() == true;
             )
         {
-            transition = (SmcTransition) it.next();
-            retval += "\n" + transition;
+            retval.append("\n");
+            retval.append((SmcTransition) it.next());
         }
 
-        return(retval);
+        return (retval.toString());
     }
 
-    public abstract void generateCode(PrintStream header,
-                                      PrintStream stream,
-                                      String mapName,
-                                      String context,
-                                      String pkg,
-                                      String indent)
-        throws ParseException;;
+    //-----------------------------------------------------------
+    // SmcElement Abstract Methods.
+    //
 
-// Member Data
+    public void accept(SmcVisitor visitor)
+    {
+        visitor.visit(this);
+        return;
+    }
 
-    protected int _line_number;
-    protected String _class_name;
-    protected String _instance_name;
-    protected List _entryActions;
-    protected List _exitActions;
-    protected List _transitions;
+    //
+    // end of SmcElement Abstract Methods.
+    //-----------------------------------------------------------
+
+//---------------------------------------------------------------
+// Member data
+//
+
+    private SmcMap _map;
+    private String _className;
+    private String _instanceName;
+    private List _entryActions;
+    private List _exitActions;
+    private List _transitions;
 }
+
+//
+// CHANGE LOG
+// $Log$
+// Revision 1.5  2005/05/28 19:28:42  cwrapp
+// Moved to visitor pattern.
+//
+// Revision 1.6  2005/02/21 15:38:04  charlesr
+// Added Francois Perrad to Contributors section for Python work.
+//
+// Revision 1.5  2005/02/03 16:49:43  charlesr
+// In implementing the Visitor pattern, the generateCode()
+// methods have been moved to the appropriate Visitor
+// subclasses (e.g. SmcJavaGenerator). This class now extends
+// SmcElement.
+//
+// Revision 1.4  2004/10/30 16:07:55  charlesr
+// Added Graphviz DOT file generation.
+//
+// Revision 1.3  2004/10/08 18:55:41  charlesr
+// Fixed C# exit action generation.
+//
+// Revision 1.2  2004/09/06 16:41:40  charlesr
+// Added C# support.
+//
+// Revision 1.1  2004/05/31 13:57:04  charlesr
+// Added support for VB.net code generation.
+//
+// Revision 1.0  2003/12/14 21:06:45  charlesr
+// Initial revision
+//
