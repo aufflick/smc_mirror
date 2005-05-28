@@ -23,32 +23,11 @@
 #
 # CHANGE LOG
 # $Log$
-# Revision 1.4  2002/05/07 00:49:06  cwrapp
-# Changes in release 1.3.2:
-# Add the following feature:
-# + 528321: Modified push transition syntax to be:
+# Revision 1.5  2005/05/28 18:52:09  cwrapp
+# Updated Makefile.
 #
-# 	  <transname> <state1>/push(<state2>)  {<actions>}
-#
-# 	  which means "transition to <state1> and then
-# 	  immediately push to <state2>". The current
-# 	  syntax:
-#
-# 	  <transname> push(<state2>)  {<actions>}
-#
-#           is still valid and <state1> is assumed to be "nil".
-#
-# No bug fixes.
-#
-# Revision 1.2  2001/11/30 15:17:22  cwrapp
-# Changes in release 1.0.2:
-# + Placed the class files in Smc.jar in the net.sf.smc package.
-# + Moved Java source files from smc/bin to net/sf/smc.
-# + Corrected a C++ generation bug wherein arguments were written
-#   to the .h file rather than the .cpp file.
-#
-# Revision 1.1  2001/05/13 16:20:47  cwrapp
-# Initial add to repository.
+# Revision 1.0  2003/12/14 20:44:57  charlesr
+# Initial revision
 #
 
 STAGING_DIR =	../../staging/smc/misc
