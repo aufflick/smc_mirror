@@ -13,7 +13,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 Charles W. Rapp.
+// Copyright (C) 2000 - 2003 Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
@@ -29,28 +29,17 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.2  2002/05/07 00:46:22  cwrapp
-// Changes in release 1.3.2:
-// Add the following feature:
-// + 528321: Modified push transition syntax to be:
+// Revision 1.3  2005/05/28 19:41:44  cwrapp
+// Update for SMC v. 4.0.0.
 //
-// 	  <transname> <state1>/push(<state2>)  {<actions>}
+// Revision 1.2  2004/10/30 15:43:25  charlesr
+// Correct time format.
 //
-// 	  which means "transition to <state1> and then
-// 	  immediately push to <state2>". The current
-// 	  syntax:
+// Revision 1.1  2004/10/08 18:40:42  charlesr
+// Replaced CallbackThread with a timer.
 //
-// 	  <transname> push(<state2>)  {<actions>}
-//
-//           is still valid and <state1> is assumed to be "nil".
-//
-// No bug fixes.
-//
-// Revision 1.1  2001/06/26 22:16:23  cwrapp
-// Changes in release 1.0.0:
-// Checking in code for first production release.
-// If SMC should crash, critical information are printed out along
-// with instructions explaining where to send that information.
+// Revision 1.0  2003/12/14 19:02:45  charlesr
+// Initial revision
 //
 
 import java.applet.Applet;
@@ -96,6 +85,7 @@ public final class Telephone
         _exchange = null;
         _local = null;
         _display = "";
+        _route = 0;
 
         _receiverButton = null;
         _dialButtons = null;
@@ -113,7 +103,7 @@ public final class Telephone
         _local = new String();
 
         _clockFormatter =
-            new SimpleDateFormat("    HH:mm a    MMMM dd, yyyyy");
+            new SimpleDateFormat("    hh:mm a    MMMM dd, yyyyy");
 
         // Load sounds.
         _loadSounds();
@@ -160,32 +150,44 @@ public final class Telephone
         return;
     }
 
+    //-----------------------------------------------------------
+    // TimerListener Interface Implementation.
+    //
+
     public void handleTimeout(TimerEvent event)
     {
-        String name = event.getTimerName();
-
         if (_fsm != null)
         {
-            if (name.compareTo("RingTimer") == 0)
+            String name = event.getTimerName();
+
+            if (name.equals("RingTimer") == true)
             {
                 _fsm.RingTimer();
             }
-            else if (name.compareTo("OffHookTimer") == 0)
+            else if (name.equals("OffHookTimer") == true)
             {
                 _fsm.OffHookTimer();
             }
-            else if (name.compareTo("LoopTimer") == 0)
+            else if (name.equals("LoopTimer") == true)
             {
                 _fsm.LoopTimer();
             }
-            else if (name.compareTo("ClockTimer") == 0)
+            else if (name.equals("ClockTimer") == true)
             {
                 _fsm.ClockTimer();
+            }
+            else if (name.equals("RouteTimer") == true)
+            {
+                _callRoute();
             }
         }
 
         return;
     }
+
+    //
+    // end of TimerListener Interface Implementation.
+    //-----------------------------------------------------------
 
     //-----------------------------------------------------------
     // State Machine Conditions.
@@ -256,14 +258,40 @@ public final class Telephone
     // Use a separate thread to route the call asynchronously.
     public void routeCall()
     {
-        CallRoutingThread thread =
-            new CallRoutingThread(_callType,
-                                  _areaCode,
-                                  _exchange,
-                                  _local,
-                                  this);
+        if (_callType == EMERGENCY)
+        {
+            _route = EMERGENCY;
+        }
+        else if (_callType == LONG_DISTANCE &&
+                 _areaCode.equals("1212") == true &&
+                 _exchange.equals("555") == true &&
+                 _local.equals("1234") == true)
+        {
+            _route = NYC_TEMP;
+        }
+        else if (_exchange.equals("555") == true)
+        {
+            if (_local.equals("1212") == true)
+            {
+                _route = TIME;
+            }
+            else
+            {
+                _route = LINE_BUSY;
+            }
+        }
+        else if (_callType == LOCAL)
+        {
+            _route = DEPOSIT_MONEY;
+        }
+        else
+        {
+            _route = INVALID_NUMBER;
+        }
 
-        thread.start();
+        // Issue the appropriate transition when this timer
+        // expires.
+        startTimer("RouteTimer", 1);
 
         return;
     }
@@ -665,7 +693,6 @@ public final class Telephone
 
     private void _loadSounds()
     {
-        // String directory = "file:///C:/src/smc/examples/Java/EX7/sounds/";
         String directory = getCodeBase() + "sounds/";
         String urlString = "";
         URL soundURL;
@@ -980,19 +1007,21 @@ public final class Telephone
                         Button button = (Button) e.getSource();
                         String command = e.getActionCommand();
 
-                        if (command.compareTo("off hook") == 0)
+                        if (command.equals("off hook") == true)
                         {
                             _fsm.OffHook();
                         }
-                        else if (command.compareTo("on hook") == 0)
+                        else if (command.equals("on hook")
+                                     == true)
                         {
                             _fsm.OnHook();
                         }
                         else
                         {
-                            System.out.println("Unknown receiver command: \"" +
-                                               command +
-                                               "\".");
+                            System.out.println(
+                                "Unknown receiver command: \"" +
+                                command +
+                                "\".");
                         }
 
                         return;
@@ -1039,12 +1068,14 @@ public final class Telephone
         _actPad = "                                                              ";
 
         Panel labelPanel = new Panel();
-        String labelText = "State               Transition                Action                                                           ";
+        String labelText =
+            "State               Transition                Action                                                           ";
         Label label = new Label(labelText, Label.LEFT);
         Font labelFont = new Font("Arial", Font.BOLD, 12);
         label.setFont(labelFont);
 
-        labelPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        labelPanel.setLayout(
+            new FlowLayout(FlowLayout.LEFT, 0, 0));
         labelPanel.add(label);
 
         _textArea = new TextArea("",
@@ -1260,8 +1291,12 @@ public final class Telephone
         _fsm.PlaybackDone();
     }
 
-    private void _callRoute(int route)
+    private void _callRoute()
     {
+        int route = _route;
+
+        _route = 0;
+
         switch (route)
         {
             case EMERGENCY:
@@ -1305,6 +1340,7 @@ public final class Telephone
     private String _exchange;
     private String _local;
     private String _display;
+    private int _route;
 
     // Display the dialed digits here.
     private TextField _numberDisplay;
@@ -1329,6 +1365,7 @@ public final class Telephone
     // The telephone's time display.
     private SimpleDateFormat _clockFormatter;
 
+    //-----------------------------------------------------------
     // Constants.
     public static final int LONG_DISTANCE = 1;
     public static final int LOCAL = 2;
@@ -1519,78 +1556,5 @@ public final class Telephone
         private Telephone _owner;
         private boolean _continueFlag;
         private Thread _thread;
-    }
-
-    // Call routing needs to be done asynchronouzly in order to
-    // avoid issuing a transition within a transition.
-    private final class CallRoutingThread
-        extends Thread
-    {
-    // Member methods.
-
-        public void run()
-        {
-            int route;
-
-            if (_callType == Telephone.EMERGENCY)
-            {
-                route = Telephone.EMERGENCY;
-            }
-            else if (_callType == Telephone.LONG_DISTANCE &&
-                     _areaCode.compareTo("1212") == 0 &&
-                     _exchange.compareTo("555") == 0 &&
-                     _local.compareTo("1234") == 0)
-            {
-                route = Telephone.NYC_TEMP;
-            }
-            else if (_exchange.compareTo("555") == 0)
-            {
-                if (_local.compareTo("1212") == 0)
-                {
-                    route = Telephone.TIME;
-                }
-                else
-                {
-                    route = Telephone.LINE_BUSY;
-                }
-            }
-            else if (_callType == Telephone.LOCAL)
-            {
-                route = Telephone.DEPOSIT_MONEY;
-            }
-            else
-            {
-                route = Telephone.INVALID_NUMBER;
-            }
-
-            _areaCode = null;
-            _exchange = null;
-            _local = null;
-
-            _owner._callRoute(route);
-
-            return;
-        }
-
-        private CallRoutingThread(int callType,
-                                  String areaCode,
-                                  String exchange,
-                                  String local,
-                                  Telephone owner)
-        {
-            _callType = callType;
-            _areaCode = new String(areaCode);
-            _exchange = new String(exchange);
-            _local = new String(local);
-            _owner = owner;
-        }
-
-    // Member data.
-
-        private int _callType;
-        private String _areaCode;
-        private String _exchange;
-        private String _local;
-        private Telephone _owner;
     }
 }

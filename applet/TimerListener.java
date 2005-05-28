@@ -13,7 +13,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 Charles W. Rapp.
+// Copyright (C) 2000 - 2003 Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
@@ -30,28 +30,11 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.2  2002/05/07 00:46:22  cwrapp
-// Changes in release 1.3.2:
-// Add the following feature:
-// + 528321: Modified push transition syntax to be:
+// Revision 1.3  2005/05/28 19:41:44  cwrapp
+// Update for SMC v. 4.0.0.
 //
-// 	  <transname> <state1>/push(<state2>)  {<actions>}
-//
-// 	  which means "transition to <state1> and then
-// 	  immediately push to <state2>". The current
-// 	  syntax:
-//
-// 	  <transname> push(<state2>)  {<actions>}
-//
-//           is still valid and <state1> is assumed to be "nil".
-//
-// No bug fixes.
-//
-// Revision 1.1  2001/06/26 22:16:23  cwrapp
-// Changes in release 1.0.0:
-// Checking in code for first production release.
-// If SMC should crash, critical information are printed out along
-// with instructions explaining where to send that information.
+// Revision 1.0  2003/12/14 19:04:42  charlesr
+// Initial revision
 //
 
 import java.util.EventListener;

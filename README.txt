@@ -2,7 +2,7 @@
 
                                SMC
                      The State Machine Compiler
-                         (Version: 1.3.0)
+                         (Version: 4.0.0)
 
                      http://smc.sourceforge.net
 
@@ -13,64 +13,61 @@
 
 New Features:
 
-+ All transitions may now access the application context class
-  via the "ctxt" variable. Just as the "this" variable in C++ and
-  Java refers to the object itself, the SMC "ctxt" variable
-  references the state machine's context object.
++ Moved to Visitor pattern. By rearranging the SMC source code to
+  the Visitor pattern, it makes it easier to in new code
+  generators and code analyzers.
 
-  For example, if the context class is AppClass, then in "ctxt"
-  is declared as:
+  See http://smc.sourceforge.net/????
+  for more information about how to add new code generators to
+  SMC.
 
-  +  C++: AppClass& ctxt;
-  + Java: AppClass ctxt;
-  +  Tcl: variable ctxt;
++ Added Python code generation. This capability and examples
+  provided by Francois Perrad, francois.perrad@gadz.org.
 
-+ Methods and functions are now valid arguments themselves.
-  For example, in the following "Idle" state, notice the
-  "DoTask" transition and how the transition arguments are
-  used in the "startTask" transition action:
++ When SMC generates C++ and exceptions are allowed (when -noex
+  is *not* specified), then statemap::FSMContext::popState()
+  throws a PopOnEmptyStateStackException when a pop transition is
+  taken but the state stack is empty. Otherwise, assert() is
+  used.
 
-  Idle
-  {
-      DoTask(task : Task&)
-          Working    {startTask(task.getWorkList(),
-                                ctxt.getTaskManager(),
-                                getUniqueTaskId());}
-  }
-
-  Notice that "task" and "ctxt" are needed to make the proper
-  method calls. The call "getUniqueTaskId()" is an independent
-  subroutine and *not* a method. While "startTask" does not
-  have an object reference preceeding it, it must be an
-  accessible context class method (that is, it is interpreted as
-  "ctxt.startTask(...)").
-
-  SourceForge feature #: 479555
-
-+ A %import keyword has been added. The syntax is:
-
-  %import <name>
-
-  and results in the following code being generated:
-
-  +  C++: using namespace <name>;
-  + Java: import <name>;
-  +  Tcl: package requirce <name>;
-
-  Note: As always, the SMC programmer is responsible for making
-        sure that <name> is valid. SMC does not validate <name>
-        and an invalid <name> will be found when the generated
-        code is compiled (in C++ and Java) or run (in Tcl).
++ Added a -return command line option which causes Smc.main() to
+  return rather than exit. This option is needed by ANT users.
 
 Bug Fixes:
 
-This release contains no new bug fixes.
++ (C++) In statemap.h, the variable id and _id were changed to
+  stateId and _stateId, respectively. This change was also made
+  to the generated C++ code. This change was made due to "id"
+  being a keyword in the Macintosh Objective-C++ language.
+
++ Corrected error when multiple spaces between %header, %import,
+  %include and %declare keywords and the following name caused
+  an unhandled exception.
+
++ Corrected errors with % keywords and the -graph target.
+
++ (C++) The hybrid Object-C++ language has the reserved word
+  "id". SMC generated C++ code contains this keyword as well
+  as statemap.h. SMC now uses "stateId".
+
++ (Java) Corrected error in generated serialization code. The
+  readObject() method was not restoring the current state. The
+  generated Java serialization code is now completely redone and
+  tested.
+
++ (Java) SMC now requires that the .sm source file has the same
+  basename as the context class' .java source file. So if the
+  context class is OrderConnection and is in
+  OrderConnection.java, then the associated FSM must be in
+  OrderConnection.sm.
+
++ (Ant) Corrected a syntax error in examples/Ant/EX7/build.xml.
 
 
 1. System Requirements
 ----------------------
 
-+ JRE (Standard Edition) 1.2.2 or better.
++ JRE (Standard Edition) 1.4.1 or better.
 + Whatever JRE's requirements are (see http://java.sun.com/j2se/
   for more information).
 
@@ -88,8 +85,8 @@ classes implementing that state machine. The only code you need
 to add to your object is 1) create the state machine object and
 2) issue transitions. ITS THAT EASY.
 
-+ No, you don't have to inherit any state machine class.
-+ No, you don't have to implement any state machine interface.
++ NO, you don't have to inherit any state machine class.
++ NO, you don't have to implement any state machine interface.
 
 YES, you add to your class constructor:
 
@@ -102,7 +99,7 @@ YES, you issue state transitions:
 Congratulations! You've integrated a state machine into your object.
 
 SMC is written in Java and is truly "Write once, run anywhere".
-If you have at least the Java Standard Edition v. 1.2.2 loaded,
+If you have at least the Java Standard Edition v. 1.4.1 loaded,
 then you can run SMC (if you have the Java Enterpise Edition, so
 much the better!)
 
@@ -110,26 +107,29 @@ Java Standard Edition can be downloaded for FREE from
 
                     http://java.sun.com/j2se/
 
-SMC currently supports three object-oriented languages:
+SMC currently supports five object-oriented languages:
   1. C++,
-  2. Java and
-  3. [incr Tcl].
+  2. Java,
+  3. [incr Tcl],
+  4. VB.Net and
+  5. C#
 
 
 3. Download
 -----------
 
 Surf over to http://smc.sourceforge.net and check out
-"File Releases". The latest SMC version is 1.3.0.
+"File Releases". The latest SMC version is 3.0.0.
 SMC downloads come in two flavors: tar/gzip (for Unix)
 and self-extracting zip file (for Windows).
 
 The download package contains the executable Smc.jar and
-supporting library: statemap.h (for C++), statemap.jar (for Java)
-and statemap.tcl & pkgIndex.tcl (for Tcl).
+supporting library: statemap.h (for C++), statemap.jar
+(for Java), statemap.tcl & pkgIndex.tcl (for Tcl),
+statemap.dll (for VB.Net) and statemap.dll (for C#).
 
 NOTE: Only the SMC-generated code uses these libraries. Your code
-doesn't even know they exists. However, when compiling your
+doesn't even know they exist. However, when compiling your
 application, you will need to add a
     -I<path to statemap.h directory>
 or
@@ -149,9 +149,25 @@ The download package's directory layout is:
          |     |
          |     +-statemap.jar
          |     |
+         |     +-statmap-+-FSMContext.class
+         |     |         |
+         |     |         +-State.class
+         |     |         |
+         |     |         +-StateUndefinedException.class
+         |     |         |
+         |     |         +-TransitionUndefinedException.class
+         |     |
          |     +-statemap1.0-+-statemap.tcl
-         |                   |
-         |                   +-pkgIndex.tcl
+         |     |             |
+         |     |             +-pkgIndex.tcl
+         |     |
+         |     +-VB-+-statemap.dll
+         |     |
+         |     +-CSharp-+-Debug-+-statemap.dll
+         |              |       |
+         |              |       +-statemap.pdb
+         |              |
+         |              +-Release-+-statemap.dll
          |
          +-misc---smc.ico (smc Windows icon)
          |
@@ -167,7 +183,7 @@ The download package's directory layout is:
                     |      |
                     |      +-EX6
                     |
-                    +-Java-+-EX1 (Java source code)
+                    +-Java-+-EX1 (Java source code, Makefiles)
                     |      |
                     |      +-EX2
                     |      |
@@ -182,6 +198,28 @@ The download package's directory layout is:
                     |      +-EX7
                     |
                     +-Tcl--+-EX1 (Tcl source code)
+                    |      |
+                    |      +-EX2
+                    |      |
+                    |      +-EX3
+                    |      |
+                    |      +-EX4
+                    |      |
+                    |      +-EX5
+                    |
+                    +-VB---+-EX1 (VB.Net source code)
+                    |      |
+                    |      +-EX2
+                    |      |
+                    |      +-EX3
+                    |      |
+                    |      +-EX4
+                    |
+                    +-CSharp---+-EX1 (C# source code)
+                    |          |
+                    |          +-EX3
+                    |
+                    +-Ant--+-EX1 (Java source code, Ant built)
                            |
                            +-EX2
                            |
@@ -190,6 +228,10 @@ The download package's directory layout is:
                            +-EX4
                            |
                            +-EX5
+                           |
+                           +-EX6
+                           |
+                           +-EX7
 
 
 4. Installation
@@ -206,8 +248,8 @@ file), you install SMC as follows:
    out of the new version. Once you are satisfied with the new
    version, you may delete the old SMC.
 3. Load the SMC package:
-    (Unix) $ tar xvfz Smc_1_0_0.tgz
-    (Windows) running Smc_1_0_0.zip
+    (Unix) $ tar xvfz Smc_4_0_0.tgz
+    (Windows) running Smc_4_0_0.zip
 
 You're done! There really is nothing more that needs to be done.
 You may want to take the following steps.
@@ -227,6 +269,17 @@ The examples directory contains example SMC-based applications.
 The examples range from trivial (EX1) to sophisticated (EX5).
 Use these examples together with the SMC Programmer's Guide to
 learn how to use SMC.
+
+The C++ examples provide Makefiles, Microsoft DevStudio 6.0
+workspace and DevStudio 7.0 solution.
+
+The Java examples in examples/Java use "make" for building.
+The same examples also appear in examples/Ant and use "ant".
+
+The [incr Tcl] examples are not built and require you to
+execute "java -jar Smc.jar" by hand.
+
+The VB.Net and C# examples use DevStudio 7.0.
 
 To learn more about each example and how to build & run each one,
 read the example's README.txt.

@@ -13,71 +13,75 @@
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
-# Copyright (C) 2000 Charles W. Rapp.
+# Copyright (C) 2000 - 2004. Charles W. Rapp.
+# All Rights Reserved.
+#
+# Port to Python by Francois Perrad, francois.perrad@gadz.org
+# Copyright 2004, Francois Perrad.
 # All Rights Reserved.
 # 
 # Contributor(s):
+#   Eitan Suez contributed examples/Ant.
+#   (Name withheld) contributed the C# code generation and
+#   examples/C#.
+#   Francois Perrord contributed the Python code generator and
+#   examples/Python.
 #
 # RCS ID
 # $Id$
 #
 # CHANGE LOG
-# $Log$
-# Revision 1.5  2002/02/19 19:52:45  cwrapp
-# Changes in release 1.3.0:
-# Add the following features:
-# + 479555: Added subroutine/method calls as argument types.
-# + 508878: Added %import keyword.
-#
-# Revision 1.3  2001/11/30 15:17:22  cwrapp
-# Changes in release 1.0.2:
-# + Placed the class files in Smc.jar in the net.sf.smc package.
-# + Moved Java source files from smc/bin to net/sf/smc.
-# + Corrected a C++ generation bug wherein arguments were written
-#   to the .h file rather than the .cpp file.
-#
-# Revision 1.2  2001/06/16 19:52:43  cwrapp
-# Changes in release 1.0, beta 7:
-# Fixes the minor code generation bugs and introduces a new
-# example Java program (found at examples/Java/EX7). This
-# example program is also a Java applet and can be seen at
-# http://smc.sourceforge.net/SmcDemo.htm.
-#
-# Revision 1.1  2001/05/13 16:18:49  cwrapp
-# Initial add to repository.
+# (See the bottom of this file.)
 #
 
-VERSION=	1_3_0
+#################################################################
+# Macros.
+#
+
+# Include the official macros.
+include ./smc.mk
 
 STAGING_DIR=	../staging
 SMC_STAGING_DIR=$(STAGING_DIR)/smc
 SMC_RELEASE_DIR=$(STAGING_DIR)/smc_$(VERSION)
 RELEASE_DIR=	$(STAGING_DIR)/releases
 
-TARFILE=	$(RELEASE_DIR)/smc_$(VERSION).tar
-GZIPFILE=	$(RELEASE_DIR)/smc_$(VERSION).tgz
+TAR_FILE=	$(RELEASE_DIR)/smc_$(VERSION).tar
+TAR_GZ_FILE=	$(TAR_FILE:.tar=.tar.gz)
+GZIP_FILE=	$(TAR_FILE:.tar=.tgz)
+
+SRC_TAR_FILE=	staging/releases/SmcSrc_$(VERSION).tar
+SRC_TAR_GZ_FILE=$(SRC_TAR_FILE:.tar=.tar.gz)
+SRC_GZIP_FILE=	$(SRC_TAR_FILE:.tar=.tgz)
+SRC_TAR_LIST=	./smc/tar_list.txt
+
+#################################################################
+# Rules.
+#
 
 # Create the staging directories if needed.
 $(STAGING_DIR) :
 		mkdir $(STAGING_DIR)
 
 $(SMC_STAGING_DIR) :	$(STAGING_DIR)
+		-rm -fr $(SMC_STAGING_DIR)
 		mkdir $(SMC_STAGING_DIR)
-
-$(RELEASE_DIR) :	$(STAGING_DIR)
-		mkdir $(RELEASE_DIR)
 
 # Copy all products to the staging directory.
 install :	$(SMC_STAGING_DIR)
+		-rm -fr $(SMC_STAGING_DIR)/*
 		$(MAKE) -C lib install
 		$(MAKE) -C net/sf/smc install
 		cp -R -f -p ./examples $(SMC_STAGING_DIR)
-		-rm -fr $(SMC_STAGING_DIR)/examples/CVS
-		-rm -fr $(SMC_STAGING_DIR)/examples/*/CVS
-		-rm -fr $(SMC_STAGING_DIR)/examples/*/*/CVS
+		-rm -fr $(SMC_STAGING_DIR)/examples/*/*/RCS
+		-rm -fr $(SMC_STAGING_DIR)/examples/Ant/*/*/RCS
+		-rm -fr $(SMC_STAGING_DIR)/examples/.DS_Store
+		-rm -fr $(SMC_STAGING_DIR)/examples/*/.DS_Store
+		-rm -fr $(SMC_STAGING_DIR)/examples/*/*/.DS_Store
 		$(MAKE) -C misc install
 		cp -f LICENSE.txt $(SMC_STAGING_DIR)
 		cp -f README.txt $(SMC_STAGING_DIR)
+		chmod 444 $(SMC_STAGING_DIR)/bin/Smc.jar
 
 uninstall :
 		$(MAKE) -C lib uninstall
@@ -91,17 +95,60 @@ clean :
 		$(MAKE) -C lib clean
 		$(MAKE) -C ./net/sf/smc clean
 
-dist : 		install $(RELEASE_DIR)
-		rm -fr $(SMC_RELEASE_DIR)
-		cd $(STAGING_DIR); \
-			mv $(SMC_STAGING_DIR) $(SMC_RELEASE_DIR); \
-			tar cvf $(TARFILE) smc_$(VERSION)
-		gzip $(TARFILE)
-		mv $(TARFILE).gz $(GZIPFILE)
+smc_dist :	$(SMC_STAGING_DIR)
+		-rm -f $(TAR_FILE) $(TAR_GZ_FILE) $(GZIP_FILE)
+		(cd $(STAGING_DIR)/..; \
+		    mv $(SMC_STAGING_DIR) $(SMC_RELEASE_DIR); \
+		    tar cvf $(TAR_FILE) smc_$(VERSION))
+		gzip $(TAR_FILE)
+		mv $(TAR_GZ_FILE) $(GZIP_FILE)
+
+src_dist :	$(SMC_RELEASE_DIR)
+		(cd ..; \
+		    rm -f $(SRC_TAR_FILE) \
+			$(SRC_TAR_GZ_FILE) \
+			$(SRC_GZIP_FILE); \
+		    tar cvmpfT $(SRC_TAR_FILE) $(SRC_TAR_LIST); \
+		    gzip $(SRC_TAR_FILE); \
+		    mv $(SRC_TAR_GZ_FILE) $(SRC_GZIP_FILE))
+
+dist : 		install smc_dist src_dist
 
 distclean :
-		-rm -f $(TARFILE) $(GZIPFILE)
+		-rm -f $(TAR_FILE) $(TAR_GZ_FILE) $(GZIP_FILE)
+		(cd ..; \
+		    rm -f $(SRC_TAR_FILE) \
+			  $(SRC_TAR_GZ_FILE) \
+			  $(SRC_GZIP_FILE))
 
 realclean :
 		$(MAKE) -C lib realclean
 		$(MAKE) -C ./net/sf/smc realclean
+
+#
+# CHANGE LOG
+# $Log$
+# Revision 1.6  2005/05/28 19:41:44  cwrapp
+# Update for SMC v. 4.0.0.
+#
+# Revision 1.6  2004/10/30 15:34:17  charlesr
+# Corrected dist rule and associated macros.
+#
+# Revision 1.5  2004/10/08 18:44:07  charlesr
+# Changed version to 3.1.2.
+#
+# Revision 1.4  2004/10/02 19:59:18  charlesr
+# Changed version to 3.1.1.
+#
+# Revision 1.3  2004/09/06 15:03:12  charlesr
+# Updated for SMC v. 3.1.0.
+#
+# Revision 1.2  2004/05/31 15:18:29  charlesr
+# Added rule for generating source distribution.
+#
+# Revision 1.1  2004/05/30 21:37:06  charlesr
+# Changed version to 3.0.0.
+#
+# Revision 1.0  2003/12/14 21:07:53  charlesr
+# Initial revision
+#

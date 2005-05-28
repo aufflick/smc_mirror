@@ -23,22 +23,14 @@
 #
 # CHANGE LOG
 # $Log$
-# Revision 1.3  2002/05/07 00:46:22  cwrapp
-# Changes in release 1.3.2:
-# Add the following feature:
-# + 528321: Modified push transition syntax to be:
+# Revision 1.4  2005/05/28 19:41:44  cwrapp
+# Update for SMC v. 4.0.0.
 #
-# 	  <transname> <state1>/push(<state2>)  {<actions>}
+# Revision 1.1  2004/10/08 18:40:21  charlesr
+# Correct classpath.
 #
-# 	  which means "transition to <state1> and then
-# 	  immediately push to <state2>". The current
-# 	  syntax:
-#
-# 	  <transname> push(<state2>)  {<actions>}
-#
-#           is still valid and <state1> is assumed to be "nil".
-#
-# No bug fixes.
+# Revision 1.0  2003/12/14 19:02:21  charlesr
+# Initial revision
 #
 # Revision 1.2  2001/11/30 15:17:22  cwrapp
 # Changes in release 1.0.2:
@@ -64,10 +56,10 @@ SOURCES=	$(SM_SOURCES:%.sm=%Context.java) \
 		Timer.java \
 		Telephone.java
 
-FSM_DIR=	../smc/lib
+FSM_DIR=	../lib/Java
 
 JAVAC=		javac
-JAVAC_FLAGS=	-g -classpath ../smc/lib/statemap.jar
+JAVAC_FLAGS=	-g -classpath ../lib/Java/statemap.jar
 JAR=		jar
 JAR_CREATE_FLAGS=	cmf manifest.txt
 JAR_UPDATE_FLAGS=	uf
