@@ -1,5 +1,0 @@
-Main-Class: Smc
-Name: SMC - The State Map Compiler
-Implementation-Title: SMC
-Implementation-Version: 1.0.0
-Implementation-Vendor: Charles Rapp
