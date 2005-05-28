@@ -13,7 +13,7 @@
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
-# Copyright (C) 2000 Charles W. Rapp.
+# Copyright (C) 2000 - 2003 Charles W. Rapp.
 # All Rights Reserved.
 # 
 # Contributor(s):
@@ -29,41 +29,11 @@
 #
 # CHANGE LOG
 # $Log$
-# Revision 1.3  2002/05/07 00:29:51  cwrapp
-# Changes in release 1.3.2:
-# Add the following feature:
-# + 528321: Modified push transition syntax to be:
+# Revision 1.4  2005/05/28 18:02:56  cwrapp
+# Updated Tcl examples, removed EX6.
 #
-# 	  <transname> <state1>/push(<state2>)  {<actions>}
-#
-# 	  which means "transition to <state1> and then
-# 	  immediately push to <state2>". The current
-# 	  syntax:
-#
-# 	  <transname> push(<state2>)  {<actions>}
-#
-#           is still valid and <state1> is assumed to be "nil".
-#
-# No bug fixes.
-#
-# Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
-#
-# ----------------------------------------------------------------------
-# SMC - The State Map Compiler
-# Version: 1.0, Beta 3
-#
-# SMC compiles state map descriptions into a target object oriented
-# language. Currently supported languages are: C++, Java and [incr Tcl].
-# SMC finite state machines have such features as:
-# + Entry/Exit actions for states.
-# + Transition guards
-# + Transition arguments
-# + Push and Pop transitions.
-# + Default transitions. 
-# ----------------------------------------------------------------------
-#
-# Revision 1.1.1.1  2000/08/02 12:51:06  charlesr
-# Initial source import, SMC v. 1.0, Beta 1.
+# Revision 1.0  2003/12/14 20:36:00  charlesr
+# Initial revision
 #
 
 package require statemap;
@@ -459,6 +429,48 @@ class TaskManager {
 
     # State machine actions.
 
+    # getRunnableTaskCount --
+    #
+    #   Return the number of runnable tasks.
+    #
+    # Arguments:
+    #   None.
+    #
+    # Results:
+    #   Return the number of runnable tasks.
+    
+    public method getRunnableTaskCount {} {
+        return -code ok [llength $_runnableTaskQueue];
+    }
+
+    # getBlockedTaskCount --
+    #
+    #   Return the number of blocked tasks.
+    #
+    # Arguments:
+    #   None.
+    #
+    # Results:
+    #   Return the number of blocked tasks.
+    
+    public method getBlockedTaskCount {} {
+        return -code ok [llength $_blockedTaskList];
+    }
+
+    # getRunningTask --
+    #
+    #   Return the currently running task.
+    #
+    # Arguments:
+    #   None.
+    #
+    # Results:
+    #   Return the currently running task.
+
+    public method getRunningTask {} {
+        return -code ok _runningTask;
+    }
+
     # setTimer --
     #
     #   Create a timer for the specified period. When the timer
@@ -644,27 +656,6 @@ class TaskManager {
         }
 
         return -code ok;
-    }
-
-    # allTasksStopped --
-    #
-    #   Checks if all tasks have stopped. All tasks have stopped
-    #   if the blocked task list is empty.
-    #
-    # Arguments:
-    #   None.
-    #
-    # Results:
-    #   Returns 1 if all tasks have stopped and 0 otherwise.
-
-    public method allTasksStopped {} {
-        if {[llength $_blockedTaskList] == 0} {
-            set Retval 1;
-        } else {
-            set Retval 0;
-        }
-
-        return -code ok $Retval;
     }
 
     # deleteRunningTask --

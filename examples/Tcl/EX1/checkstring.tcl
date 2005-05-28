@@ -1,7 +1,7 @@
 #!/bin/sh
 # -*- tab-width: 4; -*-
 # \
-exec tclsh8.2 "$0" "$@"
+exec tclsh "$0" "$@"
 
 # 
 # The contents of this file are subject to the Mozilla Public
@@ -18,7 +18,7 @@ exec tclsh8.2 "$0" "$@"
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
-# Copyright (C) 2000 Charles W. Rapp.
+# Copyright (C) 2000 - 2003 Charles W. Rapp.
 # All Rights Reserved.
 # 
 # Contributor(s):
@@ -33,50 +33,17 @@ exec tclsh8.2 "$0" "$@"
 #
 # CHANGE LOG
 # $Log$
-# Revision 1.3  2002/05/07 00:29:50  cwrapp
-# Changes in release 1.3.2:
-# Add the following feature:
-# + 528321: Modified push transition syntax to be:
+# Revision 1.4  2005/05/28 18:02:52  cwrapp
+# Updated Tcl examples, removed EX6.
 #
-# 	  <transname> <state1>/push(<state2>)  {<actions>}
+# Revision 1.1  2005/01/22 13:20:23  charlesr
+# Added statemap package location to auto_path.
 #
-# 	  which means "transition to <state1> and then
-# 	  immediately push to <state2>". The current
-# 	  syntax:
+# Revision 1.0  2003/12/14 20:25:44  charlesr
+# Initial revision
 #
-# 	  <transname> push(<state2>)  {<actions>}
-#
-#           is still valid and <state1> is assumed to be "nil".
-#
-# No bug fixes.
-#
-# Revision 1.1.1.2  2001/03/26 14:41:47  cwrapp
-# Corrected Entry/Exit action semantics. Exit actions are now
-# executed only by simple transitions and pop transitions.
-# Entry actions are executed by simple transitions and push
-# transitions. Loopback transitions do not execute either Exit
-# actions or entry actions. See SMC Programmer's manual for
-# more information.
-#
-# Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
-#
-# ----------------------------------------------------------------------
-# SMC - The State Map Compiler
-# Version: 1.0, Beta 3
-#
-# SMC compiles state map descriptions into a target object oriented
-# language. Currently supported languages are: C++, Java and [incr Tcl].
-# SMC finite state machines have such features as:
-# + Entry/Exit actions for states.
-# + Transition guards
-# + Transition arguments
-# + Push and Pop transitions.
-# + Default transitions. 
-# ----------------------------------------------------------------------
-#
-# Revision 1.1.1.1  2000/08/02 12:51:04  charlesr
-# Initial source import, SMC v. 1.0, Beta 1.
-#
+
+lappend auto_path ../../../lib
 
 package require Itcl;
 

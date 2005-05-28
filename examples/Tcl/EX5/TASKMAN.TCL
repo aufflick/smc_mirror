@@ -1,7 +1,7 @@
 #!/bin/sh
 # -*- tab-width: 4; -*-
 # \
-exec wish80 -f "$0" "$@"
+exec wish -f "$0" "$@"
 
 # 
 # The contents of this file are subject to the Mozilla Public
@@ -18,7 +18,7 @@ exec wish80 -f "$0" "$@"
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
-# Copyright (C) 2000 Charles W. Rapp.
+# Copyright (C) 2000 - 2003 Charles W. Rapp.
 # All Rights Reserved.
 # 
 # Contributor(s):
@@ -28,56 +28,14 @@ exec wish80 -f "$0" "$@"
 #
 # CHANGE LOG
 # $Log$
-# Revision 1.4  2002/05/07 00:29:51  cwrapp
-# Changes in release 1.3.2:
-# Add the following feature:
-# + 528321: Modified push transition syntax to be:
+# Revision 1.5  2005/05/28 18:02:56  cwrapp
+# Updated Tcl examples, removed EX6.
 #
-# 	  <transname> <state1>/push(<state2>)  {<actions>}
+# Revision 1.1  2005/01/22 13:19:59  charlesr
+# Added statemap package location to auto_path.
 #
-# 	  which means "transition to <state1> and then
-# 	  immediately push to <state2>". The current
-# 	  syntax:
-#
-# 	  <transname> push(<state2>)  {<actions>}
-#
-#           is still valid and <state1> is assumed to be "nil".
-#
-# No bug fixes.
-#
-# Revision 1.2  2001/05/09 23:40:02  cwrapp
-# Changes in release 1.0, beta 6:
-# Fixes the four following bugs:
-# + 416011: SMC does not properly handle pop transitions which
-#           have no argument.
-# + 416013: SMC generated code does not throw a
-#           "Transition Undefined" exception as per Programmer's
-#           Manual.
-# + 416014: The initial state's Entry actions are not being
-#           executed.
-# + 416015: When a transition has both a guarded and an unguarded
-#           definition, the Exit actions are only called when the
-#           guard evaluates to true.
-# + 422795: SMC -tcl abnormally terminates.
-#
-# Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
-#
-# ----------------------------------------------------------------------
-# SMC - The State Map Compiler
-# Version: 1.0, Beta 3
-#
-# SMC compiles state map descriptions into a target object oriented
-# language. Currently supported languages are: C++, Java and [incr Tcl].
-# SMC finite state machines have such features as:
-# + Entry/Exit actions for states.
-# + Transition guards
-# + Transition arguments
-# + Push and Pop transitions.
-# + Default transitions. 
-# ----------------------------------------------------------------------
-#
-# Revision 1.1.1.1  2000/08/02 12:51:06  charlesr
-# Initial source import, SMC v. 1.0, Beta 1.
+# Revision 1.0  2003/12/14 20:32:13  charlesr
+# Initial revision
 #
 
 #############################################################################
@@ -114,6 +72,8 @@ set widget(rev,.top17.scr23) {MessageYScrollbar}
 #
 proc init {argc argv} {
     global widget;
+
+    lappend auto_path ../../../lib
 
     # Load in the necessary Tcl packages.
     package require Itcl;
