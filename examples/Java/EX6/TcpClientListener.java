@@ -13,7 +13,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 Charles W. Rapp.
+// Copyright (C) 2000 - 2003 Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
@@ -29,23 +29,14 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.3  2002/05/07 00:29:50  cwrapp
-// Changes in release 1.3.2:
-// Add the following feature:
-// + 528321: Modified push transition syntax to be:
+// Revision 1.4  2005/05/28 13:51:24  cwrapp
+// Update Java examples 1 - 7.
 //
-// 	  <transname> <state1>/push(<state2>)  {<actions>}
+// Revision 1.0  2003/12/14 20:19:17  charlesr
+// Initial revision
 //
-// 	  which means "transition to <state1> and then
-// 	  immediately push to <state2>". The current
-// 	  syntax:
-//
-// 	  <transname> push(<state2>)  {<actions>}
-//
-//           is still valid and <state1> is assumed to be "nil".
-//
-// No bug fixes.
-//
+
+package smc_ex6;
 
 public interface TcpClientListener
     extends TcpConnectionListener

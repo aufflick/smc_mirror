@@ -13,7 +13,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 Charles W. Rapp.
+// Copyright (C) 2000 - 2003 Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
@@ -29,50 +29,14 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.4  2002/05/07 00:29:50  cwrapp
-// Changes in release 1.3.2:
-// Add the following feature:
-// + 528321: Modified push transition syntax to be:
+// Revision 1.5  2005/05/28 13:51:24  cwrapp
+// Update Java examples 1 - 7.
 //
-// 	  <transname> <state1>/push(<state2>)  {<actions>}
+// Revision 1.0  2003/12/14 20:19:31  charlesr
+// Initial revision
 //
-// 	  which means "transition to <state1> and then
-// 	  immediately push to <state2>". The current
-// 	  syntax:
-//
-// 	  <transname> push(<state2>)  {<actions>}
-//
-//           is still valid and <state1> is assumed to be "nil".
-//
-// No bug fixes.
-//
-// Revision 1.1.1.2  2001/03/26 14:41:47  cwrapp
-// Corrected Entry/Exit action semantics. Exit actions are now
-// executed only by simple transitions and pop transitions.
-// Entry actions are executed by simple transitions and push
-// transitions. Loopback transitions do not execute either Exit
-// actions or entry actions. See SMC Programmer's manual for
-// more information.
-//
-// Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
-//
-// ----------------------------------------------------------------------
-// SMC - The State Map Compiler
-// Version: 1.0, Beta 3
-//
-// SMC compiles state map descriptions into a target object oriented
-// language. Currently supported languages are: C++, Java and [incr Tcl].
-// SMC finite state machines have such features as:
-// + Entry/Exit actions for states.
-// + Transition guards
-// + Transition arguments
-// + Push and Pop transitions.
-// + Default transitions. 
-// ----------------------------------------------------------------------
-//
-// Revision 1.1  2000/10/16 19:42:56  charlesr
-// Initial version.
-//
+
+package smc_ex6;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -248,32 +212,23 @@ public abstract class TcpConnection
     }
 
     //-----------------------------------------------------------
-    // State Map Guards
-    //
-
-    // Is this segment from the expected source? If not, then
-    // it is from an interloper.
-    /* package */ boolean isInterloper(TcpSegment segment)
-    {
-        return(_address == null ||
-               _port < 0 ||
-               _address.equals(segment.getSourceAddress()) == false ||
-               _port != segment.getSourcePort());
-    }
-
-    /* package */ boolean isValidAck(TcpSegment segment)
-    {
-        return(_address != null &&
-               _port >= 0 &&
-               _address.equals(segment.getSourceAddress()) == true &&
-               _port == segment.getSourcePort() &&
-               segment.getAcknowledgeNumber() ==
-                   _sequence_number);
-    }
-
-    //-----------------------------------------------------------
     // State Map Actions.
     //
+    /* package */ InetAddress getFarAddress()
+    {
+        return (_address);
+    }
+
+    /* package */ int getFarPort()
+    {
+        return (_port);
+    }
+
+    /* package */ int getSequenceNumber()
+    {
+        return (_sequence_number);
+    }
+
     /* package */ void openServerSocket(int port)
     {
         DatagramSocket socket;

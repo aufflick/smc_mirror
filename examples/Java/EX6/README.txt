@@ -27,34 +27,15 @@ client application connections to the server application and
 transmits messages at random times. The accepted client
 connection also sends messages.
 
-Unix:
+Unix & Windows:
 
-    $ java -classpath ${CLASSPATH}:../../../lib/statemap.jar server <port>
+    $ java -jar server.jar <port>
     where <port> is a valid *UDP* port number.
 
     Hit return to terminate the application. This will close all
     client connections and all clients will terminate.
 
-    $ java -classpath ${CLASSPATH}:../../../lib/statemap.jar client [-h <host>] -p <port>
-    where <host> is the host machine running the server
-                 application (may be omitted if client is running
-                 on the same machine).
-          <port> is the same port number used in starting the
-                 server application.
-
-    Hit return to terminate the application. This will close this
-    client's connection to the server. The server will *not*
-    terminate.
-
-Windows:
-
-    $ java -classpath "${CLASSPATH};../../../lib/statemap.jar" server <port>
-    where <port> is a valid *UDP* port number.
-
-    Hit return to terminate the application. This will close all
-    client connections and all clients will terminate.
-
-    $ java -classpath "${CLASSPATH};../../../lib/statemap.jar" client [-h <host>] -p <port>
+    $ java -jar client.ajr [-h <host>] -p <port>
     where <host> is the host machine running the server
                  application (may be omitted if client is running
                  on the same machine).

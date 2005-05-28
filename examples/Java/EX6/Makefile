@@ -13,7 +13,7 @@
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
-# Copyright (C) 2000 Charles W. Rapp.
+# Copyright (C) 2000 - 2004. Charles W. Rapp.
 # All Rights Reserved.
 # 
 # Contributor(s):
@@ -22,62 +22,17 @@
 # $Id$
 #
 # CHANGE LOG
-# $Log$
-# Revision 1.4  2002/05/07 00:29:50  cwrapp
-# Changes in release 1.3.2:
-# Add the following feature:
-# + 528321: Modified push transition syntax to be:
-#
-# 	  <transname> <state1>/push(<state2>)  {<actions>}
-#
-# 	  which means "transition to <state1> and then
-# 	  immediately push to <state2>". The current
-# 	  syntax:
-#
-# 	  <transname> push(<state2>)  {<actions>}
-#
-#           is still valid and <state1> is assumed to be "nil".
-#
-# No bug fixes.
-#
-# Revision 1.2  2001/05/09 23:40:02  cwrapp
-# Changes in release 1.0, beta 6:
-# Fixes the four following bugs:
-# + 416011: SMC does not properly handle pop transitions which
-#           have no argument.
-# + 416013: SMC generated code does not throw a
-#           "Transition Undefined" exception as per Programmer's
-#           Manual.
-# + 416014: The initial state's Entry actions are not being
-#           executed.
-# + 416015: When a transition has both a guarded and an unguarded
-#           definition, the Exit actions are only called when the
-#           guard evaluates to true.
-# + 422795: SMC -tcl abnormally terminates.
-#
-# Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
-#
-# ----------------------------------------------------------------------
-# SMC - The State Map Compiler
-# Version: 1.0, Beta 3
-#
-# SMC compiles state map descriptions into a target object oriented
-# language. Currently supported languages are: C++, Java and [incr Tcl].
-# SMC finite state machines have such features as:
-# + Entry/Exit actions for states.
-# + Transition guards
-# + Transition arguments
-# + Push and Pop transitions.
-# + Default transitions. 
-# ----------------------------------------------------------------------
-#
-# Revision 1.2  2000/10/16 21:08:49  charlesr
-# Added MPL comments.
+# (See the bottom of this file.)
 #
 
+#################################################################
+# Macros.
+#
+
+TARGET=		tcpdemo
 SM_SOURCES=	TcpConnection.sm
 
-SOURCES=	TcpConnectionContext.java \
+SOURCES=	$(SM_SOURCES:%.sm=%Context.java) \
 		AsyncTimer.java \
 		TimerListener.java \
 		AsyncDatagramSocket.java \
@@ -87,23 +42,68 @@ SOURCES=	TcpConnectionContext.java \
 		TcpConnectionListener.java \
 		TcpClient.java \
 		TcpServer.java \
-		server.java \
-		client.java
+		client.java \
+		server.java
 
-APP_CLASSPATH=	../../../lib/statemap.jar
+CLIENT_JAR=	client.jar
+SERVER_JAR=	server.jar
+
+PACKAGE_DIR=	smc_ex6
+
+FSM_LIB_DIR=	../../../lib
 
 JAVAC=		javac
-JAVAC_FLAGS=	-g -classpath $(APP_CLASSPATH)
+JAVAC_FLAGS=	-d . -g -classpath $(FSM_LIB_DIR)
+
 SMC=		java -jar ../../../bin/Smc.jar
-SMC_FLAGS=	-java -g
+SMC_FLAGS=	-java -g -sync
+
+JAR=		jar
+JAR_CREATE_FLAGS=	cmf
+JAR_UPDATE_FLAGS=	uf
+
+#################################################################
+# Rules.
+#
 
 %Context.java : %.sm
 		$(SMC) $(SMC_FLAGS) $<
 
-all :		tcpdemo
+%_sm.dot :	%.sm
+		$(SMC) -graph -glevel 1 $<
 
-tcpdemo :	$(SOURCES)
+all :		$(TARGET)
+
+$(TARGET)     :	$(SOURCES)
 		$(JAVAC) $(JAVAC_FLAGS) $(SOURCES)
+		$(JAR) $(JAR_CREATE_FLAGS) client_manifest.txt \
+			$(CLIENT_JAR) $(PACKAGE_DIR)/*.class
+		$(JAR) $(JAR_UPDATE_FLAGS) $(CLIENT_JAR) \
+			-C $(FSM_LIB_DIR) statemap
+		$(JAR) $(JAR_CREATE_FLAGS) server_manifest.txt \
+			$(SERVER_JAR) $(PACKAGE_DIR)/*.class
+		$(JAR) $(JAR_UPDATE_FLAGS) $(SERVER_JAR) \
+			-C $(FSM_LIB_DIR) statemap
+
+graph :		$(SM_SOURCES:%.sm=%_sm.dot)
 
 clean :
-		-rm -f *.class *Context.java
+		-rm -f *Context.java \
+			$(PACKAGE_DIR)/*.class \
+			$(CLIENT_JAR) \
+			$(SERVER_JAR) \
+			*_sm.dot
+		-rm -fr $(PACKAGE_DIR)
+
+#
+# CHANGE LOG
+# $Log$
+# Revision 1.5  2005/05/28 13:51:24  cwrapp
+# Update Java examples 1 - 7.
+#
+# Revision 1.1  2004/10/30 12:01:52  charlesr
+# Added Graphviz rules.
+#
+# Revision 1.0  2003/12/14 20:17:42  charlesr
+# Initial revision
+#

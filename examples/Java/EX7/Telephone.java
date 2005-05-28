@@ -13,7 +13,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 Charles W. Rapp.
+// Copyright (C) 2000 - 2003 Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
@@ -29,33 +29,19 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.3  2002/05/07 00:29:50  cwrapp
-// Changes in release 1.3.2:
-// Add the following feature:
-// + 528321: Modified push transition syntax to be:
+// Revision 1.4  2005/05/28 13:51:24  cwrapp
+// Update Java examples 1 - 7.
 //
-// 	  <transname> <state1>/push(<state2>)  {<actions>}
+// Revision 1.0  2003/12/14 20:22:40  charlesr
+// Initial revision
 //
-// 	  which means "transition to <state1> and then
-// 	  immediately push to <state2>". The current
-// 	  syntax:
-//
-// 	  <transname> push(<state2>)  {<actions>}
-//
-//           is still valid and <state1> is assumed to be "nil".
-//
-// No bug fixes.
-//
-// Revision 1.1  2001/06/26 22:16:24  cwrapp
-// Changes in release 1.0.0:
-// Checking in code for first production release.
-// If SMC should crash, critical information are printed out along
-// with instructions explaining where to send that information.
-//
+
+package smc_ex7;
 
 import java.applet.Applet;
 import java.applet.AudioClip;
 import java.awt.Container;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -137,6 +123,9 @@ public final class Telephone
 
         // Create the state machine to drive this object.
         _fsm = new TelephoneContext(this);
+
+        // DEBUG
+        // _fsm.setDebugFlag(true);
     }
 
     public void issueTimeout(String timer)
@@ -170,70 +159,44 @@ public final class Telephone
     }
 
     //-----------------------------------------------------------
-    // State Machine Conditions.
-    //
-
-    public boolean isDigitValid(String n)
-    {
-        boolean retcode;
-
-        try
-        {
-            int digit = Integer.parseInt(n);
-
-            retcode =
-                (digit >= 0 && digit < 10 ? true : false);
-        }
-        catch (NumberFormatException formex)
-        {
-            retcode = false;
-        }
-
-        return (retcode);
-    }
-
-    public boolean equal(String n, int value)
-    {
-        boolean retcode;
-
-        try
-        {
-            int digit;
-
-            digit = Integer.parseInt(n);
-            retcode = (digit == value ? true : false);
-        }
-        catch (NumberFormatException formex)
-        {
-            retcode = false;
-        }
-
-        return (retcode);
-    }
-
-    // The area code is complete when four digits have been
-    // collected. Since we will be adding one more in a moment,
-    // the area code need have only three digits.
-    public boolean isCodeComplete()
-    {
-        return (_areaCode.length() == 3);
-    }
-
-    // The exchange has three digits.
-    public boolean isExchangeComplete()
-    {
-        return (_exchange.length() == 2);
-    }
-
-    // The local number has four digits.
-    public boolean isLocalComplete()
-    {
-        return (_local.length() == 3);
-    }
-
-    //-----------------------------------------------------------
     // State Machine Actions.
     //
+
+    // Convert a string to a number. Return -1 if the parse
+    // fails.
+    public int parseInt(String n)
+    {
+        int retval;
+
+        try
+        {
+            retval = Integer.parseInt(n);
+        }
+        catch (NumberFormatException formex)
+        {
+            retval = -1;
+        }
+
+        return (retval);
+    }
+
+    // Return the current area code.
+    public String getAreaCode()
+    {
+        return (_areaCode);
+    }
+
+    // Return the exchange.
+    public String getExchange()
+    {
+        return (_exchange);
+    }
+
+    // Return the local number.
+    public String getLocal()
+    {
+        return (_local);
+    }
 
     // Use a separate thread to route the call asynchronously.
     public void routeCall(int callType,
@@ -538,11 +501,6 @@ public final class Telephone
         return;
     }
 
-    public String getAreaCode()
-    {
-        return (_areaCode);
-    }
-
     public void saveAreaCode(String n)
     {
         _areaCode += n;
@@ -551,22 +509,12 @@ public final class Telephone
         return;
     }
 
-    public String getExchange()
-    {
-        return (_exchange);
-    }
-
     public void saveExchange(String n)
     {
         _exchange += n;
         addDisplay(n);
 
         return;
-    }
-
-    public String getLocal()
-    {
-        return (_local);
     }
 
     public void saveLocal(String n)
@@ -631,7 +579,7 @@ public final class Telephone
 
     private void _loadSounds()
     {
-        String directory = "file:///C:/src/smc/examples/Java/EX7/sounds/";
+        String directory = "jar:file:./telephone.jar!/sounds/";
         String urlString = "";
         URL soundURL;
         AudioClip audioClip;
@@ -896,8 +844,9 @@ public final class Telephone
         int i;
 
         // Create the read-only phone number display.
-        _numberDisplay = new JTextField(14);
+        _numberDisplay = new JTextField(20);
         _numberDisplay.setEditable(false);
+        _numberDisplay.setFont(new Font(null, Font.PLAIN, 10));
 
         // Create the off-hook/on-hook button.
         _receiverButton = new JButton("Pick up receiver ");
@@ -1338,7 +1287,7 @@ public final class Telephone
         _timerTransitionMap = new HashMap();
 
         _ClockFormatter =
-            new SimpleDateFormat("    HH:mm a    MMMM dd, yyyyy");
+            new SimpleDateFormat("    HH:mm a    MMMM dd, yyyy");
 
         // Fill in the static associations between timer names
         // and their transition.
@@ -1606,6 +1555,20 @@ public final class Telephone
             _areaCode = null;
             _exchange = null;
             _local = null;
+
+            // There is a race condition between this thread
+            // and the main thread which contains the FSM.
+            // Apparently this thread can complete while the
+            // FSM is still in transition, causing an exception.
+            // so sleep a bit before issuing the callback.
+            try
+            {
+                Thread.sleep(1);
+            }
+            catch (InterruptedException interrupt)
+            {
+                // Ignore.
+            }
 
             _owner._callRoute(route);
 

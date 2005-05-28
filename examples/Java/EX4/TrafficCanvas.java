@@ -13,7 +13,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 Charles W. Rapp.
+// Copyright (C) 2000 - 2003 Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
@@ -29,63 +29,11 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.4  2002/05/07 00:29:50  cwrapp
-// Changes in release 1.3.2:
-// Add the following feature:
-// + 528321: Modified push transition syntax to be:
+// Revision 1.5  2005/05/28 13:51:24  cwrapp
+// Update Java examples 1 - 7.
 //
-// 	  <transname> <state1>/push(<state2>)  {<actions>}
-//
-// 	  which means "transition to <state1> and then
-// 	  immediately push to <state2>". The current
-// 	  syntax:
-//
-// 	  <transname> push(<state2>)  {<actions>}
-//
-//           is still valid and <state1> is assumed to be "nil".
-//
-// No bug fixes.
-//
-// Revision 1.2  2001/12/14 20:10:37  cwrapp
-// Changes in release 1.1.0:
-// Add the following features:
-// + 486786: Added the %package keyword which specifies the
-//           Java package/C++ namespace/Tcl namespace
-//           the SMC-generated classes will be placed.
-// + 486471: The %class keyword accepts fully qualified
-//           class names.
-// + 491135: Add FSMContext methods getDebugStream and
-//           setDebugStream.
-// + 492165: Added -sync command line option which causes
-//           the transition methods to be synchronized
-//           (this option may only be used with -java).
-//
-// Revision 1.1.1.2  2001/03/26 14:41:47  cwrapp
-// Corrected Entry/Exit action semantics. Exit actions are now
-// executed only by simple transitions and pop transitions.
-// Entry actions are executed by simple transitions and push
-// transitions. Loopback transitions do not execute either Exit
-// actions or entry actions. See SMC Programmer's manual for
-// more information.
-//
-// Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
-//
-// ----------------------------------------------------------------------
-// SMC - The State Map Compiler
-// Version: 1.0, Beta 3
-//
-// SMC compiles state map descriptions into a target object oriented
-// language. Currently supported languages are: C++, Java and [incr Tcl].
-// SMC finite state machines have such features as:
-// + Entry/Exit actions for states.
-// + Transition guards
-// + Transition arguments
-// + Push and Pop transitions.
-// + Default transitions. 
-// ----------------------------------------------------------------------
-//
-// Revision 1.1.1.1  2000/08/02 12:51:02  charlesr
-// Initial source import, SMC v. 1.0, Beta 1.
+// Revision 1.0  2003/12/14 20:04:00  charlesr
+// Initial revision
 //
 
 package smc_ex4;
@@ -189,9 +137,15 @@ public final class TrafficCanvas
         // Stop the timer, reset its value and start it again.
         if (_newVehicleTimer != null)
         {
+            long currTime;
+
             _newVehicleTimer.stop();
+            currTime = System.currentTimeMillis();
             _newVehicleTimer.setDelay(_newVehicleTimerDuration);
             _newVehicleTimer.start();
+
+            _nextNewVehicleTimeout =
+                currTime + _newVehicleTimerDuration;
         }
 
         return;
@@ -318,14 +272,25 @@ public final class TrafficCanvas
 
     public synchronized void pauseDemo()
     {
-        java.util.Date currTime = new java.util.Date();
-
         // Kill the timers for now but leave the graphic items
         // displayed.
         if (_newVehicleTimer != null &&
             _newVehicleTimer.isRunning() == true)
         {
+            long currTime = System.currentTimeMillis();
+            long timeLeft;
+
             _newVehicleTimer.stop();
+
+            // Figure out the number of milliseconds to the
+            // next new vehicle timeout and set the timer's
+            // initial delay to that.
+            timeLeft = _nextNewVehicleTimeout - currTime;
+            if (timeLeft < INITIAL_NEW_VEHICLE_DELAY)
+            {
+                timeLeft = INITIAL_NEW_VEHICLE_DELAY;
+            }
+            _newVehicleTimer.setInitialDelay((int) timeLeft);
         }
 
         if (_repaintTimer != null &&
@@ -449,6 +414,11 @@ public final class TrafficCanvas
     {
         Point startingPoint = new Point();
         Vehicle vehicle;
+
+        // Figure out the time to the next timeout.
+        _nextNewVehicleTimeout =
+            System.currentTimeMillis() +
+            _newVehicleTimerDuration;
 
         // Create a new vehicle for each size and start them
         // on their way. Tell the vehicle where it will
@@ -687,6 +657,8 @@ public final class TrafficCanvas
 
     private void startNewVehicleTimer()
     {
+        long currTime;
+
         // If the timer does not exist, create one.
         if (_newVehicleTimer == null)
         {
@@ -696,12 +668,20 @@ public final class TrafficCanvas
                                           new NewVehicleTimeoutListener(this));
 
             // Start creating new vehicle right away.
-            _newVehicleTimer.setInitialDelay(250);
-        }
-
-        if (_newVehicleTimer.isRunning() == false)
-        {
+            _newVehicleTimer.setInitialDelay((int) INITIAL_NEW_VEHICLE_DELAY);
+            currTime = System.currentTimeMillis();
             _newVehicleTimer.start();
+
+            _nextNewVehicleTimeout =
+                currTime + INITIAL_NEW_VEHICLE_DELAY;
+        }
+        else if (_newVehicleTimer.isRunning() == false)
+        {
+            currTime = System.currentTimeMillis();
+            _newVehicleTimer.restart();
+
+            _nextNewVehicleTimeout =
+                currTime + _newVehicleTimerDuration;
         }
 
         return;
@@ -742,6 +722,7 @@ public final class TrafficCanvas
 
     // Timer data.
     int _newVehicleTimerDuration;
+    long _nextNewVehicleTimeout;
     javax.swing.Timer _newVehicleTimer;
     javax.swing.Timer _repaintTimer;
 
@@ -795,6 +776,7 @@ public final class TrafficCanvas
 
     // Timers.
     private static final int REPAINT_TIME = 16;
+    private static final long INITIAL_NEW_VEHICLE_DELAY = 250;
 
     private static final int NORTHLIGHT = 0;
     private static final int SOUTHLIGHT = 1;

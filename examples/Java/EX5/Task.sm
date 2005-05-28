@@ -1,4 +1,6 @@
 // -*- tab-width: 4; -*-
+
+%{
 //
 // The contents of this file are subject to the Mozilla Public
 // License Version 1.1 (the "License"); you may not use this file
@@ -14,7 +16,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 Charles W. Rapp.
+// Copyright (C) 2000 - 2003 Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
@@ -32,145 +34,180 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.4  2002/05/07 00:29:50  cwrapp
-// Changes in release 1.3.2:
-// Add the following feature:
-// + 528321: Modified push transition syntax to be:
+// Revision 1.5  2005/05/28 13:51:24  cwrapp
+// Update Java examples 1 - 7.
 //
-// 	  <transname> <state1>/push(<state2>)  {<actions>}
+// Revision 1.0  2003/12/14 20:12:55  charlesr
+// Initial revision
 //
-// 	  which means "transition to <state1> and then
-// 	  immediately push to <state2>". The current
-// 	  syntax:
-//
-// 	  <transname> push(<state2>)  {<actions>}
-//
-//           is still valid and <state1> is assumed to be "nil".
-//
-// No bug fixes.
-//
-// Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
-//
-// ----------------------------------------------------------------------
-// SMC - The State Map Compiler
-// Version: 1.0, Beta 3
-//
-// SMC compiles state map descriptions into a target object oriented
-// language. Currently supported languages are: C++, Java and [incr Tcl].
-// SMC finite state machines have such features as:
-// + Entry/Exit actions for states.
-// + Transition guards
-// + Transition arguments
-// + Push and Pop transitions.
-// + Default transitions. 
-// ----------------------------------------------------------------------
-//
-// Revision 1.1.1.1  2000/08/02 12:51:03  charlesr
-// Initial source import, SMC v. 1.0, Beta 1.
-//
+%}
 
 %start ExecuteMap::Suspended
 %class Task
+%package smc_ex5
 
 %map ExecuteMap
 %%
 // A task begins life in suspended animation.
 Suspended
 {
-    Start       Running         {sendMessage(3, "Running.");
-                                 stateUpdate("Running");
-                                }
+    Start
+        Running
+        {
+            sendMessage(3, "Running.");
+            stateUpdate("Running");
+        }
 }
 
 // This task is now running.
 Running
-Entry {setStartTime();
-       setRunTimer();
-      }
-Exit {setStopTime();
-      stopTimer("Done");
-     }
+Entry
 {
-    Suspend     Suspended       {sendMessage(3, "Being suspended.");
-                                 stateUpdate("Suspended");
-                                 updateTaskMan("Task Suspended");
-                                 setSuspendTime();
-                                }
+    setStartTime();
+    setRunTimer();
+}
+Exit
+{
+    setStopTime();
+    stopTimer("Done");
+}
+{
+    Suspend
+        Suspended
+        {
+            sendMessage(3, "Being suspended.");
+            stateUpdate("Suspended");
+            updateTaskMan("Task Suspended");
+            setSuspendTime();
+        }
 
-    Done        StoppedState    {sendMessage(3, "Completed.");
-                                 stateUpdate("Done");
-                                 updateTaskMan("Task Done");
-                                 deregister();
-                                }
+    Done
+        StoppedState
+        {
+            sendMessage(3, "Completed.");
+            stateUpdate("Done");
+            updateTaskMan("Task Done");
+            deregister();
+        }
 }
 
 Blocked
 {
-    Unblock     Suspended       {sendMessage(3, "Unblocked.");
-                                 stateUpdate("Suspended");
-                                }
+    Unblock
+        Suspended
+        {
+            sendMessage(3, "Unblocked.");
+        }
 
-    Block       nil             {}
+    Block
+        nil
+        {}
 }
 
 Stopping
 {
-    Stopped     StoppedState    {sendMessage(3, "Stopped.");
-                                 stateUpdate("Stopped");
-                                 updateTaskMan("Task Stopped");
-                                 deregister();
-                                }
+    Stopped
+        StoppedState
+        {
+            sendMessage(3, "Stopped.");
+            stateUpdate("Stopped");
+            updateTaskMan("Task Stopped");
+            deregister();
+        }
 
-    Delete      nil             {}
+    Delete
+        nil
+        {}
 }
 
 StoppedState
 {
     // Now that the task is stopped, ignore
     // requests to block or stop.
-    Block       nil             {}
-    Stop        nil             {}
-    Delete      nil             {}
+    Block
+        nil
+        {}
+    Stop
+        nil
+        {}
+    Delete
+        nil
+        {}
 }
 
 Deleted
 {
-    Block       nil             {}
-    Stop        nil             {}
-    Delete      nil             {}
+    Block
+        nil
+        {}
+
+    Stop
+        nil
+        {}
+
+    Delete
+        nil
+        {}
 
     // Somehow if a task is deleted and then immediately
     // recreated, then the newly recreated task  somehow
     // winds up here. So we get a start, then start running
     // again.
-    Start       Running         {sendMessage(3, "Running.");
-                                 stateUpdate("Running");
-                                }
+    Start
+        Running
+        {
+            sendMessage(3, "Running.");
+            stateUpdate("Running");
+        }
 }
 
 Default
 {
     // Do blocks, stops and deletes immediately.
-    Block       Blocked         {sendMessage(3, "Blocked.");
-                                 stateUpdate("Blocked");
-                                 setSuspendTime();
-                                }
-    Stop        Stopping        {sendMessage(3, "Being stopped.");
-                                 setTimer("Stopped", 0);
-                                }
-    Delete      Deleted         {sendMessage(3, "Deleted.");
-                                 stateUpdate("Deleted");
-                                 updateTaskMan("Task Deleted");
-                                }
+    Block
+        Blocked
+        {
+            sendMessage(3, "Blocked.");
+            stateUpdate("Blocked");
+            setSuspendTime();
+        }
+
+    Stop
+        Stopping
+        {
+            sendMessage(3, "Being stopped.");
+            setTimer("Stopped", 0);
+        }
+
+    Delete
+        Deleted
+        {
+            sendMessage(3, "Deleted.");
+            stateUpdate("Deleted");
+            updateTaskMan("Task Deleted");
+        }
 
     // Ignore all other transitions unless in the
     // proper state.
-    Start       nil             {}
-    Started     nil             {}
-    Suspend     nil             {}
-    // Suspended   nil             {}
-    Unblock     nil             {}
-    Done        nil             {}
+    Start
+        nil
+        {}
+
+    Started
+        nil
+        {}
+
+    Suspend
+        nil
+        {}
+
+    Unblock
+        nil
+        {}
+
+    Done
+        nil
+        {}
 }
 
 %%

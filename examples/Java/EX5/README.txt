@@ -20,23 +20,19 @@ Unix & Windows:
 + Executing
 -----------
 
-Unix:
+Unix & Windows:
 
-    $ java -classpath ${CLASSPATH}:../../../lib/statemap.jar taskdemo
+    $ java -jar taskdemo.jar
 
-Windows:
+Click on "Create Task..." button and start a new task
+running. If you want to create multiple tasks, click the
+"Apply" button rather than "OK" since "OK" causes the
+dialog box to be removed.
 
-    $ java -classpath "${CLASSPATH};../../../lib/statemap.jar" taskdemo
+After creating one or more tasks, go to the task table and
+click on a task row. Notice select an item from the pop-up
+menu.
 
-    Click on "Create Task..." button and start a new task
-    running. If you want to create multiple tasks, click the
-    "Apply" button rather than "OK" since "OK" causes the
-    dialog box to be removed.
-
-    After creating one or more tasks, go to the task table and
-    click on a task row. Notice select an item from the pop-up
-    menu.
-
-    Also change the log message display to increase or decrease
-    message detail (the greater the level, the greater the
-    detail).
+Also change the log message display to increase or decrease
+message detail (the greater the level, the greater the
+detail).
