@@ -32,6 +32,9 @@
 '
 ' CHANGE LOG
 ' $Log$
+' Revision 1.2  2005/06/03 19:58:29  cwrapp
+' Further updates for release 4.0.0
+'
 ' Revision 1.1  2005/05/28 18:15:25  cwrapp
 ' Added VB.net examples 1 - 4.
 '
@@ -40,22 +43,22 @@
 '
 %}
 
-%start Map3::Q1
+%start StartMap::PushIt
 %class AppClass
 
-%map Map1
+%map ZerosMap
 %%
 // State	Transition		End State           Action(s)
-Q1
+PushIt
 {
-        	Zero			push(Q1)            {}
-			One				push(Map2::Q1)		{}
-			C				Q2					{}
-			OK				Q2					{}
-			Error_			Map3::Unacceptable  {EmptyStateStack();}
+        	Zero			push(PushIt)            {}
+			One				push(OnesMap::PushIt)		{}
+			C				PopIt					{}
+			OK				PopIt					{}
+			Error_			StartMap::Unacceptable  {EmptyStateStack();}
 }
 
-Q2
+PopIt
 {
 			Zero			pop(OK)				{}
 			Default			pop(Error_)			{}
@@ -63,27 +66,27 @@ Q2
 
 Default
 {
-			EOS				Map3::Unacceptable {
+			EOS				StartMap::Unacceptable {
                                                 EmptyStateStack();
                                                 Unacceptable();
                                                 }
-			Unknown			Map3::Unacceptable  {EmptyStateStack();}
+			Unknown			StartMap::Unacceptable  {EmptyStateStack();}
 }
 %%
 
-%map Map2
+%map OnesMap
 %%
 // State	Transition		End State           Action(s)
-Q1
+PushIt
 {
-			Zero			push(Map1::Q1)		{}
-			One				push(Q1)            {}
-			C				Q2					{}
-			OK				Q2					{}
-			Error_			Map3::Unacceptable  {EmptyStateStack();}
+			Zero			push(ZerosMap::PushIt)		{}
+			One				push(PushIt)            {}
+			C				PopIt					{}
+			OK				PopIt					{}
+			Error_			StartMap::Unacceptable  {EmptyStateStack();}
 }
 
-Q2
+PopIt
 {
 			One				pop(OK)				{}
 			Default			pop(Error_)			{}
@@ -91,27 +94,27 @@ Q2
 
 Default
 {
-			EOS				Map3::Unacceptable  {
+			EOS				StartMap::Unacceptable  {
                                                 EmptyStateStack();
                                                 Unacceptable();
                                                 }
-			Unknown			Map3::Unacceptable	{EmptyStateStack();}
+			Unknown			StartMap::Unacceptable	{EmptyStateStack();}
 }
 %%
 
-%map Map3
+%map StartMap
 %%
 // State	Transition		End State           Action(s)
-Q1
+PushIt
 {
-			Zero			push(Map1::Q1)		{}
-			One				push(Map2::Q1)		{}
-			C				Q2					{}
-			OK				Q2					{}
+			Zero			push(ZerosMap::PushIt)		{}
+			One				push(OnesMap::PushIt)		{}
+			C				PopIt					{}
+			OK				PopIt					{}
 			Error_			Unacceptable		{}
 }
 
-Q2
+PopIt
 {
 			EOS				Acceptable			{Acceptable();}
 			Default			Unacceptable		{}

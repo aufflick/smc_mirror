@@ -13,7 +13,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 - 2003 Charles W. Rapp.
+// Copyright (C) 2000 - 2005 Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
@@ -26,13 +26,8 @@
 // RCS ID
 // $Id$
 //
-// Change Log
-// $Log$
-// Revision 1.5  2005/05/28 18:44:13  cwrapp
-// Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
-//
-// Revision 1.0  2003/12/14 20:39:41  charlesr
-// Initial revision
+// CHANGE LOG
+// (See the bottom of this file.)
 //
 
 package statemap;
@@ -57,7 +52,9 @@ import java.io.Serializable;
 public abstract class State
     implements Serializable
 {
+//---------------------------------------------------------------
 // Member functions
+//
 
     protected State(String name, int id)
     {
@@ -80,8 +77,23 @@ public abstract class State
         return (_name);
     }
 
+//---------------------------------------------------------------
 // Member data
+//
 
-    private String _name;
-    private int _id;
+    private final String _name;
+    private final int _id;
 }
+
+//
+// CHANGE LOG
+// $Log$
+// Revision 1.6  2005/06/03 19:58:29  cwrapp
+// Further updates for release 4.0.0
+//
+// Revision 1.5  2005/05/28 18:44:13  cwrapp
+// Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
+//
+// Revision 1.0  2003/12/14 20:39:41  charlesr
+// Initial revision
+//

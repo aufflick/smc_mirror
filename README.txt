@@ -13,16 +13,12 @@
 
 New Features:
 
++ Added Python code generation. This capability and examples
+  provided by Francois Perrad, francois.perrad@gadz.org.
+
 + Moved to Visitor pattern. By rearranging the SMC source code to
   the Visitor pattern, it makes it easier to in new code
   generators and code analyzers.
-
-  See http://smc.sourceforge.net/????
-  for more information about how to add new code generators to
-  SMC.
-
-+ Added Python code generation. This capability and examples
-  provided by Francois Perrad, francois.perrad@gadz.org.
 
 + When SMC generates C++ and exceptions are allowed (when -noex
   is *not* specified), then statemap::FSMContext::popState()
@@ -45,10 +41,6 @@ Bug Fixes:
   an unhandled exception.
 
 + Corrected errors with % keywords and the -graph target.
-
-+ (C++) The hybrid Object-C++ language has the reserved word
-  "id". SMC generated C++ code contains this keyword as well
-  as statemap.h. SMC now uses "stateId".
 
 + (Java) Corrected error in generated serialization code. The
   readObject() method was not restoring the current state. The
@@ -107,12 +99,13 @@ Java Standard Edition can be downloaded for FREE from
 
                     http://java.sun.com/j2se/
 
-SMC currently supports five object-oriented languages:
+SMC currently supports six object-oriented languages:
   1. C++,
   2. Java,
   3. [incr Tcl],
   4. VB.Net and
   5. C#
+  6. Python
 
 
 3. Download
@@ -164,10 +157,18 @@ The download package's directory layout is:
          |     +-VB-+-statemap.dll
          |     |
          |     +-CSharp-+-Debug-+-statemap.dll
-         |              |       |
-         |              |       +-statemap.pdb
+         |     |        |       |
+         |     |        |       +-statemap.pdb
+         |     |        |
+         |     |        +-Release-+-statemap.dll
+         |     |
+         |     +-Python-+-Makefile
          |              |
-         |              +-Release-+-statemap.dll
+         |              +-README.txt
+         |              |
+         |              +-setup.py
+         |              |
+         |              +-statemap.py
          |
          +-misc---smc.ico (smc Windows icon)
          |
@@ -215,23 +216,33 @@ The download package's directory layout is:
                     |      |
                     |      +-EX4
                     |
-                    +-CSharp---+-EX1 (C# source code)
-                    |          |
-                    |          +-EX3
+                    +-CSharp-+-EX1 (C# source code)
+                    |        |
+                    |        +-EX3
                     |
                     +-Ant--+-EX1 (Java source code, Ant built)
-                           |
-                           +-EX2
-                           |
-                           +-EX3
-                           |
-                           +-EX4
-                           |
-                           +-EX5
-                           |
-                           +-EX6
-                           |
-                           +-EX7
+                    |      |
+                    |      +-EX2
+                    |      |
+                    |      +-EX3
+                    |      |
+                    |      +-EX4
+                    |      |
+                    |      +-EX5
+                    |      |
+                    |      +-EX6
+                    |      |
+                    |      +-EX7
+                    |
+                    +-Python-+-EX1 (Python source code)
+                             |
+                             +-EX2
+                             |
+                             +-EX3
+                             |
+                             +-EX4
+                             |
+                             +-EX7
 
 
 4. Installation

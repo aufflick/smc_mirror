@@ -14,7 +14,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 - 2003 Charles W. Rapp.
+// Copyright (C) 2000 - 2005 Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
@@ -31,6 +31,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2005/06/03 19:58:28  cwrapp
+// Further updates for release 4.0.0
+//
 // Revision 1.1  2005/05/28 12:49:21  cwrapp
 // Added Ant examples 1 - 7.
 //
@@ -41,26 +44,29 @@
 // Initial revision
 //
 
-%start Map3::Q1
+%start Map3::PushIt
 %class AppClass
 
-%map Map1
+%map ZerosMap
 %%
 // State	Transition		End State           Action(s)
-Q1 {
-        	Zero			push(Q1)            {}
-			One				push(Map2::Q1)		{}
-			C				Q2					{}
-			OK				Q2					{}
+PushIt
+{
+        	Zero			push(PushIt)        {}
+			One				push(OnesMap::PushIt)	{}
+			C				PopIt				{}
+			OK				PopIt				{}
 			Error			Map3::Unacceptable  {emptyStateStack();}
 }
 
-Q2 {
+PopIt
+{
 			Zero			pop(OK)				{}
 			Default			pop(Error)			{}
 }
 
-Default {
+Default
+{
 			EOS				Map3::Unacceptable  {
                                                 emptyStateStack();
                                                 Unacceptable();
@@ -69,23 +75,25 @@ Default {
 }
 %%
 
-%map Map2
+%map OnesMap
 %%
 // State	Transition		End State           Action(s)
-Q1 {
-			Zero			push(Map1::Q1)		{}
-			One				push(Q1)            {}
-			C				Q2					{}
-			OK				Q2					{}
+PushIt
+{
+			Zero			push(ZerosMap::PushIt)	{}
+			One				push(PushIt)        {}
+			C				PopIt				{}
+			OK				PopIt				{}
 			Error			Map3::Unacceptable  {emptyStateStack();}
 }
 
-Q2 {
+PopIt {
 			One				pop(OK)				{}
 			Default			pop(Error)			{}
 }
 
-Default {
+Default
+{
 			EOS				Map3::Unacceptable  {
                                                 emptyStateStack();
                                                 Unacceptable();
@@ -97,26 +105,31 @@ Default {
 %map Map3
 %%
 // State	Transition		End State           Action(s)
-Q1 {
-			Zero			push(Map1::Q1)		{}
-			One				push(Map2::Q1)		{}
-			C				Q2					{}
-			OK				Q2					{}
+PushIt
+{
+			Zero			push(ZerosMap::PushIt)	{}
+			One				push(OnesMap::PushIt)	{}
+			C				PopIt				{}
+			OK				PopIt				{}
 			Error			Unacceptable		{}
 }
 
-Q2 {
+PopIt
+{
 			EOS				Acceptable			{Acceptable();}
 			Default			Unacceptable		{}
 }
 
-Acceptable {}
+Acceptable
+{}
 
-Unacceptable {
+Unacceptable
+{
 		 	Default			nil					{}
 }
 
-Default {
+Default
+{
 			EOS				Unacceptable		{Unacceptable();}
 			Unknown			Unacceptable		{}
 }

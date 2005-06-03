@@ -33,6 +33,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2005/06/03 19:58:28  cwrapp
+// Further updates for release 4.0.0
+//
 // Revision 1.1  2005/05/28 12:49:21  cwrapp
 // Added Ant examples 1 - 7.
 //
@@ -71,10 +74,6 @@ Exit
     LeftOffHook
         LeftOffHook
         {}
-
-    InvalidDigit
-        InvalidDigit
-        {}
     
     // Time to update the clock's display.
     ClockTimer
@@ -94,6 +93,10 @@ Dialing
         {
             routeCall(callType, areaCode, exchange, local);
         }
+
+    InvalidDigit
+        InvalidDigit
+        {}
 }
 
 // The call is now being routed.
@@ -289,8 +292,12 @@ Default
         nil
         {}
 
+    DialingDone
+        nil
+        {}
+
     InvalidDigit
-        InvalidDigit
+        nil
         {}
     
     // No matter when it happens, when the phone is hung

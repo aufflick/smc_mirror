@@ -13,7 +13,7 @@
 #
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
-# Copyright (C) 2000 - 2003 Charles W. Rapp.
+# Copyright (C) 2000 - 2005 Charles W. Rapp.
 # All Rights Reserved.
 #
 # Contributor(s):
@@ -30,6 +30,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2005/06/03 19:58:28  cwrapp
+# Further updates for release 4.0.0
+#
 # Revision 1.1  2005/05/28 17:48:29  cwrapp
 # Added Python examples 1 - 4 and 7.
 #

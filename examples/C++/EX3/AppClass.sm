@@ -16,7 +16,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 - 2003 Charles W. Rapp.
+// Copyright (C) 2000 - 2005 Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
@@ -30,6 +30,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2005/06/03 19:58:28  cwrapp
+// Further updates for release 4.0.0
+//
 // Revision 1.4  2005/05/28 13:31:18  cwrapp
 // Updated C++ examples.
 //
@@ -38,23 +41,23 @@
 //
 %}
 
-%start Map3::Q1
+%start StartMap::PushIt
 %class AppClass
 %header AppClass.h
 
-%map Map1
+%map ZerosMap
 %%
 // State    Transition  End State       Action(s)
-Q1
+PushIt
 {
-            Zero        push(Q1)        {}
-            One         push(Map2::Q1)  {}
-            C           Q2              {}
-            OK          Q2              {}
-            Error       Map3::Unacceptable {emptyStateStack();}
+            Zero        push(PushIt)       {}
+            One         push(OnesMap::PushIt)  {}
+            C           PopIt              {}
+            OK          PopIt              {}
+            Error       StartMap::Unacceptable {emptyStateStack();}
 }
 
-Q2
+PopIt
 {
             Zero        pop(OK)         {}
             Default     pop(Error)      {}
@@ -62,28 +65,28 @@ Q2
 
 Default
 {
-            EOS         Map3::Unacceptable
+            EOS         StartMap::Unacceptable
                                         {
                                             emptyStateStack();
                                             Unacceptable();
 										}
-            Unknown     Map3::Unacceptable {}
+            Unknown     StartMap::Unacceptable {}
 }
 %%
 
-%map Map2
+%map OnesMap
 %%
 // State    Transition  End State       Action(s)
-Q1
+PushIt
 {
-            Zero        push(Map1::Q1)  {}
-            One         push(Q1)        {}
-            C           Q2              {}
-            OK          Q2              {}
-            Error       Map3::Unacceptable {emptyStateStack();}
+            Zero        push(ZerosMap::PushIt)  {}
+            One         push(PushIt)    {}
+            C           PopIt           {}
+            OK          PopIt           {}
+            Error       StartMap::Unacceptable {emptyStateStack();}
 }
 
-Q2
+PopIt
 {
             One         pop(OK)         {}
             Default     pop(Error)      {}
@@ -91,28 +94,28 @@ Q2
 
 Default
 {
-            EOS         Map3::Unacceptable
+            EOS         StartMap::Unacceptable
                                         {
 											emptyStateStack();
 											Unacceptable();
 										}
-            Unknown     Map3::Unacceptable {}
+            Unknown     StartMap::Unacceptable {}
 }
 %%
 
-%map Map3
+%map StartMap
 %%
 // State    Transition  End State       Action(s)
-Q1
+PushIt
 {
-            Zero        push(Map1::Q1)  {}
-            One         push(Map2::Q1)  {}
-            C           Q2              {}
-            OK          Q2              {}
+            Zero        push(ZerosMap::PushIt)  {}
+            One         push(OnesMap::PushIt)  {}
+            C           PopIt           {}
+            OK          PopIt           {}
             Error       Unacceptable    {}
 }
 
-Q2
+PopIt
 {
             EOS         Acceptable      {Acceptable();}
             Default     Unacceptable    {}
