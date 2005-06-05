@@ -1,3 +1,5 @@
+import java.io.PrintStream;
+
 public final class TelephoneContext
     extends statemap.FSMContext
 {
@@ -9,26 +11,7 @@ public final class TelephoneContext
 
         _owner = owner;
         setState(CallMap.Initialized);
-
-        owner.writeState("CallMap.Initialized");
-
         CallMap.Initialized.Entry(this);
-    }
-
-    public TelephoneState getState()
-        throws statemap.StateUndefinedException
-    {
-        if (_state == null)
-        {
-            throw(new statemap.StateUndefinedException());
-        }
-
-        return((TelephoneState) _state);
-    }
-
-    public Telephone getOwner()
-    {
-        return(_owner);
     }
 
     public void ClockTimer()
@@ -111,14 +94,6 @@ public final class TelephoneContext
         return;
     }
 
-    public void Looptimer()
-    {
-        _transition = "Looptimer";
-        getState().Looptimer(this);
-        _transition = "";
-        return;
-    }
-
     public void NYCTemp()
     {
         _transition = "NYCTemp";
@@ -191,75 +166,184 @@ public final class TelephoneContext
         return;
     }
 
+    protected TelephoneState getState()
+        throws statemap.StateUndefinedException
+    {
+        if (_state == null)
+        {
+            throw(
+                new statemap.StateUndefinedException());
+        }
+
+        return ((TelephoneState) _state);
+    }
+
+    protected Telephone getOwner()
+    {
+        return (_owner);
+    }
+
 // Member data.
 
-    private Telephone _owner;
+    transient private Telephone _owner;
 
     protected static abstract class TelephoneState
         extends statemap.State
     {
-        protected TelephoneState(String name)
+        protected TelephoneState(String name, int id)
         {
-            super(name);
+            super (name, id);
         }
 
-        protected void Entry(TelephoneContext s) {}
-        protected void Exit(TelephoneContext s) {}
+        protected void Entry(TelephoneContext context) {}
+        protected void Exit(TelephoneContext context) {}
 
-        protected void ClockTimer(TelephoneContext s) {}
-        protected void Default(TelephoneContext s) {}
-        protected void DepositMoney(TelephoneContext s) {}
-        protected void DialingDone(TelephoneContext s) {}
-        protected void Digit(TelephoneContext s, String n) {}
-        protected void Emergency(TelephoneContext s) {}
-        protected void InvalidDigit(TelephoneContext s) {}
-        protected void InvalidNumber(TelephoneContext s) {}
-        protected void LeftOffHook(TelephoneContext s) {}
-        protected void LineBusy(TelephoneContext s) {}
-        protected void LoopTimer(TelephoneContext s) {}
-        protected void Looptimer(TelephoneContext s) {}
-        protected void NYCTemp(TelephoneContext s) {}
-        protected void OffHook(TelephoneContext s) {}
-        protected void OffHookTimer(TelephoneContext s) {}
-        protected void OnHook(TelephoneContext s) {}
-        protected void PlaybackDone(TelephoneContext s) {}
-        protected void RingTimer(TelephoneContext s) {}
-        protected void Start(TelephoneContext s) {}
-        protected void Stop(TelephoneContext s) {}
-        protected void Time(TelephoneContext s) {}
+        protected void ClockTimer(TelephoneContext context)
+        {
+            Default(context);
+        }
+
+        protected void DepositMoney(TelephoneContext context)
+        {
+            Default(context);
+        }
+
+        protected void DialingDone(TelephoneContext context)
+        {
+            Default(context);
+        }
+
+        protected void Digit(TelephoneContext context, String n)
+        {
+            Default(context);
+        }
+
+        protected void Emergency(TelephoneContext context)
+        {
+            Default(context);
+        }
+
+        protected void InvalidDigit(TelephoneContext context)
+        {
+            Default(context);
+        }
+
+        protected void InvalidNumber(TelephoneContext context)
+        {
+            Default(context);
+        }
+
+        protected void LeftOffHook(TelephoneContext context)
+        {
+            Default(context);
+        }
+
+        protected void LineBusy(TelephoneContext context)
+        {
+            Default(context);
+        }
+
+        protected void LoopTimer(TelephoneContext context)
+        {
+            Default(context);
+        }
+
+        protected void NYCTemp(TelephoneContext context)
+        {
+            Default(context);
+        }
+
+        protected void OffHook(TelephoneContext context)
+        {
+            Default(context);
+        }
+
+        protected void OffHookTimer(TelephoneContext context)
+        {
+            Default(context);
+        }
+
+        protected void OnHook(TelephoneContext context)
+        {
+            Default(context);
+        }
+
+        protected void PlaybackDone(TelephoneContext context)
+        {
+            Default(context);
+        }
+
+        protected void RingTimer(TelephoneContext context)
+        {
+            Default(context);
+        }
+
+        protected void Start(TelephoneContext context)
+        {
+            Default(context);
+        }
+
+        protected void Stop(TelephoneContext context)
+        {
+            Default(context);
+        }
+
+        protected void Time(TelephoneContext context)
+        {
+            Default(context);
+        }
+
+        protected void Default(TelephoneContext context)
+        {
+            if (context.getDebugFlag() == true)
+            {
+                PrintStream str = 
+                    context.getDebugStream();
+
+                str.println(
+                    "TRANSITION   : Default");
+            }
+
+            throw (
+                new statemap.TransitionUndefinedException(
+                    "State: " +
+                    context.getState().getName() +
+                    ", Transition: " +
+                    context.getTransition()));
+        }
     }
 
-    protected static abstract class CallMap
+    /* package */ static abstract class CallMap
     {
-        private static CallMap_Default.CallMap_Initialized Initialized;
-        private static CallMap_Default.CallMap_OnHook OnHook;
-        private static CallMap_Default.CallMap_Routing Routing;
-        private static CallMap_Default.CallMap_NYCTemp NYCTemp;
-        private static CallMap_Default.CallMap_Time Time;
-        private static CallMap_Default.CallMap_DepositMoney DepositMoney;
-        private static CallMap_Default.CallMap_BusySignal BusySignal;
-        private static CallMap_Default.CallMap_PlayingMessage PlayingMessage;
-        private static CallMap_Default.CallMap_MessagePlayed MessagePlayed;
-        private static CallMap_Default.CallMap_LeftOffHook LeftOffHook;
-        private static CallMap_Default.CallMap_InvalidDigit InvalidDigit;
-        private static CallMap_Default.CallMap_WaitForOnHook WaitForOnHook;
+        /* package */ static CallMap_Default.CallMap_Initialized Initialized;
+        /* package */ static CallMap_Default.CallMap_OnHook OnHook;
+        /* package */ static CallMap_Default.CallMap_Routing Routing;
+        /* package */ static CallMap_Default.CallMap_NYCTemp NYCTemp;
+        /* package */ static CallMap_Default.CallMap_Time Time;
+        /* package */ static CallMap_Default.CallMap_DepositMoney DepositMoney;
+        /* package */ static CallMap_Default.CallMap_BusySignal BusySignal;
+        /* package */ static CallMap_Default.CallMap_PlayingMessage PlayingMessage;
+        /* package */ static CallMap_Default.CallMap_MessagePlayed MessagePlayed;
+        /* package */ static CallMap_Default.CallMap_LeftOffHook LeftOffHook;
+        /* package */ static CallMap_Default.CallMap_InvalidDigit InvalidDigit;
+        /* package */ static CallMap_Default.CallMap_WaitForOnHook WaitForOnHook;
         private static CallMap_Default Default;
 
         static
         {
-            Initialized = new CallMap_Default.CallMap_Initialized("CallMap.Initialized");
-            OnHook = new CallMap_Default.CallMap_OnHook("CallMap.OnHook");
-            Routing = new CallMap_Default.CallMap_Routing("CallMap.Routing");
-            NYCTemp = new CallMap_Default.CallMap_NYCTemp("CallMap.NYCTemp");
-            Time = new CallMap_Default.CallMap_Time("CallMap.Time");
-            DepositMoney = new CallMap_Default.CallMap_DepositMoney("CallMap.DepositMoney");
-            BusySignal = new CallMap_Default.CallMap_BusySignal("CallMap.BusySignal");
-            PlayingMessage = new CallMap_Default.CallMap_PlayingMessage("CallMap.PlayingMessage");
-            MessagePlayed = new CallMap_Default.CallMap_MessagePlayed("CallMap.MessagePlayed");
-            LeftOffHook = new CallMap_Default.CallMap_LeftOffHook("CallMap.LeftOffHook");
-            InvalidDigit = new CallMap_Default.CallMap_InvalidDigit("CallMap.InvalidDigit");
-            WaitForOnHook = new CallMap_Default.CallMap_WaitForOnHook("CallMap.WaitForOnHook");
-            Default = new CallMap_Default("CallMap.Default");
+            Initialized = new CallMap_Default.CallMap_Initialized("CallMap.Initialized", 0);
+            OnHook = new CallMap_Default.CallMap_OnHook("CallMap.OnHook", 1);
+            Routing = new CallMap_Default.CallMap_Routing("CallMap.Routing", 2);
+            NYCTemp = new CallMap_Default.CallMap_NYCTemp("CallMap.NYCTemp", 3);
+            Time = new CallMap_Default.CallMap_Time("CallMap.Time", 4);
+            DepositMoney = new CallMap_Default.CallMap_DepositMoney("CallMap.DepositMoney", 5);
+            BusySignal = new CallMap_Default.CallMap_BusySignal("CallMap.BusySignal", 6);
+            PlayingMessage = new CallMap_Default.CallMap_PlayingMessage("CallMap.PlayingMessage", 7);
+            MessagePlayed = new CallMap_Default.CallMap_MessagePlayed("CallMap.MessagePlayed", 8);
+            LeftOffHook = new CallMap_Default.CallMap_LeftOffHook("CallMap.LeftOffHook", 9);
+            InvalidDigit = new CallMap_Default.CallMap_InvalidDigit("CallMap.InvalidDigit", 10);
+            WaitForOnHook = new CallMap_Default.CallMap_WaitForOnHook("CallMap.WaitForOnHook", 11);
+            Default = new CallMap_Default("CallMap.Default", -1);
         }
 
     }
@@ -267,232 +351,216 @@ public final class TelephoneContext
     protected static class CallMap_Default
         extends TelephoneState
     {
-        protected CallMap_Default(String name)
+        protected CallMap_Default(String name, int id)
         {
-            super(name);
+            super (name, id);
         }
 
-        protected void Digit(TelephoneContext s, String n)
+        protected void Digit(TelephoneContext context, String n)
         {
-            if (s.getDebugFlag() == true)
+            Telephone ctxt = context.getOwner();
+
+            if (context.getDebugFlag() == true)
             {
-                System.err.println("TRANSITION   : CallMap.Default.Digit(String n)");
+                PrintStream str = context.getDebugStream();
+
+                str.println("TRANSITION   : CallMap.Default.Digit(String n)");
             }
 
-            (s.getOwner()).writeTransition("Default.Digit(" +
-                                          n +
-                                          ")");
+            TelephoneState endState = context.getState();
 
+            context.clearState();
+            try
+            {
+                ctxt.writeTransition("CallMap::Default::Digit(" + n + ")");
+            }
+            finally
+            {
+                context.setState(endState);
+            }
             return;
         }
 
-        protected void OnHook(TelephoneContext s)
+        protected void OnHook(TelephoneContext context)
         {
-            if (s.getDebugFlag() == true)
+            Telephone ctxt = context.getOwner();
+
+            if (context.getDebugFlag() == true)
             {
-                System.err.println("TRANSITION   : CallMap.Default.OnHook");
+                PrintStream str = context.getDebugStream();
+
+                str.println("TRANSITION   : CallMap.Default.OnHook()");
             }
 
-            (s.getState()).Exit(s);
-            s.clearState();
+            boolean loopbackFlag =
+                context.getState().getName().equals(
+                    CallMap.OnHook.getName());
 
-            (s.getOwner()).writeTransition("Default.OnHook");
-
-            (s.getOwner()).writeTransAction("setReceiver(\"off hook\", \"Pick up receiver\");");
-            (s.getOwner()).setReceiver("off hook", "Pick up receiver");
-
-            (s.getOwner()).writeTransAction("clearDisplay();");
-            (s.getOwner()).clearDisplay();
-
-            s.setState(CallMap.OnHook);
-            (s.getOwner()).writeState("CallMap.OnHook");
-
-            (s.getState()).Entry(s);
-            return;
-        }
-
-        protected void Stop(TelephoneContext s)
-        {
-            if (s.getDebugFlag() == true)
+            if (loopbackFlag == false)
             {
-                System.err.println("TRANSITION   : CallMap.Default.Stop");
+                (context.getState()).Exit(context);
             }
 
-            (s.getState()).Exit(s);
-            s.clearState();
-
-            (s.getOwner()).writeTransition("Default.Stop");
-
-            (s.getOwner()).writeTransAction("setReceiver(\"off hook\", \"Pick up receiver\");");
-            (s.getOwner()).setReceiver("off hook", "Pick up receiver");
-
-            (s.getOwner()).writeTransAction("clearDisplay();");
-            (s.getOwner()).clearDisplay();
-
-            s.setState(CallMap.Initialized);
-            (s.getOwner()).writeState("CallMap.OnHook");
-
-            (s.getState()).Entry(s);
-            return;
-        }
-
-        protected void ClockTimer(TelephoneContext s)
-        {
-            if (s.getDebugFlag() == true)
+            context.clearState();
+            try
             {
-                System.err.println("TRANSITION   : CallMap.Default.ClockTimer");
+                ctxt.writeTransition("CallMap::Default::OnHook");
+                ctxt.writeTransAction("setReceiver(\"off hook\", \"Pick up receiver\")");
+                ctxt.setReceiver("off hook", "Pick up receiver");
+                ctxt.writeTransAction("clearDisplay()");
+                ctxt.clearDisplay();
+            }
+            finally
+            {
+                context.setState(CallMap.OnHook);
 
-            (s.getOwner()).writeTransition("Default.ClockTimer");
+                if (loopbackFlag == false)
+                {
+                    (context.getState()).Entry(context);
+                }
 
             }
-
             return;
         }
 
-        protected void Start(TelephoneContext s)
+        protected void Stop(TelephoneContext context)
         {
-            Default(s);
-            return;
-        }
+            Telephone ctxt = context.getOwner();
 
-        protected void DialingDone(TelephoneContext s)
-        {
-            Default(s);
-            return;
-        }
-
-        protected void InvalidDigit(TelephoneContext s)
-        {
-            Default(s);
-            return;
-        }
-
-        protected void LeftOffHook(TelephoneContext s)
-        {
-            Default(s);
-            return;
-        }
-
-        protected void OffHook(TelephoneContext s)
-        {
-            Default(s);
-            return;
-        }
-
-        protected void DepositMoney(TelephoneContext s)
-        {
-            Default(s);
-            return;
-        }
-
-        protected void Emergency(TelephoneContext s)
-        {
-            Default(s);
-            return;
-        }
-
-        protected void InvalidNumber(TelephoneContext s)
-        {
-            Default(s);
-            return;
-        }
-
-        protected void LineBusy(TelephoneContext s)
-        {
-            Default(s);
-            return;
-        }
-
-        protected void NYCTemp(TelephoneContext s)
-        {
-            Default(s);
-            return;
-        }
-
-        protected void Time(TelephoneContext s)
-        {
-            Default(s);
-            return;
-        }
-
-        protected void RingTimer(TelephoneContext s)
-        {
-            Default(s);
-            return;
-        }
-
-        protected void PlaybackDone(TelephoneContext s)
-        {
-            Default(s);
-            return;
-        }
-
-        protected void OffHookTimer(TelephoneContext s)
-        {
-            Default(s);
-            return;
-        }
-
-        protected void LoopTimer(TelephoneContext s)
-        {
-            Default(s);
-            return;
-        }
-
-        protected void Looptimer(TelephoneContext s)
-        {
-            Default(s);
-            return;
-        }
-
-        protected void Default(TelephoneContext s)
-        {
-            if (s.getDebugFlag() == true)
+            if (context.getDebugFlag() == true)
             {
-                System.err.println("TRANSITION   : CallMap.Default");
+                PrintStream str = context.getDebugStream();
+
+                str.println("TRANSITION   : CallMap.Default.Stop()");
             }
 
-            throw (new statemap.TransitionUndefinedException("State: " +
-                                                             s.getState().getName() +
-                                                             ", Transition: " +
-                                                             s.getTransition()));
+            boolean loopbackFlag =
+                context.getState().getName().equals(
+                    CallMap.Initialized.getName());
+
+            if (loopbackFlag == false)
+            {
+                (context.getState()).Exit(context);
+            }
+
+            context.clearState();
+            try
+            {
+                ctxt.writeTransition("CallMap::Default::Stop");
+                ctxt.writeTransAction("setReceiver(\"off hook\", \"Pick up receiver\")");
+                ctxt.setReceiver("off hook", "Pick up receiver");
+                ctxt.writeTransAction("clearDisplay()");
+                ctxt.clearDisplay();
+            }
+            finally
+            {
+                context.setState(CallMap.Initialized);
+
+                if (loopbackFlag == false)
+                {
+                    (context.getState()).Entry(context);
+                }
+
+            }
+            return;
+        }
+
+        protected void ClockTimer(TelephoneContext context)
+        {
+            Telephone ctxt = context.getOwner();
+
+            if (context.getDebugFlag() == true)
+            {
+                PrintStream str = context.getDebugStream();
+
+                str.println("TRANSITION   : CallMap.Default.ClockTimer()");
+            }
+
+            TelephoneState endState = context.getState();
+
+            context.clearState();
+            try
+            {
+                ctxt.writeTransition("CallMap::Default::ClockTimer");
+            }
+            finally
+            {
+                context.setState(endState);
+            }
+            return;
         }
 
         private static final class CallMap_Initialized
             extends CallMap_Default
         {
-            private CallMap_Initialized(String name)
+            private CallMap_Initialized(String name, int id)
             {
-                super(name);
+                super (name, id);
             }
 
-            protected void Default(TelephoneContext s)
+            protected void Entry(TelephoneContext context)
             {
-                if (s.getDebugFlag() == true)
-                {
-                    System.err.println("TRANSITION   : CallMap.Initialized.Default");
-                }
+                Telephone ctxt = context.getOwner();
 
-                (s.getOwner()).writeTransition("Default");
-
+                ctxt.writeState("Entering CallMap::Initialized");
                 return;
             }
 
-            protected void Start(TelephoneContext s)
+            protected void Exit(TelephoneContext context)
             {
-                if (s.getDebugFlag() == true)
+                Telephone ctxt = context.getOwner();
+
+                ctxt.writeState("Exiting CallMap::Initialized");
+                return;
+            }
+
+            protected void Default(TelephoneContext context)
+            {
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
                 {
-                    System.err.println("TRANSITION   : CallMap.Initialized.Start");
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : CallMap.Initialized.Default()");
                 }
 
-                (s.getState()).Exit(s);
+                TelephoneState endState = context.getState();
 
-                (s.getOwner()).writeTransition("Start");
+                context.clearState();
+                try
+                {
+                    ctxt.writeTransition("Default");
+                }
+                finally
+                {
+                    context.setState(endState);
+                }
+                return;
+            }
 
-                s.setState(CallMap.OnHook);
-                (s.getOwner()).writeState("CallMap.OnHook");
+            protected void Start(TelephoneContext context)
+            {
+                Telephone ctxt = context.getOwner();
 
-                (s.getState()).Entry(s);
+                if (context.getDebugFlag() == true)
+                {
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : CallMap.Initialized.Start()");
+                }
+
+                (context.getState()).Exit(context);
+                context.clearState();
+                try
+                {
+                    ctxt.writeTransition("OnHook");
+                }
+                finally
+                {
+                    context.setState(CallMap.OnHook);
+                    (context.getState()).Entry(context);
+                }
                 return;
             }
         }
@@ -500,138 +568,167 @@ public final class TelephoneContext
         private static final class CallMap_OnHook
             extends CallMap_Default
         {
-            private CallMap_OnHook(String name)
+            private CallMap_OnHook(String name, int id)
             {
-                super(name);
+                super (name, id);
             }
 
-            protected void Entry(TelephoneContext s)
+            protected void Entry(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Entry",
-                                                "updateClock();");
-                (s.getOwner()).updateClock();
+                Telephone ctxt = context.getOwner();
 
-                (s.getOwner()).writeStateAction("Entry",
-                                                "startClockTimer();");
-                (s.getOwner()).startClockTimer();
+                ctxt.writeState("Entering CallMap::OnHook");
+                ctxt.writeStateAction("Entry", "updateClock()");
+                ctxt.updateClock();
+                ctxt.writeStateAction("Entry", "startClockTimer()");
+                ctxt.startClockTimer();
                 return;
             }
 
-            protected void Exit(TelephoneContext s)
+            protected void Exit(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Exit",
-                                                "stopTimer(\"ClockTimer\");");
-                (s.getOwner()).stopTimer("ClockTimer");
+                Telephone ctxt = context.getOwner();
+
+                ctxt.writeState("Exiting CallMap::OnHook");
+                ctxt.writeStateAction("Exit", "stopTimer(\"ClockTimer\")");
+                ctxt.stopTimer("ClockTimer");
                 return;
             }
 
-            protected void ClockTimer(TelephoneContext s)
+            protected void ClockTimer(TelephoneContext context)
             {
-                if (s.getDebugFlag() == true)
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
                 {
-                    System.err.println("TRANSITION   : CallMap.OnHook.ClockTimer");
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : CallMap.OnHook.ClockTimer()");
                 }
 
+                TelephoneState endState = context.getState();
 
-                TelephoneState endState = s.getState();
-
-                s.clearState();
-
-                (s.getOwner()).writeTransition("ClockTimer");
-
-                (s.getOwner()).writeTransAction("updateClock();");
-                (s.getOwner()).updateClock();
-
-                (s.getOwner()).writeTransAction("startClockTimer();");
-                (s.getOwner()).startClockTimer();
-
-                s.setState(endState);
+                context.clearState();
+                try
+                {
+                    ctxt.writeTransition("ClockTimer");
+                    ctxt.writeTransAction("updateClock()");
+                    ctxt.updateClock();
+                    ctxt.writeTransAction("startClockTimer()");
+                    ctxt.startClockTimer();
+                }
+                finally
+                {
+                    context.setState(endState);
+                }
                 return;
             }
 
-            protected void DialingDone(TelephoneContext s)
+            protected void DialingDone(TelephoneContext context)
             {
-                if (s.getDebugFlag() == true)
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
                 {
-                    System.err.println("TRANSITION   : CallMap.OnHook.DialingDone");
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : CallMap.OnHook.DialingDone()");
                 }
 
-                (s.getState()).Exit(s);
-                s.clearState();
-
-                (s.getOwner()).writeTransition("DialingDone");
-
-                (s.getOwner()).writeTransAction("routeCall();");
-                (s.getOwner()).routeCall();
-
-                s.setState(CallMap.Routing);
-                (s.getOwner()).writeState("CallMap.Routing");
-
-                (s.getState()).Entry(s);
+                (context.getState()).Exit(context);
+                context.clearState();
+                try
+                {
+                    ctxt.writeTransition("DialingDone");
+                    ctxt.writeTransAction("routeCall()");
+                    ctxt.routeCall();
+                }
+                finally
+                {
+                    context.setState(CallMap.Routing);
+                    (context.getState()).Entry(context);
+                }
                 return;
             }
 
-            protected void InvalidDigit(TelephoneContext s)
+            protected void InvalidDigit(TelephoneContext context)
             {
-                if (s.getDebugFlag() == true)
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
                 {
-                    System.err.println("TRANSITION   : CallMap.OnHook.InvalidDigit");
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : CallMap.OnHook.InvalidDigit()");
                 }
 
-                (s.getState()).Exit(s);
-
-                (s.getOwner()).writeTransition("InvalidDigit");
-
-                s.setState(CallMap.InvalidDigit);
-                (s.getOwner()).writeState("CallMap.InvalidDigit");
-
-                (s.getState()).Entry(s);
+                (context.getState()).Exit(context);
+                context.clearState();
+                try
+                {
+                    ctxt.writeTransition("InvalidDigit");
+                }
+                finally
+                {
+                    context.setState(CallMap.InvalidDigit);
+                    (context.getState()).Entry(context);
+                }
                 return;
             }
 
-            protected void LeftOffHook(TelephoneContext s)
+            protected void LeftOffHook(TelephoneContext context)
             {
-                if (s.getDebugFlag() == true)
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
                 {
-                    System.err.println("TRANSITION   : CallMap.OnHook.LeftOffHook");
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : CallMap.OnHook.LeftOffHook()");
                 }
 
-                (s.getState()).Exit(s);
-
-                (s.getOwner()).writeTransition("LeftOffHook");
-
-                s.setState(CallMap.LeftOffHook);
-                (s.getOwner()).writeState("CallMap.LeftOffHook");
-
-                (s.getState()).Entry(s);
+                (context.getState()).Exit(context);
+                context.clearState();
+                try
+                {
+                    ctxt.writeTransition("LeftOffHook");
+                }
+                finally
+                {
+                    context.setState(CallMap.LeftOffHook);
+                    (context.getState()).Entry(context);
+                }
                 return;
             }
 
-            protected void OffHook(TelephoneContext s)
+            protected void OffHook(TelephoneContext context)
             {
-                if (s.getDebugFlag() == true)
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
                 {
-                    System.err.println("TRANSITION   : CallMap.OnHook.OffHook");
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : CallMap.OnHook.OffHook()");
                 }
 
+                TelephoneState endState = context.getState();
 
-                TelephoneState currentState = s.getState();
-
-                s.clearState();
-
-                (s.getOwner()).writeTransition("OffHook");
-
-                (s.getOwner()).writeTransAction("clearDisplay();");
-                (s.getOwner()).clearDisplay();
-
-                (s.getOwner()).writeTransAction("setReceiver(\"on hook\", \"Put down receiver\");");
-                (s.getOwner()).setReceiver("on hook", "Put down receiver");
-
-                s.setState(currentState);
-                s.pushState(PhoneNumber.DialTone);
-                (s.getOwner()).writeState("PhoneNumber.DialTone");
-
-                (s.getState()).Entry(s);
+                context.clearState();
+                try
+                {
+                    ctxt.writeTransition("push(PhoneNumber::DialTone)");
+                    ctxt.writeTransAction("clearDisplay()");
+                    ctxt.clearDisplay();
+                    ctxt.writeTransAction("setReceiver(\"on hook\", \"Put down receiver\")");
+                    ctxt.setReceiver("on hook", "Put down receiver");
+                }
+                finally
+                {
+                    context.setState(endState);
+                    context.pushState(PhoneNumber.DialTone);
+                    (context.getState()).Entry(context);
+                }
                 return;
             }
         }
@@ -639,124 +736,178 @@ public final class TelephoneContext
         private static final class CallMap_Routing
             extends CallMap_Default
         {
-            private CallMap_Routing(String name)
+            private CallMap_Routing(String name, int id)
             {
-                super(name);
+                super (name, id);
             }
 
-            protected void DepositMoney(TelephoneContext s)
+            protected void Entry(TelephoneContext context)
             {
-                if (s.getDebugFlag() == true)
-                {
-                    System.err.println("TRANSITION   : CallMap.Routing.DepositMoney");
-                }
+                Telephone ctxt = context.getOwner();
 
-                (s.getState()).Exit(s);
-
-                (s.getOwner()).writeTransition("DepositMoney");
-
-                s.setState(CallMap.DepositMoney);
-                (s.getOwner()).writeState("CallMap.DepositMoney");
-
-                (s.getState()).Entry(s);
+                ctxt.writeState("Entering CallMap::Routing");
                 return;
             }
 
-            protected void Emergency(TelephoneContext s)
+            protected void Exit(TelephoneContext context)
             {
-                if (s.getDebugFlag() == true)
-                {
-                    System.err.println("TRANSITION   : CallMap.Routing.Emergency");
-                }
+                Telephone ctxt = context.getOwner();
 
-                (s.getState()).Exit(s);
-                s.clearState();
-
-                (s.getOwner()).writeTransition("Emergency");
-
-                (s.getOwner()).writeTransAction("playEmergency();");
-                (s.getOwner()).playEmergency();
-
-                s.setState(CallMap.PlayingMessage);
-                (s.getOwner()).writeState("CallMap.PlayingMessage");
-
-                (s.getState()).Entry(s);
+                ctxt.writeState("Exiting CallMap::Routing");
                 return;
             }
 
-            protected void InvalidNumber(TelephoneContext s)
+            protected void DepositMoney(TelephoneContext context)
             {
-                if (s.getDebugFlag() == true)
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
                 {
-                    System.err.println("TRANSITION   : CallMap.Routing.InvalidNumber");
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : CallMap.Routing.DepositMoney()");
                 }
 
-                (s.getState()).Exit(s);
-                s.clearState();
-
-                (s.getOwner()).writeTransition("InvalidNumber");
-
-                (s.getOwner()).writeTransAction("playInvalidNumber();");
-                (s.getOwner()).playInvalidNumber();
-
-                s.setState(CallMap.PlayingMessage);
-                (s.getOwner()).writeState("CallMap.PlayingMessage");
-
-                (s.getState()).Entry(s);
+                (context.getState()).Exit(context);
+                context.clearState();
+                try
+                {
+                    ctxt.writeTransition("DepositMoney");
+                }
+                finally
+                {
+                    context.setState(CallMap.DepositMoney);
+                    (context.getState()).Entry(context);
+                }
                 return;
             }
 
-            protected void LineBusy(TelephoneContext s)
+            protected void Emergency(TelephoneContext context)
             {
-                if (s.getDebugFlag() == true)
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
                 {
-                    System.err.println("TRANSITION   : CallMap.Routing.LineBusy");
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : CallMap.Routing.Emergency()");
                 }
 
-                (s.getState()).Exit(s);
-
-                (s.getOwner()).writeTransition("LineBusy");
-
-                s.setState(CallMap.BusySignal);
-                (s.getOwner()).writeState("CallMap.BusySignal");
-
-                (s.getState()).Entry(s);
+                (context.getState()).Exit(context);
+                context.clearState();
+                try
+                {
+                    ctxt.writeTransition("Emergency");
+                    ctxt.writeTransAction("playEmergency()");
+                    ctxt.playEmergency();
+                }
+                finally
+                {
+                    context.setState(CallMap.PlayingMessage);
+                    (context.getState()).Entry(context);
+                }
                 return;
             }
 
-            protected void NYCTemp(TelephoneContext s)
+            protected void InvalidNumber(TelephoneContext context)
             {
-                if (s.getDebugFlag() == true)
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
                 {
-                    System.err.println("TRANSITION   : CallMap.Routing.NYCTemp");
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : CallMap.Routing.InvalidNumber()");
                 }
 
-                (s.getState()).Exit(s);
-
-                (s.getOwner()).writeTransition("NYCTemp");
-                
-                s.setState(CallMap.NYCTemp);
-                (s.getOwner()).writeState("CallMap.NYCTemp");
-
-                (s.getState()).Entry(s);
+                (context.getState()).Exit(context);
+                context.clearState();
+                try
+                {
+                    ctxt.writeTransition("InvalidNumber");
+                    ctxt.writeTransAction("playInvalidNumber()");
+                    ctxt.playInvalidNumber();
+                }
+                finally
+                {
+                    context.setState(CallMap.PlayingMessage);
+                    (context.getState()).Entry(context);
+                }
                 return;
             }
 
-            protected void Time(TelephoneContext s)
+            protected void LineBusy(TelephoneContext context)
             {
-                if (s.getDebugFlag() == true)
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
                 {
-                    System.err.println("TRANSITION   : CallMap.Routing.Time");
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : CallMap.Routing.LineBusy()");
                 }
 
-                (s.getState()).Exit(s);
+                (context.getState()).Exit(context);
+                context.clearState();
+                try
+                {
+                    ctxt.writeTransition("LineBusy");
+                }
+                finally
+                {
+                    context.setState(CallMap.BusySignal);
+                    (context.getState()).Entry(context);
+                }
+                return;
+            }
 
-                (s.getOwner()).writeTransition("Time");
+            protected void NYCTemp(TelephoneContext context)
+            {
+                Telephone ctxt = context.getOwner();
 
-                s.setState(CallMap.Time);
-                (s.getOwner()).writeState("CallMap.Time");
+                if (context.getDebugFlag() == true)
+                {
+                    PrintStream str = context.getDebugStream();
 
-                (s.getState()).Entry(s);
+                    str.println("TRANSITION   : CallMap.Routing.NYCTemp()");
+                }
+
+                (context.getState()).Exit(context);
+                context.clearState();
+                try
+                {
+                    ctxt.writeTransition("NYCTemp");
+                }
+                finally
+                {
+                    context.setState(CallMap.NYCTemp);
+                    (context.getState()).Entry(context);
+                }
+                return;
+            }
+
+            protected void Time(TelephoneContext context)
+            {
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
+                {
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : CallMap.Routing.Time()");
+                }
+
+                (context.getState()).Exit(context);
+                context.clearState();
+                try
+                {
+                    ctxt.writeTransition("Time");
+                }
+                finally
+                {
+                    context.setState(CallMap.Time);
+                    (context.getState()).Entry(context);
+                }
                 return;
             }
         }
@@ -764,50 +915,57 @@ public final class TelephoneContext
         private static final class CallMap_NYCTemp
             extends CallMap_Default
         {
-            private CallMap_NYCTemp(String name)
+            private CallMap_NYCTemp(String name, int id)
             {
-                super(name);
+                super (name, id);
             }
 
-            protected void Entry(TelephoneContext s)
+            protected void Entry(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Entry",
-                                                "loop(\"ringing\");");
-                (s.getOwner()).loop("ringing");
+                Telephone ctxt = context.getOwner();
 
-                (s.getOwner()).writeStateAction("Entry",
-                                                "startTimer(\"RingTimer\", 10000);");
-                (s.getOwner()).startTimer("RingTimer", 10000);
+                ctxt.writeState("Entering CallMap::NYCTemp");
+                ctxt.writeStateAction("Entry", "loop(\"ringing\")");
+                ctxt.loop("ringing");
+                ctxt.writeStateAction("Entry", "startTimer(\"RingTimer\", 10000)");
+                ctxt.startTimer("RingTimer", 10000);
                 return;
             }
 
-            protected void Exit(TelephoneContext s)
+            protected void Exit(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Exit",
-                                                "stopLoop(\"ringing\");");
-                (s.getOwner()).stopLoop("ringing");
+                Telephone ctxt = context.getOwner();
+
+                ctxt.writeState("Exiting CallMap::NYCTemp");
+                ctxt.writeStateAction("Entry", "stopLoop(\"ringing\")");
+                ctxt.stopLoop("ringing");
                 return;
             }
 
-            protected void RingTimer(TelephoneContext s)
+            protected void RingTimer(TelephoneContext context)
             {
-                if (s.getDebugFlag() == true)
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
                 {
-                    System.err.println("TRANSITION   : CallMap.NYCTemp.RingTimer");
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : CallMap.NYCTemp.RingTimer()");
                 }
 
-                (s.getState()).Exit(s);
-                s.clearState();
-
-                (s.getOwner()).writeTransition("RingTimer");
-
-                (s.getOwner()).writeTransAction("playNYCTemp();");
-                (s.getOwner()).playNYCTemp();
-
-                s.setState(CallMap.PlayingMessage);
-                (s.getOwner()).writeState("CallMap.PlayingMessage");
-
-                (s.getState()).Entry(s);
+                (context.getState()).Exit(context);
+                context.clearState();
+                try
+                {
+                    ctxt.writeTransition("RingTimer");
+                    ctxt.writeTransAction("playNYCTemp()");
+                    ctxt.playNYCTemp();
+                }
+                finally
+                {
+                    context.setState(CallMap.PlayingMessage);
+                    (context.getState()).Entry(context);
+                }
                 return;
             }
         }
@@ -815,50 +973,57 @@ public final class TelephoneContext
         private static final class CallMap_Time
             extends CallMap_Default
         {
-            private CallMap_Time(String name)
+            private CallMap_Time(String name, int id)
             {
-                super(name);
+                super (name, id);
             }
 
-            protected void Entry(TelephoneContext s)
+            protected void Entry(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Entry",
-                                                "loop(\"ringing\");");
-                (s.getOwner()).loop("ringing");
+                Telephone ctxt = context.getOwner();
 
-                (s.getOwner()).writeStateAction("Entry",
-                                                "startTimer(\"RingTimer\", 10000);");
-                (s.getOwner()).startTimer("RingTimer", 10000);
+                ctxt.writeState("Entering CallMap::Time");
+                ctxt.writeStateAction("Entry", "loop(\"ringing\")");
+                ctxt.loop("ringing");
+                ctxt.writeStateAction("Entry", "startTimer(\"RingTimer\", 10000)");
+                ctxt.startTimer("RingTimer", 10000);
                 return;
             }
 
-            protected void Exit(TelephoneContext s)
+            protected void Exit(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Exit",
-                                                "stopLoop(\"ringing\");");
-                (s.getOwner()).stopLoop("ringing");
+                Telephone ctxt = context.getOwner();
+
+                ctxt.writeState("Exiting CallMap::Time");
+                ctxt.writeStateAction("Entry", "stopLoop(\"ringing\")");
+                ctxt.stopLoop("ringing");
                 return;
             }
 
-            protected void RingTimer(TelephoneContext s)
+            protected void RingTimer(TelephoneContext context)
             {
-                if (s.getDebugFlag() == true)
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
                 {
-                    System.err.println("TRANSITION   : CallMap.Time.RingTimer");
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : CallMap.Time.RingTimer()");
                 }
 
-                (s.getState()).Exit(s);
-                s.clearState();
-
-                (s.getOwner()).writeTransition("RingTimer");
-
-                (s.getOwner()).writeTransAction("playTime();");
-                (s.getOwner()).playTime();
-
-                s.setState(CallMap.PlayingMessage);
-                (s.getOwner()).writeState("CallMap.PlayingMessage");
-
-                (s.getState()).Entry(s);
+                (context.getState()).Exit(context);
+                context.clearState();
+                try
+                {
+                    ctxt.writeTransition("RingTimer");
+                    ctxt.writeTransAction("playTime()");
+                    ctxt.playTime();
+                }
+                finally
+                {
+                    context.setState(CallMap.PlayingMessage);
+                    (context.getState()).Entry(context);
+                }
                 return;
             }
         }
@@ -866,50 +1031,55 @@ public final class TelephoneContext
         private static final class CallMap_DepositMoney
             extends CallMap_Default
         {
-            private CallMap_DepositMoney(String name)
+            private CallMap_DepositMoney(String name, int id)
             {
-                super(name);
+                super (name, id);
             }
 
-            protected void Entry(TelephoneContext s)
+            protected void Entry(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Entry",
-                                                "loop(\"ringing\");");
-                (s.getOwner()).loop("ringing");
+                Telephone ctxt = context.getOwner();
 
-                (s.getOwner()).writeStateAction("Entry",
-                                                "startTimer(\"RingTimer\", 5000);");
-                (s.getOwner()).startTimer("RingTimer", 5000);
+                ctxt.writeState("Entering CallMap::DepositMoney");
+                ctxt.writeStateAction("Entry", "loop(\"ringing\")");
+                ctxt.loop("ringing");
+                ctxt.writeStateAction("Entry", "startTimer(\"RingTimer\", 5000)");
+                ctxt.startTimer("RingTimer", 5000);
                 return;
             }
 
-            protected void Exit(TelephoneContext s)
+            protected void Exit(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Exit",
-                                                "stopLoop(\"ringing\");");
-                (s.getOwner()).stopLoop("ringing");
+                Telephone ctxt = context.getOwner();
+
+                ctxt.writeState("Exiting CallMap::DepositMoney");
+                ctxt.writeStateAction("Entry", "stopLoop(\"ringing\")");
+                ctxt.stopLoop("ringing");
                 return;
             }
 
-            protected void RingTimer(TelephoneContext s)
+            protected void RingTimer(TelephoneContext context)
             {
-                if (s.getDebugFlag() == true)
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
                 {
-                    System.err.println("TRANSITION   : CallMap.DepositMoney.RingTimer");
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : CallMap.DepositMoney.RingTimer()");
                 }
 
-                (s.getState()).Exit(s);
-                s.clearState();
-
-                (s.getOwner()).writeTransition("RingTimer");
-
-                (s.getOwner()).writeTransAction("playDepositMoney();");
-                (s.getOwner()).playDepositMoney();
-
-                s.setState(CallMap.PlayingMessage);
-                (s.getOwner()).writeState("CallMap.PlayingMessage");
-
-                (s.getState()).Entry(s);
+                (context.getState()).Exit(context);
+                context.clearState();
+                try
+                {
+                    ctxt.playDepositMoney();
+                }
+                finally
+                {
+                    context.setState(CallMap.PlayingMessage);
+                    (context.getState()).Entry(context);
+                }
                 return;
             }
         }
@@ -917,24 +1087,28 @@ public final class TelephoneContext
         private static final class CallMap_BusySignal
             extends CallMap_Default
         {
-            private CallMap_BusySignal(String name)
+            private CallMap_BusySignal(String name, int id)
             {
-                super(name);
+                super (name, id);
             }
 
-            protected void Entry(TelephoneContext s)
+            protected void Entry(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Entry",
-                                                "loop(\"busy\");");
-                (s.getOwner()).loop("busy");
+                Telephone ctxt = context.getOwner();
+
+                ctxt.writeState("Entering CallMap::BusySignal");
+                ctxt.writeStateAction("Entry", "loop(\"busy\")");
+                ctxt.loop("busy");
                 return;
             }
 
-            protected void Exit(TelephoneContext s)
+            protected void Exit(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Exit",
-                                                "stopLoop(\"busy\");");
-                (s.getOwner()).stopLoop("busy");
+                Telephone ctxt = context.getOwner();
+
+                ctxt.writeState("Exiting CallMap::BusySignal");
+                ctxt.writeStateAction("Entry", "stopLoop(\"busy\")");
+                ctxt.stopLoop("busy");
                 return;
             }
         }
@@ -942,82 +1116,111 @@ public final class TelephoneContext
         private static final class CallMap_PlayingMessage
             extends CallMap_Default
         {
-            private CallMap_PlayingMessage(String name)
+            private CallMap_PlayingMessage(String name, int id)
             {
-                super(name);
+                super (name, id);
             }
 
-            protected void OnHook(TelephoneContext s)
+            protected void Entry(TelephoneContext context)
             {
-                if (s.getDebugFlag() == true)
-                {
-                    System.err.println("TRANSITION   : CallMap.PlayingMessage.OnHook");
-                }
+                Telephone ctxt = context.getOwner();
 
-                (s.getState()).Exit(s);
-                s.clearState();
-
-                (s.getOwner()).writeTransition("OnHook");
-
-                (s.getOwner()).writeTransAction("stopPlayback();");
-                (s.getOwner()).stopPlayback();
-
-                (s.getOwner()).writeTransAction("setReceiver(\"off hook\", \"Pick up receiver\");");
-                (s.getOwner()).setReceiver("off hook", "Pick up receiver");
-
-                (s.getOwner()).writeTransAction("clearDisplay();");
-                (s.getOwner()).clearDisplay();
-
-                s.setState(CallMap.OnHook);
-                (s.getOwner()).writeState("CallMap.OnHook");
-
-                (s.getState()).Entry(s);
+                ctxt.writeState("Entering CallMap::PlayingMessage");
                 return;
             }
 
-            protected void PlaybackDone(TelephoneContext s)
+            protected void Exit(TelephoneContext context)
             {
-                if (s.getDebugFlag() == true)
-                {
-                    System.err.println("TRANSITION   : CallMap.PlayingMessage.PlaybackDone");
-                }
+                Telephone ctxt = context.getOwner();
 
-                (s.getState()).Exit(s);
-
-                (s.getOwner()).writeTransition("PlaybackDone");
-
-                s.setState(CallMap.MessagePlayed);
-                (s.getOwner()).writeState("CallMap.MessagePlayed");
-
-                (s.getState()).Entry(s);
+                ctxt.writeState("Exiting CallMap::PlayingMessage");
                 return;
             }
 
-            protected void Stop(TelephoneContext s)
+            protected void OnHook(TelephoneContext context)
             {
-                if (s.getDebugFlag() == true)
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
                 {
-                    System.err.println("TRANSITION   : CallMap.PlayingMessage.Stop");
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : CallMap.PlayingMessage.OnHook()");
                 }
 
-                (s.getState()).Exit(s);
-                s.clearState();
+                (context.getState()).Exit(context);
+                context.clearState();
+                try
+                {
+                    ctxt.writeTransition("OnHook");
+                    ctxt.writeTransAction("stopPlayback()");
+                    ctxt.stopPlayback();
+                    ctxt.writeTransAction("setReceiver(\"off hook\", \"Pick up receiver\")");
+                    ctxt.setReceiver("off hook", "Pick up receiver");
+                    ctxt.writeTransAction("clearDisplay()");
+                    ctxt.clearDisplay();
+                }
+                finally
+                {
+                    context.setState(CallMap.OnHook);
+                    (context.getState()).Entry(context);
+                }
+                return;
+            }
 
-                (s.getOwner()).writeTransition("Stop");
+            protected void PlaybackDone(TelephoneContext context)
+            {
+                Telephone ctxt = context.getOwner();
 
-                (s.getOwner()).writeTransAction("stopPlayback();");
-                (s.getOwner()).stopPlayback();
+                if (context.getDebugFlag() == true)
+                {
+                    PrintStream str = context.getDebugStream();
 
-                (s.getOwner()).writeTransAction("setReceiver(\"off hook\", \"Pick up receiver\");");
-                (s.getOwner()).setReceiver("off hook", "Pick up receiver");
+                    str.println("TRANSITION   : CallMap.PlayingMessage.PlaybackDone()");
+                }
 
-                (s.getOwner()).writeTransAction("clearDisplay();");
-                (s.getOwner()).clearDisplay();
+                (context.getState()).Exit(context);
+                context.clearState();
+                try
+                {
+                    ctxt.writeTransition("PlaybackDone");
+                }
+                finally
+                {
+                    context.setState(CallMap.MessagePlayed);
+                    (context.getState()).Entry(context);
+                }
+                return;
+            }
 
-                s.setState(CallMap.Initialized);
-                (s.getOwner()).writeState("CallMap.Initialized");
+            protected void Stop(TelephoneContext context)
+            {
+                Telephone ctxt = context.getOwner();
 
-                (s.getState()).Entry(s);
+                if (context.getDebugFlag() == true)
+                {
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : CallMap.PlayingMessage.Stop()");
+                }
+
+                (context.getState()).Exit(context);
+                context.clearState();
+                try
+                {
+                    ctxt.writeTransition("Stop");
+                    ctxt.writeTransAction("stopPlayback()");
+                    ctxt.stopPlayback();
+                    ctxt.writeTransAction("setReceiver(\"off hook\", \"Pick up receiver\")");
+                    ctxt.setReceiver("off hook", "Pick up receiver");
+                    ctxt.writeTransAction("clearDisplay()");
+                    ctxt.clearDisplay();
+                }
+                finally
+                {
+                    context.setState(CallMap.Initialized);
+                    (context.getState()).Entry(context);
+                }
                 return;
             }
         }
@@ -1025,42 +1228,53 @@ public final class TelephoneContext
         private static final class CallMap_MessagePlayed
             extends CallMap_Default
         {
-            private CallMap_MessagePlayed(String name)
+            private CallMap_MessagePlayed(String name, int id)
             {
-                super(name);
+                super (name, id);
             }
 
-            protected void Entry(TelephoneContext s)
+            protected void Entry(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Entry",
-                                                "startTimer(\"OffHookTimer\", 10000);");
-                (s.getOwner()).startTimer("OffHookTimer", 10000);
+                Telephone ctxt = context.getOwner();
+
+                ctxt.writeState("Entering CallMap::MessagePlayed");
+                ctxt.writeStateAction("Entry", "startTimer(\"OffHookTimer\", 10000)");
+                ctxt.startTimer("OffHookTimer", 10000);
                 return;
             }
 
-            protected void Exit(TelephoneContext s)
+            protected void Exit(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Exit",
-                                                "stopTimer(\"OffHookTimer\");");
-                (s.getOwner()).stopTimer("OffHookTimer");
+                Telephone ctxt = context.getOwner();
+
+                ctxt.writeState("Exiting CallMap::MessagePlayed");
+                ctxt.writeStateAction("Exit", "stopTimer(\"OffHookTimer\")");
+                ctxt.stopTimer("OffHookTimer");
                 return;
             }
 
-            protected void OffHookTimer(TelephoneContext s)
+            protected void OffHookTimer(TelephoneContext context)
             {
-                if (s.getDebugFlag() == true)
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
                 {
-                    System.err.println("TRANSITION   : CallMap.MessagePlayed.OffHookTimer");
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : CallMap.MessagePlayed.OffHookTimer()");
                 }
 
-                (s.getState()).Exit(s);
-
-                (s.getOwner()).writeTransition("OffHookTimer");
-
-                s.setState(CallMap.LeftOffHook);
-                (s.getOwner()).writeState("CallMap.LeftOffHook");
-
-                (s.getState()).Entry(s);
+                (context.getState()).Exit(context);
+                context.clearState();
+                try
+                {
+                    ctxt.writeTransition("OffHookTimer");
+                }
+                finally
+                {
+                    context.setState(CallMap.LeftOffHook);
+                    (context.getState()).Entry(context);
+                }
                 return;
             }
         }
@@ -1068,62 +1282,82 @@ public final class TelephoneContext
         private static final class CallMap_LeftOffHook
             extends CallMap_Default
         {
-            private CallMap_LeftOffHook(String name)
+            private CallMap_LeftOffHook(String name, int id)
             {
-                super(name);
+                super (name, id);
             }
 
-            protected void Entry(TelephoneContext s)
+            protected void Entry(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Entry",
-                                                "startTimer(\"LoopTimer\", 10000);");
-                (s.getOwner()).startTimer("LoopTimer", 10000);
+                Telephone ctxt = context.getOwner();
 
-                (s.getOwner()).writeStateAction("Entry",
-                                                "loop(\"phone_off_hook\");");
-                (s.getOwner()).loop("phone_off_hook");
+                ctxt.writeState("Entering CallMap::LeftOffHook");
+                ctxt.writeStateAction("Entry", "startTimer(\"LoopTimer\", 10000)");
+                ctxt.startTimer("LoopTimer", 10000);
+                ctxt.writeStateAction("Entry", "loop(\"phone_off_hook\")");
+                ctxt.loop("phone_off_hook");
                 return;
             }
 
-            protected void Exit(TelephoneContext s)
+            protected void Exit(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Exit",
-                                                "stopTimer(\"LoopTimer\");");
-                (s.getOwner()).stopTimer("LoopTimer");
+                Telephone ctxt = context.getOwner();
 
-                (s.getOwner()).writeStateAction("Exit",
-                                                "stopLoop(\"phone_off_hook\");");
-                (s.getOwner()).stopLoop("phone_off_hook");
+                ctxt.writeState("Exiting CallMap::MessagePlayed");
+                ctxt.writeStateAction("Exit", "stopTimer(\"LoopTimer\")");
+                ctxt.stopTimer("LoopTimer");
+                ctxt.writeStateAction("Exit", "stopLoop(\"phone_off_hook\")");
+                ctxt.stopLoop("phone_off_hook");
                 return;
             }
 
-            protected void Default(TelephoneContext s)
+            protected void Default(TelephoneContext context)
             {
-                if (s.getDebugFlag() == true)
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
                 {
-                    System.err.println("TRANSITION   : CallMap.LeftOffHook.Default");
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : CallMap.LeftOffHook.Default()");
                 }
 
-                (s.getOwner()).writeTransition("Default");
+                TelephoneState endState = context.getState();
 
+                context.clearState();
+                try
+                {
+                    ctxt.writeTransition("Default");
+                }
+                finally
+                {
+                    context.setState(endState);
+                }
                 return;
             }
 
-            protected void LoopTimer(TelephoneContext s)
+            protected void LoopTimer(TelephoneContext context)
             {
-                if (s.getDebugFlag() == true)
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
                 {
-                    System.err.println("TRANSITION   : CallMap.LeftOffHook.LoopTimer");
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : CallMap.LeftOffHook.LoopTimer()");
                 }
 
-                (s.getState()).Exit(s);
-
-                (s.getOwner()).writeTransition("LoopTimer");
-
-                s.setState(CallMap.WaitForOnHook);
-                (s.getOwner()).writeState("CallMap.WaitForOnHook");
-
-                (s.getState()).Entry(s);
+                (context.getState()).Exit(context);
+                context.clearState();
+                try
+                {
+                    ctxt.writeTransition("WaitForOnHook");
+                }
+                finally
+                {
+                    context.setState(CallMap.WaitForOnHook);
+                    (context.getState()).Entry(context);
+                }
                 return;
             }
         }
@@ -1131,62 +1365,82 @@ public final class TelephoneContext
         private static final class CallMap_InvalidDigit
             extends CallMap_Default
         {
-            private CallMap_InvalidDigit(String name)
+            private CallMap_InvalidDigit(String name, int id)
             {
-                super(name);
+                super (name, id);
             }
 
-            protected void Entry(TelephoneContext s)
+            protected void Entry(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Entry",
-                                                "startTimer(\"LoopTimer\", 10000);");
-                (s.getOwner()).startTimer("LoopTimer", 10000);
+                Telephone ctxt = context.getOwner();
 
-                (s.getOwner()).writeStateAction("Entry",
-                                                "loop(\"fast_busy\");");
-                (s.getOwner()).loop("fast_busy");
+                ctxt.writeState("Entering CallMap::InvalidDigit");
+                ctxt.writeStateAction("Entry", "startTimer(\"LoopTimer\", 10000)");
+                ctxt.startTimer("LoopTimer", 10000);
+                ctxt.writeStateAction("Entry", "loop(\"fast_busy\")");
+                ctxt.loop("fast_busy");
                 return;
             }
 
-            protected void Exit(TelephoneContext s)
+            protected void Exit(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Exit",
-                                                "stopTimer(\"LoopTimer\");");
-                (s.getOwner()).stopTimer("LoopTimer");
+                Telephone ctxt = context.getOwner();
 
-                (s.getOwner()).writeStateAction("Exit",
-                                                "stopLoop(\"fast_busy\");");
-                (s.getOwner()).stopLoop("fast_busy");
+                ctxt.writeState("Exiting CallMap::MessagePlayed");
+                ctxt.writeStateAction("Exit", "stopTimer(\"LoopTimer\")");
+                ctxt.stopTimer("LoopTimer");
+                ctxt.writeStateAction("Exit", "stopLoop(\"phone_off_hook\")");
+                ctxt.stopLoop("fast_busy");
                 return;
             }
 
-            protected void Default(TelephoneContext s)
+            protected void Default(TelephoneContext context)
             {
-                if (s.getDebugFlag() == true)
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
                 {
-                    System.err.println("TRANSITION   : CallMap.InvalidDigit.Default");
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : CallMap.InvalidDigit.Default()");
                 }
 
-                (s.getOwner()).writeTransition("Default");
+                TelephoneState endState = context.getState();
 
+                context.clearState();
+                try
+                {
+                    ctxt.writeTransition("Default");
+                }
+                finally
+                {
+                    context.setState(endState);
+                }
                 return;
             }
 
-            protected void LoopTimer(TelephoneContext s)
+            protected void LoopTimer(TelephoneContext context)
             {
-                if (s.getDebugFlag() == true)
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
                 {
-                    System.err.println("TRANSITION   : CallMap.InvalidDigit.LoopTimer");
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : CallMap.InvalidDigit.LoopTimer()");
                 }
 
-                (s.getState()).Exit(s);
-
-                (s.getOwner()).writeTransition("LoopTimer");
-
-                s.setState(CallMap.WaitForOnHook);
-                (s.getOwner()).writeState("CallMap.WaitForOnHook");
-
-                (s.getState()).Entry(s);
+                (context.getState()).Exit(context);
+                context.clearState();
+                try
+                {
+                    ctxt.writeTransition("LoopTimer");
+                }
+                finally
+                {
+                    context.setState(CallMap.WaitForOnHook);
+                    (context.getState()).Entry(context);
+                }
                 return;
             }
         }
@@ -1194,44 +1448,73 @@ public final class TelephoneContext
         private static final class CallMap_WaitForOnHook
             extends CallMap_Default
         {
-            private CallMap_WaitForOnHook(String name)
+            private CallMap_WaitForOnHook(String name, int id)
             {
-                super(name);
+                super (name, id);
             }
 
-            protected void Default(TelephoneContext s)
+            protected void Entry(TelephoneContext context)
             {
-                if (s.getDebugFlag() == true)
+                Telephone ctxt = context.getOwner();
+
+                ctxt.writeState("Entering CallMap::WaitForOnHook");
+                return;
+            }
+
+            protected void Exit(TelephoneContext context)
+            {
+                Telephone ctxt = context.getOwner();
+
+                ctxt.writeState("Exiting CallMap::WaitForOnHook");
+                return;
+            }
+
+            protected void Default(TelephoneContext context)
+            {
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
                 {
-                    System.err.println("TRANSITION   : CallMap.WaitForOnHook.Default");
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : CallMap.WaitForOnHook.Default()");
                 }
 
-                (s.getOwner()).writeTransition("Default");
+                TelephoneState endState = context.getState();
 
+                context.clearState();
+                try
+                {
+                    ctxt.writeTransition("Default");
+                }
+                finally
+                {
+                    context.setState(endState);
+                }
                 return;
             }
         }
     }
 
-    protected static abstract class PhoneNumber
+    /* package */ static abstract class PhoneNumber
     {
-        private static PhoneNumber_Default.PhoneNumber_DialTone DialTone;
-        private static PhoneNumber_Default.PhoneNumber_LongDistance LongDistance;
-        private static PhoneNumber_Default.PhoneNumber_OneOneStart OneOneStart;
-        private static PhoneNumber_Default.PhoneNumber_NineOne NineOne;
-        private static PhoneNumber_Default.PhoneNumber_Exchange Exchange;
-        private static PhoneNumber_Default.PhoneNumber_LocalCall LocalCall;
+        /* package */ static PhoneNumber_Default.PhoneNumber_DialTone DialTone;
+        /* package */ static PhoneNumber_Default.PhoneNumber_LongDistance LongDistance;
+        /* package */ static PhoneNumber_Default.PhoneNumber_NineOneOneStart NineOneOneStart;
+        /* package */ static PhoneNumber_Default.PhoneNumber_NineOne NineOne;
+        /* package */ static PhoneNumber_Default.PhoneNumber_Exchange Exchange;
+        /* package */ static PhoneNumber_Default.PhoneNumber_LocalCall LocalCall;
         private static PhoneNumber_Default Default;
 
         static
         {
-            DialTone = new PhoneNumber_Default.PhoneNumber_DialTone("PhoneNumber.DialTone");
-            LongDistance = new PhoneNumber_Default.PhoneNumber_LongDistance("PhoneNumber.LongDistance");
-            OneOneStart = new PhoneNumber_Default.PhoneNumber_OneOneStart("PhoneNumber.OneOneStart");
-            NineOne = new PhoneNumber_Default.PhoneNumber_NineOne("PhoneNumber.NineOne");
-            Exchange = new PhoneNumber_Default.PhoneNumber_Exchange("PhoneNumber.Exchange");
-            LocalCall = new PhoneNumber_Default.PhoneNumber_LocalCall("PhoneNumber.LocalCall");
-            Default = new PhoneNumber_Default("PhoneNumber.Default");
+            DialTone = new PhoneNumber_Default.PhoneNumber_DialTone("PhoneNumber.DialTone", 12);
+            LongDistance = new PhoneNumber_Default.PhoneNumber_LongDistance("PhoneNumber.LongDistance", 13);
+            NineOneOneStart = new PhoneNumber_Default.PhoneNumber_NineOneOneStart("PhoneNumber.NineOneOneStart", 14);
+            NineOne = new PhoneNumber_Default.PhoneNumber_NineOne("PhoneNumber.NineOne", 15);
+            Exchange = new PhoneNumber_Default.PhoneNumber_Exchange("PhoneNumber.Exchange", 16);
+            LocalCall = new PhoneNumber_Default.PhoneNumber_LocalCall("PhoneNumber.LocalCall", 17);
+            Default = new PhoneNumber_Default("PhoneNumber.Default", -1);
         }
 
     }
@@ -1239,288 +1522,264 @@ public final class TelephoneContext
     protected static class PhoneNumber_Default
         extends TelephoneState
     {
-        protected PhoneNumber_Default(String name)
+        protected PhoneNumber_Default(String name, int id)
         {
-            super(name);
+            super (name, id);
         }
 
-        protected void OffHookTimer(TelephoneContext s)
+        protected void Digit(TelephoneContext context, String n)
         {
-            if (s.getDebugFlag() == true)
+            Telephone ctxt = context.getOwner();
+
+            if (context.getDebugFlag() == true)
             {
-                System.err.println("TRANSITION   : PhoneNumber.Default.OffHookTimer");
+                PrintStream str = context.getDebugStream();
+
+                str.println("TRANSITION   : PhoneNumber.Default.Digit(String n)");
             }
 
-            (s.getState()).Exit(s);
-            s.clearState();
-
-            (s.getOwner()).writeTransition("Default.OffHookTimer");
-
-            (s.getOwner()).writeTransAction("clearDisplay();");
-            (s.getOwner()).clearDisplay();
-
-            s.popState();
-            (s.getOwner()).writeState((s.getState()).getName());
-
-            (s.getState()).LeftOffHook(s);
-            return;
-        }
-
-        protected void OnHook(TelephoneContext s)
-        {
-            if (s.getDebugFlag() == true)
+            if (ctxt.isDigitValid(n) == false)
             {
-                System.err.println("TRANSITION   : PhoneNumber.Default.OnHook");
+                (context.getState()).Exit(context);
+                context.clearState();
+                try
+                {
+                    ctxt.writeTransition("PhoneNumber::Default::Digit(" + n + ")");
+                    ctxt.writeTransAction("clearDisplay()");
+                    ctxt.clearDisplay();
+                    ctxt.writeTransition("pop(InvalidDigit)");
+                }
+                finally
+                {
+                    context.popState();
+                }
+
+                context.InvalidDigit();
             }
-
-            (s.getState()).Exit(s);
-            s.clearState();
-
-            (s.getOwner()).writeTransition("Default.OnHook");
-
-            (s.getOwner()).writeTransAction("clearDisplay();");
-            (s.getOwner()).clearDisplay();
-
-            s.popState();
-            (s.getOwner()).writeState((s.getState()).getName());
-
-            (s.getState()).OnHook(s);
-            return;
-        }
-
-        protected void Stop(TelephoneContext s)
-        {
-            if (s.getDebugFlag() == true)
+            else
             {
-                System.err.println("TRANSITION   : PhoneNumber.Default.Stop");
+                super.Digit(context, n);
             }
-
-            (s.getState()).Exit(s);
-            s.clearState();
-
-            (s.getOwner()).writeTransition("Default.Stop");
-
-            (s.getOwner()).writeTransAction("clearDisplay();");
-            (s.getOwner()).clearDisplay();
-
-            s.popState();
-            (s.getOwner()).writeState((s.getState()).getName());
-
-            (s.getState()).Stop(s);
-            return;
-        }
-
-        protected void ClockTimer(TelephoneContext s)
-        {
-            if (s.getDebugFlag() == true)
-            {
-                System.err.println("TRANSITION   : PhoneNumber.Default.ClockTimer");
-            }
-
-            (s.getOwner()).writeTransition("Default.ClockTimer");
 
             return;
         }
 
-        protected void Digit(TelephoneContext s, String n)
+        protected void OffHookTimer(TelephoneContext context)
         {
-            Default(s);
+            Telephone ctxt = context.getOwner();
+
+            if (context.getDebugFlag() == true)
+            {
+                PrintStream str = context.getDebugStream();
+
+                str.println("TRANSITION   : PhoneNumber.Default.OffHookTimer()");
+            }
+
+            (context.getState()).Exit(context);
+            context.clearState();
+            try
+            {
+                ctxt.writeTransition("PhoneNumber::Default::OffHookTimer");
+                ctxt.writeTransAction("clearDisplay()");
+                ctxt.clearDisplay();
+                ctxt.writeTransition("pop(LeftOffHook)");
+            }
+            finally
+            {
+                context.popState();
+            }
+
+            context.LeftOffHook();
             return;
         }
 
-        protected void Default(TelephoneContext s)
+        protected void OnHook(TelephoneContext context)
         {
-            if (s.getDebugFlag() == true)
+            Telephone ctxt = context.getOwner();
+
+            if (context.getDebugFlag() == true)
             {
-                System.err.println("TRANSITION   : PhoneNumber.Default");
+                PrintStream str = context.getDebugStream();
+
+                str.println("TRANSITION   : PhoneNumber.Default.OnHook()");
             }
 
-            throw (new statemap.TransitionUndefinedException("State: " +
-                                                             s.getState().getName() +
-                                                             ", Transition: " +
-                                                             s.getTransition()));
+            (context.getState()).Exit(context);
+            context.clearState();
+            try
+            {
+                ctxt.writeTransition("PhoneNumber::Default::OnHook");
+                ctxt.writeTransAction("clearDisplay()");
+                ctxt.clearDisplay();
+                ctxt.writeTransition("pop(OnHook)");
+            }
+            finally
+            {
+                context.popState();
+            }
+
+            context.OnHook();
+            return;
+        }
+
+        protected void Stop(TelephoneContext context)
+        {
+            Telephone ctxt = context.getOwner();
+
+            if (context.getDebugFlag() == true)
+            {
+                PrintStream str = context.getDebugStream();
+
+                str.println("TRANSITION   : PhoneNumber.Default.Stop()");
+            }
+
+            (context.getState()).Exit(context);
+            context.clearState();
+            try
+            {
+                ctxt.writeTransition("PhoneNumber::Default::Stop");
+                ctxt.writeTransAction("clearDisplay()");
+                ctxt.clearDisplay();
+                ctxt.writeTransition("pop(Stop)");
+            }
+            finally
+            {
+                context.popState();
+            }
+
+            context.Stop();
+            return;
+        }
+
+        protected void ClockTimer(TelephoneContext context)
+        {
+            Telephone ctxt = context.getOwner();
+
+            if (context.getDebugFlag() == true)
+            {
+                PrintStream str = context.getDebugStream();
+
+                str.println("TRANSITION   : PhoneNumber.Default.ClockTimer()");
+            }
+
+            TelephoneState endState = context.getState();
+
+            context.clearState();
+            try
+            {
+                ctxt.writeTransition("PhoneNumber::Default::ClockTimer");
+            }
+            finally
+            {
+                context.setState(endState);
+            }
+            return;
         }
 
         private static final class PhoneNumber_DialTone
             extends PhoneNumber_Default
         {
-            private PhoneNumber_DialTone(String name)
+            private PhoneNumber_DialTone(String name, int id)
             {
-                super(name);
+                super (name, id);
             }
 
-            protected void Entry(TelephoneContext s)
+            protected void Entry(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Entry",
-                                                "loop(\"dialtone\");");
-                (s.getOwner()).loop("dialtone");
+                Telephone ctxt = context.getOwner();
 
-                (s.getOwner()).writeStateAction("Entry",
-                                                "startTimer(\"OffHookTimer\", 10000);");
-                (s.getOwner()).startTimer("OffHookTimer", 10000);
+                ctxt.writeState("Entering PhoneNumber::DialTone");
+                ctxt.writeStateAction("Entry", "loop(\"dialtone\")");
+                ctxt.loop("dialtone");
+                ctxt.writeStateAction("Exit", "startTimer(\"OffHookTimer\", 10000)");
+                ctxt.startTimer("OffHookTimer", 10000);
                 return;
             }
 
-            protected void Exit(TelephoneContext s)
+            protected void Exit(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Exit",
-                                                "stopTimer(\"OffHookTimer\");");
-                (s.getOwner()).stopTimer("OffHookTimer");
+                Telephone ctxt = context.getOwner();
 
-                (s.getOwner()).writeStateAction("Exit",
-                                                "stopLoop(\"dialtone\");");
-                (s.getOwner()).stopLoop("dialtone");
+                ctxt.writeState("Exiting PhoneNumber::DialTone");
+                ctxt.writeStateAction("Exit", "stopTimer(\"OffHookTimer\")");
+                ctxt.stopTimer("OffHookTimer");
+                ctxt.writeStateAction("Exit", "stopLoop(\"dialtone\")");
+                ctxt.stopLoop("dialtone");
                 return;
             }
 
-            protected void Digit(TelephoneContext s, String n)
+            protected void Digit(TelephoneContext context, String n)
             {
-                if (s.getDebugFlag() == true)
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
                 {
-                    System.err.println("TRANSITION   : PhoneNumber.DialTone.Digit(String n)");
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : PhoneNumber.DialTone.Digit(String n)");
                 }
 
-                (s.getOwner()).writeTransition("Digit(" +
-                                               n +
-                                               ")");
-
-                if (!(s.getOwner()).isDigitValid(n))
+                if (ctxt.equal(n, 1) == true)
                 {
-                    (s.getState()).Exit(s);
-                    s.clearState();
-
-                    (s.getOwner()).writeTransAction("clearDisplay();");
-                    (s.getOwner()).clearDisplay();
-
-                    s.popState();
-                    (s.getOwner()).writeState((s.getState()).getName());
-
-                    (s.getState()).InvalidDigit(s);
+                    (context.getState()).Exit(context);
+                    context.clearState();
+                    try
+                    {
+                        ctxt.writeTransition("Digit(" + n + ")");
+                        ctxt.writeTransAction("playTT(" + n + ")");
+                        ctxt.playTT(n);
+                        ctxt.writeTransAction("setType(Telephone.LONG_DISTANCE)");
+                        ctxt.setType(Telephone.LONG_DISTANCE);
+                        ctxt.writeTransAction("saveAreaCode(" + n + ")");
+                        ctxt.saveAreaCode(n);
+                        ctxt.writeTransAction("addDisplay(\"-\")");
+                        ctxt.addDisplay("-");
+                    }
+                    finally
+                    {
+                        context.setState(PhoneNumber.LongDistance);
+                        (context.getState()).Entry(context);
+                    }
                 }
-                else if ((s.getOwner()).equal(n, 1))
+                else if (ctxt.equal(n, 9) == true)
                 {
-                    (s.getState()).Exit(s);
-                    s.clearState();
-
-                    (s.getOwner()).writeTransAction("playTT(" +
-                                                    n +
-                                                    ");");
-                    (s.getOwner()).playTT(n);
-
-                    (s.getOwner()).writeTransAction("setType(Telephone.LONG_DISTANCE);");
-                    (s.getOwner()).setType(Telephone.LONG_DISTANCE);
-
-                    (s.getOwner()).writeTransAction("saveAreaCode(" +
-                                                    n +
-                                                    ");");
-                    (s.getOwner()).saveAreaCode(n);
-
-                    (s.getOwner()).writeTransAction("addDisplay(\"-\");");
-                    (s.getOwner()).addDisplay("-");
-
-                    s.setState(PhoneNumber.LongDistance);
-                    (s.getOwner()).writeState("PhoneNumber.LongDistance");
-
-                    (s.getState()).Entry(s);
-                }
-                else if ((s.getOwner()).equal(n, 9))
-                {
-                    (s.getState()).Exit(s);
-                    s.clearState();
-
-                    (s.getOwner()).writeTransAction("playTT(" +
-                                                    n +
-                                                    ");");
-                    (s.getOwner()).playTT(n);
-
-                    (s.getOwner()).writeTransAction("saveLocal(" +
-                                                    n +
-                                                    ");");
-                    (s.getOwner()).saveExchange(n);
-
-                    s.setState(PhoneNumber.OneOneStart);
-                    (s.getOwner()).writeState("PhoneNumber.OneOneStart");
-
-                    (s.getState()).Entry(s);
+                    (context.getState()).Exit(context);
+                    context.clearState();
+                    try
+                    {
+                        ctxt.writeTransition("Digit(" + n + ")");
+                        ctxt.writeTransAction("playTT(" + n + ")");
+                        ctxt.playTT(n);
+                        ctxt.writeTransAction("saveExchange(" + n + ")");
+                        ctxt.saveExchange(n);
+                    }
+                    finally
+                    {
+                        context.setState(PhoneNumber.NineOneOneStart);
+                        (context.getState()).Entry(context);
+                    }
                 }
                 else
                 {
-                    (s.getState()).Exit(s);
-                    s.clearState();
-
-                    (s.getOwner()).writeTransAction("playTT(" +
-                                                    n +
-                                                    ");");
-                    (s.getOwner()).playTT(n);
-
-                    (s.getOwner()).writeTransAction("setType(Telephone.LOCAL);");
-                    (s.getOwner()).setType(Telephone.LOCAL);
-
-                    (s.getOwner()).writeTransAction("saveExchange(" +
-                                                    n +
-                                                    ");");
-                    (s.getOwner()).saveExchange(n);
-
-                    s.setState(PhoneNumber.Exchange);
-                    (s.getOwner()).writeState("PhoneNumber.Exchange");
-
-                    (s.getState()).Entry(s);
+                    (context.getState()).Exit(context);
+                    context.clearState();
+                    try
+                    {
+                        ctxt.writeTransition("Digit(" + n + ")");
+                        ctxt.writeTransAction("playTT(" + n + ")");
+                        ctxt.playTT(n);
+                        ctxt.writeTransAction("setType(Telephone.LOCAL)");
+                        ctxt.setType(Telephone.LOCAL);
+                        ctxt.writeTransAction("saveExchange(" + n + ")");
+                        ctxt.saveExchange(n);
+                    }
+                    finally
+                    {
+                        context.setState(PhoneNumber.Exchange);
+                        (context.getState()).Entry(context);
+                    }
                 }
 
-                return;
-            }
-
-            protected void OffHookTimer(TelephoneContext s)
-            {
-                if (s.getDebugFlag() == true)
-                {
-                    System.err.println("TRANSITION   : PhoneNumber.DialTone.OffHookTimer");
-                }
-
-                (s.getState()).Exit(s);
-
-                (s.getOwner()).writeTransition("OffHookTimer");
-
-                s.popState();
-                (s.getOwner()).writeState((s.getState()).getName());
-
-                (s.getState()).LeftOffHook(s);
-                return;
-            }
-
-            protected void OnHook(TelephoneContext s)
-            {
-                if (s.getDebugFlag() == true)
-                {
-                    System.err.println("TRANSITION   : PhoneNumber.DialTone.OnHook");
-                }
-
-                (s.getState()).Exit(s);
-
-                (s.getOwner()).writeTransition("OnHook");
-
-                s.popState();
-                (s.getOwner()).writeState((s.getState()).getName());
-
-                (s.getState()).OnHook(s);
-                return;
-            }
-
-            protected void Stop(TelephoneContext s)
-            {
-                if (s.getDebugFlag() == true)
-                {
-                    System.err.println("TRANSITION   : PhoneNumber.DialTone.Stop");
-                }
-
-                (s.getState()).Exit(s);
-
-                (s.getOwner()).writeTransition("Stop");
-
-                s.popState();
-                (s.getOwner()).writeState((s.getState()).getName());
-
-                (s.getState()).Stop(s);
                 return;
             }
         }
@@ -1528,191 +1787,163 @@ public final class TelephoneContext
         private static final class PhoneNumber_LongDistance
             extends PhoneNumber_Default
         {
-            private PhoneNumber_LongDistance(String name)
+            private PhoneNumber_LongDistance(String name, int id)
             {
-                super(name);
+                super (name, id);
             }
 
-            protected void Entry(TelephoneContext s)
+            protected void Entry(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Entry",
-                                                "startTimer(\"OffHookTimer\", 10000);");
-                (s.getOwner()).startTimer("OffHookTimer", 10000);
+                Telephone ctxt = context.getOwner();
+
+                ctxt.writeState("Entering PhoneNumber::LongDistance");
+                ctxt.writeStateAction("Entry", "startTimer(\"OffHookTimer\", 10000)");
+                ctxt.startTimer("OffHookTimer", 10000);
                 return;
             }
 
-            protected void Exit(TelephoneContext s)
+            protected void Exit(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Exit",
-                                                "stopTimer(\"OffHookTimer\");");
-                (s.getOwner()).stopTimer("OffHookTimer");
+                Telephone ctxt = context.getOwner();
+
+                ctxt.writeState("Exiting PhoneNumber::LongDistance");
+                ctxt.writeStateAction("Exit", "stopTimer(\"OffHookTimer\")");
+                ctxt.stopTimer("OffHookTimer");
                 return;
             }
 
-            protected void Digit(TelephoneContext s, String n)
+            protected void Digit(TelephoneContext context, String n)
             {
-                if (s.getDebugFlag() == true)
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
                 {
-                    System.err.println("TRANSITION   : PhoneNumber.LongDistance.Digit(String n)");
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : PhoneNumber.LongDistance.Digit(String n)");
                 }
 
-                (s.getOwner()).writeTransition("Digit(" +
-                                               n +
-                                               ")");
-
-                if (!(s.getOwner()).isDigitValid(n))
+                if (ctxt.isCodeComplete() == false)
                 {
-                    (s.getState()).Exit(s);
-                    s.clearState();
+                    TelephoneState endState = context.getState();
 
-                    (s.getOwner()).writeTransAction("clearDisplay();");
-                    (s.getOwner()).clearDisplay();
-
-                    s.popState();
-                    (s.getOwner()).writeState((s.getState()).getName());
-
-                    (s.getState()).InvalidDigit(s);
-                }
-                else if (!(s.getOwner()).isCodeComplete())
-                {
-
-                    TelephoneState endState = s.getState();
-
-                    s.clearState();
-
-                    (s.getOwner()).writeTransAction("playTT(" +
-                                                    n +
-                                                    ");");
-                    (s.getOwner()).playTT(n);
-
-                    (s.getOwner()).writeTransAction("saveAreaCode(" +
-                                                    n +
-                                                    ");");
-                    (s.getOwner()).saveAreaCode(n);
-
-                    (s.getOwner()).writeTransAction("resetTimer(\"OffHookTimer\");");
-                    (s.getOwner()).resetTimer("OffHookTimer");
-
-                    s.setState(endState);
+                    context.clearState();
+                    try
+                    {
+                        ctxt.writeTransition("Digit(" + n + ")");
+                        ctxt.writeTransAction("playTT(" + n + ")");
+                        ctxt.playTT(n);
+                        ctxt.writeTransAction("saveAreaCode(" + n + ")");
+                        ctxt.saveAreaCode(n);
+                        ctxt.writeTransAction("resetTimer(\"OffHookTimer\")");
+                        ctxt.resetTimer("OffHookTimer");
+                    }
+                    finally
+                    {
+                        context.setState(endState);
+                    }
                 }
                 else
                 {
-                    (s.getState()).Exit(s);
-                    s.clearState();
-
-                    (s.getOwner()).writeTransAction("playTT(" +
-                                                    n +
-                                                    ");");
-                    (s.getOwner()).playTT(n);
-
-                    (s.getOwner()).writeTransAction("saveAreaCode(" +
-                                                    n +
-                                                    ");");
-                    (s.getOwner()).saveAreaCode(n);
-
-                    (s.getOwner()).writeTransAction("addDisplay(\"-\");");
-                    (s.getOwner()).addDisplay("-");
-
-                    s.setState(PhoneNumber.Exchange);
-                    (s.getOwner()).writeState("PhoneNumber.Exchange");
-
-                    (s.getState()).Entry(s);
+                    (context.getState()).Exit(context);
+                    context.clearState();
+                    try
+                    {
+                        ctxt.writeTransition("Digit(" + n + ")");
+                        ctxt.writeTransAction("playTT(" + n + ")");
+                        ctxt.playTT(n);
+                        ctxt.writeTransAction("saveAreaCode(" + n + ")");
+                        ctxt.saveAreaCode(n);
+                        ctxt.writeTransAction("addDisplay(\"-\")");
+                        ctxt.addDisplay("-");
+                    }
+                    finally
+                    {
+                        context.setState(PhoneNumber.Exchange);
+                        (context.getState()).Entry(context);
+                    }
                 }
 
                 return;
             }
         }
 
-        private static final class PhoneNumber_OneOneStart
+        private static final class PhoneNumber_NineOneOneStart
             extends PhoneNumber_Default
         {
-            private PhoneNumber_OneOneStart(String name)
+            private PhoneNumber_NineOneOneStart(String name, int id)
             {
-                super(name);
+                super (name, id);
             }
 
-            protected void Entry(TelephoneContext s)
+            protected void Entry(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Entry",
-                                                "startTimer(\"OffHookTimer\", 10000);");
-                (s.getOwner()).startTimer("OffHookTimer", 10000);
+                Telephone ctxt = context.getOwner();
+
+                ctxt.writeState("Entering PhoneNumber::NineOneOneStart");
+                ctxt.writeStateAction("Entry", "startTimer(\"OffHookTimer\", 10000)");
+                ctxt.startTimer("OffHookTimer", 10000);
                 return;
             }
 
-            protected void Exit(TelephoneContext s)
+            protected void Exit(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Exit",
-                                                "stopTimer(\"OffHookTimer\");");
-                (s.getOwner()).stopTimer("OffHookTimer");
+                Telephone ctxt = context.getOwner();
+
+                ctxt.writeState("Exiting PhoneNumber::NineOneOneStart");
+                ctxt.writeStateAction("Exit", "stopTimer(\"OffHookTimer\")");
+                ctxt.stopTimer("OffHookTimer");
                 return;
             }
 
-            protected void Digit(TelephoneContext s, String n)
+            protected void Digit(TelephoneContext context, String n)
             {
-                if (s.getDebugFlag() == true)
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
                 {
-                    System.err.println("TRANSITION   : PhoneNumber.OneOneStart.Digit(String n)");
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : PhoneNumber.NineOneOneStart.Digit(String n)");
                 }
 
-                (s.getOwner()).writeTransition("Digit(" +
-                                               n +
-                                               ")");
-
-                if (!(s.getOwner()).isDigitValid(n))
+                if (ctxt.equal(n, 1) == true)
                 {
-                    (s.getState()).Exit(s);
-                    s.clearState();
-
-                    (s.getOwner()).writeTransAction("clearDisplay();");
-                    (s.getOwner()).clearDisplay();
-
-                    s.popState();
-                    (s.getOwner()).writeState((s.getState()).getName());
-
-                    (s.getState()).InvalidDigit(s);
-                }
-                else if ((s.getOwner()).equal(n, 1))
-                {
-                    (s.getState()).Exit(s);
-                    s.clearState();
-
-                    (s.getOwner()).writeTransAction("playTT(" +
-                                                    n +
-                                                    ");");
-                    (s.getOwner()).playTT(n);
-
-                    (s.getOwner()).writeTransAction("saveExchange(" +
-                                                    n +
-                                                    ");");
-                    (s.getOwner()).saveExchange(n);
-
-                    s.setState(PhoneNumber.NineOne);
-                    (s.getOwner()).writeState("PhoneNumber.NineOne");
-
-                    (s.getState()).Entry(s);
+                    (context.getState()).Exit(context);
+                    context.clearState();
+                    try
+                    {
+                        ctxt.writeTransition("Digit(" + n + ")");
+                        ctxt.writeTransAction("playTT(" + n + ")");
+                        ctxt.playTT(n);
+                        ctxt.writeTransAction("saveAreaCode(" + n + ")");
+                        ctxt.saveExchange(n);
+                    }
+                    finally
+                    {
+                        context.setState(PhoneNumber.NineOne);
+                        (context.getState()).Entry(context);
+                    }
                 }
                 else
                 {
-                    (s.getState()).Exit(s);
-                    s.clearState();
-
-                    (s.getOwner()).writeTransAction("playTT(" +
-                                                    n +
-                                                    ");");
-                    (s.getOwner()).playTT(n);
-
-                    (s.getOwner()).writeTransAction("setType(Telephone.Local);");
-                    (s.getOwner()).setType(Telephone.LOCAL);
-
-                    (s.getOwner()).writeTransAction("saveExchange(" +
-                                                    n +
-                                                    ");");
-                    (s.getOwner()).saveExchange(n);
-
-                    s.setState(PhoneNumber.Exchange);
-                    (s.getOwner()).writeState("PhoneNumber.Exchange");
-
-                    (s.getState()).Entry(s);
+                    (context.getState()).Exit(context);
+                    context.clearState();
+                    try
+                    {
+                        ctxt.writeTransition("Digit(" + n + ")");
+                        ctxt.writeTransAction("playTT(" + n + ")");
+                        ctxt.playTT(n);
+                        ctxt.writeTransAction("setType(Telephone.LOCAL)");
+                        ctxt.setType(Telephone.LOCAL);
+                        ctxt.writeTransAction("saveExchange(" + n + ")");
+                        ctxt.saveExchange(n);
+                    }
+                    finally
+                    {
+                        context.setState(PhoneNumber.Exchange);
+                        (context.getState()).Entry(context);
+                    }
                 }
 
                 return;
@@ -1722,99 +1953,85 @@ public final class TelephoneContext
         private static final class PhoneNumber_NineOne
             extends PhoneNumber_Default
         {
-            private PhoneNumber_NineOne(String name)
+            private PhoneNumber_NineOne(String name, int id)
             {
-                super(name);
+                super (name, id);
             }
 
-            protected void Entry(TelephoneContext s)
+            protected void Entry(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Entry",
-                                                "startTimer(\"OffHookTimer\", 10000);");
-                (s.getOwner()).startTimer("OffHookTimer", 10000);
+                Telephone ctxt = context.getOwner();
+
+                ctxt.writeState("Entering PhoneNumber::NineOne");
+                ctxt.writeStateAction("Entry", "startTimer(\"OffHookTimer\", 10000)");
+                ctxt.startTimer("OffHookTimer", 10000);
                 return;
             }
 
-            protected void Exit(TelephoneContext s)
+            protected void Exit(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Exit",
-                                                "stopTimer(\"OffHookTimer\");");
-                (s.getOwner()).stopTimer("OffHookTimer");
+                Telephone ctxt = context.getOwner();
+
+                ctxt.writeState("Exiting PhoneNumber::NineOne");
+                ctxt.writeStateAction("Exit", "stopTimer(\"OffHookTimer\")");
+                ctxt.stopTimer("OffHookTimer");
                 return;
             }
 
-            protected void Digit(TelephoneContext s, String n)
+            protected void Digit(TelephoneContext context, String n)
             {
-                if (s.getDebugFlag() == true)
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
                 {
-                    System.err.println("TRANSITION   : PhoneNumber.NineOne.Digit(String n)");
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : PhoneNumber.NineOne.Digit(String n)");
                 }
 
-                (s.getOwner()).writeTransition("Digit(" +
-                                               n +
-                                               ")");
-
-                if (!(s.getOwner()).isDigitValid(n))
+                if (ctxt.equal(n, 1) == true)
                 {
-                    (s.getState()).Exit(s);
-                    s.clearState();
+                    (context.getState()).Exit(context);
+                    context.clearState();
+                    try
+                    {
+                        ctxt.writeTransition("Digit(" + n + ")");
+                        ctxt.writeTransAction("playTT(" + n + ")");
+                        ctxt.playTT(n);
+                        ctxt.writeTransAction("setType(Telephone.EMERGENCY)");
+                        ctxt.setType(Telephone.EMERGENCY);
+                        ctxt.writeTransAction("saveExchange(" + n + ")");
+                        ctxt.saveExchange(n);
+                        ctxt.writeTransition("pop(DialingDone)");
+                    }
+                    finally
+                    {
+                        context.popState();
+                    }
 
-                    (s.getOwner()).writeTransAction("clearDisplay();");
-                    (s.getOwner()).clearDisplay();
-
-                    s.popState();
-                    (s.getOwner()).writeState((s.getState()).getName());
-
-                    (s.getState()).InvalidNumber(s);
-                }
-                else if ((s.getOwner()).equal(n, 1))
-                {
-                    (s.getState()).Exit(s);
-                    s.clearState();
-
-                    (s.getOwner()).writeTransAction("playTT(" +
-                                                    n +
-                                                    ");");
-                    (s.getOwner()).playTT(n);
-
-                    (s.getOwner()).writeTransAction("setType(Telephone.EMERGENCY);");
-                    (s.getOwner()).setType(Telephone.EMERGENCY);
-
-                    (s.getOwner()).writeTransAction("saveExchange(" +
-                                                    n +
-                                                    ");");
-                    (s.getOwner()).saveExchange(n);
-
-                    s.popState();
-                    (s.getOwner()).writeState((s.getState()).getName());
-
-                    (s.getState()).DialingDone(s);
+                    context.DialingDone();
                 }
                 else
                 {
-                    (s.getState()).Exit(s);
-                    s.clearState();
-
-                    (s.getOwner()).writeTransAction("playTT(" +
-                                                    n +
-                                                    ");");
-                    (s.getOwner()).playTT(n);
-
-                    (s.getOwner()).writeTransAction("setType(Telephone.LOCAL);");
-                    (s.getOwner()).setType(Telephone.LOCAL);
-
-                    (s.getOwner()).writeTransAction("saveExchange(" +
-                                                    n +
-                                                    ");");
-                    (s.getOwner()).saveExchange(n);
-
-                    (s.getOwner()).writeTransAction("addDisplay(\"-\");");
-                    (s.getOwner()).addDisplay("-");
-
-                    s.setState(PhoneNumber.LocalCall);
-                    (s.getOwner()).writeState("PhoneNumber.LocalCall");
-
-                    (s.getState()).Entry(s);
+                    (context.getState()).Exit(context);
+                    context.clearState();
+                    try
+                    {
+                        ctxt.writeTransition("Digit(" + n + ")");
+                        ctxt.writeTransAction("playTT(" + n + ")");
+                        ctxt.playTT(n);
+                        ctxt.writeTransAction("setType(Telephone.LOCAL)");
+                        ctxt.setType(Telephone.LOCAL);
+                        ctxt.writeTransAction("saveExchange(" + n + ")");
+                        ctxt.saveExchange(n);
+                        ctxt.writeTransAction("addDisplay(\"-\")");
+                        ctxt.addDisplay("-");
+                    }
+                    finally
+                    {
+                        context.setState(PhoneNumber.LocalCall);
+                        (context.getState()).Entry(context);
+                    }
                 }
 
                 return;
@@ -1824,95 +2041,81 @@ public final class TelephoneContext
         private static final class PhoneNumber_Exchange
             extends PhoneNumber_Default
         {
-            private PhoneNumber_Exchange(String name)
+            private PhoneNumber_Exchange(String name, int id)
             {
-                super(name);
+                super (name, id);
             }
 
-            protected void Entry(TelephoneContext s)
+            protected void Entry(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Entry",
-                                                "startTimer(\"OffHookTimer\", 10000);");
-                (s.getOwner()).startTimer("OffHookTimer", 10000);
+                Telephone ctxt = context.getOwner();
+
+                ctxt.writeState("Entering PhoneNumber::Exchange");
+                ctxt.writeStateAction("Entry", "startTimer(\"OffHookTimer\", 10000)");
+                ctxt.startTimer("OffHookTimer", 10000);
                 return;
             }
 
-            protected void Exit(TelephoneContext s)
+            protected void Exit(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Exit",
-                                                "stopTimer(\"OffHookTimer\");");
-                (s.getOwner()).stopTimer("OffHookTimer");
+                Telephone ctxt = context.getOwner();
+
+                ctxt.writeState("Exiting PhoneNumber::Exchange");
+                ctxt.writeStateAction("Exit", "stopTimer(\"OffHookTimer\")");
+                ctxt.stopTimer("OffHookTimer");
                 return;
             }
 
-            protected void Digit(TelephoneContext s, String n)
+            protected void Digit(TelephoneContext context, String n)
             {
-                if (s.getDebugFlag() == true)
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
                 {
-                    System.err.println("TRANSITION   : PhoneNumber.Exchange.Digit(String n)");
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : PhoneNumber.Exchange.Digit(String n)");
                 }
 
-                (s.getOwner()).writeTransition("Digit(" +
-                                               n +
-                                               ")");
-
-                if (!(s.getOwner()).isDigitValid(n))
+                if (ctxt.isExchangeComplete() == false)
                 {
-                    (s.getState()).Exit(s);
-                    s.clearState();
+                    TelephoneState endState = context.getState();
 
-                    (s.getOwner()).writeTransAction("clearDisplay();");
-                    (s.getOwner()).clearDisplay();
-
-                    s.popState();
-                    (s.getOwner()).writeState((s.getState()).getName());
-
-                    (s.getState()).InvalidDigit(s);
-                }
-                else if (!(s.getOwner()).isExchangeComplete())
-                {
-
-                    TelephoneState endState = s.getState();
-
-                    s.clearState();
-
-                    (s.getOwner()).writeTransAction("playTT(" +
-                                                    n +
-                                                    ");");
-                    (s.getOwner()).playTT(n);
-
-                    (s.getOwner()).writeTransAction("saveExchange(" +
-                                                    n +
-                                                    ");");
-                    (s.getOwner()).saveExchange(n);
-
-                    (s.getOwner()).writeTransAction("resetTimer(\"OffHookTimer\");");
-                    (s.getOwner()).resetTimer("OffHookTimer");
-
-                    s.setState(endState);
+                    context.clearState();
+                    try
+                    {
+                        ctxt.writeTransition("Digit(" + n + ")");
+                        ctxt.writeTransAction("playTT(" + n + ")");
+                        ctxt.playTT(n);
+                        ctxt.writeTransAction("saveExchange(" + n + ")");
+                        ctxt.saveExchange(n);
+                        ctxt.writeTransition("resetTimer(\"OffHookTimer\")");
+                        ctxt.resetTimer("OffHookTimer");
+                    }
+                    finally
+                    {
+                        context.setState(endState);
+                    }
                 }
                 else
                 {
-                    (s.getState()).Exit(s);
-                    s.clearState();
-
-                    (s.getOwner()).writeTransAction("playTT(" +
-                                                    n +
-                                                    ");");
-                    (s.getOwner()).playTT(n);
-
-                    (s.getOwner()).writeTransAction("saveExchange(" +
-                                                    n +
-                                                    ");");
-                    (s.getOwner()).saveExchange(n);
-
-                    (s.getOwner()).writeTransAction("addDisplay(\"-\");");
-                    (s.getOwner()).addDisplay("-");
-
-                    s.setState(PhoneNumber.LocalCall);
-                    (s.getOwner()).writeState("PhoneNumber.LocalCall");
-
-                    (s.getState()).Entry(s);
+                    (context.getState()).Exit(context);
+                    context.clearState();
+                    try
+                    {
+                        ctxt.writeTransition("Digit(" + n + ")");
+                        ctxt.writeTransAction("playTT(" + n + ")");
+                        ctxt.playTT(n);
+                        ctxt.writeTransAction("saveExchange(" + n + ")");
+                        ctxt.saveExchange(n);
+                        ctxt.writeTransAction("addDisplay(\"-\")");
+                        ctxt.addDisplay("-");
+                    }
+                    finally
+                    {
+                        context.setState(PhoneNumber.LocalCall);
+                        (context.getState()).Entry(context);
+                    }
                 }
 
                 return;
@@ -1922,92 +2125,81 @@ public final class TelephoneContext
         private static final class PhoneNumber_LocalCall
             extends PhoneNumber_Default
         {
-            private PhoneNumber_LocalCall(String name)
+            private PhoneNumber_LocalCall(String name, int id)
             {
-                super(name);
+                super (name, id);
             }
 
-            protected void Entry(TelephoneContext s)
+            protected void Entry(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Entry",
-                                                "startTimer(\"OffHookTimer\", 10000);");
-                (s.getOwner()).startTimer("OffHookTimer", 10000);
+                Telephone ctxt = context.getOwner();
+
+                ctxt.writeState("Entering CallMap::LocalCall");
+                ctxt.writeStateAction("Entry", "startTimer(\"OffHookTimer\", 10000)");
+                ctxt.startTimer("OffHookTimer", 10000);
                 return;
             }
 
-            protected void Exit(TelephoneContext s)
+            protected void Exit(TelephoneContext context)
             {
-                (s.getOwner()).writeStateAction("Exit",
-                                                "stopTimer(\"OffHookTimer\");");
-                (s.getOwner()).stopTimer("OffHookTimer");
+                Telephone ctxt = context.getOwner();
+
+                ctxt.writeState("Exiting CallMap::LocalCall");
+                ctxt.writeStateAction("Exit", "stopTimer(\"OffHookTimer\")");
+                ctxt.stopTimer("OffHookTimer");
                 return;
             }
 
-            protected void Digit(TelephoneContext s, String n)
+            protected void Digit(TelephoneContext context, String n)
             {
-                if (s.getDebugFlag() == true)
+                Telephone ctxt = context.getOwner();
+
+                if (context.getDebugFlag() == true)
                 {
-                    System.err.println("TRANSITION   : PhoneNumber.LocalCall.Digit(String n)");
+                    PrintStream str = context.getDebugStream();
+
+                    str.println("TRANSITION   : PhoneNumber.LocalCall.Digit(String n)");
                 }
 
-                (s.getOwner()).writeTransition("Digit(" +
-                                               n +
-                                               ")");
-
-                if (!(s.getOwner()).isDigitValid(n))
+                if (ctxt.isLocalComplete() == false)
                 {
-                    (s.getState()).Exit(s);
-                    s.clearState();
+                    TelephoneState endState = context.getState();
 
-                    (s.getOwner()).writeTransAction("clearDisplay();");
-                    (s.getOwner()).clearDisplay();
-
-                    s.popState();
-                    (s.getOwner()).writeState((s.getState()).getName());
-
-                    (s.getState()).InvalidDigit(s);
-                }
-                else if (!(s.getOwner()).isLocalComplete())
-                {
-
-                    TelephoneState endState = s.getState();
-
-                    s.clearState();
-
-                    (s.getOwner()).writeTransAction("playTT(" +
-                                                    n +
-                                                    ");");
-                    (s.getOwner()).playTT(n);
-
-                    (s.getOwner()).writeTransAction("saveLocal(" +
-                                                    n +
-                                                    ");");
-                    (s.getOwner()).saveLocal(n);
-
-                    (s.getOwner()).writeTransAction("resetTimer(\"OffHookTimer\");");
-                    (s.getOwner()).resetTimer("OffHookTimer");
-
-                    s.setState(endState);
+                    context.clearState();
+                    try
+                    {
+                        ctxt.writeTransition("Digit(" + n + ")");
+                        ctxt.writeTransAction("playTT(" + n + ")");
+                        ctxt.playTT(n);
+                        ctxt.writeTransAction("saveLocal(" + n + ")");
+                        ctxt.saveLocal(n);
+                        ctxt.writeTransAction("resetTimer(\"OffHookTimer\")");
+                        ctxt.resetTimer("OffHookTimer");
+                    }
+                    finally
+                    {
+                        context.setState(endState);
+                    }
                 }
                 else
                 {
-                    (s.getState()).Exit(s);
-                    s.clearState();
+                    (context.getState()).Exit(context);
+                    context.clearState();
+                    try
+                    {
+                        ctxt.writeTransition("Digit(" + n + ")");
+                        ctxt.writeTransAction("playTT(" + n + ")");
+                        ctxt.playTT(n);
+                        ctxt.writeTransAction("saveLocal(" + n + ")");
+                        ctxt.saveLocal(n);
+                        ctxt.writeTransition("pop(DialingDone)");
+                    }
+                    finally
+                    {
+                        context.popState();
+                    }
 
-                    (s.getOwner()).writeTransAction("playTT(" +
-                                                    n +
-                                                    ");");
-                    (s.getOwner()).playTT(n);
-
-                    (s.getOwner()).writeTransAction("saveLocal(" +
-                                                    n +
-                                                    ");");
-                    (s.getOwner()).saveLocal(n);
-
-                    s.popState();
-                    (s.getOwner()).writeState((s.getState()).getName());
-
-                    (s.getState()).DialingDone(s);
+                    context.DialingDone();
                 }
 
                 return;

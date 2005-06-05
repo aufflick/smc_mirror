@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2005/06/05 18:51:07  cwrapp
+// Added output actions back into FSM.
+//
 // Revision 1.3  2005/05/28 19:41:44  cwrapp
 // Update for SMC v. 4.0.0.
 //
@@ -604,7 +607,19 @@ public final class Telephone
 
     public void addDisplay(String character)
     {
-        _display += character;
+        if (character.length() == 1)
+        {
+            _display += character;
+        }
+        else if (character.equals("10") == true)
+        {
+            _display += "*";
+        }
+        else
+        {
+            _display += "#";
+        }
+
         _numberDisplay.setText(_display);
 
         return;
@@ -1080,7 +1095,7 @@ public final class Telephone
 
         _textArea = new TextArea("",
                                  25,
-                                 80,
+                                 65,
                                  TextArea.SCROLLBARS_BOTH);
         _textArea.setFont(new Font("Arial", Font.PLAIN, 9));
         _textArea.setEditable(false);

@@ -13,7 +13,7 @@
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
-# Copyright (C) 2000 Charles W. Rapp.
+# Copyright (C) 2000 - 2005 Charles W. Rapp.
 # All Rights Reserved.
 # 
 # Contributor(s):
@@ -22,7 +22,62 @@
 # $Id$
 #
 # CHANGE LOG
+# (See the bottom of this file.)
+#
+
+#################################################################
+# Macros
+#
+
+TARGET=		Telephone
+
+SM_SOURCES=	Telephone.sm
+
+SOURCES=	$(SM_SOURCES:%.sm=%Context.java) \
+		TimerEvent.java \
+		TimerListener.java \
+		Timer.java \
+		Telephone.java
+
+FSM_DIR=	../lib/Java
+
+JAVAC=		javac
+JAVAC_FLAGS=	-g -classpath ../lib/Java/statemap.jar
+
+JAR=		jar
+JAR_CREATE_FLAGS=	cmf manifest.txt
+JAR_UPDATE_FLAGS=	uf
+JAR_FILE=	$(TARGET).jar
+
+SMC=		java -jar ../../smc/bin/Smc.jar
+SMC_FLAGS=	-java -g
+
+#################################################################
+# Rules
+#
+
+all :		$(TARGET)
+
+%Context.java : %.sm
+		$(SMC) $(SMC_FLAGS) $<
+
+$(TARGET) :	$(SOURCES)
+		$(JAVAC) $(JAVAC_FLAGS) $(SOURCES)
+		$(JAR) $(JAR_CREATE_FLAGS) $(JAR_FILE) *.class
+		$(JAR) $(JAR_UPDATE_FLAGS) $(JAR_FILE) -C $(FSM_DIR) statemap
+		-rm -f *.class
+
+clean :
+		-rm -f *.class *.flc $(JAR_FILE)
+
+realclean :	clean
+
+#
+# CHANGE LOG
 # $Log$
+# Revision 1.5  2005/06/05 18:51:07  cwrapp
+# Added output actions back into FSM.
+#
 # Revision 1.4  2005/05/28 19:41:44  cwrapp
 # Update for SMC v. 4.0.0.
 #
@@ -45,39 +100,3 @@
 # If SMC should crash, critical information are printed out along
 # with instructions explaining where to send that information.
 #
-
-TARGET=		Telephone
-
-SM_SOURCES=	Telephone.sm
-
-SOURCES=	$(SM_SOURCES:%.sm=%Context.java) \
-		TimerEvent.java \
-		TimerListener.java \
-		Timer.java \
-		Telephone.java
-
-FSM_DIR=	../lib/Java
-
-JAVAC=		javac
-JAVAC_FLAGS=	-g -classpath ../lib/Java/statemap.jar
-JAR=		jar
-JAR_CREATE_FLAGS=	cmf manifest.txt
-JAR_UPDATE_FLAGS=	uf
-JAR_FILE=	$(TARGET).jar
-SMC=		java -jar ../../smc/bin/Smc.jar
-SMC_FLAGS=	-java -g
-
-all :		$(TARGET)
-
-%Context.java : %.sm
-		$(SMC) $(SMC_FLAGS) $<
-
-$(TARGET) :	$(SOURCES)
-		$(JAVAC) $(JAVAC_FLAGS) $(SOURCES)
-		$(JAR) $(JAR_CREATE_FLAGS) $(JAR_FILE) *.class
-		$(JAR) $(JAR_UPDATE_FLAGS) $(JAR_FILE) -C $(FSM_DIR) statemap
-
-clean :
-		-rm -f *.class *.flc $(JAR_FILE)
-
-realclean :	clean
