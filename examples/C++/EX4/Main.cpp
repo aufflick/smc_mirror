@@ -29,6 +29,13 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2005/06/08 11:09:12  cwrapp
+// + Updated Python code generator to place "pass" in methods with empty
+//   bodies.
+// + Corrected FSM errors in Python example 7.
+// + Removed unnecessary includes from C++ examples.
+// + Corrected errors in top-level makefile's distribution build.
+//
 // Revision 1.5  2005/05/28 13:31:18  cwrapp
 // Updated C++ examples.
 //
@@ -36,18 +43,9 @@
 // Initial revision
 //
 
-#if (__GNUC__ >= 3 && __GNUC_MINOR__ >= 1)
-#include <iostream>
-#include <cassert>
-#include <cstdio>
-#elif defined(WIN32)
-#include <iostream>
-#include <windows.h>
-#include <winbase.h>
-#endif
+#include "stoplight.h"
 #include <stdlib.h>
 #include <signal.h>
-#include "stoplight.h"
 
 using namespace std;
 

@@ -41,11 +41,6 @@
 # Include the official macros.
 include ./smc.mk
 
-STAGING_DIR=	../staging
-SMC_STAGING_DIR=$(STAGING_DIR)/smc
-SMC_RELEASE_DIR=$(STAGING_DIR)/smc_$(VERSION)
-RELEASE_DIR=	$(STAGING_DIR)/releases
-
 TAR_FILE=	$(RELEASE_DIR)/smc_$(VERSION).tar
 TAR_GZ_FILE=	$(TAR_FILE:.tar=.tar.gz)
 GZIP_FILE=	$(TAR_FILE:.tar=.tgz)
@@ -59,25 +54,14 @@ SRC_TAR_LIST=	./smc/tar_list.txt
 # Rules.
 #
 
-# Create the staging directories if needed.
-$(STAGING_DIR) :
-		mkdir $(STAGING_DIR)
-
-$(SMC_STAGING_DIR) :	$(STAGING_DIR)
-		-rm -fr $(SMC_STAGING_DIR)
-		mkdir $(SMC_STAGING_DIR)
-
 # Copy all products to the staging directory.
 install :	$(SMC_STAGING_DIR)
 		-rm -fr $(SMC_STAGING_DIR)/*
 		$(MAKE) -C lib install
 		$(MAKE) -C net/sf/smc install
 		cp -R -f -p ./examples $(SMC_STAGING_DIR)
-		-rm -fr $(SMC_STAGING_DIR)/examples/*/*/RCS
-		-rm -fr $(SMC_STAGING_DIR)/examples/Ant/*/*/RCS
-		-rm -fr $(SMC_STAGING_DIR)/examples/.DS_Store
-		-rm -fr $(SMC_STAGING_DIR)/examples/*/.DS_Store
-		-rm -fr $(SMC_STAGING_DIR)/examples/*/*/.DS_Store
+		-find $(SMC_STAGING_DIR) -name CVS -type d -exec rm -fr {} \; -prune
+		-find $(SMC_STAGING_DIR) -name .DS_Store -exec rm -fr {} \;
 		$(MAKE) -C misc install
 		cp -f LICENSE.txt $(SMC_STAGING_DIR)
 		cp -f README.txt $(SMC_STAGING_DIR)
@@ -95,11 +79,12 @@ clean :
 		$(MAKE) -C lib clean
 		$(MAKE) -C ./net/sf/smc clean
 
-smc_dist :	$(SMC_STAGING_DIR)
+smc_dist :	$(SMC_STAGING_DIR) $(SMC_RELEASE_DIR)
 		-rm -f $(TAR_FILE) $(TAR_GZ_FILE) $(GZIP_FILE)
-		(cd $(STAGING_DIR)/..; \
-		    mv $(SMC_STAGING_DIR) $(SMC_RELEASE_DIR); \
-		    tar cvf $(TAR_FILE) smc_$(VERSION))
+		-rm -fr $(SMC_RELEASE_DIR)
+		mv $(SMC_STAGING_DIR) $(SMC_RELEASE_DIR)
+		(cd $(SMC_RELEASE_DIR)/..; \
+		  tar cvf $(TAR_FILE) ./smc_$(VERSION))
 		gzip $(TAR_FILE)
 		mv $(TAR_GZ_FILE) $(GZIP_FILE)
 
@@ -128,6 +113,13 @@ realclean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.7  2005/06/08 11:08:58  cwrapp
+# + Updated Python code generator to place "pass" in methods with empty
+#   bodies.
+# + Corrected FSM errors in Python example 7.
+# + Removed unnecessary includes from C++ examples.
+# + Corrected errors in top-level makefile's distribution build.
+#
 # Revision 1.6  2005/05/28 19:41:44  cwrapp
 # Update for SMC v. 4.0.0.
 #

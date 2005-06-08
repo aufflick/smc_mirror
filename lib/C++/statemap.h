@@ -44,7 +44,7 @@
 // (See bottom of file)
 //
 
-#if (__GNUC__ >= 3 && __GNUC_MINOR__ >= 1)
+#if (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1))
 #include <iostream>
 #if defined(SMC_NO_EXCEPTIONS)
 #include <cassert>
@@ -695,6 +695,13 @@ namespace statemap
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2005/06/08 11:09:14  cwrapp
+// + Updated Python code generator to place "pass" in methods with empty
+//   bodies.
+// + Corrected FSM errors in Python example 7.
+// + Removed unnecessary includes from C++ examples.
+// + Corrected errors in top-level makefile's distribution build.
+//
 // Revision 1.6  2005/05/28 18:44:13  cwrapp
 // Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
 //

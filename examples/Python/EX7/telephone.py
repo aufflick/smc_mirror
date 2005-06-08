@@ -33,6 +33,13 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2005/06/08 11:09:13  cwrapp
+# + Updated Python code generator to place "pass" in methods with empty
+#   bodies.
+# + Corrected FSM errors in Python example 7.
+# + Removed unnecessary includes from C++ examples.
+# + Corrected errors in top-level makefile's distribution build.
+#
 # Revision 1.1  2005/05/28 17:48:30  cwrapp
 # Added Python examples 1 - 4 and 7.
 #

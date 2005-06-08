@@ -13,7 +13,7 @@
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
-# Copyright (C) 2000 Charles W. Rapp.
+# Copyright (C) 2000 - 2005 Charles W. Rapp.
 # All Rights Reserved.
 # 
 # Contributor(s):
@@ -32,22 +32,22 @@
 # Include the official macros.
 include ../../smc.mk
 
-STAGING_DIR=	../../../staging/smc/lib/statemap1.0
+LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib/statemap1.0
 
 #################################################################
 # Rules.
 #
 
-$(STAGING_DIR) :
-		mkdir $(STAGING_DIR)
+$(LIB_STAGING_DIR) :
+		mkdir $(LIB_STAGING_DIR)
 
-install :	$(STAGING_DIR) statemap.tcl pkgIndex.tcl
-		cp -f statemap.tcl $(STAGING_DIR)
-		cp -f pkgIndex.tcl $(STAGING_DIR)
+install :	$(LIB_STAGING_DIR) statemap.tcl pkgIndex.tcl
+		cp -f statemap.tcl $(LIB_STAGING_DIR)
+		cp -f pkgIndex.tcl $(LIB_STAGING_DIR)
 
 uninstall :
-		-rm $(STAGING_DIR)/statemap.tcl
-		-rm $(STAGING_DIR)/pkgIndex.tcl
+		-rm $(LIB_STAGING_DIR)/statemap.tcl
+		-rm $(LIB_STAGING_DIR)/pkgIndex.tcl
 
 clean :
 
@@ -56,6 +56,13 @@ realclean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.7  2005/06/08 11:09:15  cwrapp
+# + Updated Python code generator to place "pass" in methods with empty
+#   bodies.
+# + Corrected FSM errors in Python example 7.
+# + Removed unnecessary includes from C++ examples.
+# + Corrected errors in top-level makefile's distribution build.
+#
 # Revision 1.6  2005/05/28 18:47:13  cwrapp
 # Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
 #

@@ -7,7 +7,6 @@
     >
         <Build>
             <Settings
-                ApplicationIcon = "App.ico"
                 AssemblyKeyContainerName = ""
                 AssemblyName = "checkstring"
                 AssemblyOriginatorKeyFile = ""
@@ -88,10 +87,6 @@
         </Build>
         <Files>
             <Include>
-                <File
-                    RelPath = "App.ico"
-                    BuildAction = "Content"
-                />
                 <File
                     RelPath = "AppClass.cs"
                     SubType = "Code"

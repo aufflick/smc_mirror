@@ -743,9 +743,34 @@ public final class SmcPythonGenerator
         // Dump out this transition's actions.
         if (actions.size() == 0)
         {
+            List entryActions = state.getEntryActions();
+            List exitActions = state.getExitActions();
+
             if (condition.length() > 0)
             {
-                _source.println(indent2 + "# No actions.");
+                _source.print(indent2);
+                _source.println("# No actions.");
+            }
+            // If there are:
+            // 1. No entry actions,
+            // 2. No exit actions,
+            // 3. Only one guard,
+            // 4. No condition,
+            // 5. No actions,
+            // 6. Not a loopback or pop transition and
+            // 7. No debug code being generated.
+            // then give this transition a pass.
+            else if (_guardCount == 1 &&
+                     (entryActions == null ||
+                      entryActions.isEmpty() == true) &&
+                     (exitActions == null ||
+                      exitActions.isEmpty() == true) &&
+                     transType != Smc.TRANS_POP &&
+                     loopbackFlag == true &&
+                     Smc.isDebug() == false)
+            {
+                _source.print(indent2);
+                _source.println("pass");
             }
 
             indent3 = indent2;
@@ -954,6 +979,13 @@ public final class SmcPythonGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2005/06/08 11:09:15  cwrapp
+// + Updated Python code generator to place "pass" in methods with empty
+//   bodies.
+// + Corrected FSM errors in Python example 7.
+// + Removed unnecessary includes from C++ examples.
+// + Corrected errors in top-level makefile's distribution build.
+//
 // Revision 1.1  2005/05/28 19:28:42  cwrapp
 // Moved to visitor pattern.
 //

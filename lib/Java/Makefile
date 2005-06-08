@@ -13,7 +13,7 @@
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
-# Copyright (C) 2000 Charles W. Rapp.
+# Copyright (C) 2000 - 2005 Charles W. Rapp.
 # All Rights Reserved.
 # 
 # Contributor(s):
@@ -45,8 +45,8 @@ JAR=		jar
 JAR_FLAGS=	cvf
 JAR_FILE=	$(PACKAGE_NAME).jar
 
-STAGING_DIR=	../../../staging/smc/lib
-CLASS_DIR=	$(STAGING_DIR)/$(PACKAGE_NAME)
+LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib
+CLASS_DIR=	$(LIB_STAGING_DIR)/$(PACKAGE_NAME)
 
 #################################################################
 # Rules.
@@ -63,13 +63,13 @@ $(CLASS_DIR) :
 
 install :	$(JAR_FILE) $(CLASS_DIR)
 		cp -f $(JAR_FILE) ..
-		cp -f $(JAR_FILE) $(STAGING_DIR)
-		-chmod 444 $(STAGING_DIR)/$(JAR_FILE)
+		cp -f $(JAR_FILE) $(LIB_STAGING_DIR)
+		-chmod 444 $(LIB_STAGING_DIR)/$(JAR_FILE)
 		cp -f $(PACKAGE_NAME)/*.class $(CLASS_DIR)
 
 uninstall :
 		-rm ../$(JAR_FILE)
-		-rm $(STAGING_DIR)/$(JAR_FILE)
+		-rm $(LIB_STAGING_DIR)/$(JAR_FILE)
 
 clean :
 		-rm -f ./$(JAR_FILE) ./$(PACKAGE_NAME)/*
@@ -80,6 +80,13 @@ realclean :	clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.8  2005/06/08 11:09:14  cwrapp
+# + Updated Python code generator to place "pass" in methods with empty
+#   bodies.
+# + Corrected FSM errors in Python example 7.
+# + Removed unnecessary includes from C++ examples.
+# + Corrected errors in top-level makefile's distribution build.
+#
 # Revision 1.7  2005/05/28 18:44:13  cwrapp
 # Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
 #

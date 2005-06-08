@@ -33,6 +33,13 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2005/06/08 11:09:13  cwrapp
+// + Updated Python code generator to place "pass" in methods with empty
+//   bodies.
+// + Corrected FSM errors in Python example 7.
+// + Removed unnecessary includes from C++ examples.
+// + Corrected errors in top-level makefile's distribution build.
+//
 // Revision 1.5  2005/06/03 19:58:28  cwrapp
 // Further updates for release 4.0.0
 //
@@ -69,11 +76,6 @@ Exit
             clearDisplay();
             setReceiver("on hook", "Put down receiver");
         }
-
-    // Dialing errors.
-    LeftOffHook
-        LeftOffHook
-        {}
     
     // Time to update the clock's display.
     ClockTimer
@@ -93,6 +95,11 @@ Dialing
         {
             routeCall(callType, areaCode, exchange, local);
         }
+
+    // Dialing errors.
+    LeftOffHook
+        LeftOffHook
+        {}
 
     InvalidDigit
         InvalidDigit

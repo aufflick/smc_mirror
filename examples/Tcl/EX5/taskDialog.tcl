@@ -28,6 +28,13 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.6  2005/06/08 11:09:14  cwrapp
+# + Updated Python code generator to place "pass" in methods with empty
+#   bodies.
+# + Corrected FSM errors in Python example 7.
+# + Removed unnecessary includes from C++ examples.
+# + Corrected errors in top-level makefile's distribution build.
+#
 # Revision 1.5  2005/05/28 18:02:56  cwrapp
 # Updated Tcl examples, removed EX6.
 #
@@ -130,7 +137,6 @@ class TaskCreateDialog {
 
     public method display {} {
         global widget Gwait_for_it;
-        variable OldFocus "";
 
         # If the dialog does not exist, then create it.
         # Otherwise, bring it out of hiding.

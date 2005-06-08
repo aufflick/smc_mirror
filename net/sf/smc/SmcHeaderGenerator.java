@@ -94,7 +94,11 @@ public final class SmcHeaderGenerator
         //
         //    #endif
         //
-        srcfileCaps = _srcfileBase.toUpperCase();
+
+        // Make the file name upper case and replace
+        // slashes with underscores.
+        srcfileCaps =
+            _srcfileBase.toUpperCase().replace('\\', '_');
         _source.print("#ifndef _H_");
         _source.print(srcfileCaps);
         _source.println("_SM");
@@ -840,6 +844,13 @@ public final class SmcHeaderGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2005/06/08 11:09:15  cwrapp
+// + Updated Python code generator to place "pass" in methods with empty
+//   bodies.
+// + Corrected FSM errors in Python example 7.
+// + Removed unnecessary includes from C++ examples.
+// + Corrected errors in top-level makefile's distribution build.
+//
 // Revision 1.1  2005/05/28 19:28:42  cwrapp
 // Moved to visitor pattern.
 //

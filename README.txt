@@ -55,6 +55,11 @@ Bug Fixes:
 
 + (Ant) Corrected a syntax error in examples/Ant/EX7/build.xml.
 
++ (C++) When the .sm is in a subdirectory the slashes in the file
+  name are kept in the "#ifndef" in the generated header file.
+  This is syntactically wrong. SMC now replaces the slashes with
+  underscores.
+
 
 1. System Requirements
 ----------------------

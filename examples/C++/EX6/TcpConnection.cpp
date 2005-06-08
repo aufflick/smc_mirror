@@ -29,6 +29,13 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2005/06/08 11:09:12  cwrapp
+// + Updated Python code generator to place "pass" in methods with empty
+//   bodies.
+// + Corrected FSM errors in Python example 7.
+// + Removed unnecessary includes from C++ examples.
+// + Corrected errors in top-level makefile's distribution build.
+//
 // Revision 1.5  2005/05/28 13:31:18  cwrapp
 // Updated C++ examples.
 //
@@ -63,6 +70,10 @@
 #endif
 
 using namespace std;
+
+#if defined(WIN32)
+typedef int socklen_t;
+#endif
 
 // External variable declarations.
 extern Eventloop *Gevent_loop;
@@ -154,8 +165,8 @@ void TcpConnection::handleReceive(int)
 {
     sockaddr sourceAddress;
     TcpSegment *segment;
-    int addressSize,
-        flags,
+    socklen_t addressSize;
+    int flags,
         done,
         errorFlag,
         bytesRead,
@@ -1199,7 +1210,7 @@ int TcpConnection::doBind(int handle) const
 //
 unsigned short TcpConnection::getLocalPort(int fd) const
 {
-    int size;
+    socklen_t size;
     sockaddr_in address;
     unsigned short retval;
 

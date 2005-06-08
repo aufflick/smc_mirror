@@ -1,7 +1,7 @@
 <VisualStudioProject>
     <VisualBasic>
         <Build>
-            <Settings ReferencePath = "C:\home\crapp\src\smc_3_0_0\lib\" >
+            <Settings ReferencePath = "..\..\..\smc\lib\VB\Debug;" >
                 <Config
                     Name = "Debug"
                     EnableASPDebugging = "false"

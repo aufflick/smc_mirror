@@ -13,7 +13,7 @@
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
-# Copyright (C) 2000 Charles W. Rapp.
+# Copyright (C) 2004, 2005 Charles W. Rapp.
 # All Rights Reserved.
 # 
 # Contributor(s):
@@ -41,11 +41,14 @@ PACKAGE_NAME=	statemap
 
 JAVAC=		javac
 JAVAC_FLAGS=	-d . -g
+
 JAR=		jar
 JAR_FLAGS=	cvf
-DLL_FILE=	$(PACKAGE_NAME).dll
 
-STAGING_DIR=	../../../staging/smc/lib
+DLL_FILE=	$(PACKAGE_NAME).dll
+PDB_FILE=	$(PACKAGE_NAME).pdb
+
+LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib/VB
 
 #################################################################
 # Rules.
@@ -55,23 +58,46 @@ all:		$(DLL_FILE)
 
 # .dll can only be built withing Dev Studio.
 
-$(STAGING_DIR)/VB :
-		mkdir $(STAGING_DIR)/VB
+$(LIB_STAGING_DIR) :
+		mkdir $(LIB_STAGING_DIR)
 
-install :	$(DLL_FILE) $(STAGING_DIR)/VB
-		cp -f $(DLL_FILE) $(STAGING_DIR)/VB
+$(LIB_STAGING_DIR)/Debug : $(LIB_STAGING_DIR)
+		mkdir $(LIB_STAGING_DIR)/Debug
+
+$(LIB_STAGING_DIR)/Release : $(LIB_STAGING_DIR)
+		mkdir $(LIB_STAGING_DIR)/Release
+
+install :	install_debug install_release
+
+install_debug :	Debug/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug
+		cp -f Debug/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug
+		cp -f Debug/$(PDB_FILE) $(LIB_STAGING_DIR)/Debug
+
+install_release : Release/$(DLL_FILE) $(LIB_STAGING_DIR)/Release
+		cp -f Release/$(DLL_FILE) $(LIB_STAGING_DIR)/Release
 
 uninstall :
-		-rm -f $(STAGING_DIR)/VB/$(DLL_FILE)
+		-rm -f $(LIB_STAGING_DIR)/Debug/$(DLL_FILE)
+		-rm -f $(LIB_STAGING_DIR)/Debug/$(PDB_FILE)
+		-rm -f $(LIB_STAGING_DIR)/Release/$(DLL_FILE)
 
 clean :
-		-rm -f ./$(DLL_FILE) ./$(PACKAGE_NAME)/*
 
 realclean :	clean
+		-rm -f ./Debug/$(DLL_FILE) \
+			./Debug/$(PDB_FILE) \
+			./Release/$(DLL_FILE)
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2005/06/08 11:09:15  cwrapp
+# + Updated Python code generator to place "pass" in methods with empty
+#   bodies.
+# + Corrected FSM errors in Python example 7.
+# + Removed unnecessary includes from C++ examples.
+# + Corrected errors in top-level makefile's distribution build.
+#
 # Revision 1.1  2005/05/28 18:47:13  cwrapp
 # Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
 #

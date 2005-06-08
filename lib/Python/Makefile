@@ -41,16 +41,13 @@
 # Include the official macros.
 include ../../smc.mk
 
-STAGING_DIR=	../../../staging/smc/lib
+LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib
 
 #################################################################
 # Rules.
 #
 
-$(STAGING_DIR) :
-		mkdir $(STAGING_DIR)
-
-install :	$(STAGING_DIR) setup.py
+install :	$(LIB_STAGING_DIR) setup.py
 		python setup.py install
 
 # TODO:
@@ -67,6 +64,13 @@ realclean :	clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2005/06/08 11:09:14  cwrapp
+# + Updated Python code generator to place "pass" in methods with empty
+#   bodies.
+# + Corrected FSM errors in Python example 7.
+# + Removed unnecessary includes from C++ examples.
+# + Corrected errors in top-level makefile's distribution build.
+#
 # Revision 1.1  2005/05/28 18:47:13  cwrapp
 # Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
 #

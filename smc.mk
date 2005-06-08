@@ -40,13 +40,33 @@
 
 VERSION=	4_0_0
 
+STAGING_DIR=	../staging
+SMC_STAGING_DIR=$(STAGING_DIR)/smc
+SMC_RELEASE_DIR=$(STAGING_DIR)/smc_$(VERSION)
+RELEASE_DIR=	$(STAGING_DIR)/releases
+
 #################################################################
 # Rules.
 #
 
+# Create the staging directories if needed.
+$(STAGING_DIR) :
+		mkdir $(STAGING_DIR)
+
+$(SMC_STAGING_DIR) :	$(STAGING_DIR)
+		-rm -fr $(SMC_STAGING_DIR)
+		mkdir $(SMC_STAGING_DIR)
+
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2005/06/08 11:08:58  cwrapp
+# + Updated Python code generator to place "pass" in methods with empty
+#   bodies.
+# + Corrected FSM errors in Python example 7.
+# + Removed unnecessary includes from C++ examples.
+# + Corrected errors in top-level makefile's distribution build.
+#
 # Revision 1.1  2005/05/28 19:41:44  cwrapp
 # Update for SMC v. 4.0.0.
 #

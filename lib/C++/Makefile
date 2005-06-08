@@ -13,7 +13,7 @@
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
-# Copyright (C) 2000 Charles W. Rapp.
+# Copyright (C) 2000 - 2005 Charles W. Rapp.
 # All Rights Reserved.
 # 
 # Contributor(s):
@@ -22,7 +22,42 @@
 # $Id$
 #
 # CHANGE LOG
+# (See the bottom of this file.)
+#
+
+#################################################################
+# Macros.
+#
+
+# Include the official macros.
+include ../../smc.mk
+
+LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib
+
+#################################################################
+# Rules.
+#
+
+install :	statemap.h
+		cp -f statemap.h $(LIB_STAGING_DIR)
+
+uninstall :
+		-rm $(LIB_STAGING_DIR)/statemap.h
+
+clean :
+
+realclean :
+
+#
+# CHANGE LOG
 # $Log$
+# Revision 1.7  2005/06/08 11:09:14  cwrapp
+# + Updated Python code generator to place "pass" in methods with empty
+#   bodies.
+# + Corrected FSM errors in Python example 7.
+# + Removed unnecessary includes from C++ examples.
+# + Corrected errors in top-level makefile's distribution build.
+#
 # Revision 1.6  2005/05/28 18:44:13  cwrapp
 # Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
 #
@@ -35,26 +70,3 @@
 # Revision 1.0  2003/12/14 20:37:20  charlesr
 # Initial revision
 #
-
-#################################################################
-# Macros.
-#
-
-# Include the official macros.
-include ../../smc.mk
-
-STAGING_DIR=	../../../staging/smc/lib
-
-#################################################################
-# Rules.
-#
-
-install :	statemap.h
-		cp -f statemap.h $(STAGING_DIR)
-
-uninstall :
-		-rm $(STAGING_DIR)/statemap.h
-
-clean :
-
-realclean :

@@ -63,13 +63,13 @@ JAR_UPDATE_FLAGS=	uf
 # Rules.
 #
 
+all :		$(TARGET)
+
 $(SM_SOURCES:%.sm=%Context.java) : $(SM_SOURCES)
 		$(SMC) $(SMC_FLAGS) $(SM_SOURCES)
 
 %_sm.dot :	%.sm
 		$(SMC) -graph -glevel 1 $<
-
-all :		$(TARGET)
 
 $(TARGET) :	$(SOURCES)
 		$(JAVAC) $(JAVAC_FLAGS) $(SOURCES)
@@ -90,6 +90,13 @@ clean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.7  2005/06/08 11:09:13  cwrapp
+# + Updated Python code generator to place "pass" in methods with empty
+#   bodies.
+# + Corrected FSM errors in Python example 7.
+# + Removed unnecessary includes from C++ examples.
+# + Corrected errors in top-level makefile's distribution build.
+#
 # Revision 1.6  2005/05/28 13:51:24  cwrapp
 # Update Java examples 1 - 7.
 #

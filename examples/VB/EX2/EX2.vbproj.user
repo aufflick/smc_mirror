@@ -1,7 +1,7 @@
 <VisualStudioProject>
     <VisualBasic>
         <Build>
-            <Settings ReferencePath = "C:\...\smc\lib\" >
+            <Settings ReferencePath = "..\..\..\lib\VB\Debug;" >
                 <Config
                     Name = "Debug"
                     EnableASPDebugging = "false"

@@ -15,7 +15,7 @@ timeouts).
 NOTE: Smc.jar must be built and installed.
 
 Unix & Windows:
-    $ java -jar ../../../bin/Smc.jar -python [-g] Stoplight.sm Vehicle.sm
+    $ make all
 
 (Note: -g is optional and needed only for observing the FSM
        debug output.)

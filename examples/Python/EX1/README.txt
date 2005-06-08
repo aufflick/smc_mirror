@@ -14,7 +14,7 @@ empty string).
 NOTE: Smc.jar must be built and installed.
 
 Unix & Windows:
-    $ java -jar ../../../bin/Smc.jar -python AppClass.sm
+    $ make checkstring
 
 
 + Executing

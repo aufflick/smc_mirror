@@ -32,6 +32,13 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2005/06/08 11:09:13  cwrapp
+// + Updated Python code generator to place "pass" in methods with empty
+//   bodies.
+// + Corrected FSM errors in Python example 7.
+// + Removed unnecessary includes from C++ examples.
+// + Corrected errors in top-level makefile's distribution build.
+//
 // Revision 1.1  2005/05/28 17:48:30  cwrapp
 // Added Python examples 1 - 4 and 7.
 //
@@ -62,15 +69,6 @@ Exit
             setReceiver("Put down receiver");
         }
 
-    // Dialing errors.
-    LeftOffHook
-        LeftOffHook
-        {}
-
-    InvalidDigit
-        InvalidDigit
-        {}
-
     // Time to update the clock's display.
     ClockTimer
         nil
@@ -84,11 +82,23 @@ Exit
 Dialing
 {
     // Dialing successfully completed.
-    DialingDone(callType, areaCode, exchange, local)
+    DialingDone(callType: value,
+                areaCode: value,
+                exchange: value,
+                local: value)
         Routing
         {
             routeCall(callType, areaCode, exchange, local);
         }
+
+    // Dialing errors.
+    LeftOffHook
+        LeftOffHook
+        {}
+
+    InvalidDigit
+        InvalidDigit
+        {}
 }
 
 // The call is now being routed.
@@ -280,7 +290,7 @@ Default
 {
     // Ignore any dialings after a phone number has been
     // collected.
-    Digit(n)
+    Digit(n: value)
         nil
         {}
 
@@ -322,7 +332,7 @@ Exit
 {
     // If an invalid digit is dialed, give up collecting
     // digits immediately.
-    Digit(n)
+    Digit(n: value)
       [n < "0" or n > "9"]
         pop(InvalidDigit)
         {
@@ -331,7 +341,7 @@ Exit
 
     // If the first digit is 1, then this is a long distance
     // phone call. Don't save this first digit.
-    Digit(n)
+    Digit(n: value)
       [n == "1"]
         LongDistance
         {
@@ -342,7 +352,7 @@ Exit
         }
 
     // Check for 911.
-    Digit(n)
+    Digit(n: value)
       [n == "9"]
         OneOneStart
         {
@@ -350,7 +360,7 @@ Exit
             saveExchange(n);
         }
 
-    Digit(n)
+    Digit(n: value)
         Exchange
         {
             playTT(n);
@@ -372,14 +382,14 @@ Exit
 {
     // If an invalid digit is dialed, give up collecting
     // digits immediately.
-    Digit(n)
+    Digit(n: value)
       [n < "0" or n > "9"]
         pop(InvalidDigit)
         {
             clearDisplay();
         }
 
-    Digit(n)
+    Digit(n: value)
       [len(ctxt.getAreaCode()) < 3]
         nil
         {
@@ -388,7 +398,7 @@ Exit
             resetTimer("OffHookTimer", 10000);
         }
 
-    Digit(n)
+    Digit(n: value)
         Exchange
         {
             playTT(n);
@@ -410,14 +420,14 @@ Exit
 {
     // If an invalid digit is dialed, give up collecting
     // digits immediately.
-    Digit(n)
+    Digit(n: value)
       [n < "0" or n > "9"]
         pop(InvalidDigit)
         {
             clearDisplay();
         }
 
-    Digit(n)
+    Digit(n: value)
       [n == "1"]
         NineOne
         {
@@ -425,7 +435,7 @@ Exit
             saveExchange(n);
         }
 
-    Digit(n)
+    Digit(n: value)
         Exchange
         {
             playTT(n);
@@ -447,14 +457,14 @@ Exit
 {
     // If an invalid digit is dialed, give up collecting
     // digits immediately.
-    Digit(n)
+    Digit(n: value)
       [n < "0" or n > "9"]
         pop(InvalidDigit)
         {
             clearDisplay();
         }
 
-    Digit(n)
+    Digit(n: value)
       [n == "1"]
         pop(DialingDone,
                     ctxt.getType(),
@@ -467,7 +477,7 @@ Exit
             saveExchange(n);
         }
 
-    Digit(n)
+    Digit(n: value)
         LocalCall
         {
             playTT(n);
@@ -490,14 +500,14 @@ Exit
 {
     // If an invalid digit is dialed, give up collecting
     // digits immediately.
-    Digit(n)
+    Digit(n: value)
       [n < "0" or n > "9"]
         pop(InvalidDigit)
         {
             clearDisplay();
         }
 
-    Digit(n)
+    Digit(n: value)
       [len(ctxt.getExchange()) < 2]
         nil
         {
@@ -506,7 +516,7 @@ Exit
             resetTimer("OffHookTimer", 10000);
         }
 
-    Digit(n)
+    Digit(n: value)
         LocalCall
         {
             playTT(n);
@@ -528,14 +538,14 @@ Exit
 {
     // If an invalid digit is dialed, give up collecting
     // digits immediately.
-    Digit(n)
+    Digit(n: value)
       [n < "0" or n > "9"]
         pop(InvalidDigit)
         {
             clearDisplay();
         }
 
-    Digit(n)
+    Digit(n: value)
       [len(ctxt.getLocal()) < 3]
         nil
         {
@@ -544,7 +554,7 @@ Exit
             resetTimer("OffHookTimer", 10000);
         }
 
-    Digit(n)
+    Digit(n: value)
         pop(DialingDone,
                     ctxt.getType(),
                     ctxt.getAreaCode(),

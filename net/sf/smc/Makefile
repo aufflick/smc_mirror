@@ -30,6 +30,10 @@
 # (See the bottom of this file.)
 #
 
+#################################################################
+# Macros
+#
+
 SM_SOURCES=	SmcLexer.sm \
 		SmcParser.sm
 
@@ -71,8 +75,10 @@ INSTALL_DIR=	../../../../staging/smc/bin
 
 JAVAC=		javac
 JAVAC_FLAGS=	-d . -g -classpath $(APP_CLASSPATH)
+
 SMC=		java -jar $(BIN_DIR)/Smc.jar
 SMC_FLAGS=	-java -g
+
 JAR=		jar
 JAR_CREATE_FLAGS=	cmf manifest.txt
 JAR_UPDATE_FLAGS=	uf
@@ -81,6 +87,10 @@ JAR_FILE=	Smc.jar
 TAGS=		jtags
 TAG_FILE=	TAGS
 TAG_FLAGS=	-a -o $(TAG_FILE) --members
+
+#################################################################
+# Rules
+#
 
 all :		$(JAR_FILE) tags
 
@@ -120,6 +130,13 @@ realclean :	clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.7  2005/06/08 11:09:15  cwrapp
+# + Updated Python code generator to place "pass" in methods with empty
+#   bodies.
+# + Corrected FSM errors in Python example 7.
+# + Removed unnecessary includes from C++ examples.
+# + Corrected errors in top-level makefile's distribution build.
+#
 # Revision 1.6  2005/05/28 19:28:42  cwrapp
 # Moved to visitor pattern.
 #
