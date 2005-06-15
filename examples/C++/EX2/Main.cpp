@@ -13,7 +13,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 Charles W. Rapp.
+// Copyright (C) 2000 - 2003 Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
@@ -29,91 +29,37 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.1  2002/05/07 00:43:23  cwrapp
-// Changes in release 1.3.2:
-// Add the following feature:
-// + 528321: Modified push transition syntax to be:
+// Revision 1.2  2005/06/15 23:42:03  cwrapp
+// Check in for release version 4.0.0
 //
-// 	  <transname> <state1>/push(<state2>)  {<actions>}
+// Revision 1.1  2004/09/06 15:25:18  charlesr
+// Updated for SMC v. 3.1.0.
 //
-// 	  which means "transition to <state1> and then
-// 	  immediately push to <state2>". The current
-// 	  syntax:
-//
-// 	  <transname> push(<state2>)  {<actions>}
-//
-//           is still valid and <state1> is assumed to be "nil".
-//
-// No bug fixes.
-//
-// Revision 1.3  2002/05/07 00:29:49  cwrapp
-// Changes in release 1.3.2:
-// Add the following feature:
-// + 528321: Modified push transition syntax to be:
-//
-// 	  <transname> <state1>/push(<state2>)  {<actions>}
-//
-// 	  which means "transition to <state1> and then
-// 	  immediately push to <state2>". The current
-// 	  syntax:
-//
-// 	  <transname> push(<state2>)  {<actions>}
-//
-//           is still valid and <state1> is assumed to be "nil".
-//
-// No bug fixes.
-//
-// Revision 1.1.1.2  2001/03/26 14:41:46  cwrapp
-// Corrected Entry/Exit action semantics. Exit actions are now
-// executed only by simple transitions and pop transitions.
-// Entry actions are executed by simple transitions and push
-// transitions. Loopback transitions do not execute either Exit
-// actions or entry actions. See SMC Programmer's manual for
-// more information.
-//
-// Revision 1.1.1.1  2001/01/03 03:14:00  cwrapp
-//
-// ----------------------------------------------------------------------
-// SMC - The State Map Compiler
-// Version: 1.0, Beta 3
-//
-// SMC compiles state map descriptions into a target object oriented
-// language. Currently supported languages are: C++, Java and [incr Tcl].
-// SMC finite state machines have such features as:
-// + Entry/Exit actions for states.
-// + Transition guards
-// + Transition arguments
-// + Push and Pop transitions.
-// + Default transitions. 
-// ----------------------------------------------------------------------
-//
-// Revision 1.1.1.1  2000/08/02 12:50:59  charlesr
-// Initial source import, SMC v. 1.0, Beta 1.
+// Revision 1.0  2003/12/14 19:15:39  charlesr
+// Initial revision
 //
 
-#ifdef WIN32
-#include <iostream>
-#include <windows.h>
-#else
-#include <iostream.h>
-#endif
 #include "AppClass.h"
 
 const static char _rcs_id[] = "$Id$";
 
-#ifdef WIN32
 using namespace std;
-#endif
 
 int main(int argc, char *argv[])
 {
 	AppClass thisContext;
+    int retcode = 0;
 
 	if (argc < 2)
 	{
 		cerr << "No string to check." << endl;
-		return(1);
+        retcode = 2;
 	}
+    else if (argc > 2)
+    {
+        cerr << "Only one argument is accepted." << endl;
+        retcode = 3;
+    }
 	else
 	{
 		cout << "The string \"" << argv[1] << "\" is ";
@@ -121,6 +67,7 @@ int main(int argc, char *argv[])
 		if (thisContext.CheckString(argv[1]) == false)
 		{
 			cout << "not acceptable." << endl;
+            retcode = 1;
 		}
 		else
 		{
@@ -128,5 +75,5 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	return(0);
+	return (retcode);
 }
