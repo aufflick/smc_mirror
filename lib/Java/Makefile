@@ -45,8 +45,8 @@ JAR=		jar
 JAR_FLAGS=	cvf
 JAR_FILE=	$(PACKAGE_NAME).jar
 
-LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib
-CLASS_DIR=	$(LIB_STAGING_DIR)/$(PACKAGE_NAME)
+LIB_STAGING_DIR=..\..\$(SMC_STAGING_DIR)\lib
+CLASS_DIR=	$(LIB_STAGING_DIR)\$(PACKAGE_NAME)
 
 #################################################################
 # Rules.
@@ -62,10 +62,9 @@ $(CLASS_DIR) :
 		mkdir $(CLASS_DIR)
 
 install :	$(JAR_FILE) $(CLASS_DIR)
-		cp -f $(JAR_FILE) ..
-		cp -f $(JAR_FILE) $(LIB_STAGING_DIR)
-		-chmod 444 $(LIB_STAGING_DIR)/$(JAR_FILE)
-		cp -f $(PACKAGE_NAME)/*.class $(CLASS_DIR)
+		copy $(JAR_FILE) ..
+		copy $(JAR_FILE) $(LIB_STAGING_DIR)
+		copy $(PACKAGE_NAME)\\*.class $(CLASS_DIR)
 
 uninstall :
 		-rm ../$(JAR_FILE)
@@ -80,6 +79,9 @@ realclean :	clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.9  2005/06/16 18:08:17  fperrad
+# Added C, Perl & Ruby.
+#
 # Revision 1.8  2005/06/08 11:09:14  cwrapp
 # + Updated Python code generator to place "pass" in methods with empty
 #   bodies.

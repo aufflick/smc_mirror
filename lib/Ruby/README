@@ -1,0 +1,15 @@
+Statemap
+========
+
+INSTALLATION
+
+To install this module, type the following:
+
+   ???
+
+DOCUMENTATION
+
+To generate the HTML files, type the following:
+
+   rdoc statemap.rb
+
