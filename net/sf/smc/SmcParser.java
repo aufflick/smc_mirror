@@ -43,7 +43,9 @@ import java.util.List;
 
 public final class SmcParser
 {
+//---------------------------------------------------------------
 // Member Methods
+//
 
     /**
      * Creates a parser for the named FSM in the given input
@@ -1184,7 +1186,9 @@ public final class SmcParser
     // end of State Machine Actions
     //-----------------------------------------------------------
 
+//---------------------------------------------------------------
 // Member Data
+//
 
     // The FSM name.
     private String _name;
@@ -1370,8 +1374,32 @@ public final class SmcParser
     }
 }
 
+//
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2005/06/18 18:28:42  cwrapp
+// SMC v. 4.0.1
+//
+// New Features:
+//
+// (No new features.)
+//
+// Bug Fixes:
+//
+// + (C++) When the .sm is in a subdirectory the forward- or
+//   backslashes in the file name are kept in the "#ifndef" in the
+//   generated header file. This is syntactically wrong. SMC now
+//   replaces the slashes with underscores.
+//
+// + (Java) If %package is specified in the .sm file, then the
+//   generated *Context.java class will have package-level access.
+//
+// + The Programmer's Manual had incorrect HTML which prevented the
+//   pages from rendering correctly on Internet Explorer.
+//
+// + Rewrote the Programmer's Manual section 1 to make it more
+//   useful.
+//
 // Revision 1.6  2005/05/28 19:28:42  cwrapp
 // Moved to visitor pattern.
 //
@@ -1403,3 +1431,4 @@ public final class SmcParser
 //
 // Revision 1.0  2003/12/14 21:05:08  charlesr
 // Initial revision
+//

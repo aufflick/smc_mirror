@@ -55,7 +55,9 @@ import java.util.List;
 
 public final class Smc
 {
+//---------------------------------------------------------------
 // Member Methods
+//
 
     public static void main(String[] args)
     {
@@ -145,8 +147,9 @@ public final class Smc
                         retcode = 1;
 
                         // Output the parser's messages.
-                        _outputMessages(_sourceFileName,
-                                        parser.getMessages());
+                        outputMessages(_sourceFileName,
+                                       System.err,
+                                       parser.getMessages());
                     }
                     else
                     {
@@ -170,8 +173,9 @@ public final class Smc
 
                             // Output the syntax checker's
                             // messages.
-                            _outputMessages(
+                            outputMessages(
                                 _sourceFileName,
+                                System.err,
                                 checker.getMessages());
                         }
                         else
@@ -418,25 +422,56 @@ public final class Smc
         return (retval);
     }
 
+    // Outputs a list of warning and error messages.
+    public static void outputMessages(String srcFileName,
+                                      PrintStream stream,
+                                      List messages)
+    {
+        Iterator mit;
+        SmcMessage message;
+
+        for (mit = messages.iterator(); mit.hasNext() == true;)
+        {
+            message = (SmcMessage) mit.next();
+
+            stream.print(srcFileName);
+            stream.print(':');
+            stream.print(message.getLineNumber());
+
+            if (message.getLevel() == SmcMessage.WARNING)
+            {
+                stream.print(": warning - ");
+            }
+            else
+            {
+                stream.print(": error - ");
+            }
+
+            stream.println(message.getText());
+        }
+
+        return;
+    }
+
     private static boolean parseArgs(String[] args)
     {
         int i;
-        int args_consumed;
+        int argsConsumed;
         boolean castFlag = false;
         boolean retcode;
 
         // Parse all options first. Keep going until an error is
         // encountered or there are no more options left.
-        for (i = 0, retcode = true, args_consumed = 0;
+        for (i = 0, retcode = true, argsConsumed = 0;
              i < args.length &&
                      retcode == true &&
                      args[i].startsWith("-") == true;
-             i += args_consumed, args_consumed = 0)
+             i += argsConsumed, argsConsumed = 0)
         {
             if (args[i].startsWith("-sy") == true)
             {
                 _sync = true;
-                args_consumed = 1;
+                argsConsumed = 1;
             }
             else if (args[i].startsWith("-su") == true)
             {
@@ -451,7 +486,7 @@ public final class Smc
                 else
                 {
                     _suffix = args[i+1];
-                    args_consumed = 2;
+                    argsConsumed = 2;
                 }
             }
             else if (args[i].startsWith("-ca") == true)
@@ -467,7 +502,7 @@ public final class Smc
                 {
                     _castType = args[i+1];
                     castFlag = true;
-                    args_consumed = 2;
+                    argsConsumed = 2;
                 }
             }
             else if (args[i].equals("-d") == true)
@@ -482,7 +517,7 @@ public final class Smc
                 else
                 {
                     _outputDirectory = args[i+1];
-                    args_consumed = 2;
+                    argsConsumed = 2;
 
                     // If the output directory does not end with
                     // file path separator, then add one.
@@ -523,7 +558,7 @@ public final class Smc
                         }
                         else
                         {
-                            args_consumed = 2;
+                            argsConsumed = 2;
                         }
                     }
                     catch (NumberFormatException numberex)
@@ -538,36 +573,36 @@ public final class Smc
             else if (args[i].equals("-g") == true)
             {
                 _debug = true;
-                args_consumed = 1;
+                argsConsumed = 1;
             }
             else if (args[i].startsWith("-nos") == true)
             {
                 _nostreams = true;
-                args_consumed = 1;
+                argsConsumed = 1;
             }
             else if (args[i].startsWith("-noe") == true)
             {
                 // -noex is a flag.
                 _noex = true;
-                args_consumed = 1;
+                argsConsumed = 1;
             }
             else if (args[i].startsWith("-noc") == true)
             {
                 // -nocatch is a flag.
                 _nocatch = true;
-                args_consumed = 1;
+                argsConsumed = 1;
             }
             else if (args[i].startsWith("-return") == true)
             {
                 // -return is a flag.
                 _return = true;
-                args_consumed = 1;
+                argsConsumed = 1;
             }
             else if (args[i].startsWith("-se") == true)
             {
                 // -serial is a flag.
                 _serial = true;
-                args_consumed = 1;
+                argsConsumed = 1;
             }
             else if (args[i].startsWith("-c+") == true)
             {
@@ -588,7 +623,7 @@ public final class Smc
                         _suffix = "cpp";
                     }
 
-                    args_consumed = 1;
+                    argsConsumed = 1;
                 }
             }
             else if (args[i].startsWith("-j") == true)
@@ -610,7 +645,7 @@ public final class Smc
                         _suffix = "java";
                     }
 
-                    args_consumed = 1;
+                    argsConsumed = 1;
                 }
             }
             else if (args[i].startsWith("-tc") == true)
@@ -632,7 +667,7 @@ public final class Smc
                         _suffix = "tcl";
                     }
 
-                    args_consumed = 1;
+                    argsConsumed = 1;
                 }
             }
             else if (args[i].startsWith("-ta") == true)
@@ -654,7 +689,7 @@ public final class Smc
                         _suffix = "html";
                     }
 
-                    args_consumed = 1;
+                    argsConsumed = 1;
                 }
             }
             else if (args[i].equals("-vb") == true)
@@ -676,7 +711,7 @@ public final class Smc
                         _suffix = "vb";
                     }
 
-                    args_consumed = 1;
+                    argsConsumed = 1;
                 }
             }
             else if (args[i].startsWith("-cs") == true)
@@ -698,7 +733,7 @@ public final class Smc
                         _suffix = "cs";
                     }
 
-                    args_consumed = 1;
+                    argsConsumed = 1;
                 }
             }
             else if (args[i].startsWith("-py") == true)
@@ -720,7 +755,7 @@ public final class Smc
                         _suffix = "py";
                     }
 
-                    args_consumed = 1;
+                    argsConsumed = 1;
                 }
             }
             else if (args[i].startsWith("-gr") == true)
@@ -749,7 +784,7 @@ public final class Smc
                         _graphLevel = GRAPH_LEVEL_0;
                     }
 
-                    args_consumed = 1;
+                    argsConsumed = 1;
                 }
             }
             else if (args[i].startsWith("-vers") == true)
@@ -760,12 +795,12 @@ public final class Smc
             else if (args[i].startsWith("-verb") == true)
             {
                 _verbose = true;
-                args_consumed = 1;
+                argsConsumed = 1;
             }
             else if (args[i].startsWith("-vverb") == true)
             {
                 _fsmVerbose = true;
-                args_consumed = 1;
+                argsConsumed = 1;
             }
             else if (args[i].startsWith("-h") == true)
             {
@@ -792,7 +827,7 @@ public final class Smc
             }
             else
             {
-                File source_file;
+                File sourceFile;
 
                 for (; i < args.length && retcode == true; ++i)
                 {
@@ -809,15 +844,15 @@ public final class Smc
                     }
                     else
                     {
-                        source_file = new File(args[i]);
-                        if (source_file.exists() == false)
+                        sourceFile = new File(args[i]);
+                        if (sourceFile.exists() == false)
                         {
                             retcode = false;
                             _errorMsg = "No such file named \"" +
                                          args[i] +
                                          "\"";
                         }
-                        else if (source_file.canRead() == false)
+                        else if (sourceFile.canRead() == false)
                         {
                             retcode = false;
                             _errorMsg = "Source file \"" +
@@ -1014,36 +1049,6 @@ public final class Smc
         // Note: this works because the file name's form
         // has already been validated as ending in .sm.
         return (fileName.substring(0, fileName.indexOf(".sm")));
-    }
-
-    // Outputs a list of warning and error messages.
-    private static void _outputMessages(String srcFileName,
-                                        List messages)
-    {
-        Iterator mit;
-        SmcMessage message;
-
-        for (mit = messages.iterator(); mit.hasNext() == true;)
-        {
-            message = (SmcMessage) mit.next();
-
-            System.err.print(srcFileName);
-            System.err.print(':');
-            System.err.print(message.getLineNumber());
-
-            if (message.getLevel() == SmcMessage.WARNING)
-            {
-                System.err.print(": warning - ");
-            }
-            else
-            {
-                System.err.print(": error - ");
-            }
-
-            System.err.println(message.getText());
-        }
-
-        return;
     }
 
     // Generate the State pattern in the target language.
@@ -1257,7 +1262,9 @@ public final class Smc
         return;
     }
 
+//---------------------------------------------------------------
 // Member Data
+//
 
     //-----------------------------------------------------------
     // Statics.
@@ -1347,11 +1354,35 @@ public final class Smc
     /* package */ static final int TRANS_PUSH = 2;
     /* package */ static final int TRANS_POP = 3;
 
-    private static final String VERSION = "v. 4.0.0";
+    private static final String VERSION = "v. 4.0.1";
 }
 
+//
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2005/06/18 18:28:42  cwrapp
+// SMC v. 4.0.1
+//
+// New Features:
+//
+// (No new features.)
+//
+// Bug Fixes:
+//
+// + (C++) When the .sm is in a subdirectory the forward- or
+//   backslashes in the file name are kept in the "#ifndef" in the
+//   generated header file. This is syntactically wrong. SMC now
+//   replaces the slashes with underscores.
+//
+// + (Java) If %package is specified in the .sm file, then the
+//   generated *Context.java class will have package-level access.
+//
+// + The Programmer's Manual had incorrect HTML which prevented the
+//   pages from rendering correctly on Internet Explorer.
+//
+// + Rewrote the Programmer's Manual section 1 to make it more
+//   useful.
+//
 // Revision 1.6  2005/05/28 19:28:42  cwrapp
 // Moved to visitor pattern.
 //
@@ -1397,3 +1428,4 @@ public final class Smc
 //
 // Revision 1.0  2003/12/14 21:02:45  charlesr
 // Initial revision
+//

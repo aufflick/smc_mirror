@@ -1,6 +1,50 @@
 
                               SMC -
                   The State Machine Compiler
+                        Version 4.0.1
+
+
+
++ Major changes
+---------------
+
+(No major changes)
+
+
++ Bug fixes
+-----------
+
+(C++) When the .sm is in a subdirectory the forward- or
+backslashes in the file name are kept in the "#ifndef" in the
+generated header file. This is syntactically wrong. SMC now
+replaces the slashes with underscores.
+
+(Java) If %package is specified in the .sm file, then the
+generated *Context.java class will have package-level access.
+
+The Programmer's Manual had incorrect HTML which prevented the
+pages from rendering correctly on Internet Explorer.
+
++ Code changes
+--------------
+
+Moved
+
+    private static void _outputMessages(String, List)
+
+to
+
+    public static void outputMessages(String, PrintStream, List)
+
+Compiler messages are now written to the specified
+java.io.PrintStream rather than System.err. Also making this
+method public allows other SMC tools to access it
+
+
+
+
+                              SMC -
+                  The State Machine Compiler
                         Version 4.0.0
 
 

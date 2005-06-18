@@ -97,8 +97,9 @@ public final class SmcHeaderGenerator
 
         // Make the file name upper case and replace
         // slashes with underscores.
-        srcfileCaps =
-            _srcfileBase.toUpperCase().replace('\\', '_');
+        srcfileCaps = _srcfileBase.replace('\\', '_');
+        srcfileCaps = srcfileCaps.replace('/', '_');
+        srcfileCaps = srcfileCaps.toUpperCase();
         _source.print("#ifndef _H_");
         _source.print(srcfileCaps);
         _source.println("_SM");
@@ -844,6 +845,29 @@ public final class SmcHeaderGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2005/06/18 18:28:42  cwrapp
+// SMC v. 4.0.1
+//
+// New Features:
+//
+// (No new features.)
+//
+// Bug Fixes:
+//
+// + (C++) When the .sm is in a subdirectory the forward- or
+//   backslashes in the file name are kept in the "#ifndef" in the
+//   generated header file. This is syntactically wrong. SMC now
+//   replaces the slashes with underscores.
+//
+// + (Java) If %package is specified in the .sm file, then the
+//   generated *Context.java class will have package-level access.
+//
+// + The Programmer's Manual had incorrect HTML which prevented the
+//   pages from rendering correctly on Internet Explorer.
+//
+// + Rewrote the Programmer's Manual section 1 to make it more
+//   useful.
+//
 // Revision 1.2  2005/06/08 11:09:15  cwrapp
 // + Updated Python code generator to place "pass" in methods with empty
 //   bodies.

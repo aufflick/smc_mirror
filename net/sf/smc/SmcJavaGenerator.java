@@ -66,6 +66,7 @@ public final class SmcJavaGenerator
         String packageName = fsm.getPackage();
         String context = fsm.getContext();
         String startState = fsm.getStartState();
+        String accessLevel = "public";
         List maps = fsm.getMaps();
         List transitions;
         Iterator it;
@@ -94,6 +95,9 @@ public final class SmcJavaGenerator
             _source.print(packageName);
             _source.println(";");
             _source.println();
+
+            // And give the context class package level access.
+            accessLevel = "/* package */";
         }
 
         // Do user-specified imports now.
@@ -121,7 +125,8 @@ public final class SmcJavaGenerator
         // The context clas contains all the state classes as
         // inner classes, so generate the context first rather
         // than last.
-        _source.print("public final class ");
+        _source.print(accessLevel);
+        _source.print(" final class ");
         _source.print(context);
         _source.println("Context");
         _source.println("    extends statemap.FSMContext");
@@ -133,7 +138,10 @@ public final class SmcJavaGenerator
         }
 
         _source.println("{");
+        _source.println(
+            "//---------------------------------------------------------------");
         _source.println("// Member methods.");
+        _source.println("//");
         _source.println();
 
         // Generate the context class' constructor.
@@ -383,7 +391,10 @@ public final class SmcJavaGenerator
         }
 
         // Declare member data.
+        _source.println(
+            "//---------------------------------------------------------------");
         _source.println("// Member data.");
+        _source.println("//");
         _source.println();
         _source.print("    transient private ");
         _source.print(context);
@@ -427,6 +438,11 @@ public final class SmcJavaGenerator
         }
 
         // Declare the inner state class.
+        _source.println();
+        _source.println(
+            "//---------------------------------------------------------------");
+        _source.println("// Inner classes.");
+        _source.println("//");
         _source.println();
         _source.print("    protected static abstract class ");
         _source.print(context);
@@ -1387,6 +1403,29 @@ public final class SmcJavaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2005/06/18 18:28:42  cwrapp
+// SMC v. 4.0.1
+//
+// New Features:
+//
+// (No new features.)
+//
+// Bug Fixes:
+//
+// + (C++) When the .sm is in a subdirectory the forward- or
+//   backslashes in the file name are kept in the "#ifndef" in the
+//   generated header file. This is syntactically wrong. SMC now
+//   replaces the slashes with underscores.
+//
+// + (Java) If %package is specified in the .sm file, then the
+//   generated *Context.java class will have package-level access.
+//
+// + The Programmer's Manual had incorrect HTML which prevented the
+//   pages from rendering correctly on Internet Explorer.
+//
+// + Rewrote the Programmer's Manual section 1 to make it more
+//   useful.
+//
 // Revision 1.1  2005/05/28 19:28:42  cwrapp
 // Moved to visitor pattern.
 //

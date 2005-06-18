@@ -79,7 +79,7 @@ clean :
 		$(MAKE) -C lib clean
 		$(MAKE) -C ./net/sf/smc clean
 
-smc_dist :	$(SMC_STAGING_DIR) $(SMC_RELEASE_DIR)
+smc_dist :	$(SMC_STAGING_DIR)
 		-rm -f $(TAR_FILE) $(TAR_GZ_FILE) $(GZIP_FILE)
 		-rm -fr $(SMC_RELEASE_DIR)
 		mv $(SMC_STAGING_DIR) $(SMC_RELEASE_DIR)
@@ -101,6 +101,7 @@ dist : 		install smc_dist src_dist
 
 distclean :
 		-rm -f $(TAR_FILE) $(TAR_GZ_FILE) $(GZIP_FILE)
+		-rm -fr $(SMC_RELEASE_DIR)
 		(cd ..; \
 		    rm -f $(SRC_TAR_FILE) \
 			  $(SRC_TAR_GZ_FILE) \
@@ -113,6 +114,29 @@ realclean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.8  2005/06/18 18:28:36  cwrapp
+# SMC v. 4.0.1
+#
+# New Features:
+#
+# (No new features.)
+#
+# Bug Fixes:
+#
+# + (C++) When the .sm is in a subdirectory the forward- or
+#   backslashes in the file name are kept in the "#ifndef" in the
+#   generated header file. This is syntactically wrong. SMC now
+#   replaces the slashes with underscores.
+#
+# + (Java) If %package is specified in the .sm file, then the
+#   generated *Context.java class will have package-level access.
+#
+# + The Programmer's Manual had incorrect HTML which prevented the
+#   pages from rendering correctly on Internet Explorer.
+#
+# + Rewrote the Programmer's Manual section 1 to make it more
+#   useful.
+#
 # Revision 1.7  2005/06/08 11:08:58  cwrapp
 # + Updated Python code generator to place "pass" in methods with empty
 #   bodies.

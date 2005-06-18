@@ -61,7 +61,7 @@ $(JAR_FILE) :	$(LIB_SOURCES)
 $(CLASS_DIR) :
 		mkdir $(CLASS_DIR)
 
-install :	$(JAR_FILE) $(CLASS_DIR)
+install :	$(LIB_STAGING_DIR) $(JAR_FILE) $(CLASS_DIR)
 		cp -f $(JAR_FILE) ..
 		cp -f $(JAR_FILE) $(LIB_STAGING_DIR)
 		-chmod 444 $(LIB_STAGING_DIR)/$(JAR_FILE)
@@ -80,6 +80,29 @@ realclean :	clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.11  2005/06/18 18:28:42  cwrapp
+# SMC v. 4.0.1
+#
+# New Features:
+#
+# (No new features.)
+#
+# Bug Fixes:
+#
+# + (C++) When the .sm is in a subdirectory the forward- or
+#   backslashes in the file name are kept in the "#ifndef" in the
+#   generated header file. This is syntactically wrong. SMC now
+#   replaces the slashes with underscores.
+#
+# + (Java) If %package is specified in the .sm file, then the
+#   generated *Context.java class will have package-level access.
+#
+# + The Programmer's Manual had incorrect HTML which prevented the
+#   pages from rendering correctly on Internet Explorer.
+#
+# + Rewrote the Programmer's Manual section 1 to make it more
+#   useful.
+#
 # Revision 1.10  2005/06/16 18:26:35  fperrad
 # Sorry, reverse to revision 1.8
 #

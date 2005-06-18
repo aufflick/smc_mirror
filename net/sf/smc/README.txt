@@ -83,3 +83,10 @@ SMC's command line options are:
           + -python
           + -table
           + -graph
+
+
++ Notices
+---------
+
+This software is OSI Certified Open Source Software.
+OSI Certified is a certification mark of the Open Source Initiative.

@@ -2,7 +2,7 @@
 
                                SMC
                      The State Machine Compiler
-                         (Version: 4.0.0)
+                         (Version: 4.0.1)
 
                      http://smc.sourceforge.net
 
@@ -13,52 +13,23 @@
 
 New Features:
 
-+ Added Python code generation. This capability and examples
-  provided by Francois Perrad, francois.perrad@gadz.org.
-
-+ Moved to Visitor pattern. By rearranging the SMC source code to
-  the Visitor pattern, it makes it easier to in new code
-  generators and code analyzers.
-
-+ When SMC generates C++ and exceptions are allowed (when -noex
-  is *not* specified), then statemap::FSMContext::popState()
-  throws a PopOnEmptyStateStackException when a pop transition is
-  taken but the state stack is empty. Otherwise, assert() is
-  used.
-
-+ Added a -return command line option which causes Smc.main() to
-  return rather than exit. This option is needed by ANT users.
+(No new features.)
 
 Bug Fixes:
 
-+ (C++) In statemap.h, the variable id and _id were changed to
-  stateId and _stateId, respectively. This change was also made
-  to the generated C++ code. This change was made due to "id"
-  being a keyword in the Macintosh Objective-C++ language.
++ (C++) When the .sm is in a subdirectory the forward- or
+  backslashes in the file name are kept in the "#ifndef" in the
+  generated header file. This is syntactically wrong. SMC now
+  replaces the slashes with underscores.
 
-+ Corrected error when multiple spaces between %header, %import,
-  %include and %declare keywords and the following name caused
-  an unhandled exception.
++ (Java) If %package is specified in the .sm file, then the
+  generated *Context.java class will have package-level access.
 
-+ Corrected errors with % keywords and the -graph target.
++ The Programmer's Manual had incorrect HTML which prevented the
+  pages from rendering correctly on Internet Explorer.
 
-+ (Java) Corrected error in generated serialization code. The
-  readObject() method was not restoring the current state. The
-  generated Java serialization code is now completely redone and
-  tested.
-
-+ (Java) SMC now requires that the .sm source file has the same
-  basename as the context class' .java source file. So if the
-  context class is OrderConnection and is in
-  OrderConnection.java, then the associated FSM must be in
-  OrderConnection.sm.
-
-+ (Ant) Corrected a syntax error in examples/Ant/EX7/build.xml.
-
-+ (C++) When the .sm is in a subdirectory the slashes in the file
-  name are kept in the "#ifndef" in the generated header file.
-  This is syntactically wrong. SMC now replaces the slashes with
-  underscores.
++ Rewrote the Programmer's Manual section 1 to make it more
+  useful.
 
 
 1. System Requirements
@@ -312,3 +283,10 @@ Surf over to http://smc.sourceforge.net to:
 + Report bugs.
 + Get the latest news about SMC.
 + Access SMC source code via a CVS web interface.
+
+
+7. Notices
+----------
+
+This software is OSI Certified Open Source Software.
+OSI Certified is a certification mark of the Open Source Initiative.

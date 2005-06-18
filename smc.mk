@@ -13,7 +13,7 @@
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
-# Copyright (C) 2000 - 2004. Charles W. Rapp.
+# Copyright (C) 2000 - 2005. Charles W. Rapp.
 # All Rights Reserved.
 #
 # Port to Python by Francois Perrad, francois.perrad@gadz.org
@@ -38,7 +38,7 @@
 # Macros.
 #
 
-VERSION=	4_0_0
+VERSION=	4_0_1
 
 STAGING_DIR=	../staging
 SMC_STAGING_DIR=$(STAGING_DIR)/smc
@@ -60,6 +60,29 @@ $(SMC_STAGING_DIR) :	$(STAGING_DIR)
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2005/06/18 18:28:36  cwrapp
+# SMC v. 4.0.1
+#
+# New Features:
+#
+# (No new features.)
+#
+# Bug Fixes:
+#
+# + (C++) When the .sm is in a subdirectory the forward- or
+#   backslashes in the file name are kept in the "#ifndef" in the
+#   generated header file. This is syntactically wrong. SMC now
+#   replaces the slashes with underscores.
+#
+# + (Java) If %package is specified in the .sm file, then the
+#   generated *Context.java class will have package-level access.
+#
+# + The Programmer's Manual had incorrect HTML which prevented the
+#   pages from rendering correctly on Internet Explorer.
+#
+# + Rewrote the Programmer's Manual section 1 to make it more
+#   useful.
+#
 # Revision 1.2  2005/06/08 11:08:58  cwrapp
 # + Updated Python code generator to place "pass" in methods with empty
 #   bodies.
