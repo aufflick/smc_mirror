@@ -35,6 +35,10 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.7  2005/06/30 10:44:23  cwrapp
+ * Added %access keyword which allows developers to set the generate Context
+ * class' accessibility level in Java and C#.
+ *
  * Revision 1.6  2005/05/28 19:28:42  cwrapp
  * Moved to visitor pattern.
  *
@@ -153,6 +157,15 @@ Start
 
     DECLARE(token : SmcLexer.Token)
         Declare
+        {
+            setHeaderLine(token.getLineNumber());
+        }
+
+    // The %access keyword is allowed for all target languages
+    // but ignored if target language does not support setting
+    // the class accessibility level.
+    ACCESS(token: SmcLexer.Token)
+        Access
         {
             setHeaderLine(token.getLineNumber());
         }
@@ -334,6 +347,30 @@ Declare
         }
 }
 
+Access
+    Entry
+    {
+	    setRawMode("\n\r\f");
+    }
+    Exit
+    {
+	    setCookedMode();
+    }
+{
+    SOURCE(token: SmcLexer.Token)
+        Start
+        {
+            setAccessLevel(token.getValue());
+        }
+
+    Default
+        StartError
+        {
+            error("Missing access level after %access.",
+                  ctxt.getLineNumber());
+        }
+}
+
 // Remain in this state until a known good token is found.
 StartError
 {
@@ -381,6 +418,10 @@ StartError
         {
             setHeaderLine(token.getLineNumber());
         }
+
+    ACCESS(token: SmcLexer.Token)
+        Access
+        {}
 
     MAP_NAME(token : SmcLexer.Token)
       [ctxt.isValidHeader() == true]

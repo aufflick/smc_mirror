@@ -2,7 +2,7 @@
 
                                SMC
                      The State Machine Compiler
-                         (Version: 4.0.1)
+                         (Version: 4.1.0)
 
                      http://smc.sourceforge.net
 
@@ -13,23 +13,16 @@
 
 New Features:
 
-(No new features.)
++ Added a "%access" keyword which sets the generated context
+  class' accessibility level. This level is used when generating
+  Java and C# code and ignored for all other target languages.
 
 Bug Fixes:
 
-+ (C++) When the .sm is in a subdirectory the forward- or
-  backslashes in the file name are kept in the "#ifndef" in the
-  generated header file. This is syntactically wrong. SMC now
-  replaces the slashes with underscores.
-
-+ (Java) If %package is specified in the .sm file, then the
-  generated *Context.java class will have package-level access.
-
-+ The Programmer's Manual had incorrect HTML which prevented the
-  pages from rendering correctly on Internet Explorer.
-
-+ Rewrote the Programmer's Manual section 1 to make it more
-  useful.
++ (Java) The previous release set the context class'
+  accessibility level to package if the %package was specified.
+  This was a mistake. The %access keyword now solves this
+  problem.
 
 
 1. System Requirements

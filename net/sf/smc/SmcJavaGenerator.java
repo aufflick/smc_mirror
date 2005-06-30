@@ -66,7 +66,7 @@ public final class SmcJavaGenerator
         String packageName = fsm.getPackage();
         String context = fsm.getContext();
         String startState = fsm.getStartState();
-        String accessLevel = "public";
+        String accessLevel = fsm.getAccessLevel();
         List maps = fsm.getMaps();
         List transitions;
         Iterator it;
@@ -79,6 +79,19 @@ public final class SmcJavaGenerator
         String separator;
         int index;
         List params;
+
+        // If the access level has not been set, then the default
+        // is "public".
+        if (accessLevel == null || accessLevel.length() == 0)
+        {
+            accessLevel = "public";
+        }
+        // If the access level is package, change it to
+        // /* package */
+        else if (accessLevel.equals("package") == true)
+        {
+            accessLevel = "/* package */";
+        }
 
         // Dump out the raw source code, if any.
         if (rawSource != null && rawSource.length() > 0)
@@ -95,9 +108,6 @@ public final class SmcJavaGenerator
             _source.print(packageName);
             _source.println(";");
             _source.println();
-
-            // And give the context class package level access.
-            accessLevel = "/* package */";
         }
 
         // Do user-specified imports now.
@@ -1403,6 +1413,10 @@ public final class SmcJavaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2005/06/30 10:44:23  cwrapp
+// Added %access keyword which allows developers to set the generate Context
+// class' accessibility level in Java and C#.
+//
 // Revision 1.2  2005/06/18 18:28:42  cwrapp
 // SMC v. 4.0.1
 //

@@ -1,6 +1,28 @@
 
                               SMC -
                   The State Machine Compiler
+                        Version 4.0.2
+
+
+
++ Major changes
+---------------
+
+Added a "%access" keyword which sets the generated context
+class' accessibility level. This level is used when generating
+Java and C# code and ignored for all other target languages.
+
++ Bug fixes
+-----------
+
+(Java) The previous release set the context class' accessibility
+level to package if the %package was specified. This was a
+mistake. The %access keyword now solves this problem.
+
+
+
+                              SMC -
+                  The State Machine Compiler
                         Version 4.0.1
 
 

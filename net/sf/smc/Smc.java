@@ -1354,12 +1354,16 @@ public final class Smc
     /* package */ static final int TRANS_PUSH = 2;
     /* package */ static final int TRANS_POP = 3;
 
-    private static final String VERSION = "v. 4.0.1";
+    private static final String VERSION = "v. 4.0.2";
 }
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2005/06/30 10:44:23  cwrapp
+// Added %access keyword which allows developers to set the generate Context
+// class' accessibility level in Java and C#.
+//
 // Revision 1.7  2005/06/18 18:28:42  cwrapp
 // SMC v. 4.0.1
 //

@@ -60,6 +60,7 @@ public final class SmcFSM
         _package = null;
         _importList = (List) new LinkedList();
         _declareList = (List) new LinkedList();
+        _accessLevel = "";
         _headerLine = -1;
         _maps = (List) new LinkedList();
     }
@@ -205,6 +206,16 @@ public final class SmcFSM
         return (_declareList);
     }
 
+    public String getAccessLevel()
+    {
+        return (_accessLevel);
+    }
+
+    public void setAccessLevel(String accessLevel)
+    {
+        _accessLevel = accessLevel;
+    }
+
     public SmcMap findMap(String name)
     {
         Iterator mapIt;
@@ -327,6 +338,9 @@ public final class SmcFSM
     // Place forward declarations in this list.
     private List _declareList;
 
+    // The context class access level. Empty string by default.
+    private String _accessLevel;
+
     // The line where %start, etc. should appear.
     // Used in error messages.
     private int _headerLine;
@@ -338,6 +352,10 @@ public final class SmcFSM
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2005/06/30 10:44:23  cwrapp
+// Added %access keyword which allows developers to set the generate Context
+// class' accessibility level in Java and C#.
+//
 // Revision 1.1  2005/05/28 19:28:42  cwrapp
 // Moved to visitor pattern.
 //

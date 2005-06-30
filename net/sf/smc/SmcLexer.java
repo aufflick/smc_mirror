@@ -748,13 +748,14 @@ import java.util.Map;
     /* package */ static final int EOD = 25;
     /* package */ static final int SLASH = 26;
     /* package */ static final int EQUAL = 27;
-    /* package */ static final int TOKEN_COUNT = EQUAL + 1;
+    /* package */ static final int ACCESS = 28;
+    /* package */ static final int TOKEN_COUNT = ACCESS + 1;
 
     // There are four SMC keywords: entry, exit, push and pop.
     private static final int KEYWORD_COUNT = 4;
 
     // There are eight percent keywords.
-    private static final int PERCENT_KEYWORD_COUNT = 8;
+    private static final int PERCENT_KEYWORD_COUNT = 9;
 
     // The ASCII characters all have explicit transitions.
     // Unicode characters are simply given the unicode
@@ -797,6 +798,7 @@ import java.util.Map;
         _TypeName[SmcLexer.EOD] = "EOD";
         _TypeName[SmcLexer.SLASH] = "SLASH";
         _TypeName[SmcLexer.EQUAL] = "EQUAL";
+        _TypeName[SmcLexer.ACCESS] = "ACCESS";
 
         // Set up the keyword |-> token value map.
         _KeywordMap = (Map) new HashMap(KEYWORD_COUNT);
@@ -824,6 +826,8 @@ import java.util.Map;
             "%import", new Integer(SmcLexer.IMPORT));
         _PercentKeywordMap.put(
             "%declare", new Integer(SmcLexer.DECLARE));
+        _PercentKeywordMap.put(
+            "%access", new Integer(SmcLexer.ACCESS));
 
         // Set up the transition map.
         _TransMethod = new Method[SmcLexer.MAX_ASCII_CHAR];
@@ -1057,6 +1061,10 @@ import java.util.Map;
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2005/06/30 10:44:23  cwrapp
+// Added %access keyword which allows developers to set the generate Context
+// class' accessibility level in Java and C#.
+//
 // Revision 1.5  2005/05/28 19:28:42  cwrapp
 // Moved to visitor pattern.
 //

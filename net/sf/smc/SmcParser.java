@@ -397,6 +397,24 @@ public final class SmcParser
         return;
     }
 
+    /* package */ void setAccessLevel(String level)
+    {
+        String accessLevel = _fsm.getAccessLevel();
+
+        if (accessLevel != null && accessLevel.length() > 0)
+        {
+            warning("%access previously specified, " +
+                    "new access level ignored.",
+                    _lineNumber);
+        }
+        else
+        {
+            _fsm.setAccessLevel(level.trim());
+        }
+
+        return;
+    }
+
     /* package */ void addMap()
     {
         if (_mapInProgress == null)
@@ -1353,6 +1371,10 @@ public final class SmcParser
             _TransMethod[SmcLexer.EQUAL] =
                 fsmClass.getDeclaredMethod("EQUAL",
                                            paramTypes);
+            transName = "ACCESS";
+            _TransMethod[SmcLexer.ACCESS] =
+                fsmClass.getDeclaredMethod("ACCESS",
+                                           paramTypes);
         }
         catch (NoSuchMethodException ex1)
         {
@@ -1377,6 +1399,10 @@ public final class SmcParser
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2005/06/30 10:44:23  cwrapp
+// Added %access keyword which allows developers to set the generate Context
+// class' accessibility level in Java and C#.
+//
 // Revision 1.7  2005/06/18 18:28:42  cwrapp
 // SMC v. 4.0.1
 //

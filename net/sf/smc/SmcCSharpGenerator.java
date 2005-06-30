@@ -66,6 +66,7 @@ public final class SmcCSharpGenerator
         String packageName = fsm.getPackage();
         String context = fsm.getContext();
         String startState = fsm.getStartState();
+        String accessLevel = fsm.getAccessLevel();
         List maps = fsm.getMaps();
         List transitions;
         Iterator it;
@@ -78,6 +79,14 @@ public final class SmcCSharpGenerator
         int index;
         List params;
         String indent2;
+
+        // If the access level has not been set, then the
+        // default is "public".
+        // TODO
+        if (accessLevel == null || accessLevel.length() == 0)
+        {
+            accessLevel = "public";
+        }
 
         // Dump out the raw source code, if any.
         if (rawSource != null && rawSource.length () > 0)
@@ -132,7 +141,8 @@ public final class SmcCSharpGenerator
 
         // Now declare the FSM context class.
         _source.print(_indent);
-        _source.print("public sealed class ");
+        _source.print(accessLevel);
+        _source.print(" sealed class ");
         _source.print(context);
         _source.println("Context :");
         _source.print(_indent);
@@ -1635,6 +1645,10 @@ public final class SmcCSharpGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2005/06/30 10:44:23  cwrapp
+// Added %access keyword which allows developers to set the generate Context
+// class' accessibility level in Java and C#.
+//
 // Revision 1.1  2005/05/28 19:28:42  cwrapp
 // Moved to visitor pattern.
 //
