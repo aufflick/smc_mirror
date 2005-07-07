@@ -35,6 +35,10 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.8  2005/07/07 12:11:56  fperrad
+ * Add a new token '$' for Perl language.
+ * The type of parameter is optional for Python, Per & Ruby.
+ *
  * Revision 1.7  2005/06/30 10:44:23  cwrapp
  * Added %access keyword which allows developers to set the generate Context
  * class' accessibility level in Java and C#.
@@ -102,12 +106,13 @@ Start
 
     HEADER_FILE(token: SmcLexer.Token)
       [Smc._targetLanguage != Smc.C_PLUS_PLUS &&
+       Smc._targetLanguage != Smc.C &&
        Smc._targetLanguage != Smc.TABLE &&
        Smc._targetLanguage != Smc.GRAPH]
         nil
         {
             error(
-                "%header may only be used with -c++, -table or -graph options.",
+                "%header may only be used with -c++, -c, -table or -graph options.",
                 token.getLineNumber());
         }
 
@@ -119,12 +124,13 @@ Start
 
     INCLUDE_FILE(token: SmcLexer.Token)
       [Smc._targetLanguage != Smc.C_PLUS_PLUS &&
+       Smc._targetLanguage != Smc.C &&
        Smc._targetLanguage != Smc.TABLE &&
        Smc._targetLanguage != Smc.GRAPH]
         nil
         {
             error(
-                "%include may only be used with -c++, -table or -graph options.",
+                "%include may only be used with -c++, -c, -table or -graph options.",
                 token.getLineNumber());
         }
 
@@ -1343,6 +1349,33 @@ Start
             token.getLineNumber())
         {}
 
+    // Perl parameter
+    DOLLAR(token: SmcLexer.Token)
+      [ctxt.getTargetLanguage() == Smc.PERL]
+        Dollar
+        {}
+    
+    // Anything else is an error. Go to the error state and
+    // read in all remaining characters until the end paren
+    // is found.
+    Default
+        Error
+        {
+            error("Invalid parameter syntax.",
+                  ctxt.getLineNumber());
+        }
+}
+
+Dollar
+{
+    // This is the parameter name.
+    WORD(token: SmcLexer.Token)
+        ParamSeparator
+        {
+            createParameter("$" + token.getValue(),
+                            token.getLineNumber());
+        }
+
     // Anything else is an error. Go to the error state and
     // read in all remaining characters until the end paren
     // is found.
@@ -1364,18 +1397,26 @@ ParamSeparator
     // The parameter does *not* need a type if the target
     // language is typeless.
     COMMA(token: SmcLexer.Token)
-      [Smc._targetLanguage == Smc.TCL]
+      [Smc._targetLanguage == Smc.TCL ||
+       Smc._targetLanguage == Smc.PERL ||
+       Smc._targetLanguage == Smc.PYTHON ||
+       Smc._targetLanguage == Smc.RUBY]
         Start
         {
+            setParamType("value");
             addParameter();
         }
 
     RIGHT_PAREN(token: SmcLexer.Token)
-      [Smc._targetLanguage == Smc.TCL]
+      [Smc._targetLanguage == Smc.TCL ||
+       Smc._targetLanguage == Smc.PERL ||
+       Smc._targetLanguage == Smc.PYTHON ||
+       Smc._targetLanguage == Smc.RUBY]
         pop(paramsDone,
             ctxt.getParamList(),
             token.getLineNumber())
         {
+            setParamType("value");
             addParameter();
         }
 
