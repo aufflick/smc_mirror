@@ -758,6 +758,69 @@ public final class Smc
                     argsConsumed = 1;
                 }
             }
+            else if (args[i].startsWith("-pe") == true)
+            {
+                // Only one target language may be specified.
+                if (_targetLanguage != LANG_NOT_SET &&
+                    _targetLanguage != PERL)
+                {
+                    retcode = false;
+                    _errorMsg = "Only one target language can be specified";
+                }
+                else
+                {
+                    _targetLanguage = PERL;
+
+                    if (_suffix == null)
+                    {
+                        _suffix = "pm";
+                    }
+
+                    argsConsumed = 1;
+                }
+            }
+            else if (args[i].startsWith("-ru") == true)
+            {
+                // Only one target language may be specified.
+                if (_targetLanguage != LANG_NOT_SET &&
+                    _targetLanguage != RUBY)
+                {
+                    retcode = false;
+                    _errorMsg = "Only one target language can be specified";
+                }
+                else
+                {
+                    _targetLanguage = RUBY;
+
+                    if (_suffix == null)
+                    {
+                        _suffix = "rb";
+                    }
+
+                    argsConsumed = 1;
+                }
+            }
+            else if (args[i].equals("-c") == true)
+            {
+                // Only one target language can be specified.
+                if (_targetLanguage != LANG_NOT_SET &&
+                    _targetLanguage != C)
+                {
+                    retcode = false;
+                    _errorMsg = "Only one target language can be specified";
+                }
+                else
+                {
+                    _targetLanguage = C;
+
+                    if (_suffix == null)
+                    {
+                        _suffix = "c";
+                    }
+
+                    argsConsumed = 1;
+                }
+            }
             else if (args[i].startsWith("-gr") == true)
             {
                 // Only one target language may be specified.
@@ -986,8 +1049,8 @@ public final class Smc
         stream.print(" [-cast cast_type]");
         stream.print(" [-d directory]");
         stream.print(" [-glevel int]");
-        stream.print(" {-c++ | -java | -tcl | -vb | -csharp | ");
-        stream.print("-table | -graph | -python}");
+        stream.print(" {-c | -c++ | -java | -tcl | -vb | -csharp | ");
+        stream.print("-python | -perl | -ruby | -table | -graph}");
         stream.println(" statemap_file");
         stream.println("    where:");
         stream.println(
@@ -1021,12 +1084,15 @@ public final class Smc
             "\t-d        Place generated files in directory");
         stream.println(
             "\t-glevel   Detail level from 0 (least) to 2 (greatest)");
+        stream.println("\t-c        Generate C code");
         stream.println("\t-c++      Generate C++ code");
         stream.println("\t-java     Generate Java code");
         stream.println("\t-tcl      Generate [incr Tcl] code");
         stream.println("\t-vb       Generate VB.Net code");
         stream.println("\t-csharp   Generate C# code");
-        stream.println("\t-python   Generates Python code");
+        stream.println("\t-python   Generate Python code");
+        stream.println("\t-perl     Generate Perl code");
+        stream.println("\t-ruby     Generate Ruby code");
         stream.println("\t-table    Generate HTML table code");
         stream.println("\t-graph    Generate GraphViz DOT file");
         stream.println();
@@ -1034,8 +1100,8 @@ public final class Smc
             "    Note: statemap_file must end in \".sm\"");
         stream.print(
             "    Note: must select one of -c++, -java, -tcl, ");
-        stream.print("-vb, -csharp, -python, -table or ");
-        stream.println("-graph.");
+        stream.print("-vb, -csharp, -perl, -python, -ruby or ");
+        stream.println("-table or -graph.");
 
         return;
     }
@@ -1139,6 +1205,43 @@ public final class Smc
                         sourceStream, srcFileBase);
                 break;
 
+            case C:
+                // Generate the header file first.
+                srcFileName =
+                    srcFilePath +
+                    srcFileBase +
+                    "_sm.h";
+                sourceFileStream =
+                    new FileOutputStream(srcFileName);
+                sourceStream =
+                    new PrintStream(sourceFileStream);
+                fsm.accept(
+                    new SmcHeaderCGenerator(
+                        sourceStream, srcFileBase));
+                sourceFileStream.flush();
+                sourceFileStream.close();
+
+                if (_verbose == true)
+                {
+                    System.out.print("[wrote ");
+                    System.out.print(srcFileName);
+                    System.out.println("]");
+                }
+
+                srcFileName =
+                    srcFilePath +
+                    srcFileBase +
+                    "_sm." +
+                    _suffix;
+                sourceFileStream =
+                    new FileOutputStream(srcFileName);
+                sourceStream =
+                    new PrintStream(sourceFileStream);
+                generator =
+                    new SmcCGenerator(
+                        sourceStream, srcFileBase);
+                break;
+
             case JAVA:
                 srcFileName =
                     srcFilePath +
@@ -1211,6 +1314,36 @@ public final class Smc
                     new PrintStream(sourceFileStream);
                 generator =
                     new SmcPythonGenerator(
+                        sourceStream, srcFileBase);
+                break;
+
+            case PERL:
+                srcFileName =
+                    srcFilePath +
+                    srcFileBase +
+                    "_sm." +
+                    _suffix;
+                sourceFileStream =
+                    new FileOutputStream(srcFileName);
+                sourceStream =
+                    new PrintStream(sourceFileStream);
+                generator =
+                    new SmcPerlGenerator(
+                        sourceStream, srcFileBase);
+                break;
+
+            case RUBY:
+                srcFileName =
+                    srcFilePath +
+                    srcFileBase +
+                    "_sm." +
+                    _suffix;
+                sourceFileStream =
+                    new FileOutputStream(srcFileName);
+                sourceStream =
+                    new PrintStream(sourceFileStream);
+                generator =
+                    new SmcRubyGenerator(
                         sourceStream, srcFileBase);
                 break;
 
@@ -1341,6 +1474,9 @@ public final class Smc
     /* package */ static final int PYTHON = 6;
     /* package */ static final int TABLE = 7;
     /* package */ static final int GRAPH = 8;
+    /* package */ static final int PERL = 9;
+    /* package */ static final int RUBY = 10;
+    /* package */ static final int C = 11;
 
     // GraphViz detail level.
     /* package */ static final int NO_GRAPH_LEVEL = -1;
@@ -1360,6 +1496,9 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2005/07/07 12:08:44  fperrad
+// Added C, Perl & Ruby generators.
+//
 // Revision 1.8  2005/06/30 10:44:23  cwrapp
 // Added %access keyword which allows developers to set the generate Context
 // class' accessibility level in Java and C#.
