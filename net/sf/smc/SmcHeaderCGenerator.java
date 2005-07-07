@@ -101,8 +101,9 @@ public final class SmcHeaderCGenerator
 
         // Make the file name upper case and replace
         // slashes with underscores.
-        srcfileCaps =
-            _srcfileBase.toUpperCase().replace('\\', '_');
+        srcfileCaps = _srcfileBase.replace('\\', '_');
+        srcfileCaps = srcfileCaps.replace('/', '_');
+        srcfileCaps = srcfileCaps.toUpperCase();
         _source.print("#ifndef _H_");
         _source.print(srcfileCaps);
         _source.println("_SM");
@@ -343,6 +344,9 @@ public final class SmcHeaderCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2005/07/07 12:07:28  fperrad
+// When the .sm is in a subdirectory the forward- or backslashes in the file name are kept in the "#ifndef" in the generated header file. This is syntactically wrong. SMC nowreplaces the slashes with underscores.
+//
 // Revision 1.1  2005/06/16 18:11:01  fperrad
 // Added C, Perl & Ruby generators.
 //
