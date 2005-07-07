@@ -749,7 +749,8 @@ import java.util.Map;
     /* package */ static final int SLASH = 26;
     /* package */ static final int EQUAL = 27;
     /* package */ static final int ACCESS = 28;
-    /* package */ static final int TOKEN_COUNT = ACCESS + 1;
+    /* package */ static final int DOLLAR = 29;
+    /* package */ static final int TOKEN_COUNT = DOLLAR + 1;
 
     // There are four SMC keywords: entry, exit, push and pop.
     private static final int KEYWORD_COUNT = 4;
@@ -799,6 +800,7 @@ import java.util.Map;
         _TypeName[SmcLexer.SLASH] = "SLASH";
         _TypeName[SmcLexer.EQUAL] = "EQUAL";
         _TypeName[SmcLexer.ACCESS] = "ACCESS";
+        _TypeName[SmcLexer.DOLLAR] = "DOLLAR";
 
         // Set up the keyword |-> token value map.
         _KeywordMap = (Map) new HashMap(KEYWORD_COUNT);
@@ -959,6 +961,11 @@ import java.util.Map;
             _TransMethod['='] =
                 fsmClass.getDeclaredMethod("equal",
                                            paramTypes);
+
+            transName = "dollar";
+            _TransMethod['$'] =
+                fsmClass.getDeclaredMethod("dollar",
+                                           paramTypes);
         }
         catch (NoSuchMethodException ex1)
         {
@@ -1061,6 +1068,9 @@ import java.util.Map;
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2005/07/07 12:10:52  fperrad
+// Add a new token '$' for Perl language.
+//
 // Revision 1.6  2005/06/30 10:44:23  cwrapp
 // Added %access keyword which allows developers to set the generate Context
 // class' accessibility level in Java and C#.

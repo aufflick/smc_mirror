@@ -35,6 +35,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.6  2005/07/07 12:10:41  fperrad
+ * Add a new token '$' for Perl language.
+ *
  * Revision 1.5  2005/05/28 19:28:42  cwrapp
  * Moved to visitor pattern.
  *
@@ -107,6 +110,10 @@ Start
     equal           nil                 {startToken();
                                          addToToken();
                                          endToken(SmcLexer.EQUAL);}
+
+	dollar          nil					{startToken();
+                                         addToToken();
+										 endToken(SmcLexer.DOLLAR);}
 
 	// Ignore whitespace and end-of-line.
 	whitespace      nil					{}
@@ -200,6 +207,8 @@ Word
                                          checkKeyword();}
 	equal           Start               {ungetChar();
                                          checkKeyword();}
+	dollar          Start               {ungetChar();
+                                         checkKeyword();}
 
 	// The remaining characters form an invalid token.
 	Default         Start				{badToken("Unknown token");}
@@ -271,6 +280,7 @@ Default
 	semicolon		Start				{}
 	underscore      Start				{}
     equal           Start               {}
+	dollar          Start				{}
 	whitespace   	Start				{}
 	EOL             Start				{}
     unicode         Start               {}
@@ -304,6 +314,7 @@ Default
 	semicolon		Start				{}
 	underscore      Start				{}
     equal           Start               {}
+	dollar          Start				{}
 	whitespace      Start				{}
     unicode         Start               {}
 }
@@ -353,6 +364,7 @@ NeverUsed
 	semicolon		nil					{}
 	underscore      nil					{}
     equal           nil                 {}
+	dollar          nil					{}
 	whitespace      nil					{}
     unicode         nil                 {}
 	EOL             nil					{}

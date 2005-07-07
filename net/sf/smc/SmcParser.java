@@ -1375,6 +1375,10 @@ public final class SmcParser
             _TransMethod[SmcLexer.ACCESS] =
                 fsmClass.getDeclaredMethod("ACCESS",
                                            paramTypes);
+            transName = "DOLLAR";
+            _TransMethod[SmcLexer.DOLLAR] =
+                fsmClass.getDeclaredMethod("DOLLAR",
+                                           paramTypes);
         }
         catch (NoSuchMethodException ex1)
         {
@@ -1399,6 +1403,9 @@ public final class SmcParser
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2005/07/07 12:11:04  fperrad
+// Add a new token '$' for Perl language.
+//
 // Revision 1.8  2005/06/30 10:44:23  cwrapp
 // Added %access keyword which allows developers to set the generate Context
 // class' accessibility level in Java and C#.
