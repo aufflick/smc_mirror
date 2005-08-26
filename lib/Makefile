@@ -52,40 +52,55 @@ $(LIB_STAGING_DIR) :
 
 # Copy all products to the staging directory.
 install : 	$(LIB_STAGING_DIR)
+		$(MAKE) -C C install
 		$(MAKE) -C C++ install
+		$(MAKE) -C CSharp install
 		$(MAKE) -C Java install
+		$(MAKE) -C Perl install
+		$(MAKE) -C Python install
+		$(MAKE) -C Ruby install
 		$(MAKE) -C Tcl install
 		$(MAKE) -C VB install
-		$(MAKE) -C CSharp install
-		$(MAKE) -C Python install
 
 uninstall :
+		$(MAKE) -C C uninstall
 		$(MAKE) -C C++ uninstall
+		$(MAKE) -C CSharp uninstall
 		$(MAKE) -C Java uninstall
+		$(MAKE) -C Perl uninstall
+		$(MAKE) -C Python uninstall
+		$(MAKE) -C Ruby uninstall
 		$(MAKE) -C Tcl uninstall
 		$(MAKE) -C VB uninstall
-		$(MAKE) -C CSharp uninstall
-		$(MAKE) -C Python uninstall
 
 clean :
+		$(MAKE) -C C clean
 		$(MAKE) -C C++ clean
+		$(MAKE) -C CSharp clean
 		$(MAKE) -C Java clean
+		$(MAKE) -C Perl clean
+		$(MAKE) -C Python clean
+		$(MAKE) -C Ruby clean
 		$(MAKE) -C Tcl clean
 		$(MAKE) -C VB clean
-		$(MAKE) -C CSharp clean
-		$(MAKE) -C Python clean
 
 realclean :
+		$(MAKE) -C C realclean
 		$(MAKE) -C C++ realclean
+		$(MAKE) -C CSharp realclean
 		$(MAKE) -C Java realclean
+		$(MAKE) -C Perl realclean
+		$(MAKE) -C Python realclean
+		$(MAKE) -C Ruby realclean
 		$(MAKE) -C Tcl realclean
 		$(MAKE) -C VB realclean
-		$(MAKE) -C CSharp realclean
-		$(MAKE) -C Python realclean
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.7  2005/08/26 15:21:33  cwrapp
+# Final commit for release 4.2.0. See README.txt for more information.
+#
 # Revision 1.6  2005/06/08 11:09:14  cwrapp
 # + Updated Python code generator to place "pass" in methods with empty
 #   bodies.

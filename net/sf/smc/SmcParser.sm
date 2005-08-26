@@ -35,6 +35,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.9  2005/08/26 15:21:34  cwrapp
+ * Final commit for release 4.2.0. See README.txt for more information.
+ *
  * Revision 1.8  2005/07/07 12:11:56  fperrad
  * Add a new token '$' for Perl language.
  * The type of parameter is optional for Python, Per & Ruby.
@@ -69,9 +72,11 @@
  */
 %}
 
-%start ParserMap::Start
 %class SmcParser
+%start ParserMap::Start
+
 %package net.sf.smc
+
 %import java.util.List
 
 %map ParserMap
@@ -837,6 +842,10 @@ TransStart
         {
             error("Expecting either a guard, push, pop or end state.",
                   ctxt.getLineNumber());
+
+            // Need to create a dummy transition so that error
+            // handling will function.
+            createTransition(ctxt.getLineNumber());
         }
 }
 
@@ -852,6 +861,19 @@ TransStartError
     LEFT_BRACKET(token : SmcLexer.Token)
         TransGuard
         {}
+
+    // A '{' is the start of the transition actions.
+    LEFT_BRACE(token: SmcLexer.Token)
+        ActionEnd/push(ActionMap::Start)
+        {
+            createGuard(ctxt.getTransitionName(),
+                        "",
+                        token.getLineNumber());
+            setTransType(Smc.TRANS_SET);
+            setEndState("End state missing");
+
+			createActionList();
+		}
 
     PUSH(token : SmcLexer.Token)
         PushStart
@@ -872,15 +894,13 @@ TransStartError
             setTransType(Smc.TRANS_POP);
         }
 
-    WORD(token : SmcLexer.Token)
-        SimpleTrans
-        {
-            createGuard(ctxt.getTransitionName(),
-                        "",
-                        token.getLineNumber());
-            setTransType(Smc.TRANS_SET);
-            setEndState(token.getValue());
-        }
+    // One way or another this transition is now kaput.
+    RIGHT_BRACE(token: SmcLexer.Token)
+        Transitions
+	    {
+			addGuard();
+			addTransition();
+		}
 
     Default
         nil
@@ -893,8 +913,8 @@ TransParams
     // The "Default" transition may not have parameters.
     // But create a bogus transition before continuing.
     paramsDone(params: java.util.List, lineNumber: int)
-      [ctxt.getTransitionName().equalsIgnoreCase("Default")
-           == true &&
+      [ctxt.getTransitionName().equalsIgnoreCase(
+           "Default") == true &&
        params.isEmpty() == false]
         TransNext
         {

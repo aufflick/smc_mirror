@@ -3,9 +3,9 @@ Statemap
 
 INSTALLATION
 
-To install this module, type the following:
+NOTE: There is nothing to build - only a Ruby file to install:
 
-   ???
+$ make install
 
 DOCUMENTATION
 

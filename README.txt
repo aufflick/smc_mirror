@@ -2,7 +2,7 @@
 
                                SMC
                      The State Machine Compiler
-                         (Version: 4.1.0)
+                         (Version: 4.2.0)
 
                      http://smc.sourceforge.net
 
@@ -13,16 +13,23 @@
 
 New Features:
 
-+ Added a "%access" keyword which sets the generated context
-  class' accessibility level. This level is used when generating
-  Java and C# code and ignored for all other target languages.
++ Added C, Perl and Ruby language generation.
+
++ Added method valueOf(int stateId) to Java, C# and VB.Net to
+  allow developers to hand-serialize and deserialize state
+  machines.
 
 Bug Fixes:
 
-+ (Java) The previous release set the context class'
-  accessibility level to package if the %package was specified.
-  This was a mistake. The %access keyword now solves this
-  problem.
++ (C#) Removed extraneous "bool loopbackFlag = false" line
+  from Default state transitions.
+
++ (C#) Added "Trace.Listeners.Add(myWriter)" line when generating
+  debug code. By not having this line it prevented debug output
+  from being outuput.
+
++ Corrected parser abend when a transition was missing an
+  endstate.
 
 
 1. System Requirements

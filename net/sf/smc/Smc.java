@@ -1099,9 +1099,9 @@ public final class Smc
         stream.println(
             "    Note: statemap_file must end in \".sm\"");
         stream.print(
-            "    Note: must select one of -c++, -java, -tcl, ");
-        stream.print("-vb, -csharp, -perl, -python, -ruby or ");
-        stream.println("-table or -graph.");
+            "    Note: must select one of -c, -c++, -java, ");
+        stream.print("-tcl, -vb, -csharp, -perl, -python, ");
+        stream.println("-ruby, -table or -graph.");
 
         return;
     }
@@ -1490,12 +1490,15 @@ public final class Smc
     /* package */ static final int TRANS_PUSH = 2;
     /* package */ static final int TRANS_POP = 3;
 
-    private static final String VERSION = "v. 4.0.2";
+    private static final String VERSION = "v. 4.2.0";
 }
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2005/08/26 15:21:34  cwrapp
+// Final commit for release 4.2.0. See README.txt for more information.
+//
 // Revision 1.9  2005/07/07 12:08:44  fperrad
 // Added C, Perl & Ruby generators.
 //

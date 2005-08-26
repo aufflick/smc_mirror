@@ -38,7 +38,7 @@
 # Macros.
 #
 
-VERSION=	4_1_0
+VERSION=	4_2_0
 
 STAGING_DIR=	../staging
 SMC_STAGING_DIR=$(STAGING_DIR)/smc
@@ -60,6 +60,9 @@ $(SMC_STAGING_DIR) :	$(STAGING_DIR)
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.5  2005/08/26 15:21:33  cwrapp
+# Final commit for release 4.2.0. See README.txt for more information.
+#
 # Revision 1.4  2005/06/30 10:44:02  cwrapp
 # Added %access keyword which allows developers to set the generate Context
 # class' accessibility level in Java and C#.

@@ -372,6 +372,17 @@ public final class SmcVBGenerator
         // and deserialize constructor.
         if (Smc.isSerial() == true)
         {
+            // Output the ValueOf method.
+            _source.print(
+                "    Public Function ValueOf(ByVal stateId As Integer) As ");
+            _source.print(context);
+            _source.println("State");
+            _source.println();
+            _source.println(
+                "        Return _States(stateId)");
+            _source.println("    End Function");
+            _source.println();
+
             _source.println(
                 "    Private Sub GetObjectData(ByVal info As SerializationInfo, _");
             _source.println(
@@ -1360,6 +1371,9 @@ public final class SmcVBGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2005/08/26 15:21:34  cwrapp
+// Final commit for release 4.2.0. See README.txt for more information.
+//
 // Revision 1.1  2005/05/28 19:28:43  cwrapp
 // Moved to visitor pattern.
 //

@@ -293,6 +293,19 @@ public final class SmcJavaGenerator
             _source.println("        return;");
             _source.println("    }");
             _source.println();
+
+            // Also output the valueOf method in case developers
+            // want to serialize manually.
+            _source.print("    public ");
+            _source.print(context);
+            _source.println("State valueOf(int stateId)");
+            _source.println(
+                "        throws ArrayIndexOutOfBoundsException");
+            _source.println("    {");
+            _source.println(
+                "        return (_States[stateId]);");
+            _source.println("    }");
+            _source.println();
         }
 
         // getState() method.
@@ -982,6 +995,7 @@ public final class SmcJavaGenerator
         String pushStateName = guard.getPushState();
         String condition = guard.getCondition();
         List actions = guard.getActions();
+        boolean hasActions = actions.isEmpty();
 
         // If this guard's end state is not of the form
         // "map::state", then prepend the map name to the
@@ -1072,7 +1086,7 @@ public final class SmcJavaGenerator
         // immediately. Otherwise, unset the current state so
         // that if an action tries to issue a transition, it will
         // fail.
-        if (actions.size() == 0)
+        if (hasActions == false)
         {
             fqEndStateName = endStateName;
         }
@@ -1091,7 +1105,6 @@ public final class SmcJavaGenerator
             _source.print("State ");
             _source.print(fqEndStateName);
             _source.println(" = context.getState();");
-            _source.println();
         }
         else
         {
@@ -1112,8 +1125,9 @@ public final class SmcJavaGenerator
             _source.print("        ");
             _source.print(fqEndStateName);
             _source.println(".getName());");
-            _source.println();
         }
+
+        _source.println();
 
         // Dump out the exit actions - but only for the first guard.
         // v. 1.0, beta 3: Not any more. The exit actions are
@@ -1150,7 +1164,7 @@ public final class SmcJavaGenerator
         }
 
         // Dump out this transition's actions.
-        if (actions.size() == 0)
+        if (hasActions == false)
         {
             if (condition.length() > 0)
             {
@@ -1216,7 +1230,7 @@ public final class SmcJavaGenerator
         // 1. The transition has no actions AND is a loopback OR
         // 2. This is a push or pop transition.
         if (transType == Smc.TRANS_SET &&
-            (actions.size() > 0 || loopbackFlag == false))
+            (hasActions == true || loopbackFlag == false))
         {
             _source.print(indent3);
             _source.print("context.setState(");
@@ -1228,7 +1242,7 @@ public final class SmcJavaGenerator
             // Set the next state so this it can be pushed
             // onto the state stack. But only do so if a clear
             // state was done.
-            if (loopbackFlag == false || actions.size() > 0)
+            if (loopbackFlag == false || hasActions == true)
             {
                 _source.print(indent3);
                 _source.print("context.setState(");
@@ -1319,7 +1333,7 @@ public final class SmcJavaGenerator
         // brace on the finally block.
         // v. 2.2.0: Check if the user has turned off this
         // feature first.
-        if (actions.size() > 0 && Smc.isNoCatch() == false)
+        if (hasActions == true && Smc.isNoCatch() == false)
         {
             _source.print(indent2);
             _source.println('}');
@@ -1413,6 +1427,9 @@ public final class SmcJavaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2005/08/26 15:21:34  cwrapp
+// Final commit for release 4.2.0. See README.txt for more information.
+//
 // Revision 1.3  2005/06/30 10:44:23  cwrapp
 // Added %access keyword which allows developers to set the generate Context
 // class' accessibility level in Java and C#.

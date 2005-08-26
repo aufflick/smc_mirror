@@ -75,12 +75,15 @@ SMC's command line options are:
 
     NOTE: Source files *must* end in ".sm" or ".SM".
           Exactly one of the following must be specified:
+          + -c
           + -c++
           + -java
           + -tcl
           + -vb
           + -csharp
+          + -perl
           + -python
+          + -ruby
           + -table
           + -graph
 

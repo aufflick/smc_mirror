@@ -604,7 +604,9 @@ public final class SmcParser
     // Returns the stored transition name.
     /* package */ String getTransitionName()
     {
-        return (_transitionName);
+        return (_transitionInProgress != null ?
+                _transitionInProgress.getName() :
+                _transitionName);
     }
 
     // Store away the transition's name for later use in
@@ -1403,6 +1405,9 @@ public final class SmcParser
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2005/08/26 15:21:34  cwrapp
+// Final commit for release 4.2.0. See README.txt for more information.
+//
 // Revision 1.9  2005/07/07 12:11:04  fperrad
 // Add a new token '$' for Perl language.
 //

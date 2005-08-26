@@ -184,10 +184,9 @@ public final class SmcCSharpGenerator
             _source.println();
             _source.print(_indent);
             _source.println(
-                "        // Turn on debugging output.");
-            _source.print(_indent);
-            _source.println("        Debug = true;");
+                "        Trace.Listeners.Add(myWriter);");
             _source.println();
+            _source.print(_indent);
         }
 
         // The state name "map::state" must be changed to
@@ -325,6 +324,23 @@ public final class SmcCSharpGenerator
                 _source.println("    }");
                 _source.println();
             }
+        }
+
+        // If -serial specified, then output the valueOf(int)
+        // method.
+        if (Smc.isSerial() == true)
+        {
+            _source.print(_indent);
+            _source.print("    public ");
+            _source.print(context);
+            _source.println("State valueOf(int stateId)");
+            _source.print(_indent);
+            _source.println("    {");
+            _source.print(_indent);
+            _source.println("        return(_States[stateId]);");
+            _source.print(_indent);
+            _source.println("    }");
+            _source.println();
         }
 
         // getState() method.
@@ -583,7 +599,7 @@ public final class SmcCSharpGenerator
         _source.println("// Inner classes.");
         _source.println();
         _source.print(_indent);
-        _source.print("    internal abstract class ");
+        _source.print("    public abstract class ");
         _source.print(context);
         _source.println("State :");
         _source.print(_indent);
@@ -672,7 +688,7 @@ public final class SmcCSharpGenerator
         {
             _source.print(_indent);
             _source.println(
-                "            if (context.Debug == true)");
+                "            if (context._debug_flag == true)");
             _source.print(_indent);
             _source.println("            {");
             _source.print(_indent);
@@ -743,6 +759,7 @@ public final class SmcCSharpGenerator
         SmcState defaultState = map.getDefaultState();
         String context = map.getFSM().getContext();
         String mapName = map.getName();
+        String indent2;
         List states = map.getStates();
         Iterator it;
         SmcState state;
@@ -865,12 +882,15 @@ public final class SmcCSharpGenerator
         _source.println("        {}");
 
         // Declare the user-defined transitions first.
+        indent2 = _indent;
+        _indent = _indent + "        ";
         for (it = definedDefaultTransitions.iterator();
              it.hasNext() == true;
             )
         {
             ((SmcTransition) it.next()).accept(this);
         }
+        _indent = indent2;
 
         // Have each state now generate its code. Each state
         // class is an inner class.
@@ -924,7 +944,7 @@ public final class SmcCSharpGenerator
         _source.println("            {}");
         _source.println();
 
-        // Add the Entry() and Exit() mehtods if this state
+        // Add the Entry() and Exit() methods if this state
         // defines them.
         actions = state.getEntryActions();
         if (actions != null && actions.isEmpty() == false)
@@ -1021,7 +1041,6 @@ public final class SmcCSharpGenerator
         String transName = transition.getName();
         List parameters = transition.getParameters();
         List guards = transition.getGuards();
-        boolean referenceFlag;
         boolean nullCondition = false;
         Iterator it;
         SmcGuard guard;
@@ -1046,23 +1065,13 @@ public final class SmcCSharpGenerator
         _source.println("{");
 
         // Almost all transitions have a "ctxt" local variable.
-        referenceFlag = transition.hasCtxtReference();
-        if (referenceFlag == true)
+        if (transition.hasCtxtReference() == true)
         {
+            _source.println();
             _source.print(_indent);
             _source.print("    ");
             _source.print(context);
             _source.println(" ctxt = context.Owner;");
-        }
-
-        if (stateName.equals("Default") == true)
-        {
-            _source.print(_indent);
-            _source.println("    bool loopbackFlag = false;");
-            _source.println();
-        }
-        else if (referenceFlag == true)
-        {
             _source.println();
         }
 
@@ -1071,8 +1080,10 @@ public final class SmcCSharpGenerator
         {
             String sep;
 
+            _source.println();
             _source.print(_indent);
-            _source.println("    if (context.Debug == true)");
+            _source.println(
+                "    if (context._debug_flag == true)");
             _source.print(_indent);
             _source.println("    {");
             _source.print(_indent);
@@ -1106,9 +1117,9 @@ public final class SmcCSharpGenerator
         }
 
         // Loop through the guards and print each one.
-        for (it = guards.iterator(),
-                 _guardIndex = 0,
-                 _guardCount = guards.size();
+        _guardIndex = 0;
+        _guardCount = guards.size();
+        for (it = guards.iterator();
              it.hasNext() == true;
              ++_guardIndex)
         {
@@ -1133,10 +1144,10 @@ public final class SmcCSharpGenerator
             // of its body.
             if (_guardCount == 1)
             {
+                _source.print(_indent);
                 _source.println("}");
             }
 
-            _source.println();
             _source.print(_indent);
             _source.print("    else");
             _source.print(_indent);
@@ -1198,6 +1209,7 @@ public final class SmcCSharpGenerator
         String pushStateName = guard.getPushState();
         String condition = guard.getCondition();
         List actions = guard.getActions();
+        boolean hasActions = actions.isEmpty();
 
         // If this guard's end state is not of the form
         // "map::state", then prepend the map name to the
@@ -1288,12 +1300,11 @@ public final class SmcCSharpGenerator
         // immediately. Otherwise, unset the current state so
         // that if an action tries to issue a transition, it will
         // fail.
-        if (actions.isEmpty() == true &&
-            endStateName.length() != 0)
+        if (hasActions == true && endStateName.length() != 0)
         {
             fqEndStateName = endStateName;
         }
-        else if (actions.isEmpty() == false)
+        else if (hasActions == false)
         {
             // Save away the current state if this is a loopback
             // transition. Storing current state allows the
@@ -1310,7 +1321,6 @@ public final class SmcCSharpGenerator
                 _source.print("State ");
                 _source.print(fqEndStateName);
                 _source.println(" = context.State;");
-                _source.println();
             }
             else
             {
@@ -1323,19 +1333,16 @@ public final class SmcCSharpGenerator
             transType != Smc.TRANS_POP &&
             loopbackFlag == false)
         {
-            _source.print(_indent);
-            _source.print(
-                "    if (context.State.Name == ");
+            _source.print(indent2);
+            _source.println("bool loopbackFlag =");
+            _source.print(indent2);
+            _source.println(
+                "    (context.State.Name == ");
             _source.print(fqEndStateName);
-            _source.println(".Name)");
-            _source.print(_indent);
-            _source.println("    {");
-            _source.print(_indent);
-            _source.println("        loopbackFlag = true;");
-            _source.print(_indent);
-            _source.println("    }");
-            _source.println();
+            _source.println(".Name);");
         }
+
+        _source.println();
 
         // Dump out the exit actions if
         // 1) this is a standard, non-loopback transition or
@@ -1369,7 +1376,7 @@ public final class SmcCSharpGenerator
         }
 
         // Dump out this transition's actions.
-        if (actions.isEmpty() == true)
+        if (hasActions == true)
         {
             if (condition.length() > 0)
             {
@@ -1434,9 +1441,7 @@ public final class SmcCSharpGenerator
         // 1. The transition has no actions AND is a loopback OR
         // 2. This is a push or pop transition.
         if (transType == Smc.TRANS_SET &&
-            (actions.isEmpty() == false ||
-             (endStateName.equals(NIL_STATE) == false &&
-              endStateName.equals(stateName) == false)))
+            (hasActions == false || loopbackFlag == false))
         {
             _source.print(indent3);
             _source.print("context.State = ");
@@ -1448,7 +1453,7 @@ public final class SmcCSharpGenerator
             // Set the next state so this it can be pushed
             // onto the state stack. But only do so if a clear
             // state was done.
-            if (loopbackFlag == false || actions.size() > 0)
+            if (loopbackFlag == false || hasActions == true)
             {
                 _source.print(indent3);
                 _source.print("context.State = ");
@@ -1537,8 +1542,7 @@ public final class SmcCSharpGenerator
         // brace on the finally block.
         // v. 2.2.0: Check if the user has turned off this
         // feature first.
-        if (actions.isEmpty() == false &&
-            Smc.isNoCatch() == false)
+        if (hasActions == false && Smc.isNoCatch() == false)
         {
             _source.print(indent2);
             _source.println("}");
@@ -1645,6 +1649,9 @@ public final class SmcCSharpGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2005/08/26 15:21:34  cwrapp
+// Final commit for release 4.2.0. See README.txt for more information.
+//
 // Revision 1.2  2005/06/30 10:44:23  cwrapp
 // Added %access keyword which allows developers to set the generate Context
 // class' accessibility level in Java and C#.

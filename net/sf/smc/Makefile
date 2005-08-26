@@ -62,6 +62,10 @@ APP_SOURCES=	SmcLexerContext.java \
 		SmcPythonGenerator.java \
 		SmcTableGenerator.java \
 		SmcGraphGenerator.java \
+		SmcHeaderCGenerator.java \
+		SmcCGenerator.java \
+		SmcPerlGenerator.java \
+		SmcRubyGenerator.java \
 		Smc.java
 
 PACKAGE_NAME=	net.sf.smc
@@ -130,6 +134,9 @@ realclean :	clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.8  2005/08/26 15:21:34  cwrapp
+# Final commit for release 4.2.0. See README.txt for more information.
+#
 # Revision 1.7  2005/06/08 11:09:15  cwrapp
 # + Updated Python code generator to place "pass" in methods with empty
 #   bodies.
