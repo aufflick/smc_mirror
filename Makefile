@@ -44,10 +44,12 @@ include ./smc.mk
 TAR_FILE=	$(RELEASE_DIR)/smc_$(VERSION).tar
 TAR_GZ_FILE=	$(TAR_FILE:.tar=.tar.gz)
 GZIP_FILE=	$(TAR_FILE:.tar=.tgz)
+ZIP_FILE=	$(RELEASE_DIR)/smc_$(VERSION).zip
 
-SRC_TAR_FILE=	staging/releases/SmcSrc_$(VERSION).tar
+SRC_TAR_FILE=	./staging/releases/SmcSrc_$(VERSION).tar
 SRC_TAR_GZ_FILE=$(SRC_TAR_FILE:.tar=.tar.gz)
 SRC_GZIP_FILE=	$(SRC_TAR_FILE:.tar=.tgz)
+SRC_ZIP_FILE=	./staging/releases/SmcSrc_$(VERSION).zip
 SRC_TAR_LIST=	./smc/tar_list.txt
 
 #################################################################
@@ -80,32 +82,37 @@ clean :
 		$(MAKE) -C ./net/sf/smc clean
 
 smc_dist :	$(SMC_STAGING_DIR)
-		-rm -f $(TAR_FILE) $(TAR_GZ_FILE) $(GZIP_FILE)
+		-rm -f $(TAR_FILE) $(TAR_GZ_FILE) $(GZIP_FILE) $(ZIP_FILE)
 		-rm -fr $(SMC_RELEASE_DIR)
 		mv $(SMC_STAGING_DIR) $(SMC_RELEASE_DIR)
 		(cd $(SMC_RELEASE_DIR)/..; \
 		  tar cvf $(TAR_FILE) ./smc_$(VERSION))
 		gzip $(TAR_FILE)
 		mv $(TAR_GZ_FILE) $(GZIP_FILE)
+		(cd $(SMC_RELEASE_DIR)/..; \
+		  zip -b . -r $(ZIP_FILE) ./smc_$(VERSION))
 
 src_dist :	$(SMC_RELEASE_DIR)
 		(cd ..; \
 		    rm -f $(SRC_TAR_FILE) \
 			$(SRC_TAR_GZ_FILE) \
-			$(SRC_GZIP_FILE); \
+			$(SRC_GZIP_FILE) \
+			$(SRC_ZIP_FILE); \
 		    tar cvmpfT $(SRC_TAR_FILE) $(SRC_TAR_LIST); \
 		    gzip $(SRC_TAR_FILE); \
-		    mv $(SRC_TAR_GZ_FILE) $(SRC_GZIP_FILE))
+		    mv $(SRC_TAR_GZ_FILE) $(SRC_GZIP_FILE); \
+		    zip -b . -r $(SRC_ZIP_FILE) ./smc -i@$(SRC_TAR_LIST))
 
 dist : 		install smc_dist src_dist
 
 distclean :
-		-rm -f $(TAR_FILE) $(TAR_GZ_FILE) $(GZIP_FILE)
+		-rm -f $(TAR_FILE) $(TAR_GZ_FILE) $(GZIP_FILE) $(ZIP_FILE)
 		-rm -fr $(SMC_RELEASE_DIR)
 		(cd ..; \
 		    rm -f $(SRC_TAR_FILE) \
 			  $(SRC_TAR_GZ_FILE) \
-			  $(SRC_GZIP_FILE))
+			  $(SRC_GZIP_FILE) \
+			  $(SRC_ZIP_FILE))
 
 realclean :
 		$(MAKE) -C lib realclean
@@ -114,6 +121,28 @@ realclean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.9  2005/09/11 15:28:47  cwrapp
+# Changes in release 4.2.0:
+# New features:
+#
+# + Added C, Perl and Ruby language generation.
+#
+# + Added method valueOf(int stateId) to Java, C# and VB.Net to
+#   allow developers to hand-serialize and deserialize state
+#   machines.
+#
+# Fixed the following bugs:
+#
+# + (C#) Removed extraneous "bool loopbackFlag = false" line
+#   from Default state transitions.
+#
+# + (C#) Added "Trace.Listeners.Add(myWriter)" line when generating
+#   debug code. By not having this line it prevented debug output
+#   from being outuput.
+#
+# + Corrected parser abend when a transition was missing an
+#   endstate.
+#
 # Revision 1.8  2005/06/18 18:28:36  cwrapp
 # SMC v. 4.0.1
 #
