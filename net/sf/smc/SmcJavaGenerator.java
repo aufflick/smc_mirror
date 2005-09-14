@@ -995,7 +995,7 @@ public final class SmcJavaGenerator
         String pushStateName = guard.getPushState();
         String condition = guard.getCondition();
         List actions = guard.getActions();
-        boolean hasActions = actions.isEmpty();
+        boolean hasActions = !(actions.isEmpty());
 
         // If this guard's end state is not of the form
         // "map::state", then prepend the map name to the
@@ -1427,6 +1427,16 @@ public final class SmcJavaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2005/09/14 01:51:33  cwrapp
+// Changes in release 4.2.0:
+// New features:
+//
+// None.
+//
+// Fixed the following bugs:
+//
+// + (Java) -java broken due to an untested minor change.
+//
 // Revision 1.4  2005/08/26 15:21:34  cwrapp
 // Final commit for release 4.2.0. See README.txt for more information.
 //

@@ -1209,7 +1209,7 @@ public final class SmcCSharpGenerator
         String pushStateName = guard.getPushState();
         String condition = guard.getCondition();
         List actions = guard.getActions();
-        boolean hasActions = actions.isEmpty();
+        boolean hasActions = !(actions.isEmpty());
 
         // If this guard's end state is not of the form
         // "map::state", then prepend the map name to the
@@ -1300,11 +1300,11 @@ public final class SmcCSharpGenerator
         // immediately. Otherwise, unset the current state so
         // that if an action tries to issue a transition, it will
         // fail.
-        if (hasActions == true && endStateName.length() != 0)
+        if (hasActions == false && endStateName.length() != 0)
         {
             fqEndStateName = endStateName;
         }
-        else if (hasActions == false)
+        else if (hasActions == true)
         {
             // Save away the current state if this is a loopback
             // transition. Storing current state allows the
@@ -1376,7 +1376,7 @@ public final class SmcCSharpGenerator
         }
 
         // Dump out this transition's actions.
-        if (hasActions == true)
+        if (hasActions == false)
         {
             if (condition.length() > 0)
             {
@@ -1441,7 +1441,7 @@ public final class SmcCSharpGenerator
         // 1. The transition has no actions AND is a loopback OR
         // 2. This is a push or pop transition.
         if (transType == Smc.TRANS_SET &&
-            (hasActions == false || loopbackFlag == false))
+            (hasActions == true || loopbackFlag == false))
         {
             _source.print(indent3);
             _source.print("context.State = ");
@@ -1453,7 +1453,7 @@ public final class SmcCSharpGenerator
             // Set the next state so this it can be pushed
             // onto the state stack. But only do so if a clear
             // state was done.
-            if (loopbackFlag == false || hasActions == true)
+            if (loopbackFlag == false || hasActions == false)
             {
                 _source.print(indent3);
                 _source.print("context.State = ");
@@ -1649,6 +1649,16 @@ public final class SmcCSharpGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2005/09/14 01:51:33  cwrapp
+// Changes in release 4.2.0:
+// New features:
+//
+// None.
+//
+// Fixed the following bugs:
+//
+// + (Java) -java broken due to an untested minor change.
+//
 // Revision 1.3  2005/08/26 15:21:34  cwrapp
 // Final commit for release 4.2.0. See README.txt for more information.
 //

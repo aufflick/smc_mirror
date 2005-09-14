@@ -1,6 +1,25 @@
 
                               SMC -
                   The State Machine Compiler
+                        Version 4.2.1
+
+
+
++ Major changes
+---------------
+
+None.
+
+
++ Bug fixes
+-----------
+
+-java broken due to an untested minor change.
+
+
+
+                              SMC -
+                  The State Machine Compiler
                         Version 4.2.0
 
 

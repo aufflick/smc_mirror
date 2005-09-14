@@ -34,6 +34,7 @@ package net.sf.smc;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -63,7 +64,7 @@ public final class SmcSyntaxChecker
 
         _fsmName = fsm;
         _targetLanguage = targetLanguage;
-        _messages = (List) new ArrayList();
+        _messages = (List) new LinkedList();
         _checkFlag = true;
     }
 
@@ -107,7 +108,7 @@ public final class SmcSyntaxChecker
         {
             _messages.add(
                 new SmcMessage(_fsmName,
-                               headerLine,
+                               0,
                                SmcMessage.ERROR,
                                "\"%start\" missing."));
 
@@ -118,7 +119,7 @@ public final class SmcSyntaxChecker
         {
             _messages.add(
                 new SmcMessage(_fsmName,
-                               headerLine,
+                               0,
                                SmcMessage.ERROR,
                                "\"%class\" missing."));
 
@@ -131,7 +132,7 @@ public final class SmcSyntaxChecker
         {
             _messages.add(
                 new SmcMessage(_fsmName,
-                               headerLine,
+                               0,
                                SmcMessage.ERROR,
                                "\"%header\" missing."));
 
@@ -147,7 +148,7 @@ public final class SmcSyntaxChecker
             _messages.add(
                 new SmcMessage(
                     _fsmName,
-                    headerLine,
+                    0,
                     SmcMessage.ERROR,
                     ".sm file name \"" +
                     fsm.getName() +

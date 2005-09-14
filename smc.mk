@@ -38,7 +38,7 @@
 # Macros.
 #
 
-VERSION=	4_2_0
+VERSION=	4_2_1
 
 STAGING_DIR=	../staging
 SMC_STAGING_DIR=$(STAGING_DIR)/smc
@@ -60,6 +60,16 @@ $(SMC_STAGING_DIR) :	$(STAGING_DIR)
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.6  2005/09/14 01:51:33  cwrapp
+# Changes in release 4.2.0:
+# New features:
+#
+# None.
+#
+# Fixed the following bugs:
+#
+# + (Java) -java broken due to an untested minor change.
+#
 # Revision 1.5  2005/08/26 15:21:33  cwrapp
 # Final commit for release 4.2.0. See README.txt for more information.
 #

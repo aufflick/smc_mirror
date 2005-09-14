@@ -2,7 +2,7 @@
 
                                SMC
                      The State Machine Compiler
-                         (Version: 4.2.0)
+                         (Version: 4.2.1)
 
                      http://smc.sourceforge.net
 
@@ -13,23 +13,11 @@
 
 New Features:
 
-+ Added C, Perl and Ruby language generation.
-
-+ Added method valueOf(int stateId) to Java, C# and VB.Net to
-  allow developers to hand-serialize and deserialize state
-  machines.
+None
 
 Bug Fixes:
 
-+ (C#) Removed extraneous "bool loopbackFlag = false" line
-  from Default state transitions.
-
-+ (C#) Added "Trace.Listeners.Add(myWriter)" line when generating
-  debug code. By not having this line it prevented debug output
-  from being outuput.
-
-+ Corrected parser abend when a transition was missing an
-  endstate.
++ (Java) -java broken due to an untested minor change.
 
 
 1. System Requirements

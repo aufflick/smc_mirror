@@ -121,7 +121,7 @@ public final class SmcParser
                 _quitFlag = true;
                 _parseStatus = false;
             }
-            // If the last token as a failure, don't go on.
+            // If the last token is a failure, don't go on.
             else if (tokenType == SmcLexer.DONE_FAILED)
             {
                 _quitFlag = true;
@@ -1405,6 +1405,16 @@ public final class SmcParser
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2005/09/14 01:51:33  cwrapp
+// Changes in release 4.2.0:
+// New features:
+//
+// None.
+//
+// Fixed the following bugs:
+//
+// + (Java) -java broken due to an untested minor change.
+//
 // Revision 1.10  2005/08/26 15:21:34  cwrapp
 // Final commit for release 4.2.0. See README.txt for more information.
 //

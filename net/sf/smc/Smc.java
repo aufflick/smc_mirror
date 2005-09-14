@@ -1490,12 +1490,22 @@ public final class Smc
     /* package */ static final int TRANS_PUSH = 2;
     /* package */ static final int TRANS_POP = 3;
 
-    private static final String VERSION = "v. 4.2.0";
+    private static final String VERSION = "v. 4.2.1";
 }
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2005/09/14 01:51:33  cwrapp
+// Changes in release 4.2.0:
+// New features:
+//
+// None.
+//
+// Fixed the following bugs:
+//
+// + (Java) -java broken due to an untested minor change.
+//
 // Revision 1.10  2005/08/26 15:21:34  cwrapp
 // Final commit for release 4.2.0. See README.txt for more information.
 //
