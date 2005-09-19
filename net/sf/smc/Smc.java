@@ -1490,12 +1490,22 @@ public final class Smc
     /* package */ static final int TRANS_PUSH = 2;
     /* package */ static final int TRANS_POP = 3;
 
-    private static final String VERSION = "v. 4.2.1";
+    private static final String VERSION = "v. 4.2.2";
 }
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.12  2005/09/19 15:20:03  cwrapp
+// Changes in release 4.2.2:
+// New features:
+//
+// None.
+//
+// Fixed the following bugs:
+//
+// + (C#) -csharp not generating finally block closing brace.
+//
 // Revision 1.11  2005/09/14 01:51:33  cwrapp
 // Changes in release 4.2.0:
 // New features:

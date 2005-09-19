@@ -1,3 +1,22 @@
+                              SMC -
+                  The State Machine Compiler
+                        Version 4.2.2
+
+
+
++ Major changes
+---------------
+
+None.
+
+
++ Bug fixes
+-----------
+
+-csharp broken due to finally block closing brace not
+generated.
+
+
 
                               SMC -
                   The State Machine Compiler

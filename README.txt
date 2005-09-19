@@ -2,7 +2,7 @@
 
                                SMC
                      The State Machine Compiler
-                         (Version: 4.2.1)
+                         (Version: 4.2.2)
 
                      http://smc.sourceforge.net
 
@@ -17,7 +17,8 @@ None
 
 Bug Fixes:
 
-+ (Java) -java broken due to an untested minor change.
++ (C#) -csharp broken due to finally block closing brace not
+generated.
 
 
 1. System Requirements

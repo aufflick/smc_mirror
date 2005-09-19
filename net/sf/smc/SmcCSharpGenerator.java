@@ -1336,7 +1336,7 @@ public final class SmcCSharpGenerator
             _source.print(indent2);
             _source.println("bool loopbackFlag =");
             _source.print(indent2);
-            _source.println(
+            _source.print(
                 "    (context.State.Name == ");
             _source.print(fqEndStateName);
             _source.println(".Name);");
@@ -1542,7 +1542,7 @@ public final class SmcCSharpGenerator
         // brace on the finally block.
         // v. 2.2.0: Check if the user has turned off this
         // feature first.
-        if (hasActions == false && Smc.isNoCatch() == false)
+        if (hasActions == true && Smc.isNoCatch() == false)
         {
             _source.print(indent2);
             _source.println("}");
@@ -1649,6 +1649,16 @@ public final class SmcCSharpGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2005/09/19 15:20:03  cwrapp
+// Changes in release 4.2.2:
+// New features:
+//
+// None.
+//
+// Fixed the following bugs:
+//
+// + (C#) -csharp not generating finally block closing brace.
+//
 // Revision 1.4  2005/09/14 01:51:33  cwrapp
 // Changes in release 4.2.0:
 // New features:

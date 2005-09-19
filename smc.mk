@@ -38,7 +38,7 @@
 # Macros.
 #
 
-VERSION=	4_2_1
+VERSION=	4_2_2
 
 STAGING_DIR=	../staging
 SMC_STAGING_DIR=$(STAGING_DIR)/smc
@@ -60,6 +60,16 @@ $(SMC_STAGING_DIR) :	$(STAGING_DIR)
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.7  2005/09/19 15:20:01  cwrapp
+# Changes in release 4.2.2:
+# New features:
+#
+# None.
+#
+# Fixed the following bugs:
+#
+# + (C#) -csharp not generating finally block closing brace.
+#
 # Revision 1.6  2005/09/14 01:51:33  cwrapp
 # Changes in release 4.2.0:
 # New features:
