@@ -34,7 +34,6 @@ package net.sf.smc;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -84,6 +83,13 @@ public final class SmcVBGenerator
         {
             _source.println(rawSource);
             _source.println();
+        }
+
+        // If reflection is on, then import the .Net collections
+        // package.
+        if (Smc.isReflection() == true)
+        {
+            _source.println("Imports System.Collections");
         }
 
         // Do user-specified imports now.
@@ -273,28 +279,7 @@ public final class SmcVBGenerator
         // Generate the transition methods. These methods are all
         // formatted: set transition name, call the current
         // state's transition method, clear the transition name.
-        transitions = (List) new ArrayList();
-        for (it = maps.iterator(); it.hasNext() == true;)
-        {
-            map = (SmcMap) it.next();
-
-            // Merge the new transitions into the current set.
-            transitions =
-                Smc.merge(
-                    map.getTransitions(),
-                    transitions,
-                    new Comparator()
-                    {
-                        public int compare(Object o1,
-                                           Object o2)
-                        {
-                            return (
-                                ((SmcTransition) o1).compareTo(
-                                    (SmcTransition) o2));
-                        }
-                    });
-        }
-
+        transitions = fsm.getTransitions();
         for (it = transitions.iterator(); it.hasNext() == true;)
         {
             trans = (SmcTransition) it.next();
@@ -475,6 +460,22 @@ public final class SmcVBGenerator
         _source.println("State");
         _source.println("    Inherits statemap.State");
         _source.println();
+
+        // If reflection is on, then generate the abstract
+        // Transitions property.
+        if (Smc.isReflection() == true)
+        {
+            _source.println(
+                "    '------------------------------------------------------------");
+            _source.println("    ' Properties");
+            _source.println("    '");
+            _source.println();
+            _source.print("    Public MustOverride ReadOnly ");
+            _source.println(
+                "Property Transitions() As IDictionary");
+            _source.println();
+        }
+
         _source.println(
             "    '------------------------------------------------------------");
         _source.println("    ' Member methods");
@@ -664,6 +665,26 @@ public final class SmcVBGenerator
         _source.print(context);
         _source.println("State");
         _source.println();
+
+        // If reflection is on, generate the Transition property.
+        if (Smc.isReflection() == true)
+        {
+            _source.println(
+                "    '------------------------------------------------------------");
+            _source.println("    ' Properties");
+            _source.println("    '");
+            _source.println();
+            _source.print("    Public Overrides ReadOnly ");
+            _source.println(
+                "Property Transitions() As IDictionary");
+            _source.println("        Get");
+            _source.println();
+            _source.println("            Return _transitions");
+            _source.println("        End Get");
+            _source.println("    End Property");
+            _source.println();
+        }
+
         _source.println(
             "    '------------------------------------------------------------");
         _source.println("    ' Member methods");
@@ -684,6 +705,61 @@ public final class SmcVBGenerator
             )
         {
             ((SmcTransition) it.next()).accept(this);
+        }
+
+        // If reflection is on, then define the transitions list.
+        if (Smc.isReflection() == true)
+        {
+            List allTransitions = map.getFSM().getTransitions();
+            SmcTransition transition;
+            String transName;
+            int transDefinition;
+
+            _source.println();
+            _source.println(
+                "    '------------------------------------------------------------");
+            _source.println("    ' Shared data");
+            _source.println("    '");
+            _source.println();
+            _source.print("    ");
+            _source.println(
+                "Private Shared _transitions As IDictionary");
+            _source.println();
+            _source.println("    Shared Sub New()");
+            _source.println();
+            _source.print("        ");
+            _source.println("_transitions = New Hashtable()");
+
+            // Now place the transition names into the list.
+            for (it = allTransitions.iterator();
+                 it.hasNext() == true;
+                )
+            {
+                transition = (SmcTransition) it.next();
+                transName = transition.getName();
+
+                // If the transition is defined in this map's
+                // default state, then the value is 2.
+                if (definedDefaultTransitions.contains(
+                        transition) == true)
+                {
+                    transDefinition = 2;
+                }
+                // Otherwise the value is 0 - undefined.
+                else
+                {
+                    transDefinition = 0;
+                }
+
+                _source.print("        ");
+                _source.print("_transitions.Add(\"");
+                _source.print(transName);
+                _source.print("\", ");
+                _source.print(transDefinition);
+                _source.println(")");
+            }
+            _source.println();
+            _source.println("    End Sub");
         }
 
         _source.println("End Class");
@@ -716,6 +792,26 @@ public final class SmcVBGenerator
         _source.print(mapName);
         _source.println("_Default");
         _source.println();
+
+        // Generate the Transitions property if reflection is on.
+        if (Smc.isReflection() == true)
+        {
+            _source.println(
+                "    '------------------------------------------------------------");
+            _source.println("    ' Properties");
+            _source.println("    '");
+            _source.println();
+            _source.print("    Public Overrides ReadOnly ");
+            _source.println(
+                "Property Transitions() As IDictionary");
+            _source.println("        Get");
+            _source.println();
+            _source.println("            Return _transitions");
+            _source.println("        End Get");
+            _source.println("    End Property");
+            _source.println();
+        }
+
         _source.println(
             "    '------------------------------------------------------------");
         _source.println("    ' Member methods");
@@ -787,6 +883,85 @@ public final class SmcVBGenerator
             )
         {
             ((SmcTransition) it.next()).accept(this);
+        }
+
+        // If reflection is on, then generate the transitions
+        // list.
+        if (Smc.isReflection() == true)
+        {
+            List allTransitions = map.getFSM().getTransitions();
+            List stateTransitions = state.getTransitions();
+            SmcState defaultState = map.getDefaultState();
+            List defaultTransitions;
+            SmcTransition transition;
+            String transName;
+            int transDefinition;
+
+            // Initialize the default transition list to all the
+            // default state's transitions.
+            if (defaultState != null)
+            {
+                defaultTransitions =
+                    defaultState.getTransitions();
+            }
+            else
+            {
+                defaultTransitions = (List) new ArrayList();
+            }
+
+            _source.println();
+            _source.println(
+                "    '------------------------------------------------------------");
+            _source.println("    ' Shared data");
+            _source.println("    '");
+            _source.println();
+            _source.print("    ");
+            _source.println(
+                "Private Shared _transitions As IDictionary");
+            _source.println();
+            _source.println("    Shared Sub New()");
+            _source.println();
+            _source.print("        ");
+            _source.println("_transitions = New Hashtable()");
+
+            // Now place the transition names into the list.
+            for (it = allTransitions.iterator();
+                 it.hasNext() == true;
+                )
+            {
+                transition = (SmcTransition) it.next();
+                transName = transition.getName();
+
+                // If the transition is in this state, then its
+                // value is 1.
+                if (stateTransitions.contains(
+                        transition) == true)
+                {
+                    transDefinition = 1;
+                }
+                // If the transition is defined in this map's
+                // default state, then the value is 2.
+                else if (defaultTransitions.contains(
+                             transition) == true)
+                {
+                    transDefinition = 2;
+                }
+                // Otherwise the value is 0 - undefined.
+                else
+                {
+                    transDefinition = 0;
+                }
+
+                _source.print("        ");
+                _source.print("_transitions.Add(\"");
+                _source.print(transName);
+                _source.print("\", ");
+                _source.print(transDefinition);
+                _source.println(")");
+            }
+
+            _source.println();
+            _source.println("    End Sub");
         }
 
         _source.println("End Class");
@@ -1371,6 +1546,39 @@ public final class SmcVBGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2005/11/07 19:34:54  cwrapp
+// Changes in release 4.3.0:
+// New features:
+//
+// + Added -reflect option for Java, C#, VB.Net and Tcl code
+//   generation. When used, allows applications to query a state
+//   about its supported transitions. Returns a list of transition
+//   names. This feature is useful to GUI developers who want to
+//   enable/disable features based on the current state. See
+//   Programmer's Manual section 11: On Reflection for more
+//   information.
+//
+// + Updated LICENSE.txt with a missing final paragraph which allows
+//   MPL 1.1 covered code to work with the GNU GPL.
+//
+// + Added a Maven plug-in and an ant task to a new tools directory.
+//   Added Eiten Suez's SMC tutorial (in PDF) to a new docs
+//   directory.
+//
+// Fixed the following bugs:
+//
+// + (GraphViz) DOT file generation did not properly escape
+//   double quotes appearing in transition guards. This has been
+//   corrected.
+//
+// + A note: the SMC FAQ incorrectly stated that C/C++ generated
+//   code is thread safe. This is wrong. C/C++ generated is
+//   certainly *not* thread safe. Multi-threaded C/C++ applications
+//   are required to synchronize access to the FSM to allow for
+//   correct performance.
+//
+// + (Java) The generated getState() method is now public.
+//
 // Revision 1.2  2005/08/26 15:21:34  cwrapp
 // Final commit for release 4.2.0. See README.txt for more information.
 //

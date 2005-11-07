@@ -34,11 +34,10 @@ package net.sf.smc;
 
 import java.io.PrintStream;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 public final class SmcFSM
     extends SmcElement
@@ -56,13 +55,13 @@ public final class SmcFSM
         _source = "";
         _context = "";
         _header = "";
-        _includeList = (List) new LinkedList();
+        _includeList = (List) new ArrayList();
         _package = null;
-        _importList = (List) new LinkedList();
-        _declareList = (List) new LinkedList();
+        _importList = (List) new ArrayList();
+        _declareList = (List) new ArrayList();
         _accessLevel = "";
         _headerLine = -1;
-        _maps = (List) new LinkedList();
+        _maps = (List) new ArrayList();
     }
 
     public String getSource()
@@ -247,6 +246,36 @@ public final class SmcFSM
         return;
     }
 
+    // Returns the list of all known transitions, all maps.
+    public List getTransitions()
+    {
+        Iterator mit;
+        SmcMap map;
+        Comparator comparator =
+            new Comparator() {
+                public int compare(Object o1,
+                                   Object o2)
+                {
+                    return(
+                        ((SmcTransition) o1).compareTo(
+                            (SmcTransition) o2));
+                }
+            };
+        List retval = (List) new ArrayList();
+
+        for (mit = _maps.iterator(); mit.hasNext() == true;)
+        {
+            map = (SmcMap) mit.next();
+
+            // Merge the new transitions into the current set.
+            retval =
+                Smc.merge(
+                    map.getTransitions(), retval, comparator);
+        }
+
+        return (retval);
+    }
+
     //-----------------------------------------------------------
     // SmcElement Abstract Methods.
     //
@@ -352,6 +381,39 @@ public final class SmcFSM
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2005/11/07 19:34:54  cwrapp
+// Changes in release 4.3.0:
+// New features:
+//
+// + Added -reflect option for Java, C#, VB.Net and Tcl code
+//   generation. When used, allows applications to query a state
+//   about its supported transitions. Returns a list of transition
+//   names. This feature is useful to GUI developers who want to
+//   enable/disable features based on the current state. See
+//   Programmer's Manual section 11: On Reflection for more
+//   information.
+//
+// + Updated LICENSE.txt with a missing final paragraph which allows
+//   MPL 1.1 covered code to work with the GNU GPL.
+//
+// + Added a Maven plug-in and an ant task to a new tools directory.
+//   Added Eiten Suez's SMC tutorial (in PDF) to a new docs
+//   directory.
+//
+// Fixed the following bugs:
+//
+// + (GraphViz) DOT file generation did not properly escape
+//   double quotes appearing in transition guards. This has been
+//   corrected.
+//
+// + A note: the SMC FAQ incorrectly stated that C/C++ generated
+//   code is thread safe. This is wrong. C/C++ generated is
+//   certainly *not* thread safe. Multi-threaded C/C++ applications
+//   are required to synchronize access to the FSM to allow for
+//   correct performance.
+//
+// + (Java) The generated getState() method is now public.
+//
 // Revision 1.2  2005/06/30 10:44:23  cwrapp
 // Added %access keyword which allows developers to set the generate Context
 // class' accessibility level in Java and C#.

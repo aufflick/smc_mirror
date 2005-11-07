@@ -42,34 +42,40 @@ SMC's command line options are:
     -suffix <suffix> 
              : Use this suffix on the output file.
     -g       : Add debugging to generated code.
+    -nostreams
+             : Do not use C++ iostream
+               (use with -c++ only).
     -version : Print SMC version to standard out and exit.
+    -verbose : Output more compiler messages.
     -help    : Print this message to standard out and exit.
     -sync    : Synchronize generated Java code
-               (use with -java and -vb only).
+               (use with -java, -vb and -csharp only).
     -noex    : Do not generate C++ exception throws
                (use with -c++ only).
     -nocatch : Do not generate try/catch/rethrow code
                (not recommended).
-    -cast <cast type>
-             : use this C++ cast type (use with -c++ only).
-    -serial  : Generate serialization code (use with -c++, -java,
-               -tcl, -vb and -csharp only).
-    -d <directory>
-             : Placed generated files in directory.
-    -nostreams
-             : Do not use C++ iostream (use with -c++ only).
+    -serial  : Generate serialization code.
     -return  : Smc.main() does not exit but simply returns.
                Use this option with ANT.
-               Do *not* use this option with make.
+    -reflect : Generate reflection code.
+               (use with -java, -tcl, -vb and -csharp only).
+    -cast <cast type>
+             : use this C++ cast type
+               (use with -c++ only).
+    -d <directory>
+             : Placed generated files in directory.
     -glevel <0 - 2>
              : Graph detail level from 0 (least) to 2 (greatest)
                (use with -graph only).
+    -c       : Generate C code.
     -c++     : Generate C++ code.
+    -csharp  : Generate C# code.
     -java    : Generate Java code.
+    -perl    : Generate Perl code.
+    -python  : Generate Python code.
+    -ruby    : Generate Ruby code.
     -tcl     : Generate [incr Tcl] code.
     -vb      : Generate VB.Net code.
-    -csharp  : Generate C# code.
-    -python  : Generate Python code.
     -table   : Generate an HTML table.
     -graph   : Generate a Graphviz DOT file.
 

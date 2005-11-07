@@ -34,11 +34,8 @@ package net.sf.smc;
 
 import java.io.PrintStream;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.StringTokenizer;
 
 /**
  * Visits the abstract syntax tree emitting C++ code.
@@ -77,7 +74,7 @@ public final class SmcCGenerator
         String context = fsm.getContext();
         String mapName;
         String startStateName = fsm.getStartState();
-        List transList = (List) new ArrayList();
+        List transList;
         String separator;
         List params;
         Iterator it;
@@ -126,28 +123,7 @@ public final class SmcCGenerator
 
         // Print out the default definitions for all the
         // transitions. First, get the transitions list.
-        for (mapIt = fsm.getMaps().iterator();
-             mapIt.hasNext() == true;
-            )
-        {
-            map = (SmcMap) mapIt.next();
-
-            // Merge the new transitions into the current set.
-            transList =
-                    Smc.merge(
-                        map.getTransitions(),
-                        transList,
-                        new Comparator() {
-                            public int compare(Object o1,
-                                               Object o2)
-                            {
-                                return (
-                                    ((SmcTransition)
-                                     o1).compareTo(
-                                         (SmcTransition) o2));
-                            }
-                        });
-        }
+        transList = fsm.getTransitions();
 
         _source.println();
         _source.println("#define getOwner(fsm) \\");
@@ -1254,6 +1230,39 @@ public final class SmcCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2005/11/07 19:34:54  cwrapp
+// Changes in release 4.3.0:
+// New features:
+//
+// + Added -reflect option for Java, C#, VB.Net and Tcl code
+//   generation. When used, allows applications to query a state
+//   about its supported transitions. Returns a list of transition
+//   names. This feature is useful to GUI developers who want to
+//   enable/disable features based on the current state. See
+//   Programmer's Manual section 11: On Reflection for more
+//   information.
+//
+// + Updated LICENSE.txt with a missing final paragraph which allows
+//   MPL 1.1 covered code to work with the GNU GPL.
+//
+// + Added a Maven plug-in and an ant task to a new tools directory.
+//   Added Eiten Suez's SMC tutorial (in PDF) to a new docs
+//   directory.
+//
+// Fixed the following bugs:
+//
+// + (GraphViz) DOT file generation did not properly escape
+//   double quotes appearing in transition guards. This has been
+//   corrected.
+//
+// + A note: the SMC FAQ incorrectly stated that C/C++ generated
+//   code is thread safe. This is wrong. C/C++ generated is
+//   certainly *not* thread safe. Multi-threaded C/C++ applications
+//   are required to synchronize access to the FSM to allow for
+//   correct performance.
+//
+// + (Java) The generated getState() method is now public.
+//
 // Revision 1.1  2005/06/16 18:11:01  fperrad
 // Added C, Perl & Ruby generators.
 //

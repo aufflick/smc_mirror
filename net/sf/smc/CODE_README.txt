@@ -1,5 +1,37 @@
                               SMC -
                   The State Machine Compiler
+                        Version 4.3.0
+
+
+
++ Major changes
+---------------
+
+Added -reflect option for Java, C#, VB.Net and Tcl code
+generation. When used, allows applications to query a state
+about its supported transitions. Returns a list of transition
+names. This feature is useful to GUI developers who want to
+enable/disable features based on the current state. See
+Programmer's Manual section 11: On Reflection for more
+information.
+
+Updated LICENSE.txt with a missing final paragraph which allows
+MPL 1.1 covered code to work with the GNU GPL.
+
+
++ Bug fixes
+-----------
+
+Fixed GraphViz DOT file generation where double qoutes in
+transition guards were not properly escaped.
+
+When generating Java, make getState() public. Also make class
+<AppClass>State public.
+
+
+
+                              SMC -
+                  The State Machine Compiler
                         Version 4.2.2
 
 

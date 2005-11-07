@@ -34,10 +34,8 @@ package net.sf.smc;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.StringTokenizer;
 
 /**
  * Visits the abstract syntax tree, emitting [incr Tcl] code.
@@ -153,27 +151,7 @@ public final class SmcTclGenerator
         // For every possible transition in every state map,
         // create a method.
         // First, get the transitions list.
-        transitions = (List) new ArrayList();
-        for (it = maps.iterator(); it.hasNext() == true;)
-        {
-            map = (SmcMap) it.next();
-
-            // Merge the new transitions into the current set.
-            transitions =
-                Smc.merge(
-                    map.getTransitions(),
-                    transitions,
-                    new Comparator() {
-                        public int compare(Object o1,
-                                           Object o2)
-                        {
-                            return (
-                                ((SmcTransition) o1).compareTo(
-                                    (SmcTransition) o2));
-                        }
-                    });
-        }
-
+        transitions = fsm.getTransitions();
         for (it = transitions.iterator(); it.hasNext() == true;)
         {
             trans = (SmcTransition) it.next();
@@ -380,6 +358,7 @@ public final class SmcTclGenerator
                  ++index)
             {
                 state = (SmcState) it2.next();
+
                 _source.print(_indent);
                 _source.print("set ");
                 _source.print(mapName);
@@ -404,6 +383,50 @@ public final class SmcTclGenerator
                 _source.print("\" ");
                 _source.print(index);
                 _source.println("];");
+            }
+        }
+
+        // If -reflect specified, then generate the transitions
+        // class-level data member for each state - but only if
+        // the state has transitions.
+        if (Smc.isReflection() == true)
+        {
+            SmcState defaultState;
+            List defaultTransitions;
+            List stateTransitions;
+
+            _source.println();
+            _source.print(_indent);
+            _source.println("# Static state transitions.");
+
+            for (it = maps.iterator(), index = 0;
+                 it.hasNext() == true;
+                )
+            {
+                map = (SmcMap) it.next();
+                defaultState = map.getDefaultState();
+                defaultTransitions =
+                    defaultState.getTransitions();
+                stateTransitions = (List) new ArrayList();
+
+                // Generate the default state's transitions
+                // first.
+                _reflectTransitions(defaultState,
+                                    stateTransitions,
+                                    defaultTransitions,
+                                    transitions);
+
+                for (it2 = map.getStates().iterator();
+                     it2.hasNext() == true;
+                     ++index)
+                {
+                    state = (SmcState) it2.next();
+                    stateTransitions = state.getTransitions();
+                    _reflectTransitions(state,
+                                        stateTransitions,
+                                        defaultTransitions,
+                                        transitions);
+                }
             }
         }
 
@@ -529,6 +552,21 @@ public final class SmcTclGenerator
         _source.print(_indent);
         _source.println("    } {}");
 
+        // If -reflection was specified, then generate the
+        // getTransitions method.
+        if (Smc.isReflection() == true)
+        {
+            _source.println();
+            _source.print(_indent);
+            _source.println(
+                "    public method getTransitions {} {");
+            _source.print(_indent);
+            _source.print("        ");
+            _source.println(
+                "return -code ok [array get _transitions];");
+            _source.println("    }");
+        }
+
         // Dump out the user-defined default transitions.
         if (defaultState != null)
         {
@@ -538,6 +576,18 @@ public final class SmcTclGenerator
             {
                 ((SmcTransition) it.next()).accept(this);
             }
+        }
+
+        // If -reflect specified, then generate the transitions
+        // class data.
+        if (Smc.isReflection() == true)
+        {
+            _source.println();
+            _source.print(_indent);
+            _source.println("# Member data.");
+            _source.println();
+            _source.print(_indent);
+            _source.println("    public common _transitions;");
         }
 
         // End the map's default state class declaration.
@@ -609,6 +659,21 @@ public final class SmcTclGenerator
         _source.print(_indent);
         _source.println("    } {}");
 
+        // If -reflection was specified, then generate the
+        // getTransitions method.
+        if (Smc.isReflection() == true)
+        {
+            _source.println();
+            _source.print(_indent);
+            _source.println(
+                "    public method getTransitions {} {");
+            _source.print(_indent);
+            _source.print("        ");
+            _source.println(
+                "return -code ok [array get _transitions];");
+            _source.println("    }");
+        }
+
         // Add the Entry() and Exit() member functions if this
         // state defines them.
         actions = state.getEntryActions();
@@ -670,6 +735,18 @@ public final class SmcTclGenerator
             )
         {
             ((SmcTransition) it.next()).accept(this);
+        }
+
+        // If -reflect specified, then generate the transitions
+        // class data.
+        if (Smc.isReflection() == true)
+        {
+            _source.println();
+            _source.print(_indent);
+            _source.println("# Member data.");
+            _source.println();
+            _source.print(_indent);
+            _source.println("    public common _transitions;");
         }
 
         // End of the state class declaration.
@@ -1371,6 +1448,64 @@ public final class SmcTclGenerator
         return;
     }
 
+    // Returns the _transition initializations for reflection.
+    private void _reflectTransitions(SmcState state,
+                                     List stateTransitions,
+                                     List defaultTransitions,
+                                     List allTransitions)
+    {
+        Iterator it;
+        SmcTransition transition;
+        String transName;
+        int transDefinition;
+        String sep;
+
+        _source.print(_indent);
+        _source.print("array set ");
+        _source.print(state.getMap().getName());
+        _source.print("_");
+        _source.print(state.getClassName());
+        _source.print("::_transitions {");
+
+        for (it = allTransitions.iterator(), sep = "";
+             it.hasNext() == true;
+             sep = " ")
+        {
+            transition = (SmcTransition) it.next();
+            transName = transition.getName();
+
+            // If the transition is in this state, then its
+            // value is 1.
+            if (stateTransitions.contains(
+                    transition) == true)
+            {
+                transDefinition = 1;
+            }
+            // If the transition is defined in this map's
+            // default state, then the value is 2.
+            else if (defaultTransitions.contains(
+                         transition) == true)
+            {
+                transDefinition = 2;
+            }
+            // Otherwise the value is 0 - undefined.
+            else
+            {
+                transDefinition = 0;
+            }
+
+            _source.print(sep);
+            _source.print("\"");
+            _source.print(transName);
+            _source.print("\" ");
+            _source.print(transDefinition);
+        }
+
+        _source.println("};");
+
+        return;
+    }
+
 //---------------------------------------------------------------
 // Member data
 //
@@ -1382,6 +1517,39 @@ public final class SmcTclGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2005/11/07 19:34:54  cwrapp
+// Changes in release 4.3.0:
+// New features:
+//
+// + Added -reflect option for Java, C#, VB.Net and Tcl code
+//   generation. When used, allows applications to query a state
+//   about its supported transitions. Returns a list of transition
+//   names. This feature is useful to GUI developers who want to
+//   enable/disable features based on the current state. See
+//   Programmer's Manual section 11: On Reflection for more
+//   information.
+//
+// + Updated LICENSE.txt with a missing final paragraph which allows
+//   MPL 1.1 covered code to work with the GNU GPL.
+//
+// + Added a Maven plug-in and an ant task to a new tools directory.
+//   Added Eiten Suez's SMC tutorial (in PDF) to a new docs
+//   directory.
+//
+// Fixed the following bugs:
+//
+// + (GraphViz) DOT file generation did not properly escape
+//   double quotes appearing in transition guards. This has been
+//   corrected.
+//
+// + A note: the SMC FAQ incorrectly stated that C/C++ generated
+//   code is thread safe. This is wrong. C/C++ generated is
+//   certainly *not* thread safe. Multi-threaded C/C++ applications
+//   are required to synchronize access to the FSM to allow for
+//   correct performance.
+//
+// + (Java) The generated getState() method is now public.
+//
 // Revision 1.1  2005/05/28 19:28:42  cwrapp
 // Moved to visitor pattern.
 //

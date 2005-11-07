@@ -34,7 +34,6 @@ package net.sf.smc;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -125,12 +124,15 @@ public final class SmcJavaGenerator
         if (Smc.isDebug() == true)
         {
             _source.println("import java.io.PrintStream;");
-            _source.println();
         }
-        else if (fsm.getImports().size() != 0)
+
+        if (Smc.isReflection() == true)
         {
-            _source.println();
+            _source.println("import java.util.HashMap;");
+            _source.println("import java.util.Map;");
         }
+
+        _source.println();
 
         // The context clas contains all the state classes as
         // inner classes, so generate the context first rather
@@ -192,28 +194,8 @@ public final class SmcJavaGenerator
         _source.println();
 
         // Generate the default transition methods.
-        // Get the transition list.
-        transitions = (List) new ArrayList();
-        for (it = maps.iterator(); it.hasNext() == true;)
-        {
-            map = (SmcMap) it.next();
-
-            // Merge the new transitions into the current set.
-            transitions =
-                Smc.merge(
-                    map.getTransitions(),
-                    transitions,
-                    new Comparator()
-                    {
-                        public int compare(Object o1,
-                                           Object o2)
-                        {
-                            return (
-                                ((SmcTransition) o1).compareTo(
-                                    (SmcTransition) o2));
-                        }
-                    });
-        }
+        // Get the transition list for the entire FSM.
+        transitions = fsm.getTransitions();
 
         // Generate the transition methods.
         for (it = transitions.iterator(); it.hasNext() == true;)
@@ -309,7 +291,7 @@ public final class SmcJavaGenerator
         }
 
         // getState() method.
-        _source.print("    protected ");
+        _source.print("    public ");
         _source.print(context);
         _source.println("State getState()");
         _source.println(
@@ -467,11 +449,26 @@ public final class SmcJavaGenerator
         _source.println("// Inner classes.");
         _source.println("//");
         _source.println();
-        _source.print("    protected static abstract class ");
+        _source.print("    public static abstract class ");
         _source.print(context);
         _source.println("State");
         _source.println("        extends statemap.State");
         _source.println("    {");
+        _source.println(
+            "    //-----------------------------------------------------------");
+        _source.println("    // Member methods.");
+        _source.println("    //");
+        _source.println();
+
+        // Abstract method to obtain the a state's supported
+        // transitions.
+        if (Smc.isReflection() == true)
+        {
+            _source.print("        ");
+            _source.println(
+                "public abstract Map getTransitions();");
+            _source.println();
+        }
 
         // Constructor.
         _source.print("        protected ");
@@ -565,6 +562,11 @@ public final class SmcJavaGenerator
         _source.println("        }");
 
         // End of state class.
+        _source.println();
+        _source.println(
+            "    //-----------------------------------------------------------");
+        _source.println("    // Member data.");
+        _source.println("    //");
         _source.println("    }");
 
         // Have each map print out its source code now.
@@ -608,6 +610,20 @@ public final class SmcJavaGenerator
             "    /* package */ static abstract class ");
         _source.println(mapName);
         _source.println("    {");
+        _source.println(
+            "    //-----------------------------------------------------------");
+        _source.println("    // Member methods.");
+        _source.println("    //");
+        _source.println();
+        _source.println(
+            "    //-----------------------------------------------------------");
+        _source.println("    // Member data.");
+        _source.println("    //");
+        _source.println();
+        _source.println(
+            "        //-------------------------------------------------------");
+        _source.println("        // Statics.");
+        _source.println("        //");
 
         // Declare each of the state class member data.
         for (it = states.iterator(); it.hasNext() == true;)
@@ -680,6 +696,24 @@ public final class SmcJavaGenerator
         _source.print(context);
         _source.println("State");
         _source.println("    {");
+        _source.println(
+            "    //-----------------------------------------------------------");
+        _source.println("    // Member methods.");
+        _source.println("    //");
+        _source.println();
+
+        // If -reflect was specified, then output the
+        // getTransitions() abstract method.
+        if (Smc.isReflection() == true)
+        {
+            _source.print("        ");
+            _source.println("public Map getTransitions()");
+            _source.println("        {");
+            _source.println(
+                "            return (_transitions);");
+            _source.println("        }");
+            _source.println();
+        }
 
         // Generate the constructor.
         _source.print("        protected ");
@@ -698,11 +732,81 @@ public final class SmcJavaGenerator
             ((SmcTransition) it.next()).accept(this);
         }
 
+        _source.println();
+        _source.println(
+            "    //-----------------------------------------------------------");
+        _source.println("    // Inner classse.");
+        _source.println("    //");
+        _source.println();
+
         // Have each state now generate its code. Each state
         // class is an inner class.
         for (it = states.iterator(); it.hasNext() == true;)
         {
             ((SmcState) it.next()).accept(this);
+        }
+
+        _source.println();
+        _source.println(
+            "    //-----------------------------------------------------------");
+        _source.println("    // Member data.");
+        _source.println("    //");
+
+        // If -reflect was specified, then generate the
+        // _transitions map.
+        if (Smc.isReflection() == true)
+        {
+            List allTransitions = map.getFSM().getTransitions();
+            SmcTransition transition;
+            String transName;
+            int transDefinition;
+
+            _source.println();
+            _source.println(
+                "        //---------------------------------------------------");
+            _source.println("        // Statics.");
+            _source.println("        //");
+            _source.print("        ");
+            _source.println("private static Map _transitions;");
+            _source.println();
+
+            // Now output the transition collection's
+            // initialization.
+            _source.println("        static");
+            _source.println("        {");
+            _source.print("            ");
+            _source.println("_transitions = new HashMap();");
+
+            // Now place all transition names and states into the
+            // map.
+            for (it = allTransitions.iterator();
+                 it.hasNext() == true;
+                )
+            {
+                transition = (SmcTransition) it.next();
+                transName = transition.getName();
+
+                // If the transition is defined in this map's
+                // default state, then the value is 2.
+                if (definedDefaultTransitions.contains(
+                        transition) == true)
+                {
+                    transDefinition = 2;
+                }
+                // Otherwise the value is 0 - undefined.
+                else
+                {
+                    transDefinition = 0;
+                }
+
+                _source.print("            ");
+                _source.print("_transitions.put(\"");
+                _source.print(transName);
+                _source.print("\", new Integer(");
+                _source.print(transDefinition);
+                _source.println("));");
+            }
+            _source.println("        }");
         }
 
         // The map class has been defined.
@@ -731,6 +835,25 @@ public final class SmcJavaGenerator
         _source.print(mapName);
         _source.println("_Default");
         _source.println("        {");
+        _source.println(
+            "        //-------------------------------------------------------");
+        _source.println("        // Member methods.");
+        _source.println("        //");
+        _source.println();
+
+        // If -reflect was specified, then generate the
+        // getTransitions() methods.
+        if (Smc.isReflection() == true)
+        {
+            _source.print("            ");
+            _source.println(
+                "public Map getTransitions()");
+            _source.println("            {");
+            _source.print("                ");
+            _source.println("return (_transitions);");
+            _source.println("            }");
+            _source.println();
+        }
 
         // Add the constructor.
         _source.print("            private ");
@@ -809,6 +932,91 @@ public final class SmcJavaGenerator
             )
         {
             ((SmcTransition) it.next()).accept(this);
+        }
+
+        _source.println();
+        _source.println(
+            "        //-------------------------------------------------------");
+        _source.println("        // Member data.");
+        _source.println("        //");
+
+        // If -reflect was specified, then generate the
+        // _transitions map.
+        if (Smc.isReflection() == true)
+        {
+            List allTransitions = map.getFSM().getTransitions();
+            List stateTransitions = state.getTransitions();
+            SmcState defaultState = map.getDefaultState();
+            List defaultTransitions;
+            SmcTransition transition;
+            String transName;
+            int transDefinition;
+
+            // Initialize the default transition list to all the
+            // default state's transitions.
+            if (defaultState != null)
+            {
+                defaultTransitions =
+                    defaultState.getTransitions();
+            }
+            else
+            {
+                defaultTransitions = (List) new ArrayList();
+            }
+
+            _source.println();
+            _source.println(
+                "            //---------------------------------------------------");
+            _source.println("            // Statics.");
+            _source.println("            //");
+            _source.print("            ");
+            _source.println("private static Map _transitions;");
+            _source.println();
+
+            // Now output the transition collection's
+            // initialization.
+            _source.println("            static");
+            _source.println("            {");
+            _source.print("                ");
+            _source.println("_transitions = new HashMap();");
+
+            // Now place all transition names and states into the
+            // map.
+            for (it = allTransitions.iterator();
+                 it.hasNext() == true;
+                )
+            {
+                transition = (SmcTransition) it.next();
+                transName = transition.getName();
+
+                // If the transition is in this state, then its
+                // value is 1.
+                if (stateTransitions.contains(
+                        transition) == true)
+                {
+                    transDefinition = 1;
+                }
+                // If the transition is defined in this map's
+                // default state, then the value is 2.
+                else if (defaultTransitions.contains(
+                             transition) == true)
+                {
+                    transDefinition = 2;
+                }
+                // Otherwise the value is 0 - undefined.
+                else
+                {
+                    transDefinition = 0;
+                }
+
+                _source.print("                ");
+                _source.print("_transitions.put(\"");
+                _source.print(transName);
+                _source.print("\", new Integer(");
+                _source.print(transDefinition);
+                _source.println("));");
+            }
+            _source.println("            }");
         }
 
         // End of this state class declaration.
@@ -1427,6 +1635,39 @@ public final class SmcJavaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2005/11/07 19:34:54  cwrapp
+// Changes in release 4.3.0:
+// New features:
+//
+// + Added -reflect option for Java, C#, VB.Net and Tcl code
+//   generation. When used, allows applications to query a state
+//   about its supported transitions. Returns a list of transition
+//   names. This feature is useful to GUI developers who want to
+//   enable/disable features based on the current state. See
+//   Programmer's Manual section 11: On Reflection for more
+//   information.
+//
+// + Updated LICENSE.txt with a missing final paragraph which allows
+//   MPL 1.1 covered code to work with the GNU GPL.
+//
+// + Added a Maven plug-in and an ant task to a new tools directory.
+//   Added Eiten Suez's SMC tutorial (in PDF) to a new docs
+//   directory.
+//
+// Fixed the following bugs:
+//
+// + (GraphViz) DOT file generation did not properly escape
+//   double quotes appearing in transition guards. This has been
+//   corrected.
+//
+// + A note: the SMC FAQ incorrectly stated that C/C++ generated
+//   code is thread safe. This is wrong. C/C++ generated is
+//   certainly *not* thread safe. Multi-threaded C/C++ applications
+//   are required to synchronize access to the FSM to allow for
+//   correct performance.
+//
+// + (Java) The generated getState() method is now public.
+//
 // Revision 1.5  2005/09/14 01:51:33  cwrapp
 // Changes in release 4.2.0:
 // New features:

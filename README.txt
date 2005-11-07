@@ -2,7 +2,7 @@
 
                                SMC
                      The State Machine Compiler
-                         (Version: 4.2.2)
+                         (Version: 4.3.0)
 
                      http://smc.sourceforge.net
 
@@ -13,12 +13,36 @@
 
 New Features:
 
-None
++ Added -reflect option for Java, C#, VB.Net and Tcl code
+  generation. When used, allows applications to query a state
+  about its supported transitions. Returns a list of transition
+  names. This feature is useful to GUI developers who want to
+  enable/disable features based on the current state. See
+  Programmer's Manual section 11: On Reflection for more
+  information.
+
++ Updated LICENSE.txt with a missing final paragraph which allows
+  MPL 1.1 covered code to work with the GNU GPL.
+
++ Added a Maven plug-in and an ant task to a new tools directory.
+  Added Eiten Suez's SMC tutorial (in PDF) to a new docs
+  directory.
+
 
 Bug Fixes:
 
-+ (C#) -csharp broken due to finally block closing brace not
-generated.
++ (GraphViz) DOT file generation did not properly escape
+  double quotes appearing in transition guards. This has been
+  corrected.
+
++ A note: the SMC FAQ incorrectly stated that C/C++ generated
+  code is thread safe. This is wrong. C/C++ generated is
+  certainly *not* thread safe. Multi-threaded C/C++ applications
+  are required to synchronize access to the FSM to allow for
+  correct performance.
+
++ (Java) The generated getState() method is now public.
+
 
 
 1. System Requirements
@@ -47,11 +71,11 @@ to add to your object is 1) create the state machine object and
 
 YES, you add to your class constructor:
 
-        _my_fsm = new MyClassContext(this);
+        _myFSM = new MyClassContext(this);
 
 YES, you issue state transitions:
 
-        _my_fsm.HandleMessage(msg);
+        _myFSM.HandleMessage(msg);
 
 Congratulations! You've integrated a state machine into your object.
 
@@ -64,13 +88,20 @@ Java Standard Edition can be downloaded for FREE from
 
                     http://java.sun.com/j2se/
 
-SMC currently supports six object-oriented languages:
-  1. C++,
-  2. Java,
-  3. [incr Tcl],
-  4. VB.Net and
-  5. C#
-  6. Python
+SMC currently supports nine programming languages:
+  1. C,
+  2. C++,
+  3. C#,
+  4. Java,
+  5. Perl,
+  6. Python,
+  7. Ruby,
+  8. [incr Tcl] and
+  9. VB.Net.
+
+SMC is also able to generate an HTML table representation of your
+FSM and a GraphViz DOT file representation
+(http://www.graphviz.org).
 
 
 3. Download
@@ -97,29 +128,23 @@ also need to add statemap.jar to your classpath).
 
 The download package's directory layout is:
 
-    Smc -+-README.txt
+    Smc -+-LICENSE.txt
          |
-         +-LICENSE.txt
+         +-README.txt
          |
          +-bin---Smc.jar 
+         |
+         +-docs--SMC_Tutorial.pdf
          |
          +-lib-+-statemap.h
          |     |
          |     +-statemap.jar
          |     |
-         |     +-statmap-+-FSMContext.class
-         |     |         |
-         |     |         +-State.class
-         |     |         |
-         |     |         +-StateUndefinedException.class
-         |     |         |
-         |     |         +-TransitionUndefinedException.class
+         |     +-setup.py
          |     |
-         |     +-statemap1.0-+-statemap.tcl
-         |     |             |
-         |     |             +-pkgIndex.tcl
+         |     +-statemap.py
          |     |
-         |     +-VB-+-statemap.dll
+         |     +-C---statemap.h
          |     |
          |     +-CSharp-+-Debug-+-statemap.dll
          |     |        |       |
@@ -127,87 +152,137 @@ The download package's directory layout is:
          |     |        |
          |     |        +-Release-+-statemap.dll
          |     |
-         |     +-Python-+-Makefile
-         |              |
-         |              +-README.txt
-         |              |
-         |              +-setup.py
-         |              |
-         |              +-statemap.py
+         |     +-Perl-+-MANIFEST
+         |     |      |
+         |     |      +-Makefile.pl
+         |     |      |
+         |     |      +-README
+         |     |      |
+         |     |      +-Statemap.pm
+         |     |      |
+         |     |      +-test.pl
+         |     |
+         |     +-Ruby-+-README
+         |     |      |
+         |     |      +-statemap.rb
+         |     |
+         |     +-VB-+-Debug-+-statemap.dll
+         |     |    |       |
+         |     |    |       +-statemap.pdb
+         |     |    |
+         |     |    +-Release---statemap.dll
+         |     |
+         |     +-statemap-+-FSMContext.class
+         |     |          |
+         |     |          +-State.class
+         |     |          |
+         |     |          +-StateUndefinedException.class
+         |     |          |
+         |     |          +-TransitionUndefinedException.class
+         |     |
+         |     +-statemap1.0-+-statemap.tcl
+         |                   |
+         |                   +-pkgIndex.tcl
          |
-         +-misc---smc.ico (smc Windows icon)
+         +-misc-+-smc.ico (smc Windows icon)
          |
          +-examples-+-C++--+-EX1 (C++ source code and build files)
-                    |      |
-                    |      +-EX2
-                    |      |
-                    |      +-EX3
-                    |      |
-                    |      +-EX4
-                    |      |
-                    |      +-EX5
-                    |      |
-                    |      +-EX6
-                    |
-                    +-Java-+-EX1 (Java source code, Makefiles)
-                    |      |
-                    |      +-EX2
-                    |      |
-                    |      +-EX3
-                    |      |
-                    |      +-EX4
-                    |      |
-                    |      +-EX5
-                    |      |
-                    |      +-EX6
-                    |      |
-                    |      +-EX7
-                    |
-                    +-Tcl--+-EX1 (Tcl source code)
-                    |      |
-                    |      +-EX2
-                    |      |
-                    |      +-EX3
-                    |      |
-                    |      +-EX4
-                    |      |
-                    |      +-EX5
-                    |
-                    +-VB---+-EX1 (VB.Net source code)
-                    |      |
-                    |      +-EX2
-                    |      |
-                    |      +-EX3
-                    |      |
-                    |      +-EX4
-                    |
-                    +-CSharp-+-EX1 (C# source code)
-                    |        |
-                    |        +-EX3
-                    |
-                    +-Ant--+-EX1 (Java source code, Ant built)
-                    |      |
-                    |      +-EX2
-                    |      |
-                    |      +-EX3
-                    |      |
-                    |      +-EX4
-                    |      |
-                    |      +-EX5
-                    |      |
-                    |      +-EX6
-                    |      |
-                    |      +-EX7
-                    |
-                    +-Python-+-EX1 (Python source code)
-                             |
-                             +-EX2
-                             |
-                             +-EX3
-                             |
-                             +-EX4
-                             |
-                             +-EX7
+         |          |      |
+         |          |      +-EX2
+         |          |      |
+         |          |      +-EX3
+         |          |      |
+         |          |      +-EX4
+         |          |      |
+         |          |      +-EX5
+         |          |      |
+         |          |      +-EX6
+         |          |
+         |          +-Java-+-EX1 (Java source code, Makefiles)
+         |          |      |
+         |          |      +-EX2
+         |          |      |
+         |          |      +-EX3
+         |          |      |
+         |          |      +-EX4
+         |          |      |
+         |          |      +-EX5
+         |          |      |
+         |          |      +-EX6
+         |          |      |
+         |          |      +-EX7
+         |          |
+         |          +-Tcl--+-EX1 (Tcl source code)
+         |          |      |
+         |          |      +-EX2
+         |          |      |
+         |          |      +-EX3
+         |          |      |
+         |          |      +-EX4
+         |          |      |
+         |          |      +-EX5
+         |          |
+         |          +-VB---+-EX1 (VB.Net source code)
+         |          |      |
+         |          |      +-EX2
+         |          |      |
+         |          |      +-EX3
+         |          |      |
+         |          |      +-EX4
+         |          |
+         |          +-CSharp-+-EX1 (C# source code)
+         |          |        |
+         |          |        +-EX3
+         |          |
+         |          +-Ant--+-EX1 (Java source code, Ant built)
+         |          |      |
+         |          |      +-EX2
+         |          |      |
+         |          |      +-EX3
+         |          |      |
+         |          |      +-EX4
+         |          |      |
+         |          |      +-EX5
+         |          |      |
+         |          |      +-EX6
+         |          |      |
+         |          |      +-EX7
+         |          |
+         |          +-Python-+-EX1 (Python source code)
+         |                   |
+         |                   +-EX2
+         |                   |
+         |                   +-EX3
+         |                   |
+         |                   +-EX4
+         |                   |
+         |                   +-EX7
+         |
+         +-tools-+-maven-+-plugin.jelly
+                 |       |
+                 |       +-plugin.properties
+                 |       |
+                 |       +-project.xml
+                 |
+                 +-smc-anttask-+-.classpath
+                               |
+                               +-.project
+                               |
+                               +-build.xml
+                               |
+                               +-smc-anttask.iml
+                               |
+                               +-smc-anttask.ipr
+                               |
+                               +-smc-anttask.iws
+                               |
+                               +-build---classes---...
+                               |
+                               +-dist---smc-ant.jar
+                               |
+                               +-lib---ant.jar
+                               |
+                               +-src---net---sf---smc---ant---SmcJarWrapper.java
 
 
 4. Installation
@@ -236,6 +311,12 @@ You may want to take the following steps.
   variable.
 + Add the full path to .../Smc/lib to your TCLLIBPATH environment
   variable.
+
+The tools directory includes a Maven plug-in (http://www.maven.org)
+and an ant task to help integrate SMC into other development
+environments.
+
+An Eclipse plug-in is not yet available.
 
 
 5. Examples
@@ -272,6 +353,7 @@ Surf over to http://smc.sourceforge.net to:
 + Report bugs.
 + Get the latest news about SMC.
 + Access SMC source code via a CVS web interface.
++ Check out docs/SMC_Tutorial.pdf.
 
 
 7. Notices

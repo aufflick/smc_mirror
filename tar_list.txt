@@ -2,6 +2,7 @@
 ./smc/tar_list.txt
 ./smc/LICENSE.txt
 ./smc/README.txt
+./smc/smc.mk
 ./smc/applet/Makefile
 ./smc/applet/Telephone.java
 ./smc/applet/Telephone.sm
@@ -11,6 +12,7 @@
 ./smc/applet/manifest.txt
 ./smc/applet/sounds
 ./smc/bin/Smc.jar
+./smc/docs/SMC_Tutorial.pdf
 ./smc/examples/Ant/EX1/README.txt
 ./smc/examples/Ant/EX1/build.xml
 ./smc/examples/Ant/EX1/etc/AppClass.sm
@@ -499,3 +501,16 @@
 ./smc/net/sf/smc/SmcVBGenerator.java
 ./smc/net/sf/smc/SmcVisitor.java
 ./smc/net/sf/smc/manifest.txt
+./smc/tools/maven/plugin.jelly
+./smc/tools/maven/plugin.properties
+./smc/tools/maven/project.xml
+./smc/tools/smc-anttask/.classpath
+./smc/tools/smc-anttask/.project
+./smc/tools/smc-anttask/build.xml
+./smc/tools/smc-anttask/smc-anttask.iml
+./smc/tools/smc-anttask/smc-anttask.ipr
+./smc/tools/smc-anttask/smc-anttask.iws
+./smc/tools/smc-anttask/build/
+./smc/tools/smc-anttask/dist/
+./smc/tools/smc-anttask/lib/ant.jar
+./smc/tools/smc-anttask/src/net/sf/smc/ant/SmcJarWrapper.java

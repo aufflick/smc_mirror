@@ -29,6 +29,39 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2005/11/07 19:34:54  cwrapp
+// Changes in release 4.3.0:
+// New features:
+//
+// + Added -reflect option for Java, C#, VB.Net and Tcl code
+//   generation. When used, allows applications to query a state
+//   about its supported transitions. Returns a list of transition
+//   names. This feature is useful to GUI developers who want to
+//   enable/disable features based on the current state. See
+//   Programmer's Manual section 11: On Reflection for more
+//   information.
+//
+// + Updated LICENSE.txt with a missing final paragraph which allows
+//   MPL 1.1 covered code to work with the GNU GPL.
+//
+// + Added a Maven plug-in and an ant task to a new tools directory.
+//   Added Eiten Suez's SMC tutorial (in PDF) to a new docs
+//   directory.
+//
+// Fixed the following bugs:
+//
+// + (GraphViz) DOT file generation did not properly escape
+//   double quotes appearing in transition guards. This has been
+//   corrected.
+//
+// + A note: the SMC FAQ incorrectly stated that C/C++ generated
+//   code is thread safe. This is wrong. C/C++ generated is
+//   certainly *not* thread safe. Multi-threaded C/C++ applications
+//   are required to synchronize access to the FSM to allow for
+//   correct performance.
+//
+// + (Java) The generated getState() method is now public.
+//
 // Revision 1.5  2005/05/28 13:51:24  cwrapp
 // Update Java examples 1 - 7.
 //
@@ -48,82 +81,143 @@ public abstract class TcpConnection
     implements DatagramSocketListener,
                TimerListener
 {
+//---------------------------------------------------------------
 // Member methods.
+//
 
-    public final synchronized void close()
+    public final void close()
     {
-        _fsm.Close();
-        return;
-    }
-
-    public final synchronized void handleReceive(DatagramPacket packet,
-                                                 AsyncDatagramSocket dgram_socket)
-    {
-        TcpSegment segment = new TcpSegment(packet);
-        Object[] args = new Object[1];
-
-        // Generate the appropriate transition based on the
-        // header flags.
-        args[0] = segment;
-
-        // DEBUG
-//          System.out.println("Receive event from " +
-//                             packet.getAddress() +
-//                             ":" +
-//                             Integer.toString(packet.getPort()) +
-//                             ":\n" +
-//                             segment);
-
-        try
+        synchronized (this)
         {
-            _transition_table[segment.getFlags()].invoke(_fsm, args);
-        }
-        catch (Exception jex)
-        {
-            System.err.println(jex);
-            jex.printStackTrace();
+            try
+            {
+                // REFLECTION
+                // Uncomment the following line to output
+                // transitions.
+                // _outputTransitions();
+
+                _fsm.Close();
+
+                // Wait for the connection to close before
+                // returning.
+                while (_async_socket != null)
+                {
+                    try
+                    {
+                        this.wait();
+                    }
+                    catch (InterruptedException interrupt)
+                    {}
+                }
+            }
+            finally
+            {
+                this.notify();
+            }
         }
 
         return;
     }
 
-    public final void handleError(Exception e,
-                                  AsyncDatagramSocket dgram_socket)
+    public final void
+        handleReceive(DatagramPacket packet,
+                      AsyncDatagramSocket dgram_socket)
+    {
+        synchronized (this)
+        {
+            try
+            {
+                TcpSegment segment = new TcpSegment(packet);
+                Object[] args = new Object[1];
+
+                // Generate the appropriate transition based on
+                // the header flags.
+                args[0] = segment;
+
+                // DEBUG
+//                 System.out.println(
+//                     "Receive event from " +
+//                     packet.getAddress() +
+//                     ":" +
+//                     Integer.toString(packet.getPort()) +
+//                     ":\n" +
+//                     segment);
+
+                // REFLECTION
+                // Uncomment the following line to output
+                // transitions.
+                // _outputTransitions();
+
+                _transition_table[segment.getFlags()].invoke(
+                    _fsm, args);
+            }
+            catch (Exception jex)
+            {
+                System.err.println(jex);
+                jex.printStackTrace();
+            }
+            finally
+            {
+                this.notify();
+            }
+        }
+
+        return;
+    }
+
+    public final void
+        handleError(Exception e,
+                    AsyncDatagramSocket dgram_socket)
     {
         // TODO
         // Generate the appropriate transition.
     }
 
-    public final synchronized void handleTimeout(String name)
+    public final void handleTimeout(String name)
     {
-        if (name.compareTo("CONN_ACK_TIMER") == 0)
+        synchronized (this)
         {
-            _fsm.ConnAckTimeout();
-        }
-        else if (name.compareTo("TRANS_ACK_TIMER") == 0)
-        {
-            _fsm.TransAckTimeout();
-        }
-        else if (name.compareTo("CLOSE_ACK_TIMER") == 0)
-        {
-            _fsm.CloseAckTimeout();
-        }
-        else if (name.compareTo("CLOSE_TIMER") == 0)
-        {
-            _fsm.CloseTimeout();
-        }
-        else if (name.compareTo("SERVER_OPENED") == 0)
-        {
-            _fsm.Opened();
-        }
-        else if (name.compareTo("CLIENT_OPENED") == 0)
-        {
-            _fsm.Opened(_address, _port);
-        }
-        else if (name.compareTo("OPEN_FAILED") == 0)
-        {
-            _fsm.OpenFailed(_errorMessage);
-            _errorMessage = null;
+            try
+            {
+                // REFLECTION
+                // Uncomment the following line to output
+                // transitions.
+                // _outputTransitions();
+
+                if (name.compareTo("CONN_ACK_TIMER") == 0)
+                {
+                    _fsm.ConnAckTimeout();
+                }
+                else if (name.compareTo("TRANS_ACK_TIMER") == 0)
+                {
+                    _fsm.TransAckTimeout();
+                }
+                else if (name.compareTo("CLOSE_ACK_TIMER") == 0)
+                {
+                    _fsm.CloseAckTimeout();
+                }
+                else if (name.compareTo("CLOSE_TIMER") == 0)
+                {
+                    _fsm.CloseTimeout();
+                }
+                else if (name.compareTo("SERVER_OPENED") == 0)
+                {
+                    _fsm.Opened();
+                }
+                else if (name.compareTo("CLIENT_OPENED") == 0)
+                {
+                    _fsm.Opened(_address, _port);
+                }
+                else if (name.compareTo("OPEN_FAILED") == 0)
+                {
+                    _fsm.OpenFailed(_errorMessage);
+                    _errorMessage = null;
+                }
+            }
+            finally
+            {
+                this.notify();
+            }
         }
 
         return;
@@ -141,6 +235,7 @@ public abstract class TcpConnection
         _server = null;
         _errorMessage = null;
 
+        // REFLECTION
         // Turn on FSM debugging.
         // _fsm.setDebugFlag(true);
 
@@ -164,6 +259,7 @@ public abstract class TcpConnection
         _listener = listener;
         _fsm = new TcpConnectionContext(this);
 
+        // REFLECTION
         // Turn on FSM debugging.
         // _fsm.setDebugFlag(true);
 
@@ -172,30 +268,81 @@ public abstract class TcpConnection
         return;
     }
 
-    protected final synchronized void passiveOpen(int port)
+    protected final void passiveOpen(int port)
     {
-        _fsm.PassiveOpen(port);
+        synchronized (this)
+        {
+            try
+            {
+                // REFLECTION
+                // Uncomment the following line to output
+                // transitions.
+                // _outputTransitions();
+
+                _fsm.PassiveOpen(port);
+            }
+            finally
+            {
+                this.notify();
+            }
+        }
+
         return;
     }
 
-    protected final synchronized void activeOpen(InetAddress address, int port)
+    protected final void activeOpen(InetAddress address, int port)
     {
-        _fsm.ActiveOpen(address, port);
+        synchronized (this)
+        {
+            try
+            {
+                // REFLECTION
+                // Uncomment the following line to output
+                // transitions.
+                // _outputTransitions();
+
+                _fsm.ActiveOpen(address, port);
+            }
+            finally
+            {
+                this.notify();
+            }
+        }
+
         return;
     }
 
-    protected final synchronized void acceptOpen(TcpSegment segment)
+    protected final void acceptOpen(TcpSegment segment)
     {
-        _fsm.AcceptOpen(segment);
+        synchronized (this)
+        {
+            try
+            {
+                // REFLECTION
+                // Uncomment the following line to output
+                // transitions.
+                // _outputTransitions();
+
+                _fsm.AcceptOpen(segment);
+            }
+            finally
+            {
+                this.notify();
+            }
+        }
+
         return;
     }
 
-    protected final void setListener(TcpConnectionListener listener)
-        throws IllegalStateException
+    protected final void
+        setListener(TcpConnectionListener listener)
+            throws IllegalStateException
     {
         if (_listener != null)
         {
-            throw(new IllegalStateException("Socket listener already set"));
+            throw(
+                new IllegalStateException(
+                    "Socket listener already set"));
         }
         else
         {
@@ -205,9 +352,25 @@ public abstract class TcpConnection
         return;
     }
 
-    protected synchronized void transmit(byte[] data, int offset, int length)
+    protected void transmit(byte[] data, int offset, int length)
     {
-        _fsm.Transmit(data, offset, length);
+        synchronized (this)
+        {
+            try
+            {
+                // REFLECTION
+                // Uncomment the following lines to output
+                // transitions.
+                // _outputTransitions();
+
+                _fsm.Transmit(data, offset, length);
+            }
+            finally
+            {
+                this.notify();
+            }
+        }
+
         return;
     }
 
@@ -470,92 +633,99 @@ public abstract class TcpConnection
                             int port,
                             TcpSegment recv_segment)
     {
-        int local_port;
-        int ack_number;
-        TcpSegment send_segment;
         DatagramSocket socket;
 
-        // Quietly quit if there is not socket.
-        if (_async_socket == null ||
-            (socket = _async_socket.getDatagramSocket()) == null)
+        // Quietly quit if there is no socket.
+        if (_async_socket != null &&
+            (socket = _async_socket.getDatagramSocket()) != null)
         {
-            return;
-        }
+            int local_port;
+            int ack_number;
+            TcpSegment send_segment;
+            DatagramPacket packet = null;
 
-        // If the address and port were not specified, then send
-        // this segment to whatever client socket we are
-        // currently speaking.
-        if (address == null)
-        {
-            address = _address;
-            port = _port;
-        }
+            // If the address and port were not specified, then
+            // send this segment to whatever client socket we are
+            // currently speaking.
+            if (address == null)
+            {
+                address = _address;
+                port = _port;
+            }
 
-        // If there is a recv_segment, then use its destination
-        // port as the local port. Otherwise, use the local
-        // datagram socket's local port.
-        if (recv_segment != null)
-        {
-            local_port = recv_segment.getDestinationPort();
-        }
-        else
-        {
-            local_port =
-                _async_socket.getDatagramSocket().getLocalPort();
-        }
+            // If there is a recv_segment, then use its
+            // destination port as the local port. Otherwise, use
+            // the local datagram socket's local port.
+            if (recv_segment != null)
+            {
+                local_port = recv_segment.getDestinationPort();
+            }
+            else
+            {
+                local_port =
+                    _async_socket.getDatagramSocket().getLocalPort();
+            }
 
-        // Send the ack number only if the ack flag is set.
-        if ((flags & TcpSegment.ACK) == 0)
-        {
-            ack_number = 0;
-        }
-        else
-        {
-            // Figure out the ack number based on the received
-            // segment's sequence number and data size.
-            ack_number = getAck(recv_segment);
-        }
+            // Send the ack number only if the ack flag is set.
+            if ((flags & TcpSegment.ACK) == 0)
+            {
+                ack_number = 0;
+            }
+            else
+            {
+                // Figure out the ack number based on the
+                // received segment's sequence number and data
+                // size.
+                ack_number = getAck(recv_segment);
+            }
 
-        send_segment =
-            new TcpSegment(local_port,
-                           address,
-                           port,
-                           _sequence_number,
-                           ack_number,
-                           flags,
-                           data,
-                           offset,
-                           size);
+            send_segment =
+                new TcpSegment(local_port,
+                               address,
+                               port,
+                               _sequence_number,
+                               ack_number,
+                               flags,
+                               data,
+                               offset,
+                               size);
 
-        // Advance the sequence number depending on the message
-        // sent. Don't do this if message came from an
-        // interloper.
-        if (address.equals(_address) && port == _port)
-        {
-            _sequence_number = getAck(send_segment);
-        }
+            // Advance the sequence number depending on the
+            // message sent. Don't do this if message came from
+            // an interloper.
+            if (address.equals(_address) && port == _port)
+            {
+                _sequence_number = getAck(send_segment);
+            }
 
-        // Now send the data.
-        try
-        {
-            DatagramPacket packet;
+            // Now send the data.
+            try
+            {
+                packet = send_segment.packetize();
 
-            packet = send_segment.packetize();
+                // DEBUG
+//                 System.out.println(
+//                     "Sending packet to " +
+//                     packet.getAddress() +
+//                     ":" +
+//                     Integer.toString(packet.getPort()) +
+//                     ":\n" +
+//                     send_segment);
 
-            // DEBUG
-//                System.out.println("Sending packet to " +
-//                                   packet.getAddress() +
-//                                   ":" +
-//                                   Integer.toString(packet.getPort()) +
-//                                   ":\n" +
-//                                   send_segment);
+                _async_socket.getDatagramSocket().send(packet);
+            }
+            catch (IOException io_exception)
+            {
+                // Ignore - the ack timer will figure out this
+                // packet was never sent.
 
-            _async_socket.getDatagramSocket().send(packet);
-            // _fsm.Transmitted();
-        }
-        catch (IOException io_exception)
-        {
-            // _fsm.TransmitFailed(io_exception.getMessage());
+                // DEBUG
+//                 System.out.println(
+//                     "Send to " +
+//                     packet.getAddress() +
+//                     ": " +
+//                     io_exception.getMessage());
+            }
         }
 
         return;
@@ -619,7 +789,43 @@ public abstract class TcpConnection
         return(retval);
     }
 
+    /*
+     * REFLECTION
+     * Uncomment the following method to output transitions.
+     *
+    private void _outputTransitions()
+    {
+        if (_fsm.getDebugFlag() == true)
+        {
+            java.io.PrintStream str = _fsm.getDebugStream();
+            TcpConnectionContext.TcpConnectionState state =
+                _fsm.getState();
+            java.util.Iterator it;
+            String sep;
+
+            str.print("State ");
+            str.print(state.getName());
+            str.print(" has transitions ");
+
+            for (it = state.getTransitions().iterator(), sep = "{";
+                 it.hasNext();
+                 sep = ", ")
+            {
+                str.print(sep);
+                str.print(it.next());
+            }
+
+            str.println("}");
+        }
+
+        return;
+    }
+     *
+     */
+
+//---------------------------------------------------------------
 // Member data.
+//
 
     protected TcpConnectionListener _listener;
     private TcpConnectionContext  _fsm;

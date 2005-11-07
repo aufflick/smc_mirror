@@ -47,10 +47,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 public final class Smc
@@ -77,10 +77,11 @@ public final class Smc
         _serial = false;
         _castType = "dynamic_cast";
         _graphLevel = NO_GRAPH_LEVEL;
-        _sourceFileList = (List) new LinkedList();
+        _sourceFileList = (List) new ArrayList();
         _verbose = false;
         _fsmVerbose = false;
         _return = false;
+        _reflection = false;
 
         // Process the command line.
         if (parseArgs(args) == false)
@@ -298,6 +299,11 @@ public final class Smc
         return (_serial);
     }
 
+    public static boolean isReflection()
+    {
+        return (_reflection);
+    }
+
     public static String getCastType()
     {
         return (_castType);
@@ -317,7 +323,7 @@ public final class Smc
         Iterator it2;
         Object e1;
         Object e2;
-        List retval = (List) new LinkedList();
+        List retval = (List) new ArrayList();
 
         // First, make certain that both lists are sorted.
         Collections.sort(l1, c);
@@ -403,17 +409,19 @@ public final class Smc
         {
             StringBuffer buffer =
                 new StringBuffer(s.length() * 2);
-            byte[] s2 = s.getBytes();
             int index;
+            int length = s.length();
+            char c;
 
-            for (index = 0; index < s2.length; ++index)
+            for (index = 0; index < length; ++index)
             {
-                if (s2[index] == '\\' || s2[index] == '"')
+                c = s.charAt(index);
+                if (c == '\\' || c == '"')
                 {
                     buffer.append('\\');
                 }
 
-                buffer.append(s2[index]);
+                buffer.append(c);
             }
 
             retval = buffer.toString();
@@ -592,10 +600,16 @@ public final class Smc
                 _nocatch = true;
                 argsConsumed = 1;
             }
-            else if (args[i].startsWith("-return") == true)
+            else if (args[i].startsWith("-ret") == true)
             {
                 // -return is a flag.
                 _return = true;
+                argsConsumed = 1;
+            }
+            else if (args[i].startsWith("-ref") == true)
+            {
+                // -reflect is a flag.
+                _reflection = true;
                 argsConsumed = 1;
             }
             else if (args[i].startsWith("-se") == true)
@@ -995,6 +1009,19 @@ public final class Smc
             retcode = false;
             _errorMsg = "-glevel can only be used with -graph.";
         }
+        // Verify that -reflect is used only with -java and -tcl.
+        else if (retcode == true &&
+                 _reflection == true &&
+                 _targetLanguage != JAVA &&
+                 _targetLanguage != TCL &&
+                 _targetLanguage != VB &&
+                 _targetLanguage != C_SHARP)
+        {
+            retcode = false;
+            _errorMsg =
+                "-reflect can only be used with -java, -tcl, " +
+                "-vb and -csharp";
+        }
 
         return (retcode);
     }
@@ -1046,6 +1073,7 @@ public final class Smc
         stream.print(" [-nocatch]");
         stream.print(" [-serial]");
         stream.print(" [-return]");
+        stream.print(" [-relect]");
         stream.print(" [-cast cast_type]");
         stream.print(" [-d directory]");
         stream.print(" [-glevel int]");
@@ -1057,28 +1085,38 @@ public final class Smc
             "\t-suffix   Add this suffix to output file");
         stream.println(
             "\t-g        Add debugging to generated code");
-        stream.print("\t-nostreams Do not use C++ iostreams ");
+        stream.println("\t-nostreams Do not use C++ iostreams ");
+        stream.print("                  ");
         stream.println("(use with -c++ only)");
         stream.print("\t-version  Print smc version ");
         stream.println("information to standard out and exit");
-        stream.print("\t-verbose ");
+        stream.print("\t-verbose  ");
         stream.println("Output more compiler messages.");
         stream.print("\t-help     Print this message to ");
         stream.println("standard out and exit");
-        stream.print(
+        stream.println(
             "\t-sync     Synchronize generated Java code ");
+        stream.print("                  ");
         stream.println("(use with -java, -vb and -csharp only)");
-        stream.print(
+        stream.println(
             "\t-noex     Do not generate C++ exception throws ");
+        stream.print("                  ");
         stream.println("(use with -c++ only)");
         stream.print(
             "\t-nocatch  Do not generate try/catch/rethrow ");
         stream.println("code (not recommended)");
         stream.println(
             "\t-serial   Generate serialization code");
-        stream.println("\t-return   Smc.main() returns");
-        stream.println("            Use this option with ANT");
-        stream.print("\t-cast     Use this C++ cast type ");
+        stream.print("\t-return   ");
+        stream.println("Smc.main() returns, not exists");
+        stream.print("                  ");
+        stream.println("(use this option with ANT)");
+        stream.println("\t-reflect  Generate reflection code");
+        stream.print("                  ");
+        stream.println(
+            "(use with -java, -tcl, -vb and -csharp only)");
+        stream.println("\t-cast     Use this C++ cast type ");
+        stream.print("                  ");
         stream.println("(use with -c++ only)");
         stream.println(
             "\t-d        Place generated files in directory");
@@ -1114,7 +1152,9 @@ public final class Smc
 
         // Note: this works because the file name's form
         // has already been validated as ending in .sm.
-        return (fileName.substring(0, fileName.indexOf(".sm")));
+        return (
+            fileName.substring(
+                0, fileName.toLowerCase().indexOf(".sm")));
     }
 
     // Generate the State pattern in the target language.
@@ -1438,6 +1478,10 @@ public final class Smc
     // If true, then generate unique integer IDs for each state.
     private static boolean _serial;
 
+    // If true, then generate getTransitions() method for each
+    // state.
+    private static boolean _reflection;
+
     // If true, then generate compiler verbose messages.
     private static boolean _verbose;
 
@@ -1490,12 +1534,45 @@ public final class Smc
     /* package */ static final int TRANS_PUSH = 2;
     /* package */ static final int TRANS_POP = 3;
 
-    private static final String VERSION = "v. 4.2.2";
+    private static final String VERSION = "v. 4.3.0";
 }
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.13  2005/11/07 19:34:54  cwrapp
+// Changes in release 4.3.0:
+// New features:
+//
+// + Added -reflect option for Java, C#, VB.Net and Tcl code
+//   generation. When used, allows applications to query a state
+//   about its supported transitions. Returns a list of transition
+//   names. This feature is useful to GUI developers who want to
+//   enable/disable features based on the current state. See
+//   Programmer's Manual section 11: On Reflection for more
+//   information.
+//
+// + Updated LICENSE.txt with a missing final paragraph which allows
+//   MPL 1.1 covered code to work with the GNU GPL.
+//
+// + Added a Maven plug-in and an ant task to a new tools directory.
+//   Added Eiten Suez's SMC tutorial (in PDF) to a new docs
+//   directory.
+//
+// Fixed the following bugs:
+//
+// + (GraphViz) DOT file generation did not properly escape
+//   double quotes appearing in transition guards. This has been
+//   corrected.
+//
+// + A note: the SMC FAQ incorrectly stated that C/C++ generated
+//   code is thread safe. This is wrong. C/C++ generated is
+//   certainly *not* thread safe. Multi-threaded C/C++ applications
+//   are required to synchronize access to the FSM to allow for
+//   correct performance.
+//
+// + (Java) The generated getState() method is now public.
+//
 // Revision 1.12  2005/09/19 15:20:03  cwrapp
 // Changes in release 4.2.2:
 // New features:

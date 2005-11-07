@@ -34,7 +34,6 @@ package net.sf.smc;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -82,7 +81,6 @@ public final class SmcCSharpGenerator
 
         // If the access level has not been set, then the
         // default is "public".
-        // TODO
         if (accessLevel == null || accessLevel.length() == 0)
         {
             accessLevel = "public";
@@ -110,6 +108,13 @@ public final class SmcCSharpGenerator
         if (Smc.isSerial() == true)
         {
             _source.println("using System.IO;");
+        }
+
+        // If reflection is on, then import the .Net collections
+        // package.
+        if (Smc.isReflection() == true)
+        {
+            _source.println("using System.Collections;");
         }
         _source.println();
 
@@ -150,7 +155,142 @@ public final class SmcCSharpGenerator
         _source.print(_indent);
         _source.println("{");
         _source.print(_indent);
+        _source.println(
+            "//---------------------------------------------------------------");
+        _source.print(_indent);
+        _source.println("// Properties.");
+        _source.print(_indent);
+        _source.println("//");
+        _source.println();
+
+        // State property.
+        _source.print(_indent);
+        _source.print("    public ");
+        _source.print(context);
+        _source.println("State State");
+        _source.print(_indent);
+        _source.println("    {");
+        _source.print(_indent);
+        _source.println("        get");
+        _source.print(_indent);
+        _source.println("        {");
+
+        // Again, if synchronization is on, then protect access
+        // to this FSM.
+        if (Smc.isSynchronized() == true)
+        {
+            _source.print(_indent);
+            _source.println("            lock (this)");
+            _source.print(_indent);
+            _source.println("            {");
+
+            indent2 = _indent + "                ";
+        }
+        else
+        {
+            indent2 = _indent + "            ";
+        }
+
+        _source.print(indent2);
+        _source.println("if (_state == null)");
+        _source.print(indent2);
+        _source.println("{");
+        _source.print(indent2);
+        _source.println("    throw(");
+        _source.print(indent2);
+        _source.println(
+            "        new statemap.StateUndefinedException());");
+        _source.print(indent2);
+        _source.println("}");
+        _source.println();
+        _source.print(indent2);
+        _source.print("return ((");
+        _source.print(context);
+        _source.println("State) _state);");
+
+        // If we are in a lock block, close it.
+        if (Smc.isSynchronized() == true)
+        {
+            _source.print(_indent);
+            _source.println("            }");
+        }
+
+        // Close the State get.
+        _source.print(_indent);
+        _source.println("        }");
+        _source.println();
+
+        // Now generate the State set.
+        _source.print(_indent);
+        _source.println("        set");
+        _source.print(_indent);
+        _source.println("        {");
+
+        // Again, if synchronization is on, then protect access
+        // to this FSM.
+        if (Smc.isSynchronized() == true)
+        {
+            _source.print(_indent);
+            _source.println("            lock(this)");
+            _source.print(_indent);
+            _source.println("            {");
+
+            indent2 = _indent + "                ";
+        }
+        else
+        {
+            indent2 = _indent + "            ";
+        }
+
+        _source.print(indent2);
+        _source.println("_state = value;");
+
+        // If we are in a lock block, close it.
+        if (Smc.isSynchronized() == true)
+        {
+            _source.print(_indent);
+            _source.println("            }");
+        }
+
+        // Close the State set.
+        _source.print(_indent);
+        _source.println("        }");
+
+        // Close the state property.
+        _source.print(_indent);
+        _source.println("    }");
+        _source.println();
+
+        // Generate the Owner property.
+        _source.print(_indent);
+        _source.print("    internal ");
+        _source.print(context);
+        _source.println(" Owner");
+        _source.print(_indent);
+        _source.println("    {");
+
+        // Generate the property get method.
+        _source.print(_indent);
+        _source.println("        get");
+        _source.print(_indent);
+        _source.println("        {");
+        _source.print(_indent);
+        _source.println("            return (_owner);");
+        _source.print(_indent);
+        _source.println("        }");
+
+        // Close the Owner property.
+        _source.print(_indent);
+        _source.println("    }");
+        _source.println();
+
+        _source.print(_indent);
+        _source.println(
+            "//---------------------------------------------------------------");
+        _source.print(_indent);
         _source.println("// Member methods.");
+        _source.print(_indent);
+        _source.println("//");
         _source.println();
 
         // Generate the context class' constructor.
@@ -220,28 +360,7 @@ public final class SmcCSharpGenerator
 
         // Generate the default transition methods.
         // First get the transition list.
-        transitions = (List) new ArrayList();
-        for (it = maps.iterator(); it.hasNext() == true;)
-        {
-            map = (SmcMap) it.next();
-
-            // Merge the new transitions into the current set.
-            transitions =
-                Smc.merge(
-                    map.getTransitions(),
-                    transitions,
-                    new Comparator()
-                    {
-                        public int compare(Object o1,
-                                           Object o2)
-                        {
-                            return (
-                                ((SmcTransition) o1).compareTo(
-                                    (SmcTransition) o2));
-                        }
-                    });
-        }
-
+        transitions = fsm.getTransitions();
         for (it = transitions.iterator(); it.hasNext() == true;)
         {
             trans = (SmcTransition) it.next();
@@ -343,127 +462,6 @@ public final class SmcCSharpGenerator
             _source.println();
         }
 
-        // getState() method.
-        _source.print(_indent);
-        _source.print("    internal ");
-        _source.print(context);
-        _source.println("State State");
-        _source.print(_indent);
-        _source.println("    {");
-        _source.print(_indent);
-        _source.println("        get");
-        _source.print(_indent);
-        _source.println("        {");
-
-        // Again, if synchronization is on, then protect access
-        // to this FSM.
-        if (Smc.isSynchronized() == true)
-        {
-            _source.print(_indent);
-            _source.println("            lock (this)");
-            _source.print(_indent);
-            _source.println("            {");
-
-            indent2 = _indent + "                ";
-        }
-        else
-        {
-            indent2 = _indent + "            ";
-        }
-
-        _source.print(indent2);
-        _source.println("if (_state == null)");
-        _source.print(indent2);
-        _source.println("{");
-        _source.print(indent2);
-        _source.println("    throw(");
-        _source.print(indent2);
-        _source.println(
-            "        new statemap.StateUndefinedException());");
-        _source.print(indent2);
-        _source.println("}");
-        _source.println();
-        _source.print(indent2);
-        _source.print("return ((");
-        _source.print(context);
-        _source.println("State) _state);");
-
-        // If we are in a lock block, close it.
-        if (Smc.isSynchronized() == true)
-        {
-            _source.print(_indent);
-            _source.println("            }");
-        }
-
-        // Close the state get.
-        _source.print(_indent);
-        _source.println("        }");
-        _source.println();
-
-        // Now generate the state set.
-        _source.print(_indent);
-        _source.println("        set");
-        _source.print(_indent);
-        _source.println("        {");
-
-        // Again, if synchronization is on, then protect access
-        // to this FSM.
-        if (Smc.isSynchronized() == true)
-        {
-            _source.print(_indent);
-            _source.println("            lock(this)");
-            _source.print(_indent);
-            _source.println("            {");
-
-            indent2 = _indent + "                ";
-        }
-        else
-        {
-            indent2 = _indent + "            ";
-        }
-
-        _source.print(indent2);
-        _source.println("_state = value;");
-
-        // If we are in a lock block, close it.
-        if (Smc.isSynchronized() == true)
-        {
-            _source.print(_indent);
-            _source.println("            }");
-        }
-
-        // Close the state set.
-        _source.print(_indent);
-        _source.println("        }");
-
-        // Close the state property.
-        _source.print(_indent);
-        _source.println("    }");
-        _source.println();
-
-        // Generate the owner property.
-        _source.print(_indent);
-        _source.print("    internal ");
-        _source.print(context);
-        _source.println(" Owner");
-        _source.print(_indent);
-        _source.println("    {");
-
-        // Generate the property get method.
-        _source.print(_indent);
-        _source.println("        get");
-        _source.print(_indent);
-        _source.println("        {");
-        _source.print(_indent);
-        _source.println("            return (_owner);");
-        _source.print(_indent);
-        _source.println("        }");
-
-        // Close the owner property.
-        _source.print(_indent);
-        _source.println("    }");
-        _source.println();
-
         // If serialization is turned on, then output the
         // WriteObject and ReadObject methods.
         if (Smc.isSerial() == true)
@@ -536,7 +534,12 @@ public final class SmcCSharpGenerator
 
         // Declare member data.
         _source.print(_indent);
+        _source.println(
+            "//---------------------------------------------------------------");
+        _source.print(_indent);
         _source.println("// Member data.");
+        _source.print(_indent);
+        _source.println("//");
         _source.println();
         _source.print(_indent);
         _source.println("    [NonSerialized]");
@@ -596,7 +599,13 @@ public final class SmcCSharpGenerator
         }
 
         // Declare the inner state class.
+        _source.print(_indent);
+        _source.println(
+            "//---------------------------------------------------------------");
+        _source.print(_indent);
         _source.println("// Inner classes.");
+        _source.print(_indent);
+        _source.println("//");
         _source.println();
         _source.print(_indent);
         _source.print("    public abstract class ");
@@ -606,6 +615,38 @@ public final class SmcCSharpGenerator
         _source.println("        statemap.State");
         _source.print(_indent);
         _source.println("    {");
+
+        // The abstract Transitions property - if reflection was
+        // is specified.
+        if (Smc.isReflection() == true)
+        {
+            _source.print(_indent);
+            _source.println("    //-----------------------------------------------------------");
+            _source.print(_indent);
+            _source.println("    // Properties.");
+            _source.print(_indent);
+            _source.println("    //");
+            _source.println();
+            _source.print(_indent);
+            _source.print("        ");
+            _source.println(
+                "public abstract IDictionary Transitions");
+            _source.print(_indent);
+            _source.println("        {");
+            _source.print(_indent);
+            _source.println("            get;");
+            _source.print(_indent);
+            _source.println("        }");
+            _source.println();
+        }
+
+        _source.print(_indent);
+        _source.println("    //-----------------------------------------------------------");
+        _source.print(_indent);
+        _source.println("    // Member methods.");
+        _source.print(_indent);
+        _source.println("    //");
+        _source.println();
 
         // State constructor.
         _source.print(_indent);
@@ -620,14 +661,16 @@ public final class SmcCSharpGenerator
 
         // Entry/Exit methods.
         _source.print(_indent);
-        _source.print("        internal virtual void Entry(");
+        _source.print(
+            "        protected internal virtual void Entry(");
         _source.print(context);
         _source.println("Context context)");
         _source.print(_indent);
         _source.println("        {}");
         _source.println();
         _source.print(_indent);
-        _source.print("        internal virtual void Exit(");
+        _source.print(
+            "        protected internal virtual void Exit(");
         _source.print(context);
         _source.println("Context context)");
         _source.print(_indent);
@@ -643,7 +686,8 @@ public final class SmcCSharpGenerator
             if (transName.equals("Default") == false)
             {
                 _source.print(_indent);
-                _source.print("        internal virtual void ");
+                _source.print(
+                    "        protected internal virtual void ");
                 _source.print(transName);
                 _source.print("(");
                 _source.print(context);
@@ -676,7 +720,8 @@ public final class SmcCSharpGenerator
 
         // Generate the overall Default transition for all maps.
         _source.print(_indent);
-        _source.print("        internal virtual void Default(");
+        _source.print(
+            "        protected internal virtual void Default(");
         _source.print(context);
         _source.println("Context context)");
         _source.print(_indent);
@@ -780,10 +825,33 @@ public final class SmcCSharpGenerator
         // its instantiation.
         _source.println();
         _source.print(_indent);
-        _source.print("    /* package */ abstract class ");
+        _source.print("    internal abstract class ");
         _source.println(mapName);
         _source.print(_indent);
         _source.println("    {");
+        _source.print(_indent);
+        _source.println(
+            "    //-----------------------------------------------------------");
+        _source.print(_indent);
+        _source.println("    // Member methods.");
+        _source.print(_indent);
+        _source.println("    //");
+        _source.println();
+        _source.print(_indent);
+        _source.println(
+            "    //-----------------------------------------------------------");
+        _source.print(_indent);
+        _source.println("    // Member data.");
+        _source.print(_indent);
+        _source.println("    //");
+        _source.println();
+        _source.print(_indent);
+        _source.println(
+            "        //-------------------------------------------------------");
+        _source.print(_indent);
+        _source.println("        // Statics.");
+        _source.print(_indent);
+        _source.println("        //");
 
         // Declare each of the state class member data.
         for (it = states.iterator(); it.hasNext() == true;)
@@ -792,7 +860,7 @@ public final class SmcCSharpGenerator
 
             _source.print(_indent);
             _source.print(
-                "        /* package */ internal static ");
+                "        internal static ");
             _source.print(mapName);
             _source.print("_Default.");
             _source.print(mapName);
@@ -870,7 +938,46 @@ public final class SmcCSharpGenerator
         _source.print(_indent);
         _source.println("    {");
 
+        // If reflection is on, generate the Transition property.
+        if (Smc.isReflection() == true)
+        {
+            _source.print(_indent);
+            _source.println(
+                "    //-----------------------------------------------------------");
+            _source.print(_indent);
+            _source.println("    // Properties.");
+            _source.print(_indent);
+            _source.println("    //");
+            _source.println();
+            _source.print(_indent);
+            _source.print("        ");
+            _source.println(
+                "public override IDictionary Transitions");
+            _source.print(_indent);
+            _source.println("        {");
+            _source.print(_indent);
+            _source.println("            get");
+            _source.print(_indent);
+            _source.println("            {");
+            _source.print(_indent);
+            _source.println(
+                "                return (_transitions);");
+            _source.print(_indent);
+            _source.println("            }");
+            _source.print(_indent);
+            _source.println("        }");
+            _source.println();
+        }
+
         // Generate the constructor.
+        _source.print(_indent);
+        _source.println(
+            "    //-----------------------------------------------------------");
+        _source.print(_indent);
+        _source.println("    // Member methods.");
+        _source.print(_indent);
+        _source.println("    //");
+        _source.println();
         _source.print(_indent);
         _source.print("        internal ");
         _source.print(mapName);
@@ -894,9 +1001,88 @@ public final class SmcCSharpGenerator
 
         // Have each state now generate its code. Each state
         // class is an inner class.
+        _source.println();
+        _source.print(_indent);
+        _source.println(
+            "    //-----------------------------------------------------------");
+        _source.print(_indent);
+        _source.println("    // Inner classes.");
+        _source.print(_indent);
+        _source.println("    //");
         for (it = states.iterator(); it.hasNext() == true;)
         {
             ((SmcState) it.next()).accept(this);
+        }
+
+        // If reflection is on, then define the transitions list.
+        if (Smc.isReflection() == true)
+        {
+            List allTransitions = map.getFSM().getTransitions();
+            SmcTransition transition;
+            String transName;
+            int transDefinition;
+
+            _source.println();
+            _source.print(_indent);
+            _source.println(
+                "    //-----------------------------------------------------------");
+            _source.print(_indent);
+            _source.println("    // Member data.");
+            _source.print(_indent);
+            _source.println("    //");
+            _source.println();
+            _source.print(_indent);
+            _source.println(
+                "        //-------------------------------------------------------");
+            _source.print(_indent);
+            _source.println("        // Statics.");
+            _source.print(_indent);
+            _source.println("        //");
+            _source.print(_indent);
+            _source.print("        ");
+            _source.println(
+                "private static IDictionary _transitions;");
+            _source.println();
+            _source.print(_indent);
+            _source.print("        static ");
+            _source.print(mapName);
+            _source.println("_Default()");
+            _source.print(_indent);
+            _source.println("        {");
+            _source.print(_indent);
+            _source.print("            ");
+            _source.println("_transitions = new Hashtable();");
+
+            // Now place the transition names into the list.
+            for (it = allTransitions.iterator();
+                 it.hasNext() == true;
+                )
+            {
+                transition = (SmcTransition) it.next();
+                transName = transition.getName();
+
+                // If the transition is defined in this map's
+                // default state, then the value is 2.
+                if (definedDefaultTransitions.contains(
+                        transition) == true)
+                {
+                    transDefinition = 2;
+                }
+                // Otherwise the value is 0 - undefined.
+                else
+                {
+                    transDefinition = 0;
+                }
+
+                _source.print("            ");
+                _source.print("_transitions.Add(\"");
+                _source.print(transName);
+                _source.print("\", ");
+                _source.print(transDefinition);
+                _source.println(");");
+            }
+            _source.print(_indent);
+            _source.println("        }");
         }
 
         // End of the map default state class.
@@ -931,7 +1117,46 @@ public final class SmcCSharpGenerator
         _source.print(_indent);
         _source.println("        {");
 
+        // Generate the Transitions property if reflection is on.
+        if (Smc.isReflection() == true)
+        {
+            _source.print(_indent);
+            _source.println(
+                "        //-------------------------------------------------------");
+            _source.print(_indent);
+            _source.println("        // Properties.");
+            _source.print(_indent);
+            _source.println("        //");
+            _source.println();
+            _source.print(_indent);
+            _source.print("            ");
+            _source.println(
+                "public override IDictionary Transitions");
+            _source.print(_indent);
+            _source.println("            {");
+            _source.print(_indent);
+            _source.println("                get");
+            _source.print(_indent);
+            _source.println("                {");
+            _source.print(_indent);
+            _source.println(
+                "                    return (_transitions);");
+            _source.print(_indent);
+            _source.println("                }");
+            _source.print(_indent);
+            _source.println("            }");
+            _source.println();
+        }
+
         // Add the constructor.
+        _source.print(_indent);
+        _source.println(
+            "        //-------------------------------------------------------");
+        _source.print(_indent);
+        _source.println("        // Member methods.");
+        _source.print(_indent);
+        _source.println("        //");
+        _source.println();
         _source.print(_indent);
         _source.print("            internal ");
         _source.print(mapName);
@@ -942,16 +1167,16 @@ public final class SmcCSharpGenerator
         _source.println("                base (name, id)");
         _source.print(_indent);
         _source.println("            {}");
-        _source.println();
 
         // Add the Entry() and Exit() methods if this state
         // defines them.
         actions = state.getEntryActions();
         if (actions != null && actions.isEmpty() == false)
         {
+            _source.println();
             _source.print(_indent);
             _source.print(
-                "            internal override void Entry(");
+                "            protected internal override void Entry(");
             _source.print(context);
             _source.println("Context context)");
             _source.print(_indent);
@@ -983,9 +1208,10 @@ public final class SmcCSharpGenerator
         actions = state.getExitActions();
         if (actions != null && actions.isEmpty() == false)
         {
+            _source.println();
             _source.print(_indent);
             _source.print(
-                "            internal override void Exit(");
+                "            protected internal override void Exit(");
             _source.print(context);
             _source.println("Context context)");
             _source.print(_indent);
@@ -1024,6 +1250,103 @@ public final class SmcCSharpGenerator
         }
         _indent = indent2;
 
+        // If reflection is on, then generate the transitions
+        // map.
+        if (Smc.isReflection() == true)
+        {
+            List allTransitions = map.getFSM().getTransitions();
+            List stateTransitions = state.getTransitions();
+            SmcState defaultState = map.getDefaultState();
+            List defaultTransitions;
+            SmcTransition transition;
+            String transName;
+            int transDefinition;
+
+            // Initialize the default transition list to all the
+            // default state's transitions.
+            if (defaultState != null)
+            {
+                defaultTransitions =
+                    defaultState.getTransitions();
+            }
+            else
+            {
+                defaultTransitions = (List) new ArrayList();
+            }
+
+            _source.println();
+            _source.print(_indent);
+            _source.println(
+                "        //-------------------------------------------------------");
+            _source.print(_indent);
+            _source.println("        // Member data.");
+            _source.print(_indent);
+            _source.println("        //");
+            _source.println();
+            _source.print(_indent);
+            _source.println(
+                "            //---------------------------------------------------");
+            _source.print(_indent);
+            _source.println("            // Statics.");
+            _source.print(_indent);
+            _source.println("            //");
+            _source.print(_indent);
+            _source.print("            ");
+            _source.println(
+                "new private static IDictionary _transitions;");
+            _source.println();
+            _source.print(_indent);
+            _source.print("            static ");
+            _source.print(mapName);
+            _source.print("_");
+            _source.print(stateName);
+            _source.println("()");
+            _source.print(_indent);
+            _source.println("            {");
+            _source.print(_indent);
+            _source.print("                ");
+            _source.println("_transitions = new Hashtable();");
+
+            // Now place the transition names into the list.
+            for (it = allTransitions.iterator();
+                 it.hasNext() == true;
+                )
+            {
+                transition = (SmcTransition) it.next();
+                transName = transition.getName();
+
+                // If the transition is in this state, then its
+                // value is 1.
+                if (stateTransitions.contains(
+                        transition) == true)
+                {
+                    transDefinition = 1;
+                }
+                // If the transition is defined in this map's
+                // default state, then the value is 2.
+                else if (defaultTransitions.contains(
+                             transition) == true)
+                {
+                    transDefinition = 2;
+                }
+                // Otherwise the value is 0 - undefined.
+                else
+                {
+                    transDefinition = 0;
+                }
+
+                _source.print("                ");
+                _source.print("_transitions.Add(\"");
+                _source.print(transName);
+                _source.print("\", ");
+                _source.print(transDefinition);
+                _source.println(");");
+            }
+
+            _source.print(_indent);
+            _source.println("            }");
+        }
+
         // End of state declaration.
         _source.print(_indent);
         _source.println("        }");
@@ -1047,7 +1370,7 @@ public final class SmcCSharpGenerator
 
         _source.println();
         _source.print(_indent);
-        _source.print("internal override void ");
+        _source.print("protected internal override void ");
         _source.print(transName);
         _source.print("(");
         _source.print(context);
@@ -1453,7 +1776,10 @@ public final class SmcCSharpGenerator
             // Set the next state so this it can be pushed
             // onto the state stack. But only do so if a clear
             // state was done.
-            if (loopbackFlag == false || hasActions == false)
+            // v. 4.3.0: If the full-qualified end state is
+            // "nil", then don't need to do anything.
+            if ((loopbackFlag == false || hasActions == true) &&
+                fqEndStateName.equals(NIL_STATE) == false)
             {
                 _source.print(indent3);
                 _source.print("context.State = ");
@@ -1649,6 +1975,39 @@ public final class SmcCSharpGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2005/11/07 19:34:54  cwrapp
+// Changes in release 4.3.0:
+// New features:
+//
+// + Added -reflect option for Java, C#, VB.Net and Tcl code
+//   generation. When used, allows applications to query a state
+//   about its supported transitions. Returns a list of transition
+//   names. This feature is useful to GUI developers who want to
+//   enable/disable features based on the current state. See
+//   Programmer's Manual section 11: On Reflection for more
+//   information.
+//
+// + Updated LICENSE.txt with a missing final paragraph which allows
+//   MPL 1.1 covered code to work with the GNU GPL.
+//
+// + Added a Maven plug-in and an ant task to a new tools directory.
+//   Added Eiten Suez's SMC tutorial (in PDF) to a new docs
+//   directory.
+//
+// Fixed the following bugs:
+//
+// + (GraphViz) DOT file generation did not properly escape
+//   double quotes appearing in transition guards. This has been
+//   corrected.
+//
+// + A note: the SMC FAQ incorrectly stated that C/C++ generated
+//   code is thread safe. This is wrong. C/C++ generated is
+//   certainly *not* thread safe. Multi-threaded C/C++ applications
+//   are required to synchronize access to the FSM to allow for
+//   correct performance.
+//
+// + (Java) The generated getState() method is now public.
+//
 // Revision 1.5  2005/09/19 15:20:03  cwrapp
 // Changes in release 4.2.2:
 // New features:

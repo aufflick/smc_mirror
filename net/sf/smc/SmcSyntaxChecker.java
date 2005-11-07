@@ -34,7 +34,6 @@ package net.sf.smc;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -64,7 +63,7 @@ public final class SmcSyntaxChecker
 
         _fsmName = fsm;
         _targetLanguage = targetLanguage;
-        _messages = (List) new LinkedList();
+        _messages = (List) new ArrayList();
         _checkFlag = true;
     }
 

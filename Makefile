@@ -24,7 +24,7 @@
 #   Eitan Suez contributed examples/Ant.
 #   (Name withheld) contributed the C# code generation and
 #   examples/C#.
-#   Francois Perrord contributed the Python code generator and
+#   Francois Perrad contributed the Python code generator and
 #   examples/Python.
 #
 # RCS ID
@@ -61,7 +61,9 @@ install :	$(SMC_STAGING_DIR)
 		-rm -fr $(SMC_STAGING_DIR)/*
 		$(MAKE) -C lib install
 		$(MAKE) -C net/sf/smc install
+		cp -R -f -p ./docs $(SMC_STAGING_DIR)
 		cp -R -f -p ./examples $(SMC_STAGING_DIR)
+		cp -R -f -p ./tools $(SMC_STAGING_DIR)
 		-find $(SMC_STAGING_DIR) -name CVS -type d -exec rm -fr {} \; -prune
 		-find $(SMC_STAGING_DIR) -name .DS_Store -exec rm -fr {} \;
 		$(MAKE) -C misc install
@@ -121,6 +123,39 @@ realclean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.10  2005/11/07 19:34:53  cwrapp
+# Changes in release 4.3.0:
+# New features:
+#
+# + Added -reflect option for Java, C#, VB.Net and Tcl code
+#   generation. When used, allows applications to query a state
+#   about its supported transitions. Returns a list of transition
+#   names. This feature is useful to GUI developers who want to
+#   enable/disable features based on the current state. See
+#   Programmer's Manual section 11: On Reflection for more
+#   information.
+#
+# + Updated LICENSE.txt with a missing final paragraph which allows
+#   MPL 1.1 covered code to work with the GNU GPL.
+#
+# + Added a Maven plug-in and an ant task to a new tools directory.
+#   Added Eiten Suez's SMC tutorial (in PDF) to a new docs
+#   directory.
+#
+# Fixed the following bugs:
+#
+# + (GraphViz) DOT file generation did not properly escape
+#   double quotes appearing in transition guards. This has been
+#   corrected.
+#
+# + A note: the SMC FAQ incorrectly stated that C/C++ generated
+#   code is thread safe. This is wrong. C/C++ generated is
+#   certainly *not* thread safe. Multi-threaded C/C++ applications
+#   are required to synchronize access to the FSM to allow for
+#   correct performance.
+#
+# + (Java) The generated getState() method is now public.
+#
 # Revision 1.9  2005/09/11 15:28:47  cwrapp
 # Changes in release 4.2.0:
 # New features:

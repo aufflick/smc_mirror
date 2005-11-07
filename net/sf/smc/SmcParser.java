@@ -37,8 +37,8 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 public final class SmcParser
@@ -60,7 +60,7 @@ public final class SmcParser
                      boolean debugFlag)
     {
         _name = name;
-        _messages = (List) new LinkedList();
+        _messages = (List) new ArrayList();
         _lexer = new SmcLexer(istream, debugFlag);
         _parserFSM = new SmcParserContext(this);
         _parserFSM.setDebugFlag(debugFlag);
@@ -711,7 +711,7 @@ public final class SmcParser
     // name.
     /* package */ void createTransition(int lineNumber)
     {
-        createTransition(new LinkedList(), lineNumber);
+        createTransition(new ArrayList(), lineNumber);
         return;
     }
 
@@ -889,7 +889,7 @@ public final class SmcParser
     {
         if (_paramList == null)
         {
-            _paramList = (List) new LinkedList();
+            _paramList = (List) new ArrayList();
         }
 
         return;
@@ -987,7 +987,7 @@ public final class SmcParser
         }
         else
         {
-            _actionList = (List) new LinkedList();
+            _actionList = (List) new ArrayList();
         }
 
         return;
@@ -1126,7 +1126,7 @@ public final class SmcParser
         }
         else
         {
-            _argList = (List) new LinkedList();
+            _argList = (List) new ArrayList();
         }
 
         return;
@@ -1405,6 +1405,39 @@ public final class SmcParser
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.12  2005/11/07 19:34:54  cwrapp
+// Changes in release 4.3.0:
+// New features:
+//
+// + Added -reflect option for Java, C#, VB.Net and Tcl code
+//   generation. When used, allows applications to query a state
+//   about its supported transitions. Returns a list of transition
+//   names. This feature is useful to GUI developers who want to
+//   enable/disable features based on the current state. See
+//   Programmer's Manual section 11: On Reflection for more
+//   information.
+//
+// + Updated LICENSE.txt with a missing final paragraph which allows
+//   MPL 1.1 covered code to work with the GNU GPL.
+//
+// + Added a Maven plug-in and an ant task to a new tools directory.
+//   Added Eiten Suez's SMC tutorial (in PDF) to a new docs
+//   directory.
+//
+// Fixed the following bugs:
+//
+// + (GraphViz) DOT file generation did not properly escape
+//   double quotes appearing in transition guards. This has been
+//   corrected.
+//
+// + A note: the SMC FAQ incorrectly stated that C/C++ generated
+//   code is thread safe. This is wrong. C/C++ generated is
+//   certainly *not* thread safe. Multi-threaded C/C++ applications
+//   are required to synchronize access to the FSM to allow for
+//   correct performance.
+//
+// + (Java) The generated getState() method is now public.
+//
 // Revision 1.11  2005/09/14 01:51:33  cwrapp
 // Changes in release 4.2.0:
 // New features:

@@ -30,6 +30,39 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2005/11/07 19:34:54  cwrapp
+// Changes in release 4.3.0:
+// New features:
+//
+// + Added -reflect option for Java, C#, VB.Net and Tcl code
+//   generation. When used, allows applications to query a state
+//   about its supported transitions. Returns a list of transition
+//   names. This feature is useful to GUI developers who want to
+//   enable/disable features based on the current state. See
+//   Programmer's Manual section 11: On Reflection for more
+//   information.
+//
+// + Updated LICENSE.txt with a missing final paragraph which allows
+//   MPL 1.1 covered code to work with the GNU GPL.
+//
+// + Added a Maven plug-in and an ant task to a new tools directory.
+//   Added Eiten Suez's SMC tutorial (in PDF) to a new docs
+//   directory.
+//
+// Fixed the following bugs:
+//
+// + (GraphViz) DOT file generation did not properly escape
+//   double quotes appearing in transition guards. This has been
+//   corrected.
+//
+// + A note: the SMC FAQ incorrectly stated that C/C++ generated
+//   code is thread safe. This is wrong. C/C++ generated is
+//   certainly *not* thread safe. Multi-threaded C/C++ applications
+//   are required to synchronize access to the FSM to allow for
+//   correct performance.
+//
+// + (Java) The generated getState() method is now public.
+//
 // Revision 1.4  2005/05/28 13:51:24  cwrapp
 // Update Java examples 1 - 7.
 //
@@ -40,8 +73,9 @@
 package smc_ex6;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.ListIterator;
+import java.util.List;
 
 public final class server
     implements TcpConnectionListener
@@ -121,6 +155,7 @@ public final class server
     {
         TcpServer server_socket = new TcpServer(this);
         StopThread thread = new StopThread(this);
+        Iterator it;
 
         // Remember this thread for latter.
         _my_thread = Thread.currentThread();
@@ -174,11 +209,34 @@ public final class server
             server_socket.close();
 
             // Stop all remaining accepted clients.
-            client client;
-            while (_client_list.size() > 0)
+            for (it = _client_list.iterator();
+                 it.hasNext() == true;
+                )
             {
-                client = (client) _client_list.removeFirst();
-                client.halt();
+                ((client) it.next()).halt();
+            }
+
+            // Wait for all accepted clients to stop running
+            // before returning.
+            while (_client_list.isEmpty() == false)
+            {
+                try
+                {
+                    Thread.sleep(10);
+                }
+                catch (InterruptedException interrupt)
+                {}
+
+                // Remove dead clients.
+                for (it = _client_list.iterator();
+                     it.hasNext() == true;
+                    )
+                {
+                    if (((client) it.next()).isAlive() == false)
+                    {
+                        it.remove();
+                    }
+                }
             }
         }
 
@@ -249,7 +307,7 @@ public final class server
     private String _reason;
 
     // Keep list of accepted connections.
-    private LinkedList _client_list;
+    private List _client_list;
 
     public static final long MAX_SLEEP = 0x7fffffff;
 
