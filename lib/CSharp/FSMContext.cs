@@ -29,8 +29,11 @@
 //  This package defines the FSMContext class which is inherited by
 //  the smc-generated application FSM context class.
 //
-// Change Log
+// CHANGE LOG
 // $Log$
+// Revision 1.2  2006/04/22 12:45:25  cwrapp
+// Version 4.3.1
+//
 // Revision 1.1  2005/05/28 18:44:13  cwrapp
 // Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
 //
@@ -60,9 +63,10 @@ namespace statemap
             // sets the initial state.
             _state = null;
             _transition = "";
-            _previous_state = null;
-            _state_stack = null;
-            _debug_flag = false;
+            _previousState = null;
+            _stateStack = null;
+            _debugFlag = false;
+            _debugStream = null;
         }
 
         // Used to enable debugging output
@@ -70,11 +74,24 @@ namespace statemap
         {
             get
             {
-                return _debug_flag;
+                return _debugFlag;
             }
-            set
+            set(bool flag)
             {
-                _debug_flag = value;
+                _debugFlag = flag;
+            }
+        }
+
+        // Used to set the output text writer.
+        public TextWriter DebugStream
+        {
+            get
+            {
+                return _debugStream
+            }
+            set(TextWriter stream)
+            {
+                _debugStream = stream;
             }
         }
 
@@ -90,9 +107,11 @@ namespace statemap
 
         public void SetState(State state)
         {
-            if (Debug == true)
+            if (Debug == true &&
+                _debugStream != null)
             {
-                Trace.WriteLine("NEW STATE    : " +    state.Name);
+                _debugStream.WriteLine(
+                    "NEW STATE    : " +    state.Name);
             }
 
             _state = state;
@@ -102,7 +121,7 @@ namespace statemap
 
         public void ClearState()
         {
-            _previous_state = _state;
+            _previousState = _state;
             _state = null;
 
             return;
@@ -112,30 +131,33 @@ namespace statemap
         {
             get
             {
-                if (_previous_state != null)
+                if (_previousState != null)
                 {
-                    return(_previous_state);
+                    return(_previousState);
                 }
 
-                throw new System.NullReferenceException("Previous state not set.");
+                throw
+                    new System.NullReferenceException(
+                        "Previous state not set.");
             }
         }
 
         public void PushState(State state)
         {
-            if (Debug == true)
+            if (Debug == true && _debugStream != null)
             {
-                Trace.WriteLine("PUSH TO STATE: " +    state.Name);
+                _debugStream.WriteLine(
+                    "PUSH TO STATE: " +    state.Name);
             }
 
             if (_state != null)
             {
-                if (_state_stack == null)
+                if (_stateStack == null)
                 {
-                    _state_stack = new System.Collections.Stack();
+                    _stateStack = new System.Collections.Stack();
                 }
 
-                _state_stack.Push(_state);
+                _stateStack.Push(_state);
             }
 
             _state = state;
@@ -145,11 +167,12 @@ namespace statemap
 
         public void PopState()
         {
-            if (_state_stack.Count == 0)
+            if (_stateStack.Count == 0)
             {
-                if (Debug == true)
+                if (Debug == true && _debugStream != null)
                 {
-                    Trace.WriteLine("POPPING ON EMPTY STATE STACK.");
+                    _debugStream.WriteLine(
+                        "POPPING ON EMPTY STATE STACK.");
                 }
 
                 throw new
@@ -160,12 +183,12 @@ namespace statemap
             {
                 // The pop method removes the top element
                 // from the stack and returns it.
-                _state = (State) _state_stack.Pop();
+                _state = (State) _stateStack.Pop();
 
-                if (Debug == true)
+                if (Debug == true && _debugStream != null)
                 {
-                    Trace.WriteLine("POP TO STATE : " +
-                        _state.Name);
+                    _debugStream.WriteLine(
+                        "POP TO STATE : " + _state.Name);
                 }
             }
 
@@ -174,7 +197,7 @@ namespace statemap
 
         public void EmptyStateStack()
         {
-            _state_stack.Clear();
+            _stateStack.Clear();
         }
 
         public string GetTransition()
@@ -187,11 +210,13 @@ namespace statemap
         {
             _state = null;
             _transition = null;
-            _previous_state = null;
-            _state_stack = null;
+            _previousState = null;
+            _stateStack = null;
         }
 
+    //-----------------------------------------------------------
     // Member data
+    //
 
         // The current state.
         [NonSerialized]
@@ -206,15 +231,19 @@ namespace statemap
         // Do no persist the previous state because an FSM should be
         // serialized while in transition.
         [NonSerialized]
-        protected State _previous_state;
+        protected State _previousState;
 
         // This stack is used when a push transition is taken.
         [NonSerialized]
-        protected System.Collections.Stack _state_stack;
+        protected System.Collections.Stack _stateStack;
 
         // When this flag is set to true, this class will print
         // out debug messages.
         [NonSerialized]
-        protected bool _debug_flag;
+        protected bool _debugFlag;
+
+        // Write debug output to this stream.
+        [NonSerialized]
+        protected TextWrite _debugStream;
     }
 }

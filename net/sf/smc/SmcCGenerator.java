@@ -506,6 +506,8 @@ public final class SmcCGenerator
             mapName = packageName + "_" + mapName;
         }
 
+        _context = context;
+
         // Add the Entry() and Exit() methods if this state
         // defines them.
         actions = state.getEntryActions();
@@ -1230,6 +1232,9 @@ public final class SmcCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2006/04/22 12:45:26  cwrapp
+// Version 4.3.1
+//
 // Revision 1.2  2005/11/07 19:34:54  cwrapp
 // Changes in release 4.3.0:
 // New features:

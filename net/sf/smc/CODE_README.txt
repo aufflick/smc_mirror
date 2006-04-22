@@ -1,5 +1,39 @@
                               SMC -
                   The State Machine Compiler
+                        Version 4.3.1
+
+
+
++ Major changes
+---------------
+
+None.
+
+
++ Bug fixes
+-----------
+
+(C#) Corrected error in state Entry and Exit actions where the
+context class was set to "null".
+
+(C#) Added property debugStream which allows the debug output
+TextWriter to be application-defined. By default the debug
+stream is null and no output is written. Turning on debugging
+in C# requires setting the Debug property to true and setting
+the DebugStream property to a TextWriter object.
+
+(C++) Corrected FSMContext destructor and setDebugFlag method
+which delete the _transition pointer even though FSMContext did
+not allocate the memory.
+
+(C++) Replaced strcpy calls with strncpy. State and transition
+names are now limited to 100 characters by default. However,
+this limit can be changed by modifying the statemap.h file.
+
+
+
+                              SMC -
+                  The State Machine Compiler
                         Version 4.3.0
 
 

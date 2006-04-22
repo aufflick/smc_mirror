@@ -63,27 +63,333 @@
 #endif // SMC_NO_EXCEPTIONS
 #include <stdio.h>
 #endif
+#if ! defined(SMC_NO_EXCEPTIONS)
+#include <stdexcept>
+#include <string>
+#endif
+
+// Limit names to 100 ASCII characters.
+// Why 100? Because it is a round number.
+#define MAX_NAME_LEN 100
 
 namespace statemap
 {
+//---------------------------------------------------------------
+// Exception Classes.
+//
+
 #ifndef SMC_NO_EXCEPTIONS
+    // Base class for all SMC exceptions.
+    class SmcException :
+        public std::runtime_error
+    {
+    //-----------------------------------------------------------
+    // Member methods
+    //
+    public:
+
+        // Destructor.
+        virtual ~SmcException() throw()
+        {};
+
+        static char* copyString(const char *s)
+        {
+            char *retval = NULL;
+
+            if (s != NULL)
+            {
+                retval = new char[MAX_NAME_LEN + 1];
+                retval[MAX_NAME_LEN] = '\0';
+                (void) strncpy(retval, s, MAX_NAME_LEN);
+            }
+
+            return (retval);
+        };
+
+    protected:
+
+        // Constructor.
+        SmcException(const std::string& reason)
+        : std::runtime_error(reason)
+        {};
+
+    private:
+
+        // Default construction not allowed.
+        SmcException();
+
+    //-----------------------------------------------------------
+    // Member data.
+    //
+    public:
+    protected:
+    private:
+    };
+
     // This class is thrown when a pop is issued on an empty
     // state stack.
-    class PopOnEmptyStateStackException
+    class PopOnEmptyStateStackException :
+        public SmcException
     {
+    //-----------------------------------------------------------
+    // Member methods.
+    //
     public:
 
         // Default constructor.
-        PopOnEmptyStateStackException() {};
+        PopOnEmptyStateStackException()
+        : SmcException("no state to pop from state stack")
+        {};
 
         // Destructor.
-        ~PopOnEmptyStateStackException() {};
+        virtual ~PopOnEmptyStateStackException() throw()
+        {};
+
+    protected:
+    private:
+
+    //-----------------------------------------------------------
+    // Member data.
+    //
+    public:
+    protected:
+    private:
+    };
+
+    // This class is thrown when a transition is issued
+    // but there is no current state. This happens when
+    // a transition is issued from within a transition
+    // action.
+    class StateUndefinedException :
+        public SmcException
+    {
+    //-----------------------------------------------------------
+    // Member methods.
+    //
+    public:
+
+        // Default constructor.
+        StateUndefinedException()
+        : SmcException("transition invoked while in transition")
+        {};
+
+        // Destructor.
+        virtual ~StateUndefinedException() throw()
+        {};
+
+    protected:
+    private:
+
+    //-----------------------------------------------------------
+    // Member data.
+    //
+    public:
+    protected:
+    private:
+    };
+
+    // This class is thrown when a transition is issued
+    // but there is no code to handle it.
+    class TransitionUndefinedException :
+        public SmcException
+    {
+    //-----------------------------------------------------------
+    // Member methods.
+    //
+    public:
+
+        // Default constructor.
+        TransitionUndefinedException()
+        : SmcException("no such transition in current state"),
+          _state(NULL),
+          _transition(NULL)
+        {};
+
+        // Construct an exception using the specified state
+        // and transition.
+        TransitionUndefinedException(const char *state,
+                                     const char *transition)
+        : SmcException("no such transition in current state"),
+          _state(copyString(state)),
+          _transition(copyString(transition))
+        {};
+
+        // Copy constructor.
+        TransitionUndefinedException(
+            const TransitionUndefinedException& ex)
+        : SmcException("no such transition in current state"),
+          _state(copyString(ex._state)),
+          _transition(copyString(ex._transition))
+        {};
+
+        // Destructor.
+        virtual ~TransitionUndefinedException() throw()
+        {
+            if (_state != NULL)
+            {
+                delete[] _state;
+                _state = NULL;
+            }
+
+            if (_transition != NULL)
+            {
+                delete[] _transition;
+                _transition = NULL;
+            }
+        };
+
+        // Assignment operator.
+        const TransitionUndefinedException&
+            operator=(const TransitionUndefinedException& ex)
+        {
+            // Don't do self assignment.
+            if (this != &ex)
+            {
+                if (_state != NULL)
+                {
+                    delete[] _state;
+                    _state = NULL;
+                }
+
+                if (_transition != NULL)
+                {
+                    delete[] _transition;
+                    _transition = NULL;
+                }
+
+                _state = copyString(ex._state);
+                _transition = copyString(ex._transition);
+            }
+
+            return (*this);
+        };
+
+        // Returns the state. May be NULL.
+        const char* getState() const
+        {
+            return(_state);
+        };
+
+        // Returns the transition. May be NULL.
+        const char* getTransition() const
+        {
+            return (_transition);
+        };
+
+    protected:
+    private:
+
+    //-----------------------------------------------------------
+    // Member data.
+    //
+    public:
+    protected:
+    private:
+
+		char *_state;
+		char *_transition;
+    };
+
+    // This class is thrown when a state ID is either less than
+    // the minimal value or greater than the maximal value.
+    class IndexOutOfBoundsException :
+        public SmcException
+    {
+    //-----------------------------------------------------------
+    // Member methods.
+    //
+    public:
+
+        // Default constructor.
+        IndexOutOfBoundsException()
+        : SmcException("index out of bounds"),
+          _index(0),
+          _minIndex(0),
+          _maxIndex(0)
+        {};
+
+        // Constructs an exception using the specified index,
+        // minimum index and maximum index.
+        IndexOutOfBoundsException(const int index,
+                                  const int minIndex,
+                                  const int maxIndex)
+        : SmcException("index out of bounds"),
+          _index(index),
+          _minIndex(minIndex),
+          _maxIndex(maxIndex)
+        {};
+
+        // Copy constructor.
+        IndexOutOfBoundsException(
+            const IndexOutOfBoundsException& ex)
+        : SmcException("index out of bounds"),
+          _index(ex._index),
+          _minIndex(ex._minIndex),
+          _maxIndex(ex._maxIndex)
+        {};
+
+        // Destructor.
+        virtual ~IndexOutOfBoundsException() throw()
+        {};
+
+        // Assignment operator.
+        const IndexOutOfBoundsException&
+            operator=(const IndexOutOfBoundsException& ex)
+        {
+            // Don't do self assignment.
+            if (this != &ex)
+            {
+                _index = ex._index;
+                _minIndex = ex._minIndex;
+                _maxIndex = ex._maxIndex;
+            }
+
+            return (*this);
+        };
+
+        // Returns the out-of-bounds index.
+        int getIndex() const
+        {
+            return(_index);
+        };
+
+        // Returns the minimum allowed index value.
+        int getMinIndex() const
+        {
+            return (_minIndex);
+        };
+
+        // Returns the maximum allowed index value.
+        int getMaxIndex() const
+        {
+            return (_maxIndex);
+        };
+
+    protected:
+    private:
+
+    //-----------------------------------------------------------
+    // Member data.
+    //
+    public:
+    protected:
+    private:
+
+		int _index;
+		int _minIndex;
+        int _maxIndex;
     };
 #endif // !SMC_NO_EXCEPTIONS
 
+//
+// end of Exception Classes.
+//---------------------------------------------------------------
+
     class State
     {
+    //-----------------------------------------------------------
     // Member functions.
+    //
     public:
 
         const char* getName() const
@@ -104,13 +410,11 @@ namespace statemap
         {
             if (name != NULL)
             {
-                _name = new char[strlen(name) + 1];
-                strcpy(_name, name);
+                _name = SmcException::copyString(name);
             }
             else
             {
-                _name = new char[13];
-                strcpy(_name, "NAME NOT SET");
+                _name = SmcException::copyString("NAME NOT SET");
             }
         };
 
@@ -130,7 +434,9 @@ namespace statemap
         State() {};
         State(const State&) {};
 
+    //-----------------------------------------------------------
     // Member data.
+    //
     public:
     protected:
 
@@ -145,7 +451,9 @@ namespace statemap
 
     class FSMContext
     {
+    //-----------------------------------------------------------
     // Nested classes.
+    //
     public:
     protected:
     private:
@@ -153,7 +461,9 @@ namespace statemap
         // Implements the state stack.
         class StateEntry
         {
+        //-------------------------------------------------------
         // Member functions.
+        //
         public:
             StateEntry(State *state, StateEntry *next)
             : _state(state),
@@ -172,35 +482,43 @@ namespace statemap
             };
 
             StateEntry* getNext()
-            { return(_next); };
+            {
+                return(_next);
+            };
 
         protected:
         private:
 
+        //-------------------------------------------------------
         // Member data.
+        //
         public:
         protected:
         private:
             State *_state;
             StateEntry *_next;
 
+        //-------------------------------------------------------
         // Friends
+        //
             friend class FSMContext;
         }; // end of class StateEntry
 
+    //-----------------------------------------------------------
     // Member functions
+    //
     public:
+
         // Destructor.
         virtual ~FSMContext()
         {
             StateEntry *state;
 
-            if (_transition != NULL)
-            {
-                delete[] _transition;
-                _transition = NULL;
-            }
+            // We didn't allocate this pointer, so we don't
+            // delete it.
+            _transition = NULL;
 
+            // But we did allocate the state stack.
             while (_state_stack != NULL)
             {
                 state = _state_stack;
@@ -240,14 +558,7 @@ namespace statemap
         void setDebugFlag(bool flag)
         {
             _debug_flag = flag;
-
-            // If debugging is now off and the transition name
-            // has been stored, then delete the transition.
-            if (_debug_flag == false && _transition != NULL)
-            {
-                delete[] _transition;
-                _transition = NULL;
-            }
+            _transition = NULL;
 
             return;
         };
@@ -453,7 +764,9 @@ namespace statemap
         // being used.
         FSMContext(const FSMContext& fsm) {};
 
+    //-----------------------------------------------------------
     // Member data
+    //
     public:
     protected:
 
@@ -485,216 +798,14 @@ namespace statemap
 #endif // SMC_USES_IOSTREAMS
 
     }; // end of class FSMContext
-
-    // This class is thrown when a transition is issued
-    // but there is no current state. This happens when
-    // a transition is issued from within a transition
-    // action.
-    class StateUndefinedException
-    {
-    public:
-
-        // Default constructor.
-        StateUndefinedException() {};
-
-        // Destructor.
-        ~StateUndefinedException() {};
-    };
-
-    // This class is thrown when a transition is issued
-    // but there is no code to handle it.
-    class TransitionUndefinedException
-    {
-    // Member methods.
-    public:
-
-        // Default constructor.
-        TransitionUndefinedException()
-        : _state(NULL),
-          _transition(NULL)
-        {};
-
-        // Construct an exception using the specified state
-        // and transition.
-        TransitionUndefinedException(const char *state,
-                                     const char *transition)
-        : _state(_CopyString(state)),
-          _transition(_CopyString(transition))
-        {};
-
-        // Copy constructor.
-        TransitionUndefinedException(
-            const TransitionUndefinedException& ex)
-        : _state(_CopyString(ex._state)),
-          _transition(_CopyString(ex._transition))
-        {};
-
-        // Destructor.
-        ~TransitionUndefinedException()
-        {
-            if (_state != NULL)
-            {
-                delete[] _state;
-                _state = NULL;
-            }
-
-            if (_transition != NULL)
-            {
-                delete[] _transition;
-                _transition = NULL;
-            }
-        };
-
-        // Assignment operator.
-        const TransitionUndefinedException&
-            operator=(const TransitionUndefinedException& ex)
-        {
-            // Don't do self assignment.
-            if (this != &ex)
-            {
-                if (_state != NULL)
-                {
-                    delete[] _state;
-                    _state = NULL;
-                }
-
-                if (_transition != NULL)
-                {
-                    delete[] _transition;
-                    _transition = NULL;
-                }
-
-                _state = _CopyString(ex._state);
-                _transition = _CopyString(ex._transition);
-            }
-
-            return (*this);
-        };
-
-        // Returns the state. May be NULL.
-        char* getState() const
-        {
-            return(_state);
-        };
-
-        // Returns the transition. May be NULL.
-        char* getTransition() const
-        {
-            return (_transition);
-        };
-
-    protected:
-    private:
-
-        // Copies a non-null string and returns the copy.
-        static char* _CopyString(const char *s)
-        {
-            char *retval = NULL;
-
-            if (s != NULL)
-            {
-                retval = new char[strlen(s) + 1];
-                (void) strcpy(retval, s);
-            }
-
-            return (retval);
-        };
-
-    // Member data.
-    public:
-    protected:
-    private:
-
-		char *_state;
-		char *_transition;
-    };
-
-    // This class is thrown when a state ID is either less than
-    // the minimal value or greater than the maximal value.
-    class IndexOutOfBoundsException
-    {
-    // Member methods.
-    public:
-
-        // Default constructor.
-        IndexOutOfBoundsException()
-        : _index(0),
-          _minIndex(0),
-          _maxIndex(0)
-        {};
-
-        // Constructs an exception using the specified index,
-        // minimum index and maximum index.
-        IndexOutOfBoundsException(int index,
-                                  int minIndex,
-                                  int maxIndex)
-        : _index(index),
-          _minIndex(minIndex),
-          _maxIndex(maxIndex)
-        {};
-
-        // Copy constructor.
-        IndexOutOfBoundsException(
-            const IndexOutOfBoundsException& ex)
-        : _index(ex._index),
-          _minIndex(ex._minIndex),
-          _maxIndex(ex._maxIndex)
-        {};
-
-        // Destructor.
-        ~IndexOutOfBoundsException()
-        {};
-
-        // Assignment operator.
-        const IndexOutOfBoundsException&
-            operator=(const IndexOutOfBoundsException& ex)
-        {
-            // Don't do self assignment.
-            if (this != &ex)
-            {
-                _index = ex._index;
-                _minIndex = ex._minIndex;
-                _maxIndex = ex._maxIndex;
-            }
-
-            return (*this);
-        };
-
-        // Returns the out-of-bounds index.
-        int getIndex() const
-        {
-            return(_index);
-        };
-
-        // Returns the minimum allowed index value.
-        int getMinIndex() const
-        {
-            return (_minIndex);
-        };
-
-        // Returns the maximum allowed index value.
-        int getMaxIndex() const
-        {
-            return (_maxIndex);
-        };
-
-    protected:
-    private:
-
-    // Member data.
-    public:
-    protected:
-    private:
-
-		int _index;
-		int _minIndex;
-        int _maxIndex;
-    };
 };
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2006/04/22 12:45:24  cwrapp
+// Version 4.3.1
+//
 // Revision 1.7  2005/06/08 11:09:14  cwrapp
 // + Updated Python code generator to place "pass" in methods with empty
 //   bodies.

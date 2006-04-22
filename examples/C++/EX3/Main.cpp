@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2006/04/22 12:45:24  cwrapp
+// Version 4.3.1
+//
 // Revision 1.5  2005/06/08 11:09:12  cwrapp
 // + Updated Python code generator to place "pass" in methods with empty
 //   bodies.
@@ -71,15 +74,27 @@ int main(int argc, char *argv[])
 	{
 		cout << "The string \"" << argv[1] << "\" is ";
 
-		if (thisContext.CheckString(argv[1]) == false)
-		{
-			cout << "not acceptable." << endl;
+        try
+        {
+            if (thisContext.CheckString(argv[1]) == false)
+            {
+                cout << "not acceptable." << endl;
+                retcode = 1;
+            }
+            else
+            {
+                cout << "acceptable." << endl;
+            }
+        }
+        catch (SmcException smcex)
+        {
+            cout << "not acceptable - "
+                 << smcex.what()
+                 << '.'
+                 << endl;
+
             retcode = 1;
-		}
-		else
-		{
-			cout << "acceptable." << endl;
-		}
+        }
 	}
 
 	return (retcode);

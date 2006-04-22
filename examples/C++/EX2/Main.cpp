@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2006/04/22 12:45:24  cwrapp
+// Version 4.3.1
+//
 // Revision 1.2  2005/06/15 23:42:03  cwrapp
 // Check in for release version 4.0.0
 //
@@ -64,15 +67,27 @@ int main(int argc, char *argv[])
 	{
 		cout << "The string \"" << argv[1] << "\" is ";
 
-		if (thisContext.CheckString(argv[1]) == false)
-		{
-			cout << "not acceptable." << endl;
+        try
+        {
+            if (thisContext.CheckString(argv[1]) == false)
+            {
+                cout << "not acceptable." << endl;
+                retcode = 1;
+            }
+            else
+            {
+                cout << "acceptable." << endl;
+            }
+        }
+        catch (SmcException smcex)
+        {
+            cout << "not acceptable - "
+                 << smcex.what()
+                 << '.'
+                 << endl;
+
             retcode = 1;
-		}
-		else
-		{
-			cout << "acceptable." << endl;
-		}
+        }
 	}
 
 	return (retcode);

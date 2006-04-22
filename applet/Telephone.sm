@@ -30,6 +30,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2006/04/22 12:45:23  cwrapp
+// Version 4.3.1
+//
 // Revision 1.4  2005/06/05 18:51:07  cwrapp
 // Added output actions back into FSM.
 //
@@ -212,6 +215,10 @@ NYCTemp
     {
         writeState("Exiting CallMap::NYCTemp");
 
+        writeStateAction(
+            "Entry", "stopTimer(\"RingTimer\")");
+        stopTimer("RingTimer");
+
         writeStateAction("Entry", "stopLoop(\"ringing\")");
         stopLoop("ringing");
     }
@@ -242,6 +249,10 @@ Time
     {
         writeState("Exiting CallMap::Time");
 
+        writeStateAction(
+            "Entry", "stopTimer(\"RingTimer\")");
+        stopTimer("RingTimer");
+
         writeStateAction("Entry", "stopLoop(\"ringing\")");
         stopLoop("ringing");
     }
@@ -271,6 +282,10 @@ DepositMoney
     Exit
     {
         writeState("Exiting CallMap::DepositMoney");
+
+        writeStateAction(
+            "Entry", "stopTimer(\"RingTimer\")");
+        stopTimer("RingTimer");
 
         writeStateAction("Entry", "stopLoop(\"ringing\")");
         stopLoop("ringing");

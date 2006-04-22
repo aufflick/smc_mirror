@@ -1534,12 +1534,15 @@ public final class Smc
     /* package */ static final int TRANS_PUSH = 2;
     /* package */ static final int TRANS_POP = 3;
 
-    private static final String VERSION = "v. 4.3.0";
+    private static final String VERSION = "v. 4.3.1";
 }
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.14  2006/04/22 12:45:26  cwrapp
+// Version 4.3.1
+//
 // Revision 1.13  2005/11/07 19:34:54  cwrapp
 // Changes in release 4.3.0:
 // New features:

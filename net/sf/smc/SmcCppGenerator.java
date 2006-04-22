@@ -72,7 +72,7 @@ public final class SmcCppGenerator
     //
     // (put namespace a { namespace b ... if %package defined.)
     //
-    // // Static class declarations.
+    // Static class declarations.
     // <map name>_<state name> <map name>::<state>("<map name>::<state name>", <index>)
     public void visit(SmcFSM fsm)
     {
@@ -111,7 +111,6 @@ public final class SmcCppGenerator
             _source.print("#include ");
             _source.println(((String) it.next()));
         }
-
 
         // Include the context file last.
         _source.print("#include \"");
@@ -1343,6 +1342,9 @@ public final class SmcCppGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2006/04/22 12:45:26  cwrapp
+// Version 4.3.1
+//
 // Revision 1.2  2005/11/07 19:34:54  cwrapp
 // Changes in release 4.3.0:
 // New features:

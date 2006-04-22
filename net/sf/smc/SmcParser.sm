@@ -35,6 +35,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.11  2006/04/22 12:45:26  cwrapp
+ * Version 4.3.1
+ *
  * Revision 1.10  2005/09/14 01:51:33  cwrapp
  * Changes in release 4.2.0:
  * New features:
@@ -126,8 +129,8 @@ Start
        Smc._targetLanguage != Smc.GRAPH]
         nil
         {
-            error(
-                "%header may only be used with -c++, -c, -table or -graph options.",
+            warning(
+                "%header only used by -c++, -c, -table or -graph options.",
                 token.getLineNumber());
         }
 
@@ -144,8 +147,8 @@ Start
        Smc._targetLanguage != Smc.GRAPH]
         nil
         {
-            error(
-                "%include may only be used with -c++, -c, -table or -graph options.",
+            warning(
+                "%include only used by -c++, -c, -table or -graph options.",
                 token.getLineNumber());
         }
 
@@ -171,8 +174,8 @@ Start
        Smc._targetLanguage != Smc.GRAPH]
         nil
         {
-            error(
-                "%declare may only be used with -c++, -table or -graph options.",
+            warning(
+                "%declare only used by -c++, -table or -graph options.",
                 token.getLineNumber());
         }
 
@@ -431,8 +434,8 @@ StartError
        Smc._targetLanguage != Smc.GRAPH]
         nil
         {
-            error(
-                "%declare may only be used with -c++, -table or -graph options.",
+            warning(
+                "%declare only used by -c++, -table or -graph options.",
                 token.getLineNumber());
         }
 
@@ -993,7 +996,7 @@ TransNext
     Default
         TransNextError
         {
-            error("Expecting either a guard, push, pop or end state.",
+            error("Expecting either a guard, \"push\", \"pop\" or end state.",
                   ctxt.getLineNumber());
         }
 }
@@ -1162,7 +1165,7 @@ PushStart
     Default
         PushError
         {
-            error("\"push\" must be followed by a '\'.",
+            error("\"push\" must be followed by a '/'.",
                   ctxt.getLineNumber());
         }
 }

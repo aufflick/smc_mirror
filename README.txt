@@ -2,7 +2,7 @@
 
                                SMC
                      The State Machine Compiler
-                         (Version: 4.3.0)
+                         (Version: 4.3.1)
 
                      http://smc.sourceforge.net
 
@@ -13,35 +13,27 @@
 
 New Features:
 
-+ Added -reflect option for Java, C#, VB.Net and Tcl code
-  generation. When used, allows applications to query a state
-  about its supported transitions. Returns a list of transition
-  names. This feature is useful to GUI developers who want to
-  enable/disable features based on the current state. See
-  Programmer's Manual section 11: On Reflection for more
-  information.
-
-+ Updated LICENSE.txt with a missing final paragraph which allows
-  MPL 1.1 covered code to work with the GNU GPL.
-
-+ Added a Maven plug-in and an ant task to a new tools directory.
-  Added Eiten Suez's SMC tutorial (in PDF) to a new docs
-  directory.
+None.
 
 
 Bug Fixes:
 
-+ (GraphViz) DOT file generation did not properly escape
-  double quotes appearing in transition guards. This has been
-  corrected.
++ (C#) Corrected error in state Entry and Exit actions where the
+  context class was set to "null".
 
-+ A note: the SMC FAQ incorrectly stated that C/C++ generated
-  code is thread safe. This is wrong. C/C++ generated is
-  certainly *not* thread safe. Multi-threaded C/C++ applications
-  are required to synchronize access to the FSM to allow for
-  correct performance.
++ (C#) Added property debugStream which allows the debug output
+  TextWriter to be application-defined. By default the debug
+  stream is null and no output is written. Turning on debugging
+  in C# requires setting the Debug property to true and setting
+  the DebugStream property to a TextWriter object.
 
-+ (Java) The generated getState() method is now public.
++ (C++) Corrected FSMContext destructor and setDebugFlag method
+  which delete the _transition pointer even though FSMContext did
+  not allocate the memory.
+
++ (C++) Replaced strcpy calls with strncpy. State and transition
+  names are now limited to 100 characters by default. However,
+  this limit can be changed by modifying the statemap.h file.
 
 
 

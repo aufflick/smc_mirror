@@ -33,6 +33,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2006/04/22 12:45:24  cwrapp
+// Version 4.3.1
+//
 // Revision 1.6  2005/06/08 11:09:13  cwrapp
 // + Updated Python code generator to place "pass" in methods with empty
 //   bodies.
@@ -146,6 +149,7 @@ Entry
 }
 Exit
 {
+    stopTimer("RingTimer");
     stopLoop("ringing");
 }
 {
@@ -164,6 +168,7 @@ Entry
 }
 Exit
 {
+    stopTimer("RingTimer");
     stopLoop("ringing");
 }
 {
@@ -182,6 +187,7 @@ Entry
 }
 Exit
 {
+    stopTimer("RingTimer");
     stopLoop("ringing");
 }
 {

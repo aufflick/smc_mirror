@@ -52,6 +52,8 @@ SMC's command line options are:
                (use with -java, -vb and -csharp only).
     -noex    : Do not generate C++ exception throws
                (use with -c++ only).
+    -noglob  : Do no generate static variables
+               (use with -c++ only).
     -nocatch : Do not generate try/catch/rethrow code
                (not recommended).
     -serial  : Generate serialization code.

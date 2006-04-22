@@ -68,13 +68,16 @@ $(TARGET) :	$(SOURCES)
 		-rm -f *.class
 
 clean :
-		-rm -f *.class *.flc $(JAR_FILE)
+		-rm -f *Context.java *.class *.flc $(JAR_FILE)
 
 realclean :	clean
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.6  2006/04/22 12:45:23  cwrapp
+# Version 4.3.1
+#
 # Revision 1.5  2005/06/05 18:51:07  cwrapp
 # Added output actions back into FSM.
 #
