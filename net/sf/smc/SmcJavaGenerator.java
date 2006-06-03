@@ -193,6 +193,24 @@ public final class SmcJavaGenerator
         _source.println("    }");
         _source.println();
 
+        // Generate the second constructor which allows the
+        // initial state to be dynamically set. Overrides the
+        // %start specifier.
+        _source.print("    public ");
+        _source.print(context);
+        _source.print("Context(");
+        _source.print(context);
+        _source.print(" owner, ");
+        _source.print(context);
+        _source.println("State initState)");
+        _source.println("    {");
+        _source.println("        super();");
+        _source.println("        _owner = owner;");
+        _source.println("        setState(initState);");
+        _source.println("        initState.Entry(this);");
+        _source.println("    }");
+        _source.println();
+
         // Generate the default transition methods.
         // Get the transition list for the entire FSM.
         transitions = fsm.getTransitions();
@@ -317,6 +335,26 @@ public final class SmcJavaGenerator
         _source.println(" getOwner()");
         _source.println("    {");
         _source.println("        return (_owner);");
+        _source.println("    }");
+        _source.println();
+
+        // setOwner() method.
+        _source.print("    public void setOwner(");
+        _source.print(context);
+        _source.println(" owner)");
+        _source.println("    {");
+        _source.println("        if (owner == null)");
+        _source.println("        {");
+        _source.println("            throw (");
+        _source.println("                new NullPointerException(");
+        _source.println("                    \"null owner\"));");
+        _source.println("        }");
+        _source.println("        else");
+        _source.println("        {");
+        _source.println("            _owner = owner;");
+        _source.println("        }");
+        _source.println();
+        _source.println("        return;");
         _source.println("    }");
         _source.println();
 
@@ -622,7 +660,7 @@ public final class SmcJavaGenerator
         _source.println();
         _source.println(
             "        //-------------------------------------------------------");
-        _source.println("        // Statics.");
+        _source.println("        // Constants.");
         _source.println("        //");
 
         // Declare each of the state class member data.
@@ -630,7 +668,7 @@ public final class SmcJavaGenerator
         {
             state = (SmcState) it.next();
 
-            _source.print("        /* package */ static ");
+            _source.print("        public static final ");
             _source.print(mapName);
             _source.print("_Default.");
             _source.print(mapName);
@@ -638,27 +676,8 @@ public final class SmcJavaGenerator
             _source.print(state.getClassName());
             _source.print(' ');
             _source.print(state.getInstanceName());
-            _source.println(';');
-        }
-
-        // Create a default state as well.
-        _source.print("        private static ");
-        _source.print(mapName);
-        _source.println("_Default Default;");
-        _source.println();
-
-        // Declare the static block.
-        _source.println("        static");
-        _source.println("        {");
-
-        // Initialize the static state objects.
-        for (it = states.iterator(); it.hasNext() == true;)
-        {
-            state = (SmcState) it.next();
-
-            _source.print("            ");
-            _source.print(state.getInstanceName());
-            _source.print(" = new ");
+            _source.println(" =");
+            _source.print("            new ");
             _source.print(mapName);
             _source.print("_Default.");
             _source.print(mapName);
@@ -673,15 +692,15 @@ public final class SmcJavaGenerator
             _source.println(");");
         }
 
-        // Instantiate a default state as well.
-        _source.print("            Default = new ");
+        // Create a default state as well.
+        _source.print("        private static final ");
+        _source.print(mapName);
+        _source.println("_Default Default =");
+        _source.print("            new ");
         _source.print(mapName);
         _source.print("_Default(\"");
         _source.print(mapName);
         _source.println(".Default\", -1);");
-
-        // End of static block.
-        _source.println("        }");
         _source.println();
 
         // End of the map class.
@@ -1635,6 +1654,9 @@ public final class SmcJavaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2006/06/03 19:39:25  cwrapp
+// Final v. 4.3.1 check in.
+//
 // Revision 1.6  2005/11/07 19:34:54  cwrapp
 // Changes in release 4.3.0:
 // New features:

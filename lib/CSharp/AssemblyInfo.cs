@@ -29,8 +29,11 @@
 //  This package defines the FSMContext class which is inherited by
 //  the smc-generated application FSM context class.
 //
-// Change Log
+// CHANGE LOG
 // $Log$
+// Revision 1.2  2006/06/03 19:39:25  cwrapp
+// Final v. 4.3.1 check in.
+//
 // Revision 1.1  2005/05/28 18:44:13  cwrapp
 // Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
 //
@@ -66,7 +69,7 @@ using System.Runtime.CompilerServices;
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
 
-[assembly: AssemblyVersion("3.1.0.1")]
+[assembly: AssemblyVersion("4.3.1.1")]
 
 //
 // In order to sign your assembly you must specify a key to use. Refer to the 
@@ -93,12 +96,12 @@ using System.Runtime.CompilerServices;
 //   (*) Delay Signing is an advanced option - see the Microsoft .NET Framework
 //       documentation for more information on this.
 //
-[assembly: AssemblyDelaySign(false)]
-
-#if ANT
-[assembly: AssemblyKeyFile(@"@KeyPath@")]
-#else
-[assembly: AssemblyKeyFile(@"..\..\keys.sn")]
-#endif
-
-[assembly: AssemblyKeyName("")] 
+// [assembly: AssemblyDelaySign(false)]
+// 
+// #if ANT
+// [assembly: AssemblyKeyFile(@"@KeyPath@")]
+// #else
+// [assembly: AssemblyKeyFile(@"..\..\keys.sn")]
+// #endif
+// 
+// [assembly: AssemblyKeyName("")] 

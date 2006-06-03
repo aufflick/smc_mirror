@@ -192,12 +192,14 @@ public final class SmcGuard
         // The ctxt variable may appear in the condition, the
         // actions or in the pop arguments.
         if ((_condition != null &&
-             _condition.indexOf("ctxt.") >= 0) ||
+             (_condition.indexOf("ctxt.") >= 0 ||
+              _condition.indexOf("ctxt->") >= 0)) ||
             (_actions != null &&
              _actions.isEmpty() == false) ||
             (_transType == Smc.TRANS_POP &&
              _popArgs != null &&
-             _popArgs.indexOf("ctxt.") >= 0))
+             (_popArgs.indexOf("ctxt.") >= 0 ||
+              _popArgs.indexOf("ctxt->") >= 0)))
         {
             retcode = true;
         }
@@ -265,6 +267,9 @@ public final class SmcGuard
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2006/06/03 19:39:25  cwrapp
+// Final v. 4.3.1 check in.
+//
 // Revision 1.7  2005/11/07 19:34:54  cwrapp
 // Changes in release 4.3.0:
 // New features:

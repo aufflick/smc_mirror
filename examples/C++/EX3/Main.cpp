@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2006/06/03 19:39:25  cwrapp
+// Final v. 4.3.1 check in.
+//
 // Revision 1.6  2006/04/22 12:45:24  cwrapp
 // Version 4.3.1
 //
@@ -54,6 +57,7 @@
 const static char _rcs_id[] = "$Id$";
 
 using namespace std;
+using namespace statemap;
 
 int main(int argc, char *argv[])
 {

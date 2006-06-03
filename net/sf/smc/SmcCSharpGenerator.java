@@ -107,7 +107,11 @@ public final class SmcCSharpGenerator
         // serialization package.
         if (Smc.isSerial() == true)
         {
-            _source.println("using System.IO;");
+            _source.println(
+                "using System.Runtime.Serialization;");
+            _source.println("using System.Security;");
+            _source.println(
+                "using System.Security.Permissions;");
         }
 
         // If reflection is on, then import the .Net collections
@@ -151,7 +155,17 @@ public final class SmcCSharpGenerator
         _source.print(context);
         _source.println("Context :");
         _source.print(_indent);
-        _source.println("    statemap.FSMContext");
+        _source.print("    statemap.FSMContext");
+        if (Smc.isSerial() == false)
+        {
+            _source.println();
+        }
+        else
+        {
+            _source.println(',');
+            _source.print(_indent);
+            _source.println("    ISerializable");
+        }
         _source.print(_indent);
         _source.println("{");
         _source.print(_indent);
@@ -218,7 +232,6 @@ public final class SmcCSharpGenerator
         // Close the State get.
         _source.print(_indent);
         _source.println("        }");
-        _source.println();
 
         // Now generate the State set.
         _source.print(_indent);
@@ -263,7 +276,7 @@ public final class SmcCSharpGenerator
 
         // Generate the Owner property.
         _source.print(_indent);
-        _source.print("    internal ");
+        _source.print("    public ");
         _source.print(context);
         _source.println(" Owner");
         _source.print(_indent);
@@ -276,6 +289,42 @@ public final class SmcCSharpGenerator
         _source.println("        {");
         _source.print(_indent);
         _source.println("            return (_owner);");
+        _source.print(_indent);
+        _source.println("        }");
+
+        // Generate the property set method.
+        _source.print(_indent);
+        _source.println("        set");
+        _source.print(_indent);
+        _source.println("        {");
+
+        // Again, if synchronization is on, then protect access
+        // to this FSM.
+        if (Smc.isSynchronized() == true)
+        {
+            _source.print(_indent);
+            _source.println("            lock(this)");
+            _source.print(_indent);
+            _source.println("            {");
+
+            indent2 = _indent + "                ";
+        }
+        else
+        {
+            indent2 = _indent + "            ";
+        }
+
+        _source.print(indent2);
+        _source.println("_owner = value;");
+
+        // If we are in a lock block, close it.
+        if (Smc.isSynchronized() == true)
+        {
+            _source.print(_indent);
+            _source.println("            }");
+        }
+
+        // Close the Onwer set.
         _source.print(_indent);
         _source.println("        }");
 
@@ -357,6 +406,68 @@ public final class SmcCSharpGenerator
         _source.print(_indent);
         _source.println("    }");
         _source.println();
+
+        // If -serial was specified, then generate the
+        // deserialize constructor.
+        if (Smc.isSerial() == true)
+        {
+            _source.print(_indent);
+            _source.print("    public ");
+            _source.print(context);
+            _source.print("Context(SerializationInfo info, ");
+            _source.println("StreamingContext context) :");
+            _source.print(_indent);
+            _source.println("        base ()");
+            _source.print(_indent);
+            _source.println("    {");
+            _source.print(_indent);
+            _source.println("        int stackSize;");
+            _source.print(_indent);
+            _source.println("        int stateId;");
+            _source.println();
+            _source.print(_indent);
+            _source.print(
+                "        stackSize = ");
+            _source.println("info.GetInt32(\"stackSize\");");
+            _source.print(_indent);
+            _source.println("        if (stackSize > 0)");
+            _source.print(_indent);
+            _source.println("        {");
+            _source.print(_indent);
+            _source.println("            int index;");
+            _source.print(_indent);
+            _source.println("            String name;");
+            _source.println();
+            _source.print(_indent);
+            _source.print(
+                "            for (index = (stackSize - 1); ");
+            _source.println("index >= 0; --index)");
+            _source.print(_indent);
+            _source.println("            {");
+            _source.print(_indent);
+            _source.print("                ");
+            _source.println("name = \"stackIndex\" + index;");
+            _source.print(_indent);
+            _source.print("                ");
+            _source.println("stateId = info.GetInt32(name);");
+            _source.print(_indent);
+            _source.print("                ");
+            _source.println("PushState(_States[stateId]);");
+            _source.print(_indent);
+            _source.println("            }");
+            _source.print(_indent);
+            _source.println("        }");
+            _source.println();
+            _source.print(_indent);
+            _source.println(
+                "        stateId = info.GetInt32(\"state\");");
+            _source.print(_indent);
+            _source.println(
+                "        PushState(_States[stateId]);");
+            _source.print(_indent);
+            _source.println("    }");
+            _source.println();
+        }
 
         // Generate the default transition methods.
         // First get the transition list.
@@ -463,67 +574,70 @@ public final class SmcCSharpGenerator
         }
 
         // If serialization is turned on, then output the
-        // WriteObject and ReadObject methods.
+        // GetObjectData method.
         if (Smc.isSerial() == true)
         {
             _source.print(_indent);
-            _source.print("    private void WriteObject(");
-            _source.println("BinaryWriter writer)");
+            _source.print("    [SecurityPermissionAttribute(");
+            _source.print("SecurityAction.Demand, ");
+            _source.println("SerializationFormatter=true)]");
+            _source.print(_indent);
+            _source.print("    public void GetObjectData(");
+            _source.println("SerializationInfo info,");
+            _source.print(_indent);
+            _source.print("                              ");
+            _source.println("StreamingContext context)");
             _source.print(_indent);
             _source.println("    {");
             _source.print(_indent);
-            _source.println(
-                "        int size = _state_stack.Count;");
+            _source.println("        int stackSize = 0;");
             _source.println();
             _source.print(_indent);
+            _source.println("        if (_stateStack != null)");
+            _source.print(_indent);
+            _source.println("        {");
+            _source.print(_indent);
             _source.println(
-                "        writer.Write((int) (size + 1));");
+                "            stackSize = _stateStack.Count;");
+            _source.print(_indent);
+            _source.println("        }");
             _source.println();
             _source.print(_indent);
-            _source.print(
-                "        foreach (");
+            _source.print("        ");
+            _source.println(
+                "info.AddValue(\"stackSize\", stackSize);");
+            _source.println();
+            _source.print(_indent);
+            _source.println("        if (stackSize > 0)");
+            _source.print(_indent);
+            _source.println("        {");
+            _source.print(_indent);
+            _source.println("            int index = 0;");
+            _source.print(_indent);
+            _source.println("            String name;");
+            _source.println();
+            _source.print(_indent);
+            _source.print("            foreach (");
             _source.print(context);
-            _source.println("State state in _state_stack)");
+            _source.println("State state in _stateStack)");
             _source.print(_indent);
-            _source.println("        {");
+            _source.println("            {");
             _source.print(_indent);
-            _source.println(
-                "            writer.Write(state.Id);");
+            _source.print("                ");
+            _source.println("name = \"stackIndex\" + index;");
             _source.print(_indent);
-            _source.println("        }");
-            _source.println();
+            _source.print("                info.AddValue(");
+            _source.println("name, state.Id);");
             _source.print(_indent);
-            _source.println(
-                "        writer.Write(base._state.Id);");
+            _source.println("                ++index;");
             _source.print(_indent);
-            _source.println("        return;");
-            _source.print(_indent);
-            _source.println("    }");
-            _source.println();
-            _source.print(_indent);
-            _source.print("    private void ReadObject(");
-            _source.println("BinaryReader reader)");
-            _source.print(_indent);
-            _source.println("    {");
-            _source.print(_indent);
-            _source.println("        int size;");
-            _source.print(_indent);
-            _source.println("        int i;");
-            _source.println();
-            _source.print(_indent);
-            _source.println(
-                "        size = reader.ReadInt32();");
-            _source.println();
-            _source.print(_indent);
-            _source.println(
-                "        for (i = 0; i < size; ++i)");
-            _source.print(_indent);
-            _source.println("        {");
-            _source.print(_indent);
-            _source.print("            PushState(_States[");
-            _source.println("reader.ReadInt32()]);");
+            _source.println("            }");
             _source.print(_indent);
             _source.println("        }");
+            _source.println();
+            _source.print(_indent);
+            _source.println(
+                "        info.AddValue(\"state\", _state.Id);");
             _source.println();
             _source.print(_indent);
             _source.println("        return;");
@@ -733,7 +847,7 @@ public final class SmcCSharpGenerator
         {
             _source.print(_indent);
             _source.println(
-                "            if (context._debug_flag == true)");
+                "            if (context._debugFlag == true)");
             _source.print(_indent);
             _source.println("            {");
             _source.print(_indent);
@@ -859,8 +973,10 @@ public final class SmcCSharpGenerator
             state = (SmcState) it.next();
 
             _source.print(_indent);
+            _source.println("        [NonSerialized]");
+            _source.print(_indent);
             _source.print(
-                "        internal static ");
+                "        internal static readonly ");
             _source.print(mapName);
             _source.print("_Default.");
             _source.print(mapName);
@@ -868,33 +984,9 @@ public final class SmcCSharpGenerator
             _source.print(state.getClassName());
             _source.print(' ');
             _source.print(state.getInstanceName());
-            _source.println(';');
-        }
-
-        // Create the default state as well.
-        _source.print(_indent);
-        _source.print("        private static ");
-        _source.print(mapName);
-        _source.println("_Default Default;");
-        _source.println();
-
-        // Declare the static block.
-        _source.print(_indent);
-        _source.print("        static ");
-        _source.print(mapName);
-        _source.println("()");
-        _source.print(_indent);
-        _source.println("        {");
-
-        // Initialize the static state objects.
-        for (it = states.iterator(); it.hasNext() == true;)
-        {
-            state = (SmcState) it.next();
-
+            _source.println(" =");
             _source.print(_indent);
-            _source.print("            ");
-            _source.print(state.getInstanceName());
-            _source.print(" = new ");
+            _source.print("            new ");
             _source.print(mapName);
             _source.print("_Default.");
             _source.print(mapName);
@@ -909,17 +1001,20 @@ public final class SmcCSharpGenerator
             _source.println(");");
         }
 
-        // Instantiate a default state as well.
+        // Create the default state as well.
         _source.print(_indent);
-        _source.print("            Default = new ");
+        _source.println("        [NonSerialized]");
+        _source.print(_indent);
+        _source.print("        private static readonly ");
+        _source.print(mapName);
+        _source.println("_Default Default =");
+        _source.print(_indent);
+        _source.print("            new ");
         _source.print(mapName);
         _source.print("_Default(\"");
         _source.print(mapName);
         _source.println(".Default\", -1);");
-
-        // End of static block.
-        _source.print(_indent);
-        _source.println("        }");
+        _source.println();
 
         // End of map class.
         _source.print(_indent);
@@ -1406,7 +1501,7 @@ public final class SmcCSharpGenerator
             _source.println();
             _source.print(_indent);
             _source.println(
-                "    if (context._debug_flag == true)");
+                "    if (context._debugFlag == true)");
             _source.print(_indent);
             _source.println("    {");
             _source.print(_indent);
@@ -1975,6 +2070,9 @@ public final class SmcCSharpGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2006/06/03 19:39:25  cwrapp
+// Final v. 4.3.1 check in.
+//
 // Revision 1.6  2005/11/07 19:34:54  cwrapp
 // Changes in release 4.3.0:
 // New features:

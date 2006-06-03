@@ -31,6 +31,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2006/06/03 19:39:25  cwrapp
+// Final v. 4.3.1 check in.
+//
 // Revision 1.2  2006/04/22 12:45:25  cwrapp
 // Version 4.3.1
 //
@@ -76,9 +79,9 @@ namespace statemap
             {
                 return _debugFlag;
             }
-            set(bool flag)
+            set
             {
-                _debugFlag = flag;
+                _debugFlag = value;
             }
         }
 
@@ -87,11 +90,11 @@ namespace statemap
         {
             get
             {
-                return _debugStream
+                return _debugStream;
             }
-            set(TextWriter stream)
+            set
             {
-                _debugStream = stream;
+                _debugStream = value;
             }
         }
 
@@ -244,6 +247,6 @@ namespace statemap
 
         // Write debug output to this stream.
         [NonSerialized]
-        protected TextWrite _debugStream;
+        protected TextWriter _debugStream;
     }
 }

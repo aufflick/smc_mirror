@@ -9,6 +9,20 @@
 
 None.
 
++ Minor changes
+---------------
+
+(Java) Added FSM constructor which takes two arguments:
+the FSM owner and an initial state. Changed state singletons
+from package-level statics to public-level static finals so
+application code may access them. For example, the state
+
+    MyMap::Connected
+
+is referenced as
+
+    AppClassContext.MyMap.Connected.
+
 
 + Bug fixes
 -----------
@@ -22,6 +36,8 @@ stream is null and no output is written. Turning on debugging
 in C# requires setting the Debug property to true and setting
 the DebugStream property to a TextWriter object.
 
+(C#, VB) Modified FSM serialization to follow .Net scheme.
+
 (C++) Corrected FSMContext destructor and setDebugFlag method
 which delete the _transition pointer even though FSMContext did
 not allocate the memory.
@@ -29,6 +45,12 @@ not allocate the memory.
 (C++) Replaced strcpy calls with strncpy. State and transition
 names are now limited to 100 characters by default. However,
 this limit can be changed by modifying the statemap.h file.
+
+(Perl) Corrected error where $ctxt variable was not defined
+when necessary.
+
+(Python) Corrected code indentation. Incorrect indentation is
+a syntax error in Python.
 
 
 

@@ -687,7 +687,7 @@ public final class SmcPythonGenerator
             transType != Smc.TRANS_POP &&
             loopbackFlag == false)
         {
-            _source.print(_indent);
+            _source.print(indent2);
             _source.print(
                 "loopbackFlag = fsm.getState().getName() == ");
             _source.print(fqEndStateName);
@@ -956,6 +956,9 @@ public final class SmcPythonGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2006/06/03 19:39:25  cwrapp
+// Final v. 4.3.1 check in.
+//
 // Revision 1.3  2005/11/07 19:34:54  cwrapp
 // Changes in release 4.3.0:
 // New features:
