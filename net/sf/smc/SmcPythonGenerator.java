@@ -641,10 +641,10 @@ public final class SmcPythonGenerator
         else
         {
             // Yes there is a condition.
-            indent2 = _indent + "        ";
+            indent2 = _indent + "    ";
 
             _source.print(_indent);
-            _source.print("    if ");
+            _source.print("if ");
             _source.print(condition);
             _source.println(" :");
         }
@@ -956,6 +956,9 @@ public final class SmcPythonGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2006/07/11 18:17:53  cwrapp
+// Corrected indentation.
+//
 // Revision 1.4  2006/06/03 19:39:25  cwrapp
 // Final v. 4.3.1 check in.
 //
