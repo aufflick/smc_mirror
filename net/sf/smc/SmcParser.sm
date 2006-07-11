@@ -35,6 +35,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.12  2006/07/11 18:17:01  cwrapp
+ * Removed errors regarding percent keywords.
+ *
  * Revision 1.11  2006/04/22 12:45:26  cwrapp
  * Version 4.3.1
  *
@@ -122,34 +125,10 @@ Start
             setHeaderLine(token.getLineNumber());
         }
 
-    HEADER_FILE(token: SmcLexer.Token)
-      [Smc._targetLanguage != Smc.C_PLUS_PLUS &&
-       Smc._targetLanguage != Smc.C &&
-       Smc._targetLanguage != Smc.TABLE &&
-       Smc._targetLanguage != Smc.GRAPH]
-        nil
-        {
-            warning(
-                "%header only used by -c++, -c, -table or -graph options.",
-                token.getLineNumber());
-        }
-
     HEADER_FILE(token : SmcLexer.Token)
         HeaderFile
         {
             setHeaderLine(token.getLineNumber());
-        }
-
-    INCLUDE_FILE(token: SmcLexer.Token)
-      [Smc._targetLanguage != Smc.C_PLUS_PLUS &&
-       Smc._targetLanguage != Smc.C &&
-       Smc._targetLanguage != Smc.TABLE &&
-       Smc._targetLanguage != Smc.GRAPH]
-        nil
-        {
-            warning(
-                "%include only used by -c++, -c, -table or -graph options.",
-                token.getLineNumber());
         }
 
     INCLUDE_FILE(token: SmcLexer.Token)
@@ -166,17 +145,6 @@ Start
         Import
         {
             setHeaderLine(token.getLineNumber());
-        }
-
-    DECLARE(token: SmcLexer.Token)
-      [Smc._targetLanguage != Smc.C_PLUS_PLUS &&
-       Smc._targetLanguage != Smc.TABLE &&
-       Smc._targetLanguage != Smc.GRAPH]
-        nil
-        {
-            warning(
-                "%declare only used by -c++, -table or -graph options.",
-                token.getLineNumber());
         }
 
     DECLARE(token : SmcLexer.Token)
@@ -426,17 +394,6 @@ StartError
         Import
         {
             setHeaderLine(token.getLineNumber());
-        }
-
-    DECLARE(token: SmcLexer.Token)
-      [Smc._targetLanguage != Smc.C_PLUS_PLUS &&
-       Smc._targetLanguage != Smc.TABLE &&
-       Smc._targetLanguage != Smc.GRAPH]
-        nil
-        {
-            warning(
-                "%declare only used by -c++, -table or -graph options.",
-                token.getLineNumber());
         }
 
     DECLARE(token : SmcLexer.Token)
@@ -1432,10 +1389,10 @@ ParamSeparator
     // The parameter does *not* need a type if the target
     // language is typeless.
     COMMA(token: SmcLexer.Token)
-      [Smc._targetLanguage == Smc.TCL ||
-       Smc._targetLanguage == Smc.PERL ||
-       Smc._targetLanguage == Smc.PYTHON ||
-       Smc._targetLanguage == Smc.RUBY]
+      [ctxt.getTargetLanguage() == Smc.TCL ||
+       ctxt.getTargetLanguage() == Smc.PERL ||
+       ctxt.getTargetLanguage() == Smc.PYTHON ||
+       ctxt.getTargetLanguage() == Smc.RUBY]
         Start
         {
             setParamType("value");
@@ -1443,10 +1400,10 @@ ParamSeparator
         }
 
     RIGHT_PAREN(token: SmcLexer.Token)
-      [Smc._targetLanguage == Smc.TCL ||
-       Smc._targetLanguage == Smc.PERL ||
-       Smc._targetLanguage == Smc.PYTHON ||
-       Smc._targetLanguage == Smc.RUBY]
+      [ctxt.getTargetLanguage() == Smc.TCL ||
+       ctxt.getTargetLanguage() == Smc.PERL ||
+       ctxt.getTargetLanguage() == Smc.PYTHON ||
+       ctxt.getTargetLanguage() == Smc.RUBY]
         pop(paramsDone,
             ctxt.getParamList(),
             token.getLineNumber())
@@ -1598,8 +1555,8 @@ ActionName
     // Either way, it is part of .Net languages and SMC must
     // allow .Net users to access this capability.
     EQUAL(token: SmcLexer.Token)
-      [Smc._targetLanguage != Smc.VB &&
-       Smc._targetLanguage != Smc.C_SHARP]
+      [ctxt.getTargetLanguage() != Smc.VB &&
+       ctxt.getTargetLanguage() != Smc.C_SHARP]
         ActionError
         {
 			clearActions();
