@@ -236,17 +236,18 @@ public final class SmcVBGenerator
         _source.println("        Get");
         _source.println("            Return _owner");
         _source.println("        End Get");
-        _source.print("        Set(ByRef owner As ");
+        _source.print("        Set(ByVal owner As ");
         _source.print(context);
         _source.println(")");
         _source.println();
         _source.println("            If owner Is Nothing _");
         _source.println("            Then");
         _source.println(
-            "                Throw New NullPointerException");
+            "                Throw New NullReferenceException");
         _source.println("            End If");
         _source.println();
         _source.println("            _owner = owner");
+        _source.println("        End Set");
         _source.println("    End Property");
         _source.println();
 
@@ -1557,6 +1558,9 @@ public final class SmcVBGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2006/07/11 18:18:37  cwrapp
+// Corrected owner property.
+//
 // Revision 1.4  2006/06/03 19:39:25  cwrapp
 // Final v. 4.3.1 check in.
 //
