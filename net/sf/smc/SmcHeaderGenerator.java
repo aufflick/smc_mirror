@@ -410,7 +410,7 @@ public final class SmcHeaderGenerator
         _source.println();
         _source.print(_indent);
         _source.print("        return (");
-        _source.print(Smc.getCastType());
+        _source.print(Smc.castType());
         _source.print("<");
         _source.print(context);
         _source.println("State&>(*_state));");
@@ -822,6 +822,9 @@ public final class SmcHeaderGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2006/07/11 18:14:38  cwrapp
+// Changed method getCastType() to castType().
+//
 // Revision 1.4  2005/11/07 19:34:54  cwrapp
 // Changes in release 4.3.0:
 // New features:
