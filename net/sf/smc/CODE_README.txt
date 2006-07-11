@@ -12,7 +12,7 @@ None.
 + Minor changes
 ---------------
 
-(C, C++) Added "-header <path>" which specifies where generated
+(C, C++) Added "-headerd <path>" which specifies where generated
 header file is to be placed. This allows for the generated C/C++
 source file and header file to be placed into different
 locations.
