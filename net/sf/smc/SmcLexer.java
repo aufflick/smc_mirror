@@ -267,12 +267,11 @@ import java.util.Map;
                 _currentChar = readChar();
 
                 // If the character's integer value is greater
-                // than 127, then throw an exception.
+                // than 127, then issue a unicode transition
+                // and let the lexer FSM decide whether it is
+                // acceptable or not.
                 if (_currentChar >= _TransMethod.length)
                 {
-                    // Issue a unicode transition and let the
-                    // lexer FSM decide whether it is acceptable
-                    // or not.
                     _lexerFSM.unicode();
                 }
                 else
@@ -1068,6 +1067,9 @@ import java.util.Map;
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2006/07/11 18:15:49  cwrapp
+// Corrected comment.
+//
 // Revision 1.7  2005/07/07 12:10:52  fperrad
 // Add a new token '$' for Perl language.
 //
