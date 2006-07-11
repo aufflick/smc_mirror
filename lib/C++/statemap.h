@@ -75,6 +75,24 @@
 namespace statemap
 {
 //---------------------------------------------------------------
+// Routines.
+//
+
+    inline char* copyString(const char *s)
+    {
+        char *retval = NULL;
+
+        if (s != NULL)
+        {
+            retval = new char[MAX_NAME_LEN + 1];
+            retval[MAX_NAME_LEN] = '\0';
+            (void) strncpy(retval, s, MAX_NAME_LEN);
+        }
+
+        return (retval);
+    };
+
+//---------------------------------------------------------------
 // Exception Classes.
 //
 
@@ -91,20 +109,6 @@ namespace statemap
         // Destructor.
         virtual ~SmcException() throw()
         {};
-
-        static char* copyString(const char *s)
-        {
-            char *retval = NULL;
-
-            if (s != NULL)
-            {
-                retval = new char[MAX_NAME_LEN + 1];
-                retval[MAX_NAME_LEN] = '\0';
-                (void) strncpy(retval, s, MAX_NAME_LEN);
-            }
-
-            return (retval);
-        };
 
     protected:
 
@@ -410,11 +414,11 @@ namespace statemap
         {
             if (name != NULL)
             {
-                _name = SmcException::copyString(name);
+                _name = copyString(name);
             }
             else
             {
-                _name = SmcException::copyString("NAME NOT SET");
+                _name = copyString("NAME NOT SET");
             }
         };
 
@@ -803,6 +807,9 @@ namespace statemap
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2006/07/11 18:28:22  cwrapp
+// Move SmcException::copyString() to a package-wide routine.
+//
 // Revision 1.8  2006/04/22 12:45:24  cwrapp
 // Version 4.3.1
 //
