@@ -38,7 +38,7 @@
 # Macros.
 #
 
-VERSION=	4_3_1
+VERSION=	4_3_2
 
 STAGING_DIR=	../staging
 SMC_STAGING_DIR=$(STAGING_DIR)/smc
@@ -60,6 +60,9 @@ $(SMC_STAGING_DIR) :	$(STAGING_DIR)
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.10  2006/07/11 18:33:20  cwrapp
+# Updated version.
+#
 # Revision 1.9  2006/04/22 12:45:22  cwrapp
 # Version 4.3.1
 #
