@@ -66,9 +66,13 @@ public final class SmcCGenerator
     //
     // #include <%include header file>
     // #include "<context>_sm.h"
+    // (If the -headerd option is used, then this is generated:
+    // #include "<header dir>/<context>_sm.h")
     //
     public void visit(SmcFSM fsm)
     {
+        String srcDirectory = Smc.outputDirectory();
+        String headerDirectory = Smc.headerDirectory();
         String packageName = fsm.getPackage();
         String rawSource = fsm.getSource();
         String context = fsm.getContext();
@@ -117,7 +121,18 @@ public final class SmcCGenerator
         }
 
         // Include the context file last.
+        // Is the header file included in a different directory
+        // than the source file?
         _source.print("#include \"");
+        if ((srcDirectory == null && headerDirectory != null) ||
+            (srcDirectory != null &&
+             srcDirectory.equals(headerDirectory) == false))
+        {
+            // They are in different directories. Prepend the
+            // header directory to the file name.
+            _source.print(headerDirectory);
+        }
+        // Else they are in the same directory.
         _source.print(_srcfileBase);
         _source.println("_sm.h\"");
 
@@ -1232,6 +1247,9 @@ public final class SmcCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2006/07/11 18:11:41  cwrapp
+// Added support for new -headerd command line option.
+//
 // Revision 1.3  2006/04/22 12:45:26  cwrapp
 // Version 4.3.1
 //
