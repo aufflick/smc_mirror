@@ -2,7 +2,7 @@
 
                                SMC
                      The State Machine Compiler
-                         (Version: 4.3.1)
+                         (Version: 4.3.2)
 
                      http://smc.sourceforge.net
 
@@ -17,48 +17,26 @@ None.
 
 Minor changes
 
-+ (Java) Added FSM constructor which takes two arguments:
-  the FSM owner and an initial state. Changed state singletons
-  from package-level statics to public-level static finals so
-  application code may access them. For example, the state
++ (C, C++) Added "-header <path>" which specifies where generated
+  header file is to be placed. This allows for the generated
+  C/C++ source file and header file to be placed into different
+  locations.
 
-      MyMap::Connected
-
-  is referenced as
-
-      AppClassContext.MyMap.Connected.
-
-  You can override the %start state using the constructor:
-
-      new AppClassContext(this, AppClassContext.MyMap.Connected)
-
++ (All) SMC no longer reports an error when a % keyword in .sm
+        file is unused for the specified target language.
+  (SF feature 1447155)
 
 Bug Fixes:
 
-+ (C#) Corrected error in state Entry and Exit actions where the
-  context class was set to "null".
++ (VB) Corrected Owner property set method.
+  (SF bug 1504804)
 
-+ (C#) Added property debugStream which allows the debug output
-  TextWriter to be application-defined. By default the debug
-  stream is null and no output is written. Turning on debugging
-  in C# requires setting the Debug property to true and setting
-  the DebugStream property to a TextWriter object.
++ (Python) Corrected indentation for guarded transitions.
+  (SF bug 1504907)
 
-+ (C#, VB) Modified FSM serialization to follow .Net scheme.
-
-+ (C++) Corrected FSMContext destructor and setDebugFlag method
-  which delete the _transition pointer even though FSMContext did
-  not allocate the memory.
-
-+ (C++) Replaced strcpy calls with strncpy. State and transition
-  names are now limited to 100 characters by default. However,
-  this limit can be changed by modifying the statemap.h file.
-
-+ (Perl) Corrected error where $ctxt variable was not defined
-  when necessary.
-
-+ (Python) Corrected code indentation. Incorrect indentation is
-  a syntax error in Python.
++ (C++) Corrected error in statemap.h: method incorrectly ifdef'ed
+        out when -noex option used.
+  (SF bug 1517876)
 
 
 
