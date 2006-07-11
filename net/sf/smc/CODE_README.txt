@@ -1,5 +1,44 @@
                               SMC -
                   The State Machine Compiler
+                        Version 4.3.2
+
+
+
++ Major changes
+---------------
+
+None.
+
++ Minor changes
+---------------
+
+(C, C++) Added "-header <path>" which specifies where generated
+header file is to be placed. This allows for the generated C/C++
+source file and header file to be placed into different
+locations.
+
+(All) SMC no longer reports an error when a % keyword in .sm
+      file is unused for the specified target language.
+      (SF feature 1447155)
+
+
++ Bug fixes
+-----------
+
+(VB) Corrected Owner property set method.
+     (SF bug 1504804)
+
+(Python) Corrected indentation for guarded transitions.
+         (SF bug 1504907)
+
+(C++) Corrected error in statemap.h: method incorrectly ifdef'ed
+      out when -noex option used.
+      (SF bug 1517876)
+
+
+
+                              SMC -
+                  The State Machine Compiler
                         Version 4.3.1
 
 
