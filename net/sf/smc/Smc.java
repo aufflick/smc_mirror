@@ -50,8 +50,10 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public final class Smc
 {
@@ -63,7 +65,6 @@ public final class Smc
     {
         int retcode = 0;
 
-        _appName = new String("smc");
         _errorMsg = new String();
 
         // The default smc output level is 1.
@@ -82,12 +83,14 @@ public final class Smc
         _fsmVerbose = false;
         _return = false;
         _reflection = false;
+        _outputDirectory = null;
+        _headerDirectory = null;
 
         // Process the command line.
         if (parseArgs(args) == false)
         {
             retcode = 1;
-            System.err.println(_appName + ": " + _errorMsg);
+            System.err.println(APP_NAME + ": " + _errorMsg);
             _usage(System.err);
         }
         // Arguments check out - start compiling..
@@ -264,7 +267,7 @@ public final class Smc
         }
     }
 
-    public static String getSourceFileName()
+    public static String sourceFileName()
     {
         return (_sourceFileName);
     }
@@ -304,14 +307,24 @@ public final class Smc
         return (_reflection);
     }
 
-    public static String getCastType()
+    public static String castType()
     {
         return (_castType);
     }
 
-    public static int getGraphLevel()
+    public static int graphLevel()
     {
         return (_graphLevel);
+    }
+
+    public static String outputDirectory()
+    {
+        return (_outputDirectory);
+    }
+
+    public static String headerDirectory()
+    {
+        return (_headerDirectory);
     }
 
     // Merge two lists together, returning an ordered list with
@@ -465,21 +478,52 @@ public final class Smc
     {
         int i;
         int argsConsumed;
-        boolean castFlag = false;
-        boolean retcode;
+        boolean helpFlag = false;
+        boolean retcode= true;
+
+        // Look for either -help or -verson first. If specified,
+        // then output the necessary info and return.
+        helpFlag = _needHelp(args);
+        if (helpFlag == false)
+        {
+            // Look for the target language second. Verify that
+            // exactly one target language is specifed.
+            try
+            {
+                _targetLanguage = _findTargetLanguage(args);
+            }
+            catch (IllegalArgumentException argex)
+            {
+                retcode = false;
+                _errorMsg = argex.getMessage();
+            }
+        }
 
         // Parse all options first. Keep going until an error is
         // encountered or there are no more options left.
-        for (i = 0, retcode = true, argsConsumed = 0;
+        for (i = 0, argsConsumed = 0;
              i < args.length &&
-                     retcode == true &&
-                     args[i].startsWith("-") == true;
+                 helpFlag == false &&
+                 retcode == true &&
+                 args[i].startsWith("-") == true;
              i += argsConsumed, argsConsumed = 0)
         {
             if (args[i].startsWith("-sy") == true)
             {
-                _sync = true;
-                argsConsumed = 1;
+                if (_supportsOption(SYNC_FLAG) == false)
+                {
+                    retcode = false;
+                    _errorMsg =
+                        LANGUAGES[_targetLanguage] +
+                        " does not support " +
+                        SYNC_FLAG +
+                        ".";
+                }
+                else
+                {
+                    _sync = true;
+                    argsConsumed = 1;
+                }
             }
             else if (args[i].startsWith("-su") == true)
             {
@@ -489,7 +533,16 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        "-suffix not followed by a value";
+                        SUFFIX_FLAG + " not followed by a value";
+                }
+                else if (_supportsOption(SUFFIX_FLAG) == false)
+                {
+                    retcode = false;
+                    _errorMsg =
+                        LANGUAGES[_targetLanguage] +
+                        " does not support " +
+                        SUFFIX_FLAG +
+                        ".";
                 }
                 else
                 {
@@ -504,12 +557,30 @@ public final class Smc
                     args[i+1].startsWith("-") == true)
                 {
                     retcode = false;
-                    _errorMsg = "-cast not followed by a value";
+                    _errorMsg =
+                        CAST_FLAG +
+                        " not followed by a value";
+                }
+                else if (_supportsOption(CAST_FLAG) == false)
+                {
+                    retcode = false;
+                    _errorMsg =
+                        LANGUAGES[_targetLanguage] +
+                        " does not support " +
+                        CAST_FLAG +
+                        ".";
+                }
+                else if (_isValidCast(args[i+1]) == false)
+                {
+                    retcode = false;
+                    _errorMsg =
+                        "\"" +
+                        args[i+1] +
+                        "\" is an invalid C++ cast type.";
                 }
                 else
                 {
                     _castType = args[i+1];
-                    castFlag = true;
                     argsConsumed = 2;
                 }
             }
@@ -520,7 +591,19 @@ public final class Smc
                     args[i+1].startsWith("-") == true)
                 {
                     retcode = false;
-                    _errorMsg = "-d not followed by directory";
+                    _errorMsg =
+                        DIRECTORY_FLAG +
+                        " not followed by directory";
+                }
+                else if (
+                    _supportsOption(DIRECTORY_FLAG) == false)
+                {
+                    retcode = false;
+                    _errorMsg =
+                        LANGUAGES[_targetLanguage] +
+                        " does not support " +
+                        DIRECTORY_FLAG +
+                        ".";
                 }
                 else
                 {
@@ -540,6 +623,44 @@ public final class Smc
                         _isValidDirectory(_outputDirectory);
                 }
             }
+            else if (args[i].startsWith("-hea") == true)
+            {
+                // -headerd should be followed by a directory.
+                if ((i + 1) == args.length ||
+                    args[i+1].startsWith("-") == true)
+                {
+                    retcode = false;
+                    _errorMsg = HEADER_FLAG +
+                                " not followed by directory";
+                }
+                else if (
+                    _supportsOption(HEADER_FLAG) == false)
+                {
+                    retcode = false;
+                    _errorMsg =
+                        LANGUAGES[_targetLanguage] +
+                        " does not support " +
+                        HEADER_FLAG +
+                        ".";
+                }
+                else
+                {
+                    _headerDirectory = args[i+1];
+                    argsConsumed = 2;
+
+                    // If the output directory does not end with
+                    // file path separator, then add one.
+                    if (_headerDirectory.endsWith(
+                            File.separator) == false)
+                    {
+                        _headerDirectory =
+                            _headerDirectory + File.separator;
+                    }
+
+                    retcode =
+                        _isValidDirectory(_headerDirectory);
+                }
+            }
             else if (args[i].startsWith("-gl") == true)
             {
                 // -glevel should be followed by an integer.
@@ -548,7 +669,17 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        "-glevel not followed by integer";
+                        GLEVEL_FLAG +
+                        " not followed by integer";
+                }
+                else if (_supportsOption(GLEVEL_FLAG) == false)
+                {
+                    retcode = false;
+                    _errorMsg =
+                        LANGUAGES[_targetLanguage] +
+                        " does not support " +
+                        GLEVEL_FLAG +
+                        ".";
                 }
                 else
                 {
@@ -562,7 +693,8 @@ public final class Smc
                         {
                             retcode = false;
                             _errorMsg =
-                                "-glevel must be 0, 1 or 2";
+                                GLEVEL_FLAG +
+                                " must be 0, 1 or 2";
                         }
                         else
                         {
@@ -574,300 +706,145 @@ public final class Smc
                         retcode = false;
 
                         _errorMsg =
-                            "-glevel not followed by valid integer";
+                            GLEVEL_FLAG +
+                            " not followed by valid integer";
                     }
                 }
             }
             else if (args[i].equals("-g") == true)
             {
-                _debug = true;
-                argsConsumed = 1;
+                if (_supportsOption(DEBUG_FLAG) == false)
+                {
+                    retcode = false;
+                    _errorMsg =
+                        LANGUAGES[_targetLanguage] +
+                        " does not support " +
+                        DEBUG_FLAG +
+                        ".";
+                }
+                else
+                {
+                    _debug = true;
+                    argsConsumed = 1;
+                }
             }
             else if (args[i].startsWith("-nos") == true)
             {
-                _nostreams = true;
-                argsConsumed = 1;
+                if (_supportsOption(NO_STREAMS_FLAG) == false)
+                {
+                    retcode = false;
+                    _errorMsg =
+                        LANGUAGES[_targetLanguage] +
+                        " does not support " +
+                        NO_STREAMS_FLAG +
+                        ".";
+                }
+                else
+                {
+                    _nostreams = true;
+                    argsConsumed = 1;
+                }
             }
             else if (args[i].startsWith("-noe") == true)
             {
-                // -noex is a flag.
-                _noex = true;
-                argsConsumed = 1;
+                if (_supportsOption(NO_EXCEPTIONS_FLAG) == false)
+                {
+                    retcode = false;
+                    _errorMsg =
+                        LANGUAGES[_targetLanguage] +
+                        " does not support " +
+                        NO_EXCEPTIONS_FLAG +
+                        ".";
+                }
+                else
+                {
+                    _noex = true;
+                    argsConsumed = 1;
+                }
             }
             else if (args[i].startsWith("-noc") == true)
             {
-                // -nocatch is a flag.
-                _nocatch = true;
-                argsConsumed = 1;
+                if (_supportsOption(NO_CATCH_FLAG) == false)
+                {
+                    retcode = false;
+                    _errorMsg =
+                        LANGUAGES[_targetLanguage] +
+                        " does not support " +
+                        NO_CATCH_FLAG +
+                        ".";
+                }
+                else
+                {
+                    _nocatch = true;
+                    argsConsumed = 1;
+                }
             }
             else if (args[i].startsWith("-ret") == true)
             {
-                // -return is a flag.
-                _return = true;
-                argsConsumed = 1;
+                if (_supportsOption(RETURN_FLAG) == false)
+                {
+                    retcode = false;
+                    _errorMsg =
+                        LANGUAGES[_targetLanguage] +
+                        " does not support " +
+                        RETURN_FLAG +
+                        ".";
+                }
+                else
+                {
+                    _return = true;
+                    argsConsumed = 1;
+                }
             }
             else if (args[i].startsWith("-ref") == true)
             {
-                // -reflect is a flag.
-                _reflection = true;
-                argsConsumed = 1;
+                if (_supportsOption(REFLECT_FLAG) == false)
+                {
+                    retcode = false;
+                    _errorMsg =
+                        LANGUAGES[_targetLanguage] +
+                        " does not support " +
+                        REFLECT_FLAG +
+                        ".";
+                }
+                else
+                {
+                    _reflection = true;
+                    argsConsumed = 1;
+                }
             }
             else if (args[i].startsWith("-se") == true)
             {
-                // -serial is a flag.
-                _serial = true;
+                if (_supportsOption(SERIAL_FLAG) == false)
+                {
+                    retcode = false;
+                    _errorMsg =
+                        LANGUAGES[_targetLanguage] +
+                        " does not support " +
+                        SERIAL_FLAG +
+                        ".";
+                }
+                else
+                {
+                    _serial = true;
+                    argsConsumed = 1;
+                }
+            }
+            // Ignore the target language flags - they have
+            // been processed.
+            else if (args[i].startsWith("-c+") == true ||
+                     args[i].startsWith("-j") == true  ||
+                     args[i].startsWith("-tc") == true ||
+                     args[i].startsWith("-ta") == true ||
+                     args[i].equals("-vb") == true     ||
+                     args[i].startsWith("-cs") == true ||
+                     args[i].startsWith("-py") == true ||
+                     args[i].startsWith("-pe") == true ||
+                     args[i].startsWith("-ru") == true ||
+                     args[i].equals("-c") == true      ||
+                     args[i].startsWith("-gr") == true)
+            {
                 argsConsumed = 1;
-            }
-            else if (args[i].startsWith("-c+") == true)
-            {
-                // Only one target language can be specified.
-                if (_targetLanguage != LANG_NOT_SET &&
-                    _targetLanguage != C_PLUS_PLUS)
-                {
-                    retcode = false;
-                    _errorMsg =
-                        "Only one target language may be specified";
-                }
-                else
-                {
-                    _targetLanguage = C_PLUS_PLUS;
-
-                    if (_suffix == null)
-                    {
-                        _suffix = "cpp";
-                    }
-
-                    argsConsumed = 1;
-                }
-            }
-            else if (args[i].startsWith("-j") == true)
-            {
-                // Only one target language can be specified.
-                if (_targetLanguage != LANG_NOT_SET &&
-                    _targetLanguage != JAVA)
-                {
-                    retcode = false;
-                    _errorMsg =
-                        "Only one target language may be specified";
-                }
-                else
-                {
-                    _targetLanguage = JAVA;
-
-                    if (_suffix == null)
-                    {
-                        _suffix = "java";
-                    }
-
-                    argsConsumed = 1;
-                }
-            }
-            else if (args[i].startsWith("-tc") == true)
-            {
-                // Only one target language can be specified.
-                if (_targetLanguage != LANG_NOT_SET &&
-                    _targetLanguage != TCL)
-                {
-                    retcode = false;
-                    _errorMsg =
-                        "Only one target language may be specified";
-                }
-                else
-                {
-                    _targetLanguage = TCL;
-
-                    if (_suffix == null)
-                    {
-                        _suffix = "tcl";
-                    }
-
-                    argsConsumed = 1;
-                }
-            }
-            else if (args[i].startsWith("-ta") == true)
-            {
-                // Only one target language can be specified.
-                if (_targetLanguage != LANG_NOT_SET &&
-                    _targetLanguage != TABLE)
-                {
-                    retcode = false;
-                    _errorMsg =
-                        "Only one target language may be specified";
-                }
-                else
-                {
-                    _targetLanguage = TABLE;
-
-                    if (_suffix == null)
-                    {
-                        _suffix = "html";
-                    }
-
-                    argsConsumed = 1;
-                }
-            }
-            else if (args[i].equals("-vb") == true)
-            {
-                // Only one target language may be specified.
-                if (_targetLanguage != LANG_NOT_SET &&
-                    _targetLanguage != VB)
-                {
-                    retcode = false;
-                    _errorMsg =
-                        "Only one target language may be specified";
-                }
-                else
-                {
-                    _targetLanguage = VB;
-
-                    if (_suffix == null)
-                    {
-                        _suffix = "vb";
-                    }
-
-                    argsConsumed = 1;
-                }
-            }
-            else if (args[i].startsWith("-cs") == true)
-            {
-                // Only one target language may be specified.
-                if (_targetLanguage != LANG_NOT_SET &&
-                    _targetLanguage != C_SHARP)
-                {
-                    retcode = false;
-                    _errorMsg =
-                        "Only one target language may be specified";
-                }
-                else
-                {
-                    _targetLanguage = C_SHARP;
-
-                    if (_suffix == null)
-                    {
-                        _suffix = "cs";
-                    }
-
-                    argsConsumed = 1;
-                }
-            }
-            else if (args[i].startsWith("-py") == true)
-            {
-                // Only one target language may be specified.
-                if (_targetLanguage != LANG_NOT_SET &&
-                    _targetLanguage != PYTHON)
-                {
-                    retcode = false;
-                    _errorMsg =
-                        "Only one target language may be specified";
-                }
-                else
-                {
-                    _targetLanguage = PYTHON;
-
-                    if (_suffix == null)
-                    {
-                        _suffix = "py";
-                    }
-
-                    argsConsumed = 1;
-                }
-            }
-            else if (args[i].startsWith("-pe") == true)
-            {
-                // Only one target language may be specified.
-                if (_targetLanguage != LANG_NOT_SET &&
-                    _targetLanguage != PERL)
-                {
-                    retcode = false;
-                    _errorMsg = "Only one target language can be specified";
-                }
-                else
-                {
-                    _targetLanguage = PERL;
-
-                    if (_suffix == null)
-                    {
-                        _suffix = "pm";
-                    }
-
-                    argsConsumed = 1;
-                }
-            }
-            else if (args[i].startsWith("-ru") == true)
-            {
-                // Only one target language may be specified.
-                if (_targetLanguage != LANG_NOT_SET &&
-                    _targetLanguage != RUBY)
-                {
-                    retcode = false;
-                    _errorMsg = "Only one target language can be specified";
-                }
-                else
-                {
-                    _targetLanguage = RUBY;
-
-                    if (_suffix == null)
-                    {
-                        _suffix = "rb";
-                    }
-
-                    argsConsumed = 1;
-                }
-            }
-            else if (args[i].equals("-c") == true)
-            {
-                // Only one target language can be specified.
-                if (_targetLanguage != LANG_NOT_SET &&
-                    _targetLanguage != C)
-                {
-                    retcode = false;
-                    _errorMsg = "Only one target language can be specified";
-                }
-                else
-                {
-                    _targetLanguage = C;
-
-                    if (_suffix == null)
-                    {
-                        _suffix = "c";
-                    }
-
-                    argsConsumed = 1;
-                }
-            }
-            else if (args[i].startsWith("-gr") == true)
-            {
-                // Only one target language may be specified.
-                if (_targetLanguage != LANG_NOT_SET &&
-                    _targetLanguage != GRAPH)
-                {
-                    retcode = false;
-                    _errorMsg =
-                        "Only one target language may be specified";
-                }
-                else
-                {
-                    _targetLanguage = GRAPH;
-
-                    if (_suffix == null)
-                    {
-                        _suffix = "dot";
-                    }
-
-                    // If the graph level is no specified, then
-                    // set it to level 0.
-                    if (_graphLevel == NO_GRAPH_LEVEL)
-                    {
-                        _graphLevel = GRAPH_LEVEL_0;
-                    }
-
-                    argsConsumed = 1;
-                }
-            }
-            else if (args[i].startsWith("-vers") == true)
-            {
-                System.out.println(_appName + " " + _version);
-                System.exit(0);
             }
             else if (args[i].startsWith("-verb") == true)
             {
@@ -879,11 +856,6 @@ public final class Smc
                 _fsmVerbose = true;
                 argsConsumed = 1;
             }
-            else if (args[i].startsWith("-h") == true)
-            {
-                _usage(System.out);
-                System.exit(0);
-            }
             else
             {
                 retcode = false;
@@ -893,9 +865,18 @@ public final class Smc
             }
         }
 
+        if (helpFlag == true || retcode == false)
+        {
+            // no-op.
+        }
+        else if (_targetLanguage == LANG_NOT_SET)
+        {
+            retcode = false;
+            _errorMsg = "Target language was not specified.";
+        }
         // Was a state map source file given? It must be the
         // last argument in the list.
-        if (retcode == true)
+        else if (retcode == true)
         {
             if (i == args.length)
             {
@@ -909,8 +890,8 @@ public final class Smc
                 for (; i < args.length && retcode == true; ++i)
                 {
                     // The file name must end in ".sm".
-                    if (args[i].endsWith(".sm") == false &&
-                        args[i].endsWith(".SM") == false)
+                    if (args[i].toLowerCase().endsWith(".sm") ==
+                            false)
                     {
                         retcode = false;
                         _errorMsg =
@@ -945,85 +926,253 @@ public final class Smc
             }
         }
 
-        // Before returning, verify that a target programming
-        // language was selected.
-        if (retcode == true && _targetLanguage == LANG_NOT_SET)
+        return (retcode);
+    }
+
+    // Process the -help and -version flags separately.
+    private static boolean _needHelp(String[] args)
+    {
+        int i;
+        boolean retval = false;
+
+        for (i = 0; i < args.length && retval == false; ++i)
         {
-            retcode = false;
-            _errorMsg = "Target language was not specified.";
-        }
-        // Also verify that if the sync flag was given, then
-        // the target language is Java.
-        else if (retcode == true &&
-                 _sync == true &&
-                 _targetLanguage != JAVA &&
-                 _targetLanguage != VB &&
-                 _targetLanguage != C_SHARP)
-        {
-            retcode = false;
-            _errorMsg =
-                "-sync can only be used with -java, -vb and -csharp.";
-        }
-        // Verify that -nostreams flag is used only with -c++.
-        else if (retcode == true &&
-                 _nostreams == true &&
-                 _targetLanguage != C_PLUS_PLUS)
-        {
-            retcode = false;
-            _errorMsg =
-                "-nostreams can only be used with -c++.";
-        }
-        // Verify that the -noex flag is used only with -c++.
-        else if (retcode == true &&
-                 _noex == true &&
-                 _targetLanguage != C_PLUS_PLUS)
-        {
-            retcode = false;
-            _errorMsg = "-noex can only be used with -c++.";
-        }
-        // Verify that the -cast flag is used only with -c++.
-        else if (retcode == true &&
-                 castFlag == true &&
-                 _targetLanguage != C_PLUS_PLUS)
-        {
-            retcode = false;
-            _errorMsg = "-cast can only be used with -c++.";
-        }
-        // Verify that the cast type is valid.
-        else if (retcode == true &&
-                 castFlag == true &&
-                 _castType.equals("dynamic_cast") == false &&
-                 _castType.equals("static_cast") == false &&
-                 _castType.equals("reinterpret_cast") == false)
-        {
-            retcode = false;
-            _errorMsg = "\"" +
-                         _castType +
-                         "\" is an invalid C++ cast type.";
-        }
-        // Verify that -glevel is used only with -graph.
-        else if (retcode == true &&
-                 _graphLevel >= GRAPH_LEVEL_0 &&
-                 _targetLanguage != GRAPH)
-        {
-            retcode = false;
-            _errorMsg = "-glevel can only be used with -graph.";
-        }
-        // Verify that -reflect is used only with -java and -tcl.
-        else if (retcode == true &&
-                 _reflection == true &&
-                 _targetLanguage != JAVA &&
-                 _targetLanguage != TCL &&
-                 _targetLanguage != VB &&
-                 _targetLanguage != C_SHARP)
-        {
-            retcode = false;
-            _errorMsg =
-                "-reflect can only be used with -java, -tcl, " +
-                "-vb and -csharp";
+            if (args[i].startsWith("-hel") == true)
+            {
+                retval = true;
+                _usage(System.out);
+            }
+            else if (args[i].startsWith("-vers") == true)
+            {
+                retval = true;
+                System.out.println(APP_NAME + " " + _version);
+            }
         }
 
-        return (retcode);
+        return (retval);
+    }
+
+    // Returns the target language found in the command line
+    // arguments. Throws an IllegalArgumentException if more than
+    // one target language is specified.
+    // As a side effect sets the default suffix.
+    private static int _findTargetLanguage(String[] args)
+    {
+        int i;
+        int retval = LANG_NOT_SET;
+
+        for (i = 0; i < args.length; ++i)
+        {
+            if (args[i].startsWith("-c+") == true)
+            {
+                // Only one target language can be specified.
+                if (_targetLanguage != LANG_NOT_SET &&
+                    _targetLanguage != C_PLUS_PLUS)
+                {
+                    throw (
+                        new IllegalArgumentException(
+                            "Only one target language " +
+                            "may be specified"));
+                }
+                else
+                {
+                    retval = C_PLUS_PLUS;
+                    _suffix = "cpp";
+                }
+            }
+            else if (args[i].startsWith("-j") == true)
+            {
+                // Only one target language can be specified.
+                if (_targetLanguage != LANG_NOT_SET &&
+                    _targetLanguage != JAVA)
+                {
+                    throw (
+                        new IllegalArgumentException(
+                            "Only one target language " +
+                            "may be specified"));
+                }
+                else
+                {
+                    retval = JAVA;
+                    _suffix = "java";
+                }
+            }
+            else if (args[i].startsWith("-tc") == true)
+            {
+                // Only one target language can be specified.
+                if (_targetLanguage != LANG_NOT_SET &&
+                    _targetLanguage != TCL)
+                {
+                    throw (
+                        new IllegalArgumentException(
+                            "Only one target language " +
+                            "may be specified"));
+                }
+                else
+                {
+                    retval = TCL;
+                    _suffix = "tcl";
+                }
+            }
+            else if (args[i].startsWith("-ta") == true)
+            {
+                // Only one target language can be specified.
+                if (_targetLanguage != LANG_NOT_SET &&
+                    _targetLanguage != TABLE)
+                {
+                    throw (
+                        new IllegalArgumentException(
+                            "Only one target language " +
+                            "may be specified"));
+                }
+                else
+                {
+                    _targetLanguage = TABLE;
+                    _suffix = "html";
+                }
+            }
+            else if (args[i].equals("-vb") == true)
+            {
+                // Only one target language may be specified.
+                if (_targetLanguage != LANG_NOT_SET &&
+                    _targetLanguage != VB)
+                {
+                    throw (
+                        new IllegalArgumentException(
+                            "Only one target language " +
+                            "may be specified"));
+                }
+                else
+                {
+                    retval = VB;
+                    _suffix = "vb";
+                }
+            }
+            else if (args[i].startsWith("-cs") == true)
+            {
+                // Only one target language may be specified.
+                if (_targetLanguage != LANG_NOT_SET &&
+                    _targetLanguage != C_SHARP)
+                {
+                    throw (
+                        new IllegalArgumentException(
+                            "Only one target language " +
+                            "may be specified"));
+                }
+                else
+                {
+                    retval = C_SHARP;
+                    _suffix = "cs";
+                }
+            }
+            else if (args[i].startsWith("-py") == true)
+            {
+                // Only one target language may be specified.
+                if (_targetLanguage != LANG_NOT_SET &&
+                    _targetLanguage != PYTHON)
+                {
+                    throw (
+                        new IllegalArgumentException(
+                            "Only one target language " +
+                            "may be specified"));
+                }
+                else
+                {
+                    retval = PYTHON;
+                    _suffix = "py";
+                }
+            }
+            else if (args[i].startsWith("-pe") == true)
+            {
+                // Only one target language may be specified.
+                if (_targetLanguage != LANG_NOT_SET &&
+                    _targetLanguage != PERL)
+                {
+                    throw (
+                        new IllegalArgumentException(
+                            "Only one target language " +
+                            "may be specified"));
+                }
+                else
+                {
+                    retval = PERL;
+                    _suffix = "pm";
+                }
+            }
+            else if (args[i].startsWith("-ru") == true)
+            {
+                // Only one target language may be specified.
+                if (_targetLanguage != LANG_NOT_SET &&
+                    _targetLanguage != RUBY)
+                {
+                    throw (
+                        new IllegalArgumentException(
+                            "Only one target language " +
+                            "may be specified"));
+                }
+                else
+                {
+                    retval = RUBY;
+                    _suffix = "rb";
+                }
+            }
+            else if (args[i].equals("-c") == true)
+            {
+                // Only one target language can be specified.
+                if (_targetLanguage != LANG_NOT_SET &&
+                    _targetLanguage != C)
+                {
+                    throw (
+                        new IllegalArgumentException(
+                            "Only one target language " +
+                            "may be specified"));
+                }
+                else
+                {
+                    retval = C;
+                    _suffix = "c";
+                }
+            }
+            else if (args[i].startsWith("-gr") == true)
+            {
+                // Only one target language may be specified.
+                if (_targetLanguage != LANG_NOT_SET &&
+                    _targetLanguage != GRAPH)
+                {
+                    throw (
+                        new IllegalArgumentException(
+                            "Only one target language " +
+                            "may be specified"));
+                }
+                else
+                {
+                    retval = GRAPH;
+                    _suffix = "dot";
+                    _graphLevel = GRAPH_LEVEL_0;
+                }
+            }
+        }
+
+        return (retval);
+    }
+
+    // Returns true if the target language supports the specified
+    // option.
+    private static boolean _supportsOption(String option)
+    {
+        List languages = (List) _optionMap.get(option);
+
+        return (
+            languages != null &&
+            languages.contains(new Integer(_targetLanguage)));
+    }
+
+    // Returns true if the string is a valid C++ cast.
+    private static boolean _isValidCast(String castType)
+    {
+        return (castType.equals("dynamic_cast") == true ||
+                castType.equals("static_cast") == true ||
+                castType.equals("reinterpret_cast") == true);
     }
 
     // Returns true if the path is a valid destination directory.
@@ -1061,7 +1210,7 @@ public final class Smc
     private static void _usage(PrintStream stream)
     {
         stream.print("usage: ");
-        stream.print(_appName);
+        stream.print(APP_NAME);
         stream.print(" [-suffix suffix]");
         stream.print(" [-g]");
         stream.print(" [-nostreams]");
@@ -1073,9 +1222,10 @@ public final class Smc
         stream.print(" [-nocatch]");
         stream.print(" [-serial]");
         stream.print(" [-return]");
-        stream.print(" [-relect]");
+        stream.print(" [-reflect]");
         stream.print(" [-cast cast_type]");
         stream.print(" [-d directory]");
+        stream.print(" [-headerd directory]");
         stream.print(" [-glevel int]");
         stream.print(" {-c | -c++ | -java | -tcl | -vb | -csharp | ");
         stream.print("-python | -perl | -ruby | -table | -graph}");
@@ -1086,7 +1236,7 @@ public final class Smc
         stream.println(
             "\t-g        Add debugging to generated code");
         stream.println("\t-nostreams Do not use C++ iostreams ");
-        stream.print("                  ");
+        stream.print("\t          ");
         stream.println("(use with -c++ only)");
         stream.print("\t-version  Print smc version ");
         stream.println("information to standard out and exit");
@@ -1096,11 +1246,11 @@ public final class Smc
         stream.println("standard out and exit");
         stream.println(
             "\t-sync     Synchronize generated Java code ");
-        stream.print("                  ");
+        stream.print("\t          ");
         stream.println("(use with -java, -vb and -csharp only)");
         stream.println(
             "\t-noex     Do not generate C++ exception throws ");
-        stream.print("                  ");
+        stream.print("\t          ");
         stream.println("(use with -c++ only)");
         stream.print(
             "\t-nocatch  Do not generate try/catch/rethrow ");
@@ -1109,19 +1259,25 @@ public final class Smc
             "\t-serial   Generate serialization code");
         stream.print("\t-return   ");
         stream.println("Smc.main() returns, not exists");
-        stream.print("                  ");
+        stream.print("\t          ");
         stream.println("(use this option with ANT)");
         stream.println("\t-reflect  Generate reflection code");
-        stream.print("                  ");
+        stream.print("\t          ");
         stream.println(
             "(use with -java, -tcl, -vb and -csharp only)");
         stream.println("\t-cast     Use this C++ cast type ");
-        stream.print("                  ");
+        stream.print("\t          ");
         stream.println("(use with -c++ only)");
         stream.println(
             "\t-d        Place generated files in directory");
         stream.println(
+            "\t-headerd  Place generated header files in directory");
+        stream.print("\t          ");
+        stream.println("(use with -c, -c++ only)");
+        stream.println(
             "\t-glevel   Detail level from 0 (least) to 2 (greatest)");
+        stream.print("\t          ");
+        stream.println("(use with -graph only)");
         stream.println("\t-c        Generate C code");
         stream.println("\t-c++      Generate C++ code");
         stream.println("\t-java     Generate Java code");
@@ -1209,11 +1365,24 @@ public final class Smc
             // For C++ two files are generated: the .h and the
             // .cpp.
             case C_PLUS_PLUS:
-                // Generate the header file first.
-                srcFileName =
-                    srcFilePath +
-                    srcFileBase +
-                    "_sm.h";
+                // Generate the header file first. If -headerd
+                // was specified, then place the file there.
+                // -headerd takes precedence over -d.
+                if (_headerDirectory != null)
+                {
+                    srcFileName =
+                        _headerDirectory +
+                        srcFileBase +
+                        "_sm.h";
+                }
+                else
+                {
+                    srcFileName =
+                        srcFilePath +
+                        srcFileBase +
+                        "_sm.h";
+                }
+
                 sourceFileStream =
                     new FileOutputStream(srcFileName);
                 sourceStream =
@@ -1246,11 +1415,24 @@ public final class Smc
                 break;
 
             case C:
-                // Generate the header file first.
-                srcFileName =
-                    srcFilePath +
-                    srcFileBase +
-                    "_sm.h";
+                // Generate the header file first. If -headerd
+                // was specified, then place the file there.
+                // -headerd takes precedence over -d.
+                if (_headerDirectory != null)
+                {
+                    srcFileName =
+                        _headerDirectory +
+                        srcFileBase +
+                        "_sm.h";
+                }
+                else
+                {
+                    srcFileName =
+                        srcFilePath +
+                        srcFileBase +
+                        "_sm.h";
+                }
+
                 sourceFileStream =
                     new FileOutputStream(srcFileName);
                 sourceStream =
@@ -1443,9 +1625,6 @@ public final class Smc
     // Statics.
     //
 
-    // This applications print name.
-    private static String _appName;
-
     // The source file currently being compiled.
     private static String _sourceFileName;
 
@@ -1457,6 +1636,9 @@ public final class Smc
 
     // Place the output files in this directory. May be null.
     private static String _outputDirectory;
+
+    // Place header files in this directory. May be null.
+    private static String _headerDirectory;
 
     // If true, then generate verbose information.
     private static boolean _debug;
@@ -1503,6 +1685,11 @@ public final class Smc
     // The app's version ID.
     private static String _version;
 
+    // Map each command line option flag to the target languages
+    // supporting the flag.
+    // private static Map<String, List<int>> _optionMap;
+    private static Map _optionMap;
+
     //-----------------------------------------------------------
     // Constants.
     //
@@ -1522,6 +1709,23 @@ public final class Smc
     /* package */ static final int RUBY = 10;
     /* package */ static final int C = 11;
 
+    // Programming language names.
+    private static final String[] LANGUAGES =
+    {
+        "(not set)",
+        "C++",
+        "Java",
+        "[incr Tcl]",
+        "VB.net",
+        "C#",
+        "Python",
+        "-table",
+        "-graph",
+        "Perl",
+        "Ruby",
+        "C"
+    };
+
     // GraphViz detail level.
     /* package */ static final int NO_GRAPH_LEVEL = -1;
     /* package */ static final int GRAPH_LEVEL_0 = 0;
@@ -1534,12 +1738,117 @@ public final class Smc
     /* package */ static final int TRANS_PUSH = 2;
     /* package */ static final int TRANS_POP = 3;
 
-    private static final String VERSION = "v. 4.3.1";
+    private static final String APP_NAME = "smc";
+    private static final String VERSION = "v. 4.3.2";
+
+    // Command line option flags.
+    private static final String CAST_FLAG = "-cast";
+    private static final String DIRECTORY_FLAG = "-d";
+    private static final String DEBUG_FLAG = "-g";
+    private static final String GLEVEL_FLAG = "-glevel";
+    private static final String HEADER_FLAG = "-headerd";
+    private static final String HELP_FLAG = "-help";
+    private static final String NO_CATCH_FLAG = "-nocatch";
+    private static final String NO_EXCEPTIONS_FLAG = "-noex";
+    private static final String NO_STREAMS_FLAG = "-nostreams";
+    private static final String REFLECT_FLAG = "-reflect";
+    private static final String RETURN_FLAG = "-return";
+    private static final String SERIAL_FLAG = "-serial";
+    private static final String SUFFIX_FLAG = "-suffix";
+    private static final String SYNC_FLAG = "-sync";
+    private static final String VERBOSE_FLAG = "-verbose";
+    private static final String VERSION_FLAG = "-version";
+    private static final String VVERBOSE_FLAG = "-vverbose";
+
+    static
+    {
+        // List<Integer> language = new ArrayList<Integer>();
+        List languages = new ArrayList();
+        int target;
+
+        // _optionMap = new HashMap<String, List<Integer>>();
+        _optionMap = new HashMap();
+
+        // Languages supporting each option:
+        // +      -cast: C++
+        // +         -d: all
+        // +         -g: all
+        // +    -glevel: graph
+        // +    -header: C, C++
+        // +      -help: all
+        // +   -nocatch: all
+        // +      -noex: C++
+        // + -nostreams: C++
+        // +   -reflect: C#, Java, TCL, VB
+        // +    -return: all
+        // +    -serial: C#, C++, Java, Tcl, VB
+        // +    -suffix: all
+        // +      -sync: C#, Java, VB
+        // +   -verbose: all
+        // +   -version: all
+        // +  -vverbose: all
+
+        // Set the options supporting all languages first.
+        for (target = C_PLUS_PLUS; target <= C; ++target)
+        {
+            languages.add(new Integer(target));
+        }
+
+        _optionMap.put(DIRECTORY_FLAG, languages);
+        _optionMap.put(DEBUG_FLAG, languages);
+        _optionMap.put(HELP_FLAG, languages);
+        _optionMap.put(NO_CATCH_FLAG, languages);
+        _optionMap.put(RETURN_FLAG, languages);
+        _optionMap.put(SUFFIX_FLAG, languages);
+        _optionMap.put(VERBOSE_FLAG, languages);
+        _optionMap.put(VERSION_FLAG, languages);
+        _optionMap.put(VVERBOSE_FLAG, languages);
+
+        // Set the options supported by less than all langugages.
+        languages = new ArrayList();
+        languages.add(new Integer(C_PLUS_PLUS));
+        _optionMap.put(CAST_FLAG, languages);
+        _optionMap.put(NO_EXCEPTIONS_FLAG, languages);
+        _optionMap.put(NO_STREAMS_FLAG, languages);
+
+        languages = new ArrayList();
+        languages.add(new Integer(C_PLUS_PLUS));
+        languages.add(new Integer(C));
+        _optionMap.put(HEADER_FLAG, languages);
+
+        languages = new ArrayList();
+        languages.add(new Integer(C_SHARP));
+        languages.add(new Integer(JAVA));
+        languages.add(new Integer(VB));
+        _optionMap.put(SYNC_FLAG, languages);
+
+        languages = new ArrayList();
+        languages.add(new Integer(C_SHARP));
+        languages.add(new Integer(JAVA));
+        languages.add(new Integer(VB));
+        languages.add(new Integer(TCL));
+        _optionMap.put(REFLECT_FLAG, languages);
+
+        languages = new ArrayList();
+        languages.add(new Integer(C_SHARP));
+        languages.add(new Integer(JAVA));
+        languages.add(new Integer(VB));
+        languages.add(new Integer(TCL));
+        languages.add(new Integer(C_PLUS_PLUS));
+        _optionMap.put(SERIAL_FLAG, languages);
+
+        languages = new ArrayList();
+        languages.add(new Integer(GRAPH));
+        _optionMap.put(GLEVEL_FLAG, languages);
+    }
 }
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.15  2006/07/11 18:20:00  cwrapp
+// Added -headerd option. Improved command line processing.
+//
 // Revision 1.14  2006/04/22 12:45:26  cwrapp
 // Version 4.3.1
 //
