@@ -101,7 +101,7 @@ public final class SmcGraphGenerator
     public void visit(SmcMap map)
     {
         String mapName = map.getName();
-        int graphLevel = Smc.getGraphLevel();
+        int graphLevel = Smc.graphLevel();
         Iterator it;
         Iterator it2;
         SmcState defaultState = map.getDefaultState();
@@ -217,7 +217,7 @@ public final class SmcGraphGenerator
 
     public void visit(SmcState state)
     {
-        int graphLevel = Smc.getGraphLevel();
+        int graphLevel = Smc.graphLevel();
         String mapName = state.getMap().getName();
         String instanceName = state.getInstanceName();
 
@@ -297,7 +297,7 @@ public final class SmcGraphGenerator
         // Graph level 2: add parameters to transition name.
         // Generate the parameters once and pass the string to
         // the guards in the "package" argument.
-        if (Smc.getGraphLevel() == Smc.GRAPH_LEVEL_2 &&
+        if (Smc.graphLevel() == Smc.GRAPH_LEVEL_2 &&
             parameters.isEmpty() == false)
         {
             ByteArrayOutputStream baos =
@@ -339,7 +339,7 @@ public final class SmcGraphGenerator
         String endStateName = guard.getEndState();
         String pushStateName = guard.getPushState();
         String condition = guard.getCondition();
-        int graphLevel = Smc.getGraphLevel();
+        int graphLevel = Smc.graphLevel();
         List actions = guard.getActions();
         Iterator it;
 
@@ -446,7 +446,7 @@ public final class SmcGraphGenerator
 
     public void visit(SmcAction action)
     {
-        int graphLevel = Smc.getGraphLevel();
+        int graphLevel = Smc.graphLevel();
 
         // Actions are only reported for graph levels 1 and 2.
         // Graph level 1: only the action name, no arguments.
@@ -515,6 +515,9 @@ public final class SmcGraphGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2006/07/11 18:13:33  cwrapp
+// Changed method getGraphLevel() to graphLevel().
+//
 // Revision 1.2  2005/11/07 19:34:54  cwrapp
 // Changes in release 4.3.0:
 // New features:
