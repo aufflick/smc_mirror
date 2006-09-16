@@ -1,11 +1,11 @@
 //
 // The contents of this file are subject to the Mozilla Public
 // License Version 1.1 (the "License"); you may not use this file
-// except in compliance with the License. You may obtain a copy of
-// the License at http://www.mozilla.org/MPL/
+// except in compliance with the License. You may obtain a copy
+// of the License at http://www.mozilla.org/MPL/
 // 
-// Software distributed under the License is distributed on an "AS
-// IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+// Software distributed under the License is distributed on an
+// "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
@@ -49,7 +49,7 @@ import java.util.List;
 public final class SmcCGenerator
     extends SmcCodeGenerator
 {
-//-----------------------------------------------------------------
+//---------------------------------------------------------------
 // Member methods
 //
 
@@ -192,7 +192,8 @@ public final class SmcCGenerator
 
                 _source.println(")");
                 _source.println("{");
-                _source.println("    getState(fsm)->Default(fsm);");
+                _source.println(
+                    "    getState(fsm)->Default(fsm);");
                 _source.println("}");
             }
         }
@@ -208,11 +209,12 @@ public final class SmcCGenerator
         // Print the transition out to the verbose log.
         if (Smc.isDebug() == true)
         {
-            _source.println("    if (getDebugFlag(fsm) != 0) {");
+            _source.println("    if (getDebugFlag(fsm) != 0)");
+            _source.println("    {");
 
             // The TRACE macro.
-            _source.print(
-                "        TRACE(\"TRANSITION   : %s.%s\\n\\r\", ");
+            _source.print("        TRACE(");
+            _source.print("\"TRANSITION   : %s.%s\\n\\r\", ");
             _source.println(
                 "getName(getState(fsm)), getTransition(fsm));");
 
@@ -246,7 +248,8 @@ public final class SmcCGenerator
                 {
                     trans = (SmcTransition) transIt.next();
 
-                    if (trans.getName().equals("Default") == false)
+                    if (trans.getName().equals(
+                            "Default") == false)
                     {
                         _source.print("#define ");
                         _source.print(mapName); 
@@ -496,7 +499,8 @@ public final class SmcCGenerator
             _source.print("_");
             _source.print(state.getClassName());
             _source.print("\", ");
-            _source.print(Integer.toString(map.getNextStateId()));
+            _source.print(
+                Integer.toString(map.getNextStateId()));
             _source.println(" };");
         }
 
@@ -689,6 +693,40 @@ public final class SmcCGenerator
         {
             _source.println("    int loopbackFlag = 0;");
         }
+
+        // ANSI C requires all local variables be declared
+        // at the code block's start before any control
+        // statements. If this transition appears only once
+        // in the state, has at least one action and it is a
+        // loopback and debugging is on, then visit(SmcGuard)
+        // will generate a local variable declaration after the
+        // debug if clause - an ANSI syntax error.
+        // So we need to check if this transition meets that
+        // condition and generate the local variable declaration
+        // here rather than in visit(SmcGuard).
+        //
+        // Note: when guard count is > 1, then the guard code
+        // is placed into an if or else block - and so the
+        // end state variable will appear at the start of that
+        // block, nullifying the debug if clauses affect.
+        _guardCount = guards.size();
+        if (_guardCount == 1)
+        {
+            guard = (SmcGuard) guards.get(0);
+
+            if (guard.getActions().isEmpty() == false &&
+                isLoopback(guard.getTransType(),
+                           stateName,
+                           guard.getEndState()) == true)
+            {
+                _source.print(_indent);
+                _source.print("const struct ");
+                _source.print(context);
+                _source.println(
+                    "State* EndStateName = getState(fsm);");
+            }
+        }
+
         _source.println();
 
         // Print the transition to the verbose log.
@@ -696,8 +734,8 @@ public final class SmcCGenerator
         {
             String sep;
 
-            _source.println("    if (getDebugFlag(fsm) != 0) {");
-
+            _source.println("    if (getDebugFlag(fsm) != 0)");
+            _source.println("    {");
             _source.print("        TRACE(\"TRANSITION   : ");
             _source.print(mapName);
             _source.print("_");
@@ -722,9 +760,7 @@ public final class SmcCGenerator
         }
 
         // Loop through the guards and print each one.
-        for (git = guards.iterator(),
-                     _guardIndex = 0,
-                     _guardCount = guards.size();
+        for (git = guards.iterator(), _guardIndex = 0;
              git.hasNext() == true;
              ++_guardIndex)
         {
@@ -820,7 +856,8 @@ public final class SmcCGenerator
             endStateName.length () > 0 &&
             endStateName.equals(NIL_STATE) == false)
         {
-            endStateName = "&" + scopeStateName(endStateName, mapName);
+            endStateName =
+                "&" + scopeStateName(endStateName, mapName);
         }
 
         // Qualify the state and push state names as well.
@@ -828,7 +865,8 @@ public final class SmcCGenerator
         pushStateName = scopeStateName(pushStateName, mapName);
         if (packageName != null && packageName.length() > 0)
         {
-            pushStateName = "&" + packageName + "_" + pushStateName;
+            pushStateName =
+                "&" + packageName + "_" + pushStateName;
         }
         else 
         {
@@ -916,13 +954,28 @@ public final class SmcCGenerator
             {
                 fqEndStateName = "EndStateName";
 
-                _source.print(indent2);
-                _source.print("const struct ");
-                _source.print(context);
-                _source.print("State* ");
-                _source.print(fqEndStateName);
-                _source.println(" = getState(fsm);");
-                _source.println();
+                // Generate this declaration only if this
+                // transition has multiple guards. If this
+                // is the only guard, then this local variable
+                // declaration will appear after the first
+                // control statement - which is an ANSI C
+                // syntax error.
+                // If there is only one guard, then this code
+                // is generated by visit(SmcTransition) before
+                // the debug code is generated.
+                // If there are multiple guards, then this code
+                // appears at the start of an if, else if or else
+                // code block which is acceptable ANSI C.
+                if (_guardCount > 1)
+                {
+                    _source.print(indent2);
+                    _source.print("const struct ");
+                    _source.print(context);
+                    _source.print("State* ");
+                    _source.print(fqEndStateName);
+                    _source.println(" = getState(fsm);");
+                    _source.println();
+                }
             }
             else
             {
@@ -937,7 +990,8 @@ public final class SmcCGenerator
         {
             _source.print(_indent);
             _source.print(
-                "    if (strcmp(getName(getState(fsm)), getName(");
+                "    if (strcmp(getName(getState(fsm)), ");
+            _source.print("getName(");
             _source.print(endStateName);
             _source.println(")) == 0) {");
             _source.print(_indent);
@@ -993,7 +1047,7 @@ public final class SmcCGenerator
         }
 
         // Dump out this transition's actions.
-        if (actions.size() == 0)
+        if (actions.isEmpty() == true)
         {
             if (condition.length() > 0)
             {
@@ -1022,7 +1076,8 @@ public final class SmcCGenerator
         // 1. The transition has no actions AND is a loopback OR
         // 2. This is a push or pop transition.
         if (transType == Smc.TRANS_SET &&
-            (actions.size() > 0 || loopbackFlag == false))
+            (actions.isEmpty() == false ||
+             loopbackFlag == false))
         {
             _source.print(indent3);
             _source.print("setState(fsm, ");
@@ -1034,7 +1089,8 @@ public final class SmcCGenerator
             // Set the end state so that it can be pushed
             // onto the state stack. But only do so if a clear
             // state was done.
-            if (loopbackFlag == false || actions.size() > 0)
+            if (loopbackFlag == false ||
+                actions.isEmpty() == false)
             {
                 _source.print(indent3);
                 _source.print("setState(fsm, ");
@@ -1238,7 +1294,7 @@ public final class SmcCGenerator
         return (retval.toString());
     }
 
-//-----------------------------------------------------------------
+//---------------------------------------------------------------
 // Member data
 //
     String _context;
@@ -1247,6 +1303,9 @@ public final class SmcCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2006/09/16 15:04:28  cwrapp
+// Initial v. 4.3.3 check-in.
+//
 // Revision 1.4  2006/07/11 18:11:41  cwrapp
 // Added support for new -headerd command line option.
 //

@@ -1,11 +1,11 @@
 //
 // The contents of this file are subject to the Mozilla Public
 // License Version 1.1 (the "License"); you may not use this file
-// except in compliance with the License. You may obtain a copy of
-// the License at http://www.mozilla.org/MPL/
+// except in compliance with the License. You may obtain a copy
+// of the License at http://www.mozilla.org/MPL/
 // 
-// Software distributed under the License is distributed on an "AS
-// IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+// Software distributed under the License is distributed on an
+// "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
@@ -26,22 +26,11 @@
 //
 // statemap.java --
 //
-//  This package defines the FSMContext class which is inherited by
-//  the smc-generated application FSM context class.
+//  This package defines the FSMContext class which is inherited
+//  by the smc-generated application FSM context class.
 //
 // CHANGE LOG
-// $Log$
-// Revision 1.3  2006/06/03 19:39:25  cwrapp
-// Final v. 4.3.1 check in.
-//
-// Revision 1.2  2006/04/22 12:45:25  cwrapp
-// Version 4.3.1
-//
-// Revision 1.1  2005/05/28 18:44:13  cwrapp
-// Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
-//
-// Revision 1.0  2004/09/06 16:32:15  charlesr
-// Initial revision
+// (See the bottom of this file.)
 //
 
 using System;
@@ -58,7 +47,9 @@ namespace statemap
     [Serializable]
     public abstract class FSMContext
     {
-    // Member functions
+    //-----------------------------------------------------------
+    // Member functions.
+    //
 
         public FSMContext()
         {
@@ -72,6 +63,10 @@ namespace statemap
             _debugStream = null;
         }
 
+        // DEPRECATED
+        // As of v. 4.3.3, System.Diagnostics.Trace is
+        // used instead of the _debugFlag, _debugStream
+        // pair.
         // Used to enable debugging output
         public bool Debug
         {
@@ -85,6 +80,10 @@ namespace statemap
             }
         }
 
+        // DEPRECATED
+        // As of v. 4.3.3, System.Diagnostics.Trace is
+        // used instead of the _debugFlag, _debugStream
+        // pair. _debugStream will always be null.
         // Used to set the output text writer.
         public TextWriter DebugStream
         {
@@ -94,12 +93,13 @@ namespace statemap
             }
             set
             {
-                _debugStream = value;
+                // DEPRECATED.
+                // _debugStream = value;
             }
         }
 
-        // Is this state machine in a transition? If state is null,
-        // then true; otherwise, false.
+        // Is this state machine in a transition? If state is
+        // null, then true; otherwise, false.
         public bool InTransition
         {
             get 
@@ -110,15 +110,11 @@ namespace statemap
 
         public void SetState(State state)
         {
-            if (Debug == true &&
-                _debugStream != null)
-            {
-                _debugStream.WriteLine(
-                    "NEW STATE    : " +    state.Name);
-            }
+#if TRACE
+            Trace.WriteLine("NEW STATE    : " +    state.Name);
+#endif
 
             _state = state;
-
             return;
         }
 
@@ -147,11 +143,9 @@ namespace statemap
 
         public void PushState(State state)
         {
-            if (Debug == true && _debugStream != null)
-            {
-                _debugStream.WriteLine(
-                    "PUSH TO STATE: " +    state.Name);
-            }
+#if TRACE
+            Trace.WriteLine("PUSH TO STATE: " +    state.Name);
+#endif
 
             if (_state != null)
             {
@@ -172,11 +166,9 @@ namespace statemap
         {
             if (_stateStack.Count == 0)
             {
-                if (Debug == true && _debugStream != null)
-                {
-                    _debugStream.WriteLine(
-                        "POPPING ON EMPTY STATE STACK.");
-                }
+#if TRACE
+                Trace.WriteLine("POPPING ON EMPTY STATE STACK.");
+#endif
 
                 throw new
                     System.InvalidOperationException(
@@ -188,11 +180,9 @@ namespace statemap
                 // from the stack and returns it.
                 _state = (State) _stateStack.Pop();
 
-                if (Debug == true && _debugStream != null)
-                {
-                    _debugStream.WriteLine(
-                        "POP TO STATE : " + _state.Name);
-                }
+#if TRACE
+                Trace.WriteLine("POP TO STATE : " + _state.Name);
+#endif
             }
 
             return;
@@ -231,8 +221,8 @@ namespace statemap
         protected string _transition;
 
         // Remember what state a transition left.
-        // Do no persist the previous state because an FSM should be
-        // serialized while in transition.
+        // Do no persist the previous state because an FSM should
+        // be serialized while in transition.
         [NonSerialized]
         protected State _previousState;
 
@@ -240,6 +230,10 @@ namespace statemap
         [NonSerialized]
         protected System.Collections.Stack _stateStack;
 
+        // DEPRECATED
+        // As of v. 4.3.3, System.Diagnostics.Trace is
+        // used instead of the _debugFlag, _debugStream
+        // pair. _debugStream will always be null.
         // When this flag is set to true, this class will print
         // out debug messages.
         [NonSerialized]
@@ -248,5 +242,24 @@ namespace statemap
         // Write debug output to this stream.
         [NonSerialized]
         protected TextWriter _debugStream;
-    }
-}
+    } // end of class FSMContext
+} // end of namespace statemap
+
+//
+// CHANGE LOG
+// $Log$
+// Revision 1.4  2006/09/16 15:04:28  cwrapp
+// Initial v. 4.3.3 check-in.
+//
+// Revision 1.3  2006/06/03 19:39:25  cwrapp
+// Final v. 4.3.1 check in.
+//
+// Revision 1.2  2006/04/22 12:45:25  cwrapp
+// Version 4.3.1
+//
+// Revision 1.1  2005/05/28 18:44:13  cwrapp
+// Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
+//
+// Revision 1.0  2004/09/06 16:32:15  charlesr
+// Initial revision
+//

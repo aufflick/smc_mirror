@@ -619,17 +619,6 @@
 ./smc/lib/Tcl/README.txt
 ./smc/lib/Tcl/pkgIndex.tcl
 ./smc/lib/Tcl/statemap.tcl
-./smc/lib/VB/AssemblyInfo.vb
-./smc/lib/VB/FSMContext.vb
-./smc/lib/VB/Makefile
-./smc/lib/VB/README.txt
-./smc/lib/VB/State.vb
-./smc/lib/VB/StateUndefinedException.vb
-./smc/lib/VB/TransitionUndefinedException.vb
-./smc/lib/VB/statemap.sln
-./smc/lib/VB/statemap.suo
-./smc/lib/VB/statemap.vbproj
-./smc/lib/VB/statemap.vbproj.user
 ./smc/misc/Makefile
 ./smc/misc/smc.ico
 ./smc/net/sf/smc/CODE_README.txt

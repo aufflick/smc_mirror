@@ -1,11 +1,11 @@
 //
 // The contents of this file are subject to the Mozilla Public
 // License Version 1.1 (the "License"); you may not use this file
-// except in compliance with the License. You may obtain a copy of
-// the License at http://www.mozilla.org/MPL/
+// except in compliance with the License. You may obtain a copy
+// of the License at http://www.mozilla.org/MPL/
 // 
-// Software distributed under the License is distributed on an "AS
-// IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+// Software distributed under the License is distributed on an
+// "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
@@ -541,7 +541,7 @@ public final class SmcHeaderGenerator
                     _source.print("    ");
                 }
 
-                _source.println("};");
+                _source.println("}");
                 _source.println();
             }
         }
@@ -550,7 +550,9 @@ public final class SmcHeaderGenerator
             _source.println();
         }
 
-        _source.println("#endif");
+        _source.print("#endif // _H_");
+        _source.print(srcfileCaps);
+        _source.println("_SM");
 
         return;
     }
@@ -822,6 +824,9 @@ public final class SmcHeaderGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2006/09/16 15:04:29  cwrapp
+// Initial v. 4.3.3 check-in.
+//
 // Revision 1.5  2006/07/11 18:14:38  cwrapp
 // Changed method getCastType() to castType().
 //

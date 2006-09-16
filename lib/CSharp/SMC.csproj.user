@@ -1,5 +1,5 @@
 <VisualStudioProject>
-    <CSHARP LastOpenVersion = "7.0.9466" >
+    <CSHARP>
         <Build>
             <Settings ReferencePath = "" >
                 <Config
@@ -20,6 +20,38 @@
                 />
                 <Config
                     Name = "Release"
+                    EnableASPDebugging = "false"
+                    EnableASPXDebugging = "false"
+                    EnableUnmanagedDebugging = "false"
+                    EnableSQLServerDebugging = "false"
+                    RemoteDebugEnabled = "false"
+                    RemoteDebugMachine = ""
+                    StartAction = "Project"
+                    StartArguments = ""
+                    StartPage = ""
+                    StartProgram = ""
+                    StartURL = ""
+                    StartWorkingDirectory = ""
+                    StartWithIE = "false"
+                />
+                <Config
+                    Name = "DebugNoTrace"
+                    EnableASPDebugging = "false"
+                    EnableASPXDebugging = "false"
+                    EnableUnmanagedDebugging = "false"
+                    EnableSQLServerDebugging = "false"
+                    RemoteDebugEnabled = "false"
+                    RemoteDebugMachine = ""
+                    StartAction = "Project"
+                    StartArguments = ""
+                    StartPage = ""
+                    StartProgram = ""
+                    StartURL = ""
+                    StartWorkingDirectory = ""
+                    StartWithIE = "true"
+                />
+                <Config
+                    Name = "ReleaseNoTrace"
                     EnableASPDebugging = "false"
                     EnableASPXDebugging = "false"
                     EnableUnmanagedDebugging = "false"

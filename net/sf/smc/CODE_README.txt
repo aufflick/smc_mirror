@@ -1,5 +1,71 @@
                               SMC -
                   The State Machine Compiler
+                        Version 4.3.3
+
+
+
++ Major changes
+---------------
+
+None.
+
++ Minor changes
+---------------
+
+(C#, VB) The _debugFlag and _debugStream are deprecated and no
+         longer used. Instead, System.Diagnostics.Trace is
+         used. The SMC programmer is responsible for defining
+         the TRACE directive during compilation so the Trace
+         will be included in the executable.
+
+         The SMC programmer is also responsible for configuring
+         Trace to send the trace output to the desired
+         destination.
+
+         There are no longer separate C# and VB dlls but a
+         single lib/DotNet directory containing four DLLs:
+         + debug with Trace support,
+         + debug without Trace support,
+         + release with Trace support and
+         + release without Trace support.
+         (SF feature 1440302)
+
+
++ Bug fixes
+-----------
+
+(C) When -g was used, generated code was not strictly ANSI C
+    compliant. This was corrected.
+    (SF bug 1550093)
+
+(GraphViz)
+    Generated DOT file was incorrect when state names
+    begin with a lower-case letter. This was corrected.
+    (SF bug 1549777)
+
+(Java)
+    Incorrectly generate setOwner() method twice when -serial
+    flag is specified.
+    (SF bug 1555456)
+
+(C++)
+    Removed incorrectly placed semicolon following namespace
+    closing brace.
+    (SF bug 1556372)
+
+(Python)
+    Added missing "pass" statement to empty "else:" block.
+    (SF bug 1558366)
+
+(VB)
+    Added namespace support. %package is now honored.
+    (SF feature request 1544657)
+
+
+
+
+                              SMC -
+                  The State Machine Compiler
                         Version 4.3.2
 
 

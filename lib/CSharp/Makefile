@@ -51,7 +51,7 @@ JAR_FLAGS=	cvf
 DLL_FILE=	$(PACKAGE_NAME).dll
 PDB_FILE=	$(PACKAGE_NAME).pdb
 
-LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib/CSharp
+LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib/DotNet
 
 #################################################################
 # Rules.
@@ -67,22 +67,48 @@ $(LIB_STAGING_DIR) :
 $(LIB_STAGING_DIR)/Debug : $(LIB_STAGING_DIR)
 		mkdir $(LIB_STAGING_DIR)/Debug
 
+$(LIB_STAGING_DIR)/Debug/Trace : $(LIB_STAGING_DIR)/Debug
+		mkdir $(LIB_STAGING_DIR)/Debug/Trace
+
+$(LIB_STAGING_DIR)/Debug/NoTrace : $(LIB_STAGING_DIR)/Debug
+		mkdir $(LIB_STAGING_DIR)/Debug/NoTrace
+
 $(LIB_STAGING_DIR)/Release : $(LIB_STAGING_DIR)
 		mkdir $(LIB_STAGING_DIR)/Release
 
+$(LIB_STAGING_DIR)/Release/Trace : $(LIB_STAGING_DIR)/Release
+		mkdir $(LIB_STAGING_DIR)/Release/Trace
+
+$(LIB_STAGING_DIR)/Release/NoTrace : $(LIB_STAGING_DIR)/Release
+		mkdir $(LIB_STAGING_DIR)/Release/NoTrace
+
 install :	install_debug install_release
 
-install_debug : Debug/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug
-		cp -f Debug/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug
-		cp -f Debug/$(PDB_FILE) $(LIB_STAGING_DIR)/Debug
+install_debug : install_debug_w_trace install_debug_wo_trace
 
-install_release : Release/$(DLL_FILE) $(LIB_STAGING_DIR)/Release
-		cp Release/$(DLL_FILE) $(LIB_STAGING_DIR)/Release
+install_debug_w_trace : Debug/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug/Trace
+		cp -f Debug/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug/Trace
+		cp -f Debug/$(PDB_FILE) $(LIB_STAGING_DIR)/Debug/Trace
+
+install_debug_wo_trace : Debug/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug/NoTrace
+		cp -f DebugNoTrace/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug/NoTrace
+		cp -f DebugNoTrace/$(PDB_FILE) $(LIB_STAGING_DIR)/Debug/NoTrace
+
+install_release : install_release_w_trace install_release_wo_trace
+
+install_release_w_trace : Release/$(DLL_FILE) $(LIB_STAGING_DIR)/Release/Trace
+		cp Release/$(DLL_FILE) $(LIB_STAGING_DIR)/Release/Trace
+
+install_release_wo_trace : Release/$(DLL_FILE) $(LIB_STAGING_DIR)/Release/NoTrace
+		cp ReleaseNoTrace/$(DLL_FILE) $(LIB_STAGING_DIR)/Release/NoTrace
 
 uninstall :
-		-rm -f $(LIB_STAGING_DIR)/Debug/$(DLL_FILE)
-		-rm -f $(LIB_STAGING_DIR)/Debug/$(PDB_FILE)
-		-rm -f $(LIB_STAGING_DIR)/Release/$(DLL_FILE)
+		-rm -f $(LIB_STAGING_DIR)/Debug/Trace/$(DLL_FILE)
+		-rm -f $(LIB_STAGING_DIR)/Debug/Trace/$(PDB_FILE)
+		-rm -f $(LIB_STAGING_DIR)/Debug/NoTrace/$(DLL_FILE)
+		-rm -f $(LIB_STAGING_DIR)/Debug/NoTrace/$(PDB_FILE)
+		-rm -f $(LIB_STAGING_DIR)/Release/Trace/$(DLL_FILE)
+		-rm -f $(LIB_STAGING_DIR)/Release/NoTrace/$(DLL_FILE)
 
 clean :
 
@@ -94,6 +120,9 @@ realclean :	clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2006/09/16 15:04:28  cwrapp
+# Initial v. 4.3.3 check-in.
+#
 # Revision 1.2  2005/06/08 11:09:14  cwrapp
 # + Updated Python code generator to place "pass" in methods with empty
 #   bodies.

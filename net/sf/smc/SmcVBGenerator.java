@@ -1,11 +1,11 @@
 //
 // The contents of this file are subject to the Mozilla Public
 // License Version 1.1 (the "License"); you may not use this file
-// except in compliance with the License. You may obtain a copy of
-// the License at http://www.mozilla.org/MPL/
+// except in compliance with the License. You may obtain a copy
+// of the License at http://www.mozilla.org/MPL/
 // 
-// Software distributed under the License is distributed on an "AS
-// IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+// Software distributed under the License is distributed on an
+// "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
@@ -62,6 +62,7 @@ public final class SmcVBGenerator
     public void visit(SmcFSM fsm)
     {
         String rawSource = fsm.getSource();
+        String packageName = fsm.getPackage();
         String context = fsm.getContext();
         String startState = fsm.getStartState();
         List maps = fsm.getMaps();
@@ -77,6 +78,7 @@ public final class SmcVBGenerator
         String separator;
         int index;
         List params;
+        String indent2;
 
         // Dump out the raw source code, if any.
         if (rawSource != null && rawSource.length () > 0)
@@ -110,36 +112,56 @@ public final class SmcVBGenerator
         }
         _source.println();
 
+        // If a package has been specified, generate the package
+        // statement now and set the indent.
+        if (packageName != null && packageName.length() > 0)
+        {
+            _source.print("Namespace ");
+            _source.println(packageName);
+            _source.println();
+            _indent = "    ";
+        }
+
         // If -serial was specified, then prepend the serialize
         // attribute to the class declaration.
         if (Smc.isSerial() == true)
         {
+            _source.print(_indent);
             _source.print("<Serializable()> ");
         }
 
         // Now declare the context class.
+        _source.print(_indent);
         _source.print("Public NotInheritable Class ");
         _source.print(context);
         _source.println("Context");
+        _source.print(_indent);
         _source.println("    Inherits statemap.FSMContext");
 
         // If -serial was specified, then we also implement the
         // ISerializable interface.
         if (Smc.isSerial() == true)
         {
+            _source.print(_indent);
             _source.println("    Implements ISerializable");
         }
 
         // Declare the associated application class as a data
         // member.
         _source.println();
+        _source.print(_indent);
         _source.println(
             "    '------------------------------------------------------------");
+        _source.print(_indent);
         _source.println("    ' Member data");
+        _source.print(_indent);
         _source.println("    '");
+        _source.print(_indent);
         _source.println();
+        _source.print(_indent);
         _source.println(
             "    ' The associated application class instance.");
+        _source.print(_indent);
         _source.print("    Private _owner As ");
         _source.println(context);
         _source.println();
@@ -150,17 +172,23 @@ public final class SmcVBGenerator
         {
             String mapName;
 
+            _source.print(_indent);
             _source.println(
                 "    '------------------------------------------------------------");
+            _source.print(_indent);
             _source.println("    ' Shared data");
+            _source.print(_indent);
             _source.println("    '");
             _source.println();
-            _source.println(
-                "    ' State instance array. Used to deserialize.");
+            _source.print(_indent);
+            _source.print("    ' State instance array. ");
+            _source.println("Used to deserialize.");
+            _source.print(_indent);
             _source.print(
                 "    Private Shared ReadOnly _States() As ");
             _source.print(context);
             _source.println("State = _");
+            _source.print(_indent);
             _source.print("        {");
 
             // For each map, ...
@@ -180,6 +208,7 @@ public final class SmcVBGenerator
 
                     // Add its singleton instance to the array.
                     _source.println(separator);
+                    _source.print(_indent);
                     _source.print("            ");
                     _source.print(mapName);
                     _source.print(".");
@@ -188,80 +217,103 @@ public final class SmcVBGenerator
             }
 
             _source.println(" _");
+            _source.print(_indent);
             _source.println("        }");
             _source.println();
         }
 
         // Now declare the current state and owner properties.
+        _source.print(_indent);
         _source.println(
             "    '------------------------------------------------------------");
+        _source.print(_indent);
         _source.println("    ' Properties");
+        _source.print(_indent);
         _source.println("    '");
         _source.println();
+        _source.print(_indent);
         _source.print("    Public Property State() As ");
         _source.print(context);
         _source.println("State");
+        _source.print(_indent);
         _source.println("        Get");
+        _source.print(_indent);
         _source.println("            If _state Is Nothing _");
+        _source.print(_indent);
         _source.println("            Then");
+        _source.print(_indent);
+        _source.print("                Throw ");
         _source.println(
-            "                Throw New statemap.StateUndefinedException()");
+            "New statemap.StateUndefinedException()");
+        _source.print(_indent);
         _source.println("            End If");
         _source.println();
+        _source.print(_indent);
         _source.println("            Return _state");
+        _source.print(_indent);
         _source.println("        End Get");
         _source.println();
+        _source.print(_indent);
         _source.print("        Set(ByVal state As ");
         _source.print(context);
         _source.println("State)");
         _source.println();
-        _source.println(
-            "            If _debugFlag = True And Not IsNothing(state) _");
-        _source.println("            Then");
-        _source.println("                _debugStream.WriteLine( _");
-        _source.println("                    String.Concat( _");
-        _source.println(
-            "                        \"NEW STATE     :\", _");
-        _source.println(
-            "                        state.Name))");
-        _source.println("            End If");
-        _source.println();
+        _source.print(_indent);
         _source.println("            _state = state");
+        _source.print(_indent);
         _source.println("        End Set");
+        _source.print(_indent);
         _source.println("    End Property");
         _source.println();
+        _source.print(_indent);
         _source.print(
             "    Public Property Owner() As ");
         _source.println(context);
+        _source.print(_indent);
         _source.println("        Get");
+        _source.print(_indent);
         _source.println("            Return _owner");
+        _source.print(_indent);
         _source.println("        End Get");
+        _source.print(_indent);
         _source.print("        Set(ByVal owner As ");
         _source.print(context);
         _source.println(")");
         _source.println();
+        _source.print(_indent);
         _source.println("            If owner Is Nothing _");
+        _source.print(_indent);
         _source.println("            Then");
+        _source.print(_indent);
         _source.println(
             "                Throw New NullReferenceException");
+        _source.print(_indent);
         _source.println("            End If");
         _source.println();
+        _source.print(_indent);
         _source.println("            _owner = owner");
+        _source.print(_indent);
         _source.println("        End Set");
+        _source.print(_indent);
         _source.println("    End Property");
         _source.println();
 
         // Generate the class member methods, starting with the
         // constructor.
+        _source.print(_indent);
         _source.println(
             "    '------------------------------------------------------------");
+        _source.print(_indent);
         _source.println("    ' Member methods");
+        _source.print(_indent);
         _source.println("    '");
         _source.println();
+        _source.print(_indent);
         _source.print("    Public Sub New(ByRef owner As ");
         _source.print(context);
         _source.println(")");
         _source.println();
+        _source.print(_indent);
         _source.println("        _owner = owner");
 
         // The state name "map::state" must be changed to
@@ -277,14 +329,17 @@ public final class SmcVBGenerator
             vbState = startState;
         }
 
+        _source.print(_indent);
         _source.print("        _state = ");
         _source.println(vbState);
 
         // Execute the start state's entry actions.
+        _source.print(_indent);
         _source.print("        ");
         _source.print(vbState);
         _source.println(".Entry(Me)");
 
+        _source.print(_indent);
         _source.println("    End Sub");
         _source.println();
 
@@ -299,6 +354,7 @@ public final class SmcVBGenerator
             // Ignore the default transition.
             if (trans.getName().equals("Default") == false)
             {
+                _source.print(_indent);
                 _source.print("    Public Sub ");
                 _source.print(trans.getName());
                 _source.print("(");
@@ -320,22 +376,23 @@ public final class SmcVBGenerator
                 // access this state machine simultaneously.
                 if (Smc.isSynchronized() == true)
                 {
+                    _source.print(_indent);
                     _source.println("        SyncLock Me");
-                    _indent = "            ";
+                    indent2 = _indent + "            ";
                 }
                 else
                 {
-                    _indent = "        ";
+                    indent2 = _indent + "        ";
                 }
 
                 // Save away the transition name in case it is
                 // need in an UndefinedTransitionException.
-                _source.print(_indent);
+                _source.print(indent2);
                 _source.print("_transition = \"");
                 _source.print(trans.getName());
                 _source.println("\"");
 
-                _source.print(_indent);
+                _source.print(indent2);
                 _source.print("State.");
                 _source.print(trans.getName());
                 _source.print("(Me");
@@ -350,16 +407,18 @@ public final class SmcVBGenerator
                     _source.print(param.getName());
                 }
                 _source.println(")");
-                _source.print(_indent);
+                _source.print(indent2);
                 _source.println("_transition = \"\"");
 
                 // If the -sync flag was specified, then output
                 // the "End SyncLock".
                 if (Smc.isSynchronized() == true)
                 {
+                    _source.print(_indent);
                     _source.println("        End SyncLock");
                 }
 
+                _source.print(_indent);
                 _source.println("    End Sub");
                 _source.println();
             }
@@ -370,106 +429,165 @@ public final class SmcVBGenerator
         if (Smc.isSerial() == true)
         {
             // Output the ValueOf method.
-            _source.print(
-                "    Public Function ValueOf(ByVal stateId As Integer) As ");
+            _source.print(_indent);
+            _source.print("    Public Function ValueOf(");
+            _source.print("ByVal stateId As Integer) As ");
             _source.print(context);
             _source.println("State");
             _source.println();
+            _source.print(_indent);
             _source.println(
                 "        Return _States(stateId)");
+            _source.print(_indent);
             _source.println("    End Function");
             _source.println();
 
+            _source.print(_indent);
+            _source.print("    Private Sub GetObjectData(");
             _source.println(
-                "    Private Sub GetObjectData(ByVal info As SerializationInfo, _");
+                "ByVal info As SerializationInfo, _");
+            _source.print(_indent);
+            _source.print("                              ");
             _source.println(
-                "                              ByVal context As StreamingContext) _");
+                "ByVal context As StreamingContext) _");
+            _source.print(_indent);
+            _source.print("            ");
             _source.println(
-                "            Implements ISerializable.GetObjectData");
+                "Implements ISerializable.GetObjectData");
             _source.println();
-            _source.println("        Dim stackSize As Integer = 0");
+            _source.print(_indent);
+            _source.println(
+                "        Dim stackSize As Integer = 0");
+            _source.print(_indent);
             _source.println("        Dim index As Integer");
+            _source.print(_indent);
             _source.println("        Dim it As IEnumerator");
             _source.println();
+            _source.print(_indent);
             _source.println(
                 "        If Not IsNothing(_stateStack) _");
+            _source.print(_indent);
             _source.println("        Then");
+            _source.print(_indent);
             _source.println(
                 "            stackSize = _stateStack.Count");
+            _source.print(_indent);
             _source.println(
                 "            it = _stateStack.GetEnumerator()");
+            _source.print(_indent);
             _source.println("        End If");
             _source.println();
+            _source.print(_indent);
+            _source.print("        ");
             _source.println(
-                "        info.AddValue(\"stackSize\", stackSize)");
+                "info.AddValue(\"stackSize\", stackSize)");
             _source.println();
+            _source.print(_indent);
             _source.println("        index = 0");
+            _source.print(_indent);
             _source.println("        While index < stackSize");
+            _source.print(_indent);
             _source.println("            info.AddValue( _");
+            _source.print(_indent);
+            _source.print("                ");
             _source.println(
-                "                String.Concat(\"stackItem\", index), _");
+                "String.Concat(\"stackItem\", index), _");
+            _source.print(_indent);
             _source.println(
                 "                              it.Current.Id)");
+            _source.print(_indent);
             _source.println(
                 "                it.MoveNext()");
+            _source.print(_indent);
             _source.println(
                 "                index += 1");
+            _source.print(_indent);
             _source.println("        End While");
             _source.println();
+            _source.print(_indent);
             _source.println(
                 "        info.AddValue(\"state\", _state.Id)");
+            _source.print(_indent);
             _source.println("    End Sub");
             _source.println();
+            _source.print(_indent);
+            _source.print("    Private Sub New(");
             _source.println(
-                "    Private Sub New(ByVal info As SerializationInfo, _");
+                "ByVal info As SerializationInfo, _");
+            _source.print(_indent);
+            _source.print("                    ");
             _source.println(
-                "                    ByVal context As StreamingContext)");
+                "ByVal context As StreamingContext)");
             _source.println();
+            _source.print(_indent);
             _source.println("        Dim stackSize As Integer");
+            _source.print(_indent);
             _source.println("        Dim stateId As Integer");
             _source.println();
-            _source.println(
-                "        stackSize = info.GetInt32(\"stackSize\")");
+            _source.print(_indent);
+            _source.print("        stackSize = ");
+            _source.println("info.GetInt32(\"stackSize\")");
+            _source.print(_indent);
             _source.println("        If stackSize > 0 _");
+            _source.print(_indent);
             _source.println("        Then");
+            _source.print(_indent);
             _source.println("            Dim index As Integer");
             _source.println();
+            _source.print(_indent);
             _source.println(
                 "            _stateStack = New Stack()");
+            _source.print(_indent);
             _source.println(
                 "            index = stackSize - 1");
+            _source.print(_indent);
             _source.println(
                 "            While index >= 0");
+            _source.print(_indent);
             _source.println(
                 "                stateId = _");
+            _source.print(_indent);
             _source.println(
                 "                    info.GetInt32( _");
+            _source.print(_indent);
+            _source.print("                        ");
             _source.println(
-                "                        String.Concat(\"stackItem\", index))");
+                "String.Concat(\"stackItem\", index))");
+            _source.print(_indent);
+            _source.print("                    ");
             _source.println(
-                "                    _stateStack.Push(_States(stateId))");
+                "_stateStack.Push(_States(stateId))");
+            _source.print(_indent);
             _source.println(
                 "                    index -= 1");
+            _source.print(_indent);
             _source.println(
                 "            End While");
+            _source.print(_indent);
             _source.println("        End If");
             _source.println();
+            _source.print(_indent);
             _source.println(
                 "        stateId = info.GetInt32(\"state\")");
+            _source.print(_indent);
             _source.println("        _state = _States(stateId)");
             _source.println();
+            _source.print(_indent);
             _source.println("    End Sub");
             _source.println();
         }
 
         // The context class declaration is complete.
+        _source.print(_indent);
         _source.println("End Class");
         _source.println();
 
         // Declare the root application state class.
+        _source.print(_indent);
         _source.print("Public MustInherit Class ");
         _source.print(context);
         _source.println("State");
+        _source.print(_indent);
         _source.println("    Inherits statemap.State");
         _source.println();
 
@@ -477,38 +595,53 @@ public final class SmcVBGenerator
         // Transitions property.
         if (Smc.isReflection() == true)
         {
+            _source.print(_indent);
             _source.println(
                 "    '------------------------------------------------------------");
+            _source.print(_indent);
             _source.println("    ' Properties");
+            _source.print(_indent);
             _source.println("    '");
             _source.println();
+            _source.print(_indent);
             _source.print("    Public MustOverride ReadOnly ");
             _source.println(
                 "Property Transitions() As IDictionary");
             _source.println();
         }
 
+        _source.print(_indent);
         _source.println(
             "    '------------------------------------------------------------");
+        _source.print(_indent);
         _source.println("    ' Member methods");
+        _source.print(_indent);
         _source.println("    '");
         _source.println();
+        _source.print(_indent);
+        _source.print("    Protected Sub New(");
         _source.println(
-            "    Protected Sub New(ByVal name As String, ByVal id As Integer)");
+            "ByVal name As String, ByVal id As Integer)");
         _source.println();
+        _source.print(_indent);
         _source.println("        MyBase.New(name, id)");
+        _source.print(_indent);
         _source.println("    End Sub");
         _source.println();
-        _source.print(
-            "    Public Overridable Sub Entry(ByRef context As ");
+        _source.print(_indent);
+        _source.print("    Public Overridable Sub Entry(");
+        _source.print("ByRef context As ");
         _source.print(context);
         _source.println("Context)");
+        _source.print(_indent);
         _source.println("    End Sub");
         _source.println();
-        _source.print(
-            "    Public Overridable Sub Exit_(ByRef context As ");
+        _source.print(_indent);
+        _source.print("    Public Overridable Sub Exit_(");
+        _source.print("ByRef context As ");
         _source.print(context);
         _source.println("Context)");
+        _source.print(_indent);
         _source.println("    End Sub");
         _source.println();
 
@@ -520,6 +653,7 @@ public final class SmcVBGenerator
             // Don't generate the Default transition here.
             if (trans.getName().equals("Default") == false)
             {
+                _source.print(_indent);
                 _source.print("    Public Overridable Sub ");
                 _source.print(trans.getName());
                 _source.print("(ByRef context As ");
@@ -537,14 +671,16 @@ public final class SmcVBGenerator
                 _source.println(")");
                 _source.println();
 
-                // If this method is reached, that means that this
-                // transition was passed to a state which does not
-                // define the transition. Call the state's default
-                // transition method.
+                // If this method is reached, that means that
+                // this transition was passed to a state which
+                // does not define the transition. Call the
+                // state's default transition method.
                 // Note: "Default" is a VB keyword, so use
                 // "Default_" instead.
+                _source.print(_indent);
                 _source.println("        Default_(context)");
 
+                _source.print(_indent);
                 _source.println("    End Sub");
                 _source.println();
             }
@@ -553,41 +689,55 @@ public final class SmcVBGenerator
         // Generate the overall Default transition for all maps.
         // Note: "Default" is a VB keyword, so use "Default_"
         // instead.
-        _source.print(
-            "    Public Overridable Sub Default_(ByRef context As ");
+        _source.print(_indent);
+        _source.print("    Public Overridable Sub Default_(");
+        _source.print("ByRef context As ");
         _source.print(context);
         _source.println("Context)");
         _source.println();
 
         if (Smc.isDebug() == true)
         {
-            _source.println(
-                "        If context.DebugFlag = True _");
-            _source.println("        Then");
-            _source.println(
-                "           context.DebugStream.WriteLine( _");
-            _source.println(
-                "               \"TRANSITION   : Default\")");
-            _source.println("        End If");
+            _source.println("#If TRACE Then");
+            _source.print(_indent);
+            _source.print("        Trace.WriteLine(");
+            _source.println("\"TRANSITION   : Default\")");
+            _source.println("#End If");
             _source.println();
         }
 
+        _source.print(_indent);
+        _source.print("        Throw ");
         _source.println(
-            "        Throw New statemap.TransitionUndefinedException( _");
+            "New statemap.TransitionUndefinedException( _");
+        _source.print(_indent);
         _source.println(
             "            String.Concat(\"State: \", _");
+        _source.print(_indent);
         _source.println("               context.State.Name, _");
+        _source.print(_indent);
         _source.println("               \", Transition: \", _");
+        _source.print(_indent);
         _source.println("               context.Transition))");
+        _source.print(_indent);
         _source.println("    End Sub");
 
         // End of the application class' state class.
+        _source.print(_indent);
         _source.println("End Class");
 
         // Have each map print out its source code now.
         for (it = maps.iterator(); it.hasNext();)
         {
             ((SmcMap) it.next()).accept(this);
+        }
+
+        // If a package has been specified, then generate
+        // the End tag now.
+        if (packageName != null && packageName.length() > 0)
+        {
+            _source.println();
+            _source.println("End Namespace");
         }
 
         return;
@@ -619,12 +769,16 @@ public final class SmcVBGenerator
         // Declare the map class. Declare it as abstract to
         // prevent its instantiation.
         _source.println();
+        _source.print(_indent);
         _source.print("Public MustInherit Class ");
         _source.println(mapName);
         _source.println();
+        _source.print(_indent);
         _source.println(
             "    '------------------------------------------------------------");
+        _source.print(_indent);
         _source.println("    ' Shared data");
+        _source.print(_indent);
         _source.println("    '");
         _source.println();
 
@@ -634,6 +788,7 @@ public final class SmcVBGenerator
             state = (SmcState) it.next();
             stateName = state.getClassName();
 
+            _source.print(_indent);
             _source.print("    Public Shared ");
             _source.print(state.getInstanceName());
             _source.print(" As ");
@@ -641,6 +796,7 @@ public final class SmcVBGenerator
             _source.print('_');
             _source.print(stateName);
             _source.println(" = _");
+            _source.print(_indent);
             _source.print("        New ");
             _source.print(mapName);
             _source.print('_');
@@ -655,9 +811,11 @@ public final class SmcVBGenerator
         }
 
         // Create a default state as well.
+        _source.print(_indent);
         _source.print("    Private Shared Default_ As ");
         _source.print(mapName);
         _source.println("_Default = _");
+        _source.print(_indent);
         _source.print("        New ");
         _source.print(mapName);
         _source.print("_Default(\"");
@@ -666,13 +824,16 @@ public final class SmcVBGenerator
         _source.println();
 
         // End of the map class.
+        _source.print(_indent);
         _source.println("End Class");
         _source.println();
 
         // Declare the map default state class.
+        _source.print(_indent);
         _source.print("Public Class ");
         _source.print(mapName);
         _source.println("_Default");
+        _source.print(_indent);
         _source.print("    Inherits ");
         _source.print(context);
         _source.println("State");
@@ -681,33 +842,48 @@ public final class SmcVBGenerator
         // If reflection is on, generate the Transition property.
         if (Smc.isReflection() == true)
         {
+            _source.print(_indent);
             _source.println(
                 "    '------------------------------------------------------------");
+            _source.print(_indent);
             _source.println("    ' Properties");
+            _source.print(_indent);
             _source.println("    '");
             _source.println();
+            _source.print(_indent);
             _source.print("    Public Overrides ReadOnly ");
             _source.println(
                 "Property Transitions() As IDictionary");
+            _source.print(_indent);
             _source.println("        Get");
             _source.println();
+            _source.print(_indent);
             _source.println("            Return _transitions");
+            _source.print(_indent);
             _source.println("        End Get");
+            _source.print(_indent);
             _source.println("    End Property");
             _source.println();
         }
 
+        _source.print(_indent);
         _source.println(
             "    '------------------------------------------------------------");
+        _source.print(_indent);
         _source.println("    ' Member methods");
+        _source.print(_indent);
         _source.println("    '");
         _source.println();
 
         // Generate the constructor.
+        _source.print(_indent);
+        _source.print("    Public Sub New(");
         _source.println(
-            "    Public Sub New(ByVal name As String, ByVal id As Integer)");
+            "ByVal name As String, ByVal id As Integer)");
         _source.println();
+        _source.print(_indent);
         _source.println("        MyBase.New(name, id)");
+        _source.print(_indent);
         _source.println("    End Sub");
         _source.println();
 
@@ -728,17 +904,23 @@ public final class SmcVBGenerator
             int transDefinition;
 
             _source.println();
+            _source.print(_indent);
             _source.println(
                 "    '------------------------------------------------------------");
+            _source.print(_indent);
             _source.println("    ' Shared data");
+            _source.print(_indent);
             _source.println("    '");
             _source.println();
+            _source.print(_indent);
             _source.print("    ");
             _source.println(
                 "Private Shared _transitions As IDictionary");
             _source.println();
+            _source.print(_indent);
             _source.println("    Shared Sub New()");
             _source.println();
+            _source.print(_indent);
             _source.print("        ");
             _source.println("_transitions = New Hashtable()");
 
@@ -763,6 +945,7 @@ public final class SmcVBGenerator
                     transDefinition = 0;
                 }
 
+                _source.print(_indent);
                 _source.print("        ");
                 _source.print("_transitions.Add(\"");
                 _source.print(transName);
@@ -771,9 +954,11 @@ public final class SmcVBGenerator
                 _source.println(")");
             }
             _source.println();
+            _source.print(_indent);
             _source.println("    End Sub");
         }
 
+        _source.print(_indent);
         _source.println("End Class");
 
         // Have each state now generate its code. Each state
@@ -796,10 +981,12 @@ public final class SmcVBGenerator
 
         // Declare the state class.
         _source.println();
+        _source.print(_indent);
         _source.print("Public NotInheritable Class ");
         _source.print(mapName);
         _source.print('_');
         _source.println(state.getClassName());
+        _source.print(_indent);
         _source.print("    Inherits ");
         _source.print(mapName);
         _source.println("_Default");
@@ -808,33 +995,48 @@ public final class SmcVBGenerator
         // Generate the Transitions property if reflection is on.
         if (Smc.isReflection() == true)
         {
+            _source.print(_indent);
             _source.println(
                 "    '------------------------------------------------------------");
+            _source.print(_indent);
             _source.println("    ' Properties");
+            _source.print(_indent);
             _source.println("    '");
             _source.println();
+            _source.print(_indent);
             _source.print("    Public Overrides ReadOnly ");
             _source.println(
                 "Property Transitions() As IDictionary");
+            _source.print(_indent);
             _source.println("        Get");
             _source.println();
+            _source.print(_indent);
             _source.println("            Return _transitions");
+            _source.print(_indent);
             _source.println("        End Get");
+            _source.print(_indent);
             _source.println("    End Property");
             _source.println();
         }
 
+        _source.print(_indent);
         _source.println(
             "    '------------------------------------------------------------");
+        _source.print(_indent);
         _source.println("    ' Member methods");
+        _source.print(_indent);
         _source.println("    '");
         _source.println();
 
         // Add the constructor.
+        _source.print(_indent);
+        _source.print("    Public Sub New(");
         _source.println(
-            "    Public Sub New(ByVal name As String, ByVal id As Integer)");
+            "ByVal name As String, ByVal id As Integer)");
         _source.println();
+        _source.print(_indent);
         _source.println("        MyBase.New(name, id)");
+        _source.print(_indent);
         _source.println("    End Sub");
 
         // Add the Entry() and Exit() member functions if this
@@ -843,13 +1045,15 @@ public final class SmcVBGenerator
         if (actions != null && actions.size() > 0)
         {
             _source.println();
-            _source.print(
-                "    Public Overrides Sub Entry(ByRef context As ");
+            _source.print(_indent);
+            _source.print("    Public Overrides Sub Entry(");
+            _source.print("ByRef context As ");
             _source.print(context);
             _source.println("Context)");
             _source.println();
 
             // Declare the "ctxt" local variable.
+            _source.print(_indent);
             _source.print("       Dim ctxt As ");
             _source.print(context);
             _source.println(" = context.Owner");
@@ -861,6 +1065,7 @@ public final class SmcVBGenerator
                 ((SmcAction) it.next()).accept(this);
             }
 
+            _source.print(_indent);
             _source.println("    End Sub");
         }
 
@@ -868,13 +1073,15 @@ public final class SmcVBGenerator
         if (actions != null && actions.size() > 0)
         {
             _source.println();
-            _source.print(
-                "    Public Overrides Sub Exit(ByRef context As ");
+            _source.print(_indent);
+            _source.print("    Public Overrides Sub Exit(");
+            _source.print("ByRef context As ");
             _source.print(context);
             _source.println("Context)");
             _source.println();
 
             // Declare the "ctxt" local variable.
+            _source.print(_indent);
             _source.print("        Dim ctxt As ");
             _source.print(context);
             _source.println(" = context.Owner");
@@ -886,6 +1093,7 @@ public final class SmcVBGenerator
                 ((SmcAction) it.next()).accept(this);
             }
 
+            _source.print(_indent);
             _source.println("    End Sub");
         }
 
@@ -922,17 +1130,23 @@ public final class SmcVBGenerator
             }
 
             _source.println();
+            _source.print(_indent);
             _source.println(
                 "    '------------------------------------------------------------");
+            _source.print(_indent);
             _source.println("    ' Shared data");
+            _source.print(_indent);
             _source.println("    '");
             _source.println();
+            _source.print(_indent);
             _source.print("    ");
             _source.println(
                 "Private Shared _transitions As IDictionary");
             _source.println();
+            _source.print(_indent);
             _source.println("    Shared Sub New()");
             _source.println();
+            _source.print(_indent);
             _source.print("        ");
             _source.println("_transitions = New Hashtable()");
 
@@ -964,6 +1178,7 @@ public final class SmcVBGenerator
                     transDefinition = 0;
                 }
 
+                _source.print(_indent);
                 _source.print("        ");
                 _source.print("_transitions.Add(\"");
                 _source.print(transName);
@@ -973,9 +1188,11 @@ public final class SmcVBGenerator
             }
 
             _source.println();
+            _source.print(_indent);
             _source.println("    End Sub");
         }
 
+        _source.print(_indent);
         _source.println("End Class");
 
         return;
@@ -997,6 +1214,7 @@ public final class SmcVBGenerator
         SmcParameter param;
 
         _source.println();
+        _source.print(_indent);
         _source.print("    Public Overrides Sub ");
 
         // If this is the Default transition, then change its
@@ -1026,6 +1244,7 @@ public final class SmcVBGenerator
         // Generate the ctxt local variable if needed.
         if (transition.hasCtxtReference() == true)
         {
+            _source.print(_indent);
             _source.print("        Dim ctxt As ");
             _source.print(context);
             _source.println(" = context.Owner");
@@ -1037,6 +1256,7 @@ public final class SmcVBGenerator
         if (stateName.equals("Default") == true &&
             transition.hasNonNilEndState() == true)
         {
+            _source.print(_indent);
             _source.println(
                 "        Dim loopbackFlag As Boolean = False");
             _source.println();
@@ -1047,13 +1267,11 @@ public final class SmcVBGenerator
         {
             String sep;
 
-            _source.println(
-                "        If context.DebugFlag = True _");
-            _source.println("        Then");
-            _source.println(
-                "            context.DebugStream.WriteLine( _");
-            _source.print(
-                "                \"TRANSITION   : ");
+            _source.println("#If TRACE Then");
+            _source.print(_indent);
+            _source.println("        Trace.WriteLine( _");
+            _source.print(_indent);
+            _source.print("            \"TRANSITION   : ");
             _source.print(mapName);
             _source.print(".");
             _source.print(stateName);
@@ -1071,7 +1289,7 @@ public final class SmcVBGenerator
             _source.print(")");
 
             _source.println("\")");
-            _source.println("        End If");
+            _source.println("#End If");
             _source.println();
         }
 
@@ -1100,7 +1318,9 @@ public final class SmcVBGenerator
         if (_guardIndex > 0 && nullCondition == false)
         {
             _source.println();
+            _source.print(_indent);
             _source.println("        Else");
+            _source.print(_indent);
             _source.print("            MyBase.");
             _source.print(transName);
             _source.print("(context");
@@ -1115,15 +1335,18 @@ public final class SmcVBGenerator
             }
 
             _source.println(")");
+            _source.print(_indent);
             _source.println("        End If");
         }
         // Need to add a final newline after a multiguard block.
         else if (_guardCount > 1)
         {
+            _source.print(_indent);
             _source.println("        End If");
             _source.println();
         }
 
+        _source.print(_indent);
         _source.println("    End Sub");
 
         return;
@@ -1141,6 +1364,7 @@ public final class SmcVBGenerator
         boolean defaultFlag =
             stateName.equalsIgnoreCase("Default");
         boolean loopbackFlag = false;
+        String indent1;
         String indent2;
         String indent3;
         String indent4;
@@ -1174,16 +1398,19 @@ public final class SmcVBGenerator
         // proper "if-then-else" code.
         if (_guardCount > 1)
         {
-            _indent = "            ";
+            indent1 = _indent + "            ";
 
-            // There are multiple guards. Is this the first guard?
+            // There are multiple guards.
+            // Is this the first guard?
             if (_guardIndex == 0 && condition.length() > 0)
             {
                 // Yes, this is the first. This means an "if"
                 // should be used.
+                _source.print(_indent);
                 _source.print("        If ");
                 _source.print(condition);
                 _source.println(" _");
+                _source.print(_indent);
                 _source.println("        Then");
             }
             else if (condition.length() > 0)
@@ -1191,9 +1418,11 @@ public final class SmcVBGenerator
                 // No, this is not the first transition but it
                 // does have a condition. Use an "else if".
                 _source.println();
+                _source.print(_indent);
                 _source.print("        ElseIf ");
                 _source.print(condition);
                 _source.println(" _");
+                _source.print(_indent);
                 _source.println("        Then");
             }
             else
@@ -1201,6 +1430,7 @@ public final class SmcVBGenerator
                 // This is not the first transition and it has
                 // no condition.
                 _source.println();
+                _source.print(_indent);
                 _source.println("        Else");
             }
         }
@@ -1211,15 +1441,17 @@ public final class SmcVBGenerator
             if (condition.length() == 0)
             {
                 // No. This is a plain, old. vanilla transition.
-                _indent = "        ";
+                indent1 = _indent + "        ";
             }
             else
             {
                 // Yes there is a condition.
-                _indent = "            ";
+                indent1 = _indent + "            ";
+                _source.print(_indent);
                 _source.print("        If ");
                 _source.print(condition);
                 _source.println(" _");
+                _source.print(_indent);
                 _source.println("        Then");
             }
         }
@@ -1262,37 +1494,38 @@ public final class SmcVBGenerator
             transType != Smc.TRANS_POP &&
             loopbackFlag == false)
         {
-            _source.print(_indent);
+            _source.print(indent1);
             _source.print("If context.State.Name = ");
             _source.print(fqEndStateName);
             _source.println(".Name _");
-            _source.print(_indent);
+            _source.print(indent1);
             _source.println("Then");
-            _source.print(_indent);
+            _source.print(indent1);
             _source.println("    loopbackFlag = True");
-            _source.print(_indent);
+            _source.print(indent1);
             _source.println("End If");
             _source.println();
         }
 
-        // Dump out the exit actions - but only for the first guard.
+        // Dump out the exit actions - but only for the first
+        // guard.
         // v. 1.0, beta 3: Not any more. The exit actions are
         // executed only if 1) this is a standard, non-loopback
         // transition or a pop transition.
         if (transType == Smc.TRANS_POP || loopbackFlag == false)
         {
-            indent3 = _indent;
+            indent3 = indent1;
 
             // If this is a non-loopback, generic transition,
             // do runtime loopback checking.
             if (transType == Smc.TRANS_SET &&
                 defaultFlag == true)
             {
-                indent3 = _indent + "    ";
+                indent3 = indent1 + "    ";
 
-                _source.print(_indent);
+                _source.print(indent1);
                 _source.println("If loopbackFlag = False _");
-                _source.print(_indent);
+                _source.print(indent1);
                 _source.println("Then");
             }
 
@@ -1302,7 +1535,7 @@ public final class SmcVBGenerator
             if (transType == Smc.TRANS_SET &&
                 defaultFlag == true)
             {
-                _source.print(_indent);
+                _source.print(indent1);
                 _source.println("End If");
                 _source.println();
             }
@@ -1313,19 +1546,20 @@ public final class SmcVBGenerator
         {
             if (condition.length() > 0)
             {
-                _source.print(_indent);
+                _source.print(indent1);
                 _source.println("' No actions.");
             }
 
-            indent2 = _indent;
+            indent2 = indent1;
         }
         else
         {
             Iterator it;
+            String tempIndent;
 
             // Now that we are in the transition, clear the
             // current state.
-            _source.print(_indent);
+            _source.print(indent1);
             _source.println("context.clearState()");
 
             // v. 2.0.0: Place the actions inside a try/finally
@@ -1335,26 +1569,29 @@ public final class SmcVBGenerator
             // feature first.
             if (Smc.isNoCatch() == false)
             {
-                _source.print(_indent);
+                _source.print(indent1);
                 _source.println("Try");
 
-                indent2 = _indent + "    ";
+                indent2 = indent1 + "    ";
             }
             else
             {
-                indent2 = _indent;
+                indent2 = indent1;
             }
 
+            tempIndent = _indent;
+            _indent = indent2;
             for (it = actions.iterator(); it.hasNext() == true;)
             {
                 ((SmcAction) it.next()).accept(this);
             }
+            _indent = tempIndent;
 
             // v. 2.2.0: Check if the user has turned off this
             // feature first.
             if (Smc.isNoCatch() == false)
             {
-                _source.print(_indent);
+                _source.print(indent1);
                 _source.println("Finally");
             }
         }
@@ -1416,7 +1653,7 @@ public final class SmcVBGenerator
         }
         else if (transType == Smc.TRANS_POP)
         {
-            _source.print(_indent);
+            _source.print(indent1);
             _source.println("context.popState()");
         }
 
@@ -1462,7 +1699,7 @@ public final class SmcVBGenerator
         // feature first.
         if (actions.size() > 0 && Smc.isNoCatch() == false)
         {
-            _source.print(_indent);
+            _source.print(indent1);
             _source.println("End Try");
         }
 
@@ -1475,7 +1712,7 @@ public final class SmcVBGenerator
             String popArgs = guard.getPopArgs();
 
             _source.println();
-            _source.print(_indent);
+            _source.print(indent1);
             _source.print("context.");
             _source.print(endStateName);
             _source.print("(");
@@ -1558,6 +1795,9 @@ public final class SmcVBGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2006/09/16 15:04:29  cwrapp
+// Initial v. 4.3.3 check-in.
+//
 // Revision 1.5  2006/07/11 18:18:37  cwrapp
 // Corrected owner property.
 //

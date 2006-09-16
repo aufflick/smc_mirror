@@ -60,7 +60,6 @@ install : 	$(LIB_STAGING_DIR)
 		$(MAKE) -C Python install
 		$(MAKE) -C Ruby install
 		$(MAKE) -C Tcl install
-		$(MAKE) -C VB install
 
 uninstall :
 		$(MAKE) -C C uninstall
@@ -71,7 +70,6 @@ uninstall :
 		$(MAKE) -C Python uninstall
 		$(MAKE) -C Ruby uninstall
 		$(MAKE) -C Tcl uninstall
-		$(MAKE) -C VB uninstall
 
 clean :
 		$(MAKE) -C C clean
@@ -82,7 +80,6 @@ clean :
 		$(MAKE) -C Python clean
 		$(MAKE) -C Ruby clean
 		$(MAKE) -C Tcl clean
-		$(MAKE) -C VB clean
 
 realclean :
 		$(MAKE) -C C realclean
@@ -93,11 +90,13 @@ realclean :
 		$(MAKE) -C Python realclean
 		$(MAKE) -C Ruby realclean
 		$(MAKE) -C Tcl realclean
-		$(MAKE) -C VB realclean
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.8  2006/09/16 15:04:28  cwrapp
+# Initial v. 4.3.3 check-in.
+#
 # Revision 1.7  2005/08/26 15:21:33  cwrapp
 # Final commit for release 4.2.0. See README.txt for more information.
 #

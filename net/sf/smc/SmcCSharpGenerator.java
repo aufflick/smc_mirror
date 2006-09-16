@@ -1,11 +1,11 @@
 //
 // The contents of this file are subject to the Mozilla Public
 // License Version 1.1 (the "License"); you may not use this file
-// except in compliance with the License. You may obtain a copy of
-// the License at http://www.mozilla.org/MPL/
+// except in compliance with the License. You may obtain a copy
+// of the License at http://www.mozilla.org/MPL/
 // 
-// Software distributed under the License is distributed on an "AS
-// IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+// Software distributed under the License is distributed on an
+// "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
@@ -145,6 +145,7 @@ public final class SmcCSharpGenerator
         // Does the user want to serialize this FSM?
         if (Smc.isSerial() == true)
         {
+            _source.print(_indent);
             _source.println("[Serializable]");
         }
 
@@ -354,29 +355,6 @@ public final class SmcCSharpGenerator
         _source.print(_indent);
         _source.println("    {");
         _source.println("        _owner = owner;");
-
-        // If debugging code is being generated, then direct
-        // the debug trace to the console.
-        if (Smc.isDebug() == true)
-        {
-            _source.println();
-            _source.print(_indent);
-            _source.println(
-                "        // Register the console as a trace listener");
-            _source.print(_indent);
-            _source.println(
-                "        TextWriterTraceListener myWriter =");
-            _source.print(_indent);
-            _source.print(
-                "            new TextWriterTraceListener(");
-            _source.println("System.Console.Out);");
-            _source.println();
-            _source.print(_indent);
-            _source.println(
-                "        Trace.Listeners.Add(myWriter);");
-            _source.println();
-            _source.print(_indent);
-        }
 
         // The state name "map::state" must be changed to
         // "map.state".
@@ -845,22 +823,14 @@ public final class SmcCSharpGenerator
         // message.
         if (Smc.isDebug() == true)
         {
+            _source.println("#if TRACE");
             _source.print(_indent);
-            _source.println(
-                "            if (context._debugFlag == true)");
-            _source.print(_indent);
-            _source.println("            {");
-            _source.print(_indent);
-            _source.println(
-                "                Trace.WriteLine(");
+            _source.println("            Trace.WriteLine(");
             _source.print(_indent);
             _source.print(
-                "                    \"TRANSITION : Default\"");
+                "                \"TRANSITION : Default\"");
             _source.println(");");
-            _source.println();
-            _source.print(_indent);
-            _source.println("            }");
-            _source.println();
+            _source.println("#endif");
         }
 
         // The default transition action is to throw a
@@ -868,8 +838,9 @@ public final class SmcCSharpGenerator
         _source.print(_indent);
         _source.println("            throw (");
         _source.print(_indent);
+        _source.print("                ");
         _source.println(
-            "                new statemap.TransitionUndefinedException(");
+            "new statemap.TransitionUndefinedException(");
         _source.print(_indent);
         _source.println(
             "                    \"State: \" +");
@@ -1270,8 +1241,9 @@ public final class SmcCSharpGenerator
         {
             _source.println();
             _source.print(_indent);
+            _source.print("            ");
             _source.print(
-                "            protected internal override void Entry(");
+                "protected internal override void Entry(");
             _source.print(context);
             _source.println("Context context)");
             _source.print(_indent);
@@ -1305,8 +1277,9 @@ public final class SmcCSharpGenerator
         {
             _source.println();
             _source.print(_indent);
+            _source.print("            ");
             _source.print(
-                "            protected internal override void Exit(");
+                "protected internal override void Exit(");
             _source.print(context);
             _source.println("Context context)");
             _source.print(_indent);
@@ -1499,17 +1472,12 @@ public final class SmcCSharpGenerator
             String sep;
 
             _source.println();
+            _source.println("#if TRACE");
             _source.print(_indent);
-            _source.println(
-                "    if (context._debugFlag == true)");
-            _source.print(_indent);
-            _source.println("    {");
-            _source.print(_indent);
-            _source.println(
-                "        Trace.WriteLine(");
+            _source.println("    Trace.WriteLine(");
             _source.print(_indent);
             _source.print(
-                "            \"TRANSITION   : ");
+                "        \"TRANSITION   : ");
             _source.print(mapName);
             _source.print(".");
             _source.print(stateName);
@@ -1527,10 +1495,7 @@ public final class SmcCSharpGenerator
             }
             _source.print(")");
             _source.println("\");");
-
-            // End of debug output.
-            _source.print(_indent);
-            _source.println("    }");
+            _source.println("#endif");
             _source.println();
         }
 
@@ -1656,7 +1621,8 @@ public final class SmcCSharpGenerator
         {
             indent2 = _indent + "        ";
 
-            // There are multiple guards. Is this the first guard?
+            // There are multiple guards.
+            // Is this the first guard?
             if (_guardIndex == 0 && condition.length() > 0)
             {
                 // Yes, this is the first. This means an "if"
@@ -1771,7 +1737,8 @@ public final class SmcCSharpGenerator
 
             // If this is a non-loopback, generic transition,
             // do runtime loopback checking.
-            if (transType == Smc.TRANS_SET && defaultFlag == true)
+            if (transType == Smc.TRANS_SET &&
+                defaultFlag == true)
             {
                 indent4 = indent2 + "    ";
 
@@ -2070,6 +2037,9 @@ public final class SmcCSharpGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2006/09/16 15:04:28  cwrapp
+// Initial v. 4.3.3 check-in.
+//
 // Revision 1.7  2006/06/03 19:39:25  cwrapp
 // Final v. 4.3.1 check in.
 //

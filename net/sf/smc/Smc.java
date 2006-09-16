@@ -4,8 +4,8 @@
 // except in compliance with the License. You may obtain a copy
 // of the License at http://www.mozilla.org/MPL/
 // 
-// Software distributed under the License is distributed on an "AS
-// IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+// Software distributed under the License is distributed on an
+// "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
@@ -77,7 +77,7 @@ public final class Smc
         _nocatch = false;
         _serial = false;
         _castType = "dynamic_cast";
-        _graphLevel = NO_GRAPH_LEVEL;
+        _graphLevel = GRAPH_LEVEL_0;
         _sourceFileList = (List) new ArrayList();
         _verbose = false;
         _fsmVerbose = false;
@@ -514,7 +514,7 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        LANGUAGES[_targetLanguage] +
+                        _languages[_targetLanguage].name() +
                         " does not support " +
                         SYNC_FLAG +
                         ".";
@@ -539,7 +539,7 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        LANGUAGES[_targetLanguage] +
+                        _languages[_targetLanguage].name() +
                         " does not support " +
                         SUFFIX_FLAG +
                         ".";
@@ -565,7 +565,7 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        LANGUAGES[_targetLanguage] +
+                        _languages[_targetLanguage].name() +
                         " does not support " +
                         CAST_FLAG +
                         ".";
@@ -600,7 +600,7 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        LANGUAGES[_targetLanguage] +
+                        _languages[_targetLanguage].name() +
                         " does not support " +
                         DIRECTORY_FLAG +
                         ".";
@@ -638,7 +638,7 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        LANGUAGES[_targetLanguage] +
+                        _languages[_targetLanguage].name() +
                         " does not support " +
                         HEADER_FLAG +
                         ".";
@@ -676,7 +676,7 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        LANGUAGES[_targetLanguage] +
+                        _languages[_targetLanguage].name() +
                         " does not support " +
                         GLEVEL_FLAG +
                         ".";
@@ -717,7 +717,7 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        LANGUAGES[_targetLanguage] +
+                        _languages[_targetLanguage].name() +
                         " does not support " +
                         DEBUG_FLAG +
                         ".";
@@ -734,7 +734,7 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        LANGUAGES[_targetLanguage] +
+                        _languages[_targetLanguage].name() +
                         " does not support " +
                         NO_STREAMS_FLAG +
                         ".";
@@ -751,7 +751,7 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        LANGUAGES[_targetLanguage] +
+                        _languages[_targetLanguage].name() +
                         " does not support " +
                         NO_EXCEPTIONS_FLAG +
                         ".";
@@ -768,7 +768,7 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        LANGUAGES[_targetLanguage] +
+                        _languages[_targetLanguage].name() +
                         " does not support " +
                         NO_CATCH_FLAG +
                         ".";
@@ -785,7 +785,7 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        LANGUAGES[_targetLanguage] +
+                        _languages[_targetLanguage].name() +
                         " does not support " +
                         RETURN_FLAG +
                         ".";
@@ -802,7 +802,7 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        LANGUAGES[_targetLanguage] +
+                        _languages[_targetLanguage].name() +
                         " does not support " +
                         REFLECT_FLAG +
                         ".";
@@ -819,7 +819,7 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        LANGUAGES[_targetLanguage] +
+                        _languages[_targetLanguage].name() +
                         " does not support " +
                         SERIAL_FLAG +
                         ".";
@@ -832,17 +832,7 @@ public final class Smc
             }
             // Ignore the target language flags - they have
             // been processed.
-            else if (args[i].startsWith("-c+") == true ||
-                     args[i].startsWith("-j") == true  ||
-                     args[i].startsWith("-tc") == true ||
-                     args[i].startsWith("-ta") == true ||
-                     args[i].equals("-vb") == true     ||
-                     args[i].startsWith("-cs") == true ||
-                     args[i].startsWith("-py") == true ||
-                     args[i].startsWith("-pe") == true ||
-                     args[i].startsWith("-ru") == true ||
-                     args[i].equals("-c") == true      ||
-                     args[i].startsWith("-gr") == true)
+            else if (_findLanguage(args[i]) != null)
             {
                 argsConsumed = 1;
             }
@@ -959,15 +949,17 @@ public final class Smc
     private static int _findTargetLanguage(String[] args)
     {
         int i;
+        Language lang;
         int retval = LANG_NOT_SET;
 
         for (i = 0; i < args.length; ++i)
         {
-            if (args[i].startsWith("-c+") == true)
+            // Is this argument a language name?
+            if ((lang = _findLanguage(args[i])) != null)
             {
-                // Only one target language can be specified.
+                // Only one target langugage can be specified.
                 if (_targetLanguage != LANG_NOT_SET &&
-                    _targetLanguage != C_PLUS_PLUS)
+                    _targetLanguage != lang.index())
                 {
                     throw (
                         new IllegalArgumentException(
@@ -976,180 +968,30 @@ public final class Smc
                 }
                 else
                 {
-                    retval = C_PLUS_PLUS;
-                    _suffix = "cpp";
+                    retval = lang.index();
+                    _suffix = lang.suffix();
                 }
             }
-            else if (args[i].startsWith("-j") == true)
+        }
+
+        return (retval);
+    }
+
+    // Returns the langugage record associated with the given
+    // command line option.
+    private static Language _findLanguage(String option)
+    {
+        int index;
+        Language retval = null;
+
+        for (index = 1;
+             index < _languages.length && retval == null;
+             ++index)
+        {
+            if (option.startsWith(
+                    _languages[index].optionFlag()) == true)
             {
-                // Only one target language can be specified.
-                if (_targetLanguage != LANG_NOT_SET &&
-                    _targetLanguage != JAVA)
-                {
-                    throw (
-                        new IllegalArgumentException(
-                            "Only one target language " +
-                            "may be specified"));
-                }
-                else
-                {
-                    retval = JAVA;
-                    _suffix = "java";
-                }
-            }
-            else if (args[i].startsWith("-tc") == true)
-            {
-                // Only one target language can be specified.
-                if (_targetLanguage != LANG_NOT_SET &&
-                    _targetLanguage != TCL)
-                {
-                    throw (
-                        new IllegalArgumentException(
-                            "Only one target language " +
-                            "may be specified"));
-                }
-                else
-                {
-                    retval = TCL;
-                    _suffix = "tcl";
-                }
-            }
-            else if (args[i].startsWith("-ta") == true)
-            {
-                // Only one target language can be specified.
-                if (_targetLanguage != LANG_NOT_SET &&
-                    _targetLanguage != TABLE)
-                {
-                    throw (
-                        new IllegalArgumentException(
-                            "Only one target language " +
-                            "may be specified"));
-                }
-                else
-                {
-                    _targetLanguage = TABLE;
-                    _suffix = "html";
-                }
-            }
-            else if (args[i].equals("-vb") == true)
-            {
-                // Only one target language may be specified.
-                if (_targetLanguage != LANG_NOT_SET &&
-                    _targetLanguage != VB)
-                {
-                    throw (
-                        new IllegalArgumentException(
-                            "Only one target language " +
-                            "may be specified"));
-                }
-                else
-                {
-                    retval = VB;
-                    _suffix = "vb";
-                }
-            }
-            else if (args[i].startsWith("-cs") == true)
-            {
-                // Only one target language may be specified.
-                if (_targetLanguage != LANG_NOT_SET &&
-                    _targetLanguage != C_SHARP)
-                {
-                    throw (
-                        new IllegalArgumentException(
-                            "Only one target language " +
-                            "may be specified"));
-                }
-                else
-                {
-                    retval = C_SHARP;
-                    _suffix = "cs";
-                }
-            }
-            else if (args[i].startsWith("-py") == true)
-            {
-                // Only one target language may be specified.
-                if (_targetLanguage != LANG_NOT_SET &&
-                    _targetLanguage != PYTHON)
-                {
-                    throw (
-                        new IllegalArgumentException(
-                            "Only one target language " +
-                            "may be specified"));
-                }
-                else
-                {
-                    retval = PYTHON;
-                    _suffix = "py";
-                }
-            }
-            else if (args[i].startsWith("-pe") == true)
-            {
-                // Only one target language may be specified.
-                if (_targetLanguage != LANG_NOT_SET &&
-                    _targetLanguage != PERL)
-                {
-                    throw (
-                        new IllegalArgumentException(
-                            "Only one target language " +
-                            "may be specified"));
-                }
-                else
-                {
-                    retval = PERL;
-                    _suffix = "pm";
-                }
-            }
-            else if (args[i].startsWith("-ru") == true)
-            {
-                // Only one target language may be specified.
-                if (_targetLanguage != LANG_NOT_SET &&
-                    _targetLanguage != RUBY)
-                {
-                    throw (
-                        new IllegalArgumentException(
-                            "Only one target language " +
-                            "may be specified"));
-                }
-                else
-                {
-                    retval = RUBY;
-                    _suffix = "rb";
-                }
-            }
-            else if (args[i].equals("-c") == true)
-            {
-                // Only one target language can be specified.
-                if (_targetLanguage != LANG_NOT_SET &&
-                    _targetLanguage != C)
-                {
-                    throw (
-                        new IllegalArgumentException(
-                            "Only one target language " +
-                            "may be specified"));
-                }
-                else
-                {
-                    retval = C;
-                    _suffix = "c";
-                }
-            }
-            else if (args[i].startsWith("-gr") == true)
-            {
-                // Only one target language may be specified.
-                if (_targetLanguage != LANG_NOT_SET &&
-                    _targetLanguage != GRAPH)
-                {
-                    throw (
-                        new IllegalArgumentException(
-                            "Only one target language " +
-                            "may be specified"));
-                }
-                else
-                {
-                    retval = GRAPH;
-                    _suffix = "dot";
-                    _graphLevel = GRAPH_LEVEL_0;
-                }
+                retval = _languages[index];
             }
         }
 
@@ -1618,6 +1460,66 @@ public final class Smc
     }
 
 //---------------------------------------------------------------
+// Inner classes
+//
+
+    private static final class Language
+    {
+    //-----------------------------------------------------------
+    // Member methods.
+    //
+
+        // Constructor.
+        public Language(int index,
+                        String optionFlag,
+                        String name,
+                        String suffix)
+        {
+            _index = index;
+            _optionFlag = optionFlag;
+            _name = name;
+            _suffix = suffix;
+        }
+
+        //-------------------------------------------------------
+        // Get methods.
+        //
+
+        int index()
+        {
+            return (_index);
+        }
+
+        String optionFlag()
+        {
+            return (_optionFlag);
+        }
+
+        String name()
+        {
+            return (_name);
+        }
+
+        String suffix()
+        {
+            return (_suffix);
+        }
+
+        //
+        // end of Get methods.
+        //-------------------------------------------------------
+
+    //-----------------------------------------------------------
+    // Member data.
+    //
+
+        private final int _index;
+        private final String _optionFlag;
+        private final String _name;
+        private final String _suffix;
+    }
+
+//---------------------------------------------------------------
 // Member Data
 //
 
@@ -1685,6 +1587,9 @@ public final class Smc
     // The app's version ID.
     private static String _version;
 
+    // The list of all supported languages.
+    private static Language[] _languages;
+
     // Map each command line option flag to the target languages
     // supporting the flag.
     // private static Map<String, List<int>> _optionMap;
@@ -1708,23 +1613,6 @@ public final class Smc
     /* package */ static final int PERL = 9;
     /* package */ static final int RUBY = 10;
     /* package */ static final int C = 11;
-
-    // Programming language names.
-    private static final String[] LANGUAGES =
-    {
-        "(not set)",
-        "C++",
-        "Java",
-        "[incr Tcl]",
-        "VB.net",
-        "C#",
-        "Python",
-        "-table",
-        "-graph",
-        "Perl",
-        "Ruby",
-        "C"
-    };
 
     // GraphViz detail level.
     /* package */ static final int NO_GRAPH_LEVEL = -1;
@@ -1762,6 +1650,33 @@ public final class Smc
 
     static
     {
+        // Find in the static languages array.
+        _languages = new Language[12];
+        _languages[LANG_NOT_SET] =
+            new Language(LANG_NOT_SET, "", "(not set)", "");
+        _languages[C_PLUS_PLUS] =
+            new Language(C_PLUS_PLUS, "-c+", "C++", "cpp");
+        _languages[JAVA] =
+            new Language(JAVA, "-j", "Java", "java");
+        _languages[TCL] =
+            new Language(TCL, "-tc", "[incr Tcl]", "tcl");
+        _languages[VB] =
+            new Language(VB, "-vb", "VB.net", "vb");
+        _languages[C_SHARP] =
+            new Language(C_SHARP, "-cs", "C#", "cs");
+        _languages[PYTHON] =
+            new Language(PYTHON, "-py", "Python", "py");
+        _languages[TABLE] =
+            new Language(TABLE, "-ta", "-table", "html");
+        _languages[GRAPH] =
+            new Language(GRAPH, "-gr", "-graph", "dot");
+        _languages[PERL] =
+            new Language(PERL, "-pe", "Perl", "pm");
+        _languages[RUBY] =
+            new Language(RUBY, "-ru", "Ruby", "rb");
+        _languages[C] =
+            new Language(C, "-c", "C", "c");
+
         // List<Integer> language = new ArrayList<Integer>();
         List languages = new ArrayList();
         int target;
@@ -1846,6 +1761,9 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.16  2006/09/16 15:04:28  cwrapp
+// Initial v. 4.3.3 check-in.
+//
 // Revision 1.15  2006/07/11 18:20:00  cwrapp
 // Added -headerd option. Improved command line processing.
 //

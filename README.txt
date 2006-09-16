@@ -2,7 +2,7 @@
 
                                SMC
                      The State Machine Compiler
-                         (Version: 4.3.2)
+                         (Version: 4.3.3)
 
                      http://smc.sourceforge.net
 
@@ -17,26 +17,57 @@ None.
 
 Minor changes
 
-+ (C, C++) Added "-headerd <path>" which specifies where generated
-  header file is to be placed. This allows for the generated
-  C/C++ source file and header file to be placed into different
-  locations.
++ (C#, VB)
+  The _debugFlag and _debugStream are deprecated and no
+  longer used. Instead, System.Diagnostics.Trace is
+  used. The SMC programmer is responsible for defining
+  the TRACE directive during compilation so the Trace
+  will be included in the executable.
 
-+ (All) SMC no longer reports an error when a % keyword in .sm
-        file is unused for the specified target language.
-  (SF feature 1447155)
+  The SMC programmer is also responsible for configuring
+  Trace to send the trace output to the desired destination.
+
+  There are no longer separate C# and VB DLLs but a single
+  lib/DotNet directory containing four DLLs:
+  + debug with Trace support,
+  + debug without Trace support,
+  + release with Trace support and
+  + release without Trace support.
+
+  The smc/lib/VB source code is no longer in the source
+  code release package but may still be accessed via
+  SourceForge CVS.
+  (SF feature 1440302)
 
 Bug Fixes:
 
-+ (VB) Corrected Owner property set method.
-  (SF bug 1504804)
++ (C)
+  When -g was used, generated code was not strictly ANSI C
+   compliant. This was corrected.
+  (SF bug 1550093)
 
-+ (Python) Corrected indentation for guarded transitions.
-  (SF bug 1504907)
++ (GraphViz)
+  Generated DOT file was incorrect when state names
+  begin with a lower-case letter. This was corrected.
+  (SF bug 1549777)
 
-+ (C++) Corrected error in statemap.h: method incorrectly ifdef'ed
-        out when -noex option used.
-  (SF bug 1517876)
++ (Java)
+  Incorrectly generate setOwner() method twice when -serial
+  flag is specified.
+  (SF bug 1555456)
+
++ (C++)
+  Removed incorrectly placed semicolon following namespace
+  closing brace.
+  (SF bug 1556372)
+
++ (Python)
+  Added missing "pass" statement to empty "else:" block.
+  (SF bug 1558366)
+
++ (VB)
+  Added namespace support. %package is now honored.
+  (SF feature request 1544657)
 
 
 

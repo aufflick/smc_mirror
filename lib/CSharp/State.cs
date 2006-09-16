@@ -28,13 +28,8 @@
 //
 //  Base class for all smc-generated state classes.
 //
-// Change Log
-// $Log$
-// Revision 1.1  2005/05/28 18:44:13  cwrapp
-// Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
-//
-// Revision 1.0  2004/09/06 16:33:12  charlesr
-// Initial revision
+// CHANGE LOG
+// (See the bottom of this file.)
 //
 
 using System;
@@ -44,7 +39,9 @@ namespace statemap
     [Serializable]
     public abstract class State
     {
-    // Member functions
+    //-----------------------------------------------------------
+    // Member functions.
+    //
 
         protected State(String name, int id)
         {
@@ -73,9 +70,24 @@ namespace statemap
             return _name;
         }
 
-    // Member data
+    //-----------------------------------------------------------
+    // Member data.
+    //
 
         private string _name;
         private int _id;
-    }
-}
+    } // end of class State
+} // end of namespace statemap
+
+//
+// CHANGE LOG
+// $Log$
+// Revision 1.2  2006/09/16 15:04:28  cwrapp
+// Initial v. 4.3.3 check-in.
+//
+// Revision 1.1  2005/05/28 18:44:13  cwrapp
+// Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
+//
+// Revision 1.0  2004/09/06 16:33:12  charlesr
+// Initial revision
+//

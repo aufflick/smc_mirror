@@ -1,11 +1,11 @@
 //
 // The contents of this file are subject to the Mozilla Public
 // License Version 1.1 (the "License"); you may not use this file
-// except in compliance with the License. You may obtain a copy of
-// the License at http://www.mozilla.org/MPL/
+// except in compliance with the License. You may obtain a copy
+// of the License at http://www.mozilla.org/MPL/
 // 
-// Software distributed under the License is distributed on an "AS
-// IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+// Software distributed under the License is distributed on an
+// "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
@@ -162,7 +162,7 @@ public final class SmcPythonGenerator
         _source.println(
             "            fsm.getState().getName(), fsm.getTransition())");
         _source.println(
-            "        raise TransitionUndefinedException, msg");
+            "        raise statemap.TransitionUndefinedException, msg");
 
         // Have each map print out its source code now.
         for (it = maps.iterator();  it.hasNext() == true;)
@@ -604,7 +604,8 @@ public final class SmcPythonGenerator
         {
             indent2 = _indent + "    ";
 
-            // There are multiple guards. Is this the first guard?
+            // There are multiple guards. Is this the first
+            // guard?
             if (_guardIndex == 0 && condition.length() > 0)
             {
                 // Yes, this is the first. This means an "if"
@@ -694,7 +695,8 @@ public final class SmcPythonGenerator
             _source.println(".getName()");
         }
 
-        // Dump out the exit actions - but only for the first guard.
+        // Dump out the exit actions - but only for the first
+        // guard.
         // v. 1.0, beta 3: Not any more. The exit actions are
         // executed only if 1) this is a standard, non-loopback
         // transition or a pop transition.
@@ -718,15 +720,20 @@ public final class SmcPythonGenerator
         }
 
         // Dump out this transition's actions.
-        if (actions.size() == 0)
+        if (actions.isEmpty() == true)
         {
             List entryActions = state.getEntryActions();
             List exitActions = state.getExitActions();
 
-            if (condition.length() > 0)
+            // If this is an if or else body, then give it a
+            // pass.
+            if (condition.length() > 0 ||
+                _guardCount > 1)
             {
                 _source.print(indent2);
                 _source.println("# No actions.");
+                _source.print(indent2);
+                _source.println("pass");
             }
             // If there are:
             // 1. No entry actions,
@@ -802,7 +809,8 @@ public final class SmcPythonGenerator
         // 1. The transition has no actions AND is a loopback OR
         // 2. This is a push or pop transition.
         if (transType == Smc.TRANS_SET &&
-            (actions.size() > 0 || loopbackFlag == false))
+            (actions.isEmpty() == false ||
+             loopbackFlag == false))
         {
             _source.print(indent3);
             _source.print("fsm.setState(");
@@ -814,7 +822,8 @@ public final class SmcPythonGenerator
             // Set the next state so this it can be pushed
             // onto the state stack. But only do so if a clear
             // state was done.
-            if (loopbackFlag == false || actions.size() > 0)
+            if (loopbackFlag == false ||
+                actions.isEmpty() == false)
             {
                 _source.print(indent3);
                 _source.print("fsm.setState(");
@@ -956,6 +965,9 @@ public final class SmcPythonGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2006/09/16 15:04:29  cwrapp
+// Initial v. 4.3.3 check-in.
+//
 // Revision 1.5  2006/07/11 18:17:53  cwrapp
 // Corrected indentation.
 //

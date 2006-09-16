@@ -1,11 +1,11 @@
 //
 // The contents of this file are subject to the Mozilla Public
 // License Version 1.1 (the "License"); you may not use this file
-// except in compliance with the License. You may obtain a copy of
-// the License at http://www.mozilla.org/MPL/
+// except in compliance with the License. You may obtain a copy
+// of the License at http://www.mozilla.org/MPL/
 // 
-// Software distributed under the License is distributed on an "AS
-// IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+// Software distributed under the License is distributed on an
+// "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
@@ -243,8 +243,8 @@ public final class SmcGraphGenerator
         {
             _source.println("            [label=\"\\N\"];");
         }
-        // For graph level 2, output the state name, entry and exit
-        // actions.
+        // For graph level 2, output the state name, entry and
+        // exit actions.
         else
         {
             List actions;
@@ -333,7 +333,7 @@ public final class SmcGraphGenerator
         SmcState state = transition.getState();
         SmcMap map = state.getMap();
         String mapName = map.getName();
-        String stateName = state.getClassName();
+        String stateName = state.getInstanceName();
         String transName = transition.getName();
         int transType = guard.getTransType();
         String endStateName = guard.getEndState();
@@ -515,6 +515,9 @@ public final class SmcGraphGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2006/09/16 15:04:29  cwrapp
+// Initial v. 4.3.3 check-in.
+//
 // Revision 1.3  2006/07/11 18:13:33  cwrapp
 // Changed method getGraphLevel() to graphLevel().
 //
