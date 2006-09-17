@@ -24,6 +24,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2006/09/17 16:26:06  cwrapp
+# Initial v. 4.3.3 check-in.
+#
 # Revision 1.1  2005/06/16 17:52:03  fperrad
 # Added Ruby examples 1 - 4 and 7.
 #
@@ -46,10 +49,10 @@ clean :
 		-rm *_sm.rb
 
 test:
-		-ruby -w checkstring.rb ""
-		-ruby -w checkstring.rb 00
-		-ruby -w checkstring.rb 1c
-		-ruby -w checkstring.rb c0
-		-ruby -w checkstring.rb abcba
-		-ruby -w checkstring.rb 110010c010011
-		-ruby -w checkstring.rb 110010c110010
+		-ruby -I ../../../lib/Ruby -w checkstring.rb ""
+		-ruby -I ../../../lib/Ruby -w checkstring.rb 00
+		-ruby -I ../../../lib/Ruby -w checkstring.rb 1c
+		-ruby -I ../../../lib/Ruby -w checkstring.rb c0
+		-ruby -I ../../../lib/Ruby -w checkstring.rb abcba
+		-ruby -I ../../../lib/Ruby -w checkstring.rb 110010c010011
+		-ruby -I ../../../lib/Ruby -w checkstring.rb 110010c110010

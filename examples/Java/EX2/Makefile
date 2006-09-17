@@ -13,7 +13,7 @@
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
-# Copyright (C) 2000 - 2004. Charles W. Rapp.
+# Copyright (C) 2000 - 2006. Charles W. Rapp.
 # All Rights Reserved.
 # 
 # Contributor(s):
@@ -33,6 +33,7 @@ SM_SOURCES=     AppClass.sm
 SOURCES=        $(SM_SOURCES:%.sm=%Context.java) \
                 AppClass.java \
                 checkstring.java
+OBJECTS=	$(SOURCES:%.java=%.class)
 
 JAVAC=          javac
 JAVAC_FLAGS=    -g -classpath ../../../lib/statemap.jar
@@ -42,6 +43,9 @@ JAVAC_FLAGS=    -g -classpath ../../../lib/statemap.jar
 
 SMC=            java -jar ../../../bin/Smc.jar
 SMC_FLAGS=      -java -g $(REFLECT)
+
+JAVA=		java
+JAVA_FLAGS=	-classpath .:../../../lib/statemap.jar
 
 #################################################################
 # Rules.
@@ -53,19 +57,30 @@ SMC_FLAGS=      -java -g $(REFLECT)
 %_sm.dot :	%.sm
 		$(SMC) -graph -glevel 1 $<
 
-all :           checkstring
+all :           checkstring test
 
 checkstring :   $(SOURCES)
 		$(JAVAC) $(JAVAC_FLAGS) $(SOURCES)
 
+test :		$(OBJECTS)
+		-$(JAVA) $(JAVA_FLAGS) checkstring ""
+		-$(JAVA) $(JAVA_FLAGS) checkstring 000
+		-$(JAVA) $(JAVA_FLAGS) checkstring 00011
+		-$(JAVA) $(JAVA_FLAGS) checkstring 111
+		-$(JAVA) $(JAVA_FLAGS) checkstring 000111100
+		-$(JAVA) $(JAVA_FLAGS) checkstring 00011a1b10c0
+
 graph :		$(SM_SOURCES:%.sm=%_sm.dot)
 
 clean :
-		-rm -f *.class *Context.java *_sm.dot
+		-rm -f ./*.class ./*Context.java ./*_sm.dot
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.6  2006/09/17 16:26:06  cwrapp
+# Initial v. 4.3.3 check-in.
+#
 # Revision 1.5  2005/11/07 19:34:54  cwrapp
 # Changes in release 4.3.0:
 # New features:

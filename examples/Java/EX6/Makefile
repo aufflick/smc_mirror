@@ -13,7 +13,7 @@
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
-# Copyright (C) 2000 - 2004. Charles W. Rapp.
+# Copyright (C) 2000 - 2006. Charles W. Rapp.
 # All Rights Reserved.
 # 
 # Contributor(s):
@@ -92,16 +92,19 @@ $(TARGET)     :	$(SOURCES)
 graph :		$(SM_SOURCES:%.sm=%_sm.dot)
 
 clean :
-		-rm -f *Context.java \
-			$(PACKAGE_DIR)/*.class \
-			$(CLIENT_JAR) \
-			$(SERVER_JAR) \
-			*_sm.dot
-		-rm -fr $(PACKAGE_DIR)
+		-rm -f ./*Context.java \
+			./$(PACKAGE_DIR)/*.class \
+			./$(CLIENT_JAR) \
+			./$(SERVER_JAR) \
+			./*_sm.dot
+		-rm -fr ./$(PACKAGE_DIR)
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.8  2006/09/17 16:26:06  cwrapp
+# Initial v. 4.3.3 check-in.
+#
 # Revision 1.7  2005/11/07 19:34:54  cwrapp
 # Changes in release 4.3.0:
 # New features:

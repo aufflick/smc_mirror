@@ -13,7 +13,7 @@
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
-# Copyright (C) 2000 - 2004. Charles W. Rapp.
+# Copyright (C) 2000 - 2006. Charles W. Rapp.
 # All Rights Reserved.
 # 
 # Contributor(s):
@@ -36,6 +36,8 @@ SM_SOURCES=	Telephone.sm
 SOURCES=	$(SM_SOURCES:%.sm=%Context.java) \
 		Telephone.java
 
+OBJECTS=	$(SOURCES:%.java=%.class)
+
 PACKAGE_DIR=	smc_ex7
 SOUND_DIR=	./sounds
 FSM_LIB_DIR=	../../../lib
@@ -53,11 +55,13 @@ JAR=		jar
 JAR_CREATE_FLAGS=	cmf manifest.txt
 JAR_UPDATE_FLAGS=	uf
 
+JAVA=		java
+
 #################################################################
 # Rules.
 #
 
-all :		$(TARGET)
+all :		$(TARGET) test
 
 %Context.java : %.sm
 		$(SMC) $(SMC_FLAGS) $<
@@ -72,18 +76,24 @@ $(TARGET) :	$(SOURCES)
 		$(JAR) $(JAR_UPDATE_FLAGS) $(TARGET) \
 			-C $(FSM_LIB_DIR) statemap
 
+test :		$(TRAGET)
+		$(JAVA) -jar $(TARGET)
+
 graph :		$(SM_SOURCES:%.sm=%_sm.dot)
 
 clean :
-		-rm -f *Context.java \
-			$(PACKAGE_DIR)/*.class \
-			$(TARGET) \
-			*_sm.dot
-		-rm -fr $(PACKAGE_DIR)
+		-rm -f ./*Context.java \
+			./$(PACKAGE_DIR)/*.class \
+			./$(TARGET) \
+			./*_sm.dot
+		-rm -fr ./$(PACKAGE_DIR)
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.8  2006/09/17 16:26:06  cwrapp
+# Initial v. 4.3.3 check-in.
+#
 # Revision 1.7  2005/11/07 19:34:54  cwrapp
 # Changes in release 4.3.0:
 # New features:
