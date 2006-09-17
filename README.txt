@@ -19,7 +19,7 @@ Minor changes
 
 + (C#, VB)
   The _debugFlag and _debugStream are deprecated and no
-  longer used. Instead, System.Diagnostics.Trace is
+  longer used. Instead, System.Diagnostics.Trace is now
   used. The SMC programmer is responsible for defining
   the TRACE directive during compilation so the Trace
   will be included in the executable.
@@ -66,7 +66,8 @@ Bug Fixes:
   (SF bug 1558366)
 
 + (VB)
-  Added namespace support. %package is now honored.
+  Added namespace support. %package is now honored when
+  generating VB.net code.
   (SF feature request 1544657)
 
 
