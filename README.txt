@@ -39,6 +39,9 @@ Minor changes
   SourceForge CVS.
   (SF feature 1440302)
 
++ Updated ant task to support SMC's -reflect option.
+
+
 Bug Fixes:
 
 + (C)

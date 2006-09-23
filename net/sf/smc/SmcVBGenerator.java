@@ -718,7 +718,8 @@ public final class SmcVBGenerator
         _source.print(_indent);
         _source.println("               \", Transition: \", _");
         _source.print(_indent);
-        _source.println("               context.Transition))");
+        _source.println(
+            "               context.GetTransition()))");
         _source.print(_indent);
         _source.println("    End Sub");
 
@@ -1560,7 +1561,7 @@ public final class SmcVBGenerator
             // Now that we are in the transition, clear the
             // current state.
             _source.print(indent1);
-            _source.println("context.clearState()");
+            _source.println("context.ClearState()");
 
             // v. 2.0.0: Place the actions inside a try/finally
             // block. This way the state will be set before an
@@ -1647,14 +1648,14 @@ public final class SmcVBGenerator
             }
 
             _source.print(indent2);
-            _source.print("context.pushState(");
+            _source.print("context.PushState(");
             _source.print(pushStateName);
             _source.println(")");
         }
         else if (transType == Smc.TRANS_POP)
         {
             _source.print(indent1);
-            _source.println("context.popState()");
+            _source.println("context.PopState()");
         }
 
         // Perform the new state's enty actions.
@@ -1795,6 +1796,9 @@ public final class SmcVBGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2006/09/23 14:28:19  cwrapp
+// Final SMC, v. 4.3.3 check-in.
+//
 // Revision 1.6  2006/09/16 15:04:29  cwrapp
 // Initial v. 4.3.3 check-in.
 //

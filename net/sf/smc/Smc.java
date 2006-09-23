@@ -1100,7 +1100,7 @@ public final class Smc
         stream.println(
             "\t-serial   Generate serialization code");
         stream.print("\t-return   ");
-        stream.println("Smc.main() returns, not exists");
+        stream.println("Smc.main() returns, not exits");
         stream.print("\t          ");
         stream.println("(use this option with ANT)");
         stream.println("\t-reflect  Generate reflection code");
@@ -1761,6 +1761,9 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.17  2006/09/23 14:28:18  cwrapp
+// Final SMC, v. 4.3.3 check-in.
+//
 // Revision 1.16  2006/09/16 15:04:28  cwrapp
 // Initial v. 4.3.3 check-in.
 //

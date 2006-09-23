@@ -1,7 +1,7 @@
 <VisualStudioProject>
     <CSHARP LastOpenVersion = "7.0.9466" >
         <Build>
-            <Settings ReferencePath = "..\..\..\lib\CSharp\Debug;" >
+            <Settings ReferencePath = "..\..\..\lib\DotNet\Debug\Trace;" >
                 <Config
                     Name = "Debug"
                     EnableASPDebugging = "false"

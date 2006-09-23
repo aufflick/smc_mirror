@@ -72,7 +72,7 @@
                 <Reference
                     Name = "statemap"
                     AssemblyName = "statemap"
-                    HintPath = "..\..\..\lib\VB\statemap.dll"
+                    HintPath = "..\..\..\lib\DotNet\Debug\Trace\statemap.dll"
                 />
             </References>
             <Imports>

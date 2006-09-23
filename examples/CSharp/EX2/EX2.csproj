@@ -78,7 +78,7 @@
                 <Reference
                     Name = "statemap"
                     AssemblyName = "statemap"
-                    HintPath = "..\..\..\lib\CSharp\Debug\statemap.dll"
+                    HintPath = "..\..\..\lib\DotNet\Debug\Trace\statemap.dll"
                 />
             </References>
         </Build>
