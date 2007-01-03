@@ -24,6 +24,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2007/01/03 14:40:09  fperrad
+# + Added -reflect option for Perl, Python and Ruby code generation
+#
 # Revision 1.1  2005/05/28 17:48:29  cwrapp
 # Added Python examples 1 - 4 and 7.
 #
@@ -32,8 +35,11 @@
 SM_SOURCES=     AppClass.sm
 SOURCES=        $(SM_SOURCES:%.sm=%_sm.py)
 
+# Uncomment to turn on reflection.
+# REFLECT = 	-reflect
+
 SMC=            java -jar ../../../bin/Smc.jar
-SMC_FLAGS=      -python -g
+SMC_FLAGS=      -python -g $(REFLECT)
 
 all :           checkstring
 
