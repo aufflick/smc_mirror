@@ -73,6 +73,7 @@ SMC's command line options are:
     -c++     : Generate C++ code.
     -csharp  : Generate C# code.
     -java    : Generate Java code.
+    -lua     : Generate Lua code.
     -perl    : Generate Perl code.
     -python  : Generate Python code.
     -ruby    : Generate Ruby code.
@@ -89,6 +90,7 @@ SMC's command line options are:
           + -tcl
           + -vb
           + -csharp
+          + -lua
           + -perl
           + -python
           + -ruby

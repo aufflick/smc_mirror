@@ -35,6 +35,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.14  2007/01/03 15:23:05  fperrad
+ * + Added Lua generator.
+ *
  * Revision 1.13  2006/09/16 15:04:29  cwrapp
  * Initial v. 4.3.3 check-in.
  *
@@ -1393,6 +1396,7 @@ ParamSeparator
     // language is typeless.
     COMMA(token: SmcLexer.Token)
       [ctxt.getTargetLanguage() == Smc.TCL ||
+       ctxt.getTargetLanguage() == Smc.LUA ||
        ctxt.getTargetLanguage() == Smc.PERL ||
        ctxt.getTargetLanguage() == Smc.PYTHON ||
        ctxt.getTargetLanguage() == Smc.RUBY]
@@ -1404,6 +1408,7 @@ ParamSeparator
 
     RIGHT_PAREN(token: SmcLexer.Token)
       [ctxt.getTargetLanguage() == Smc.TCL ||
+       ctxt.getTargetLanguage() == Smc.LUA ||
        ctxt.getTargetLanguage() == Smc.PERL ||
        ctxt.getTargetLanguage() == Smc.PYTHON ||
        ctxt.getTargetLanguage() == Smc.RUBY]
