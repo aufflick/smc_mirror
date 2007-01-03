@@ -1070,7 +1070,7 @@ public final class Smc
         stream.print(" [-headerd directory]");
         stream.print(" [-glevel int]");
         stream.print(" {-c | -c++ | -java | -tcl | -vb | -csharp | ");
-        stream.print("-python | -perl | -ruby | -table | -graph}");
+        stream.print("-lua | -python | -perl | -ruby | -table | -graph}");
         stream.println(" statemap_file");
         stream.println("    where:");
         stream.println(
@@ -1105,8 +1105,8 @@ public final class Smc
         stream.println("(use this option with ANT)");
         stream.println("\t-reflect  Generate reflection code");
         stream.print("\t          ");
-        stream.println(
-            "(use with -java, -tcl, -vb and -csharp only)");
+        stream.print("(use with -java, -tcl, -vb, -csharp, ");
+        stream.println("-lua, -perl, -python and -ruby only)");
         stream.println("\t-cast     Use this C++ cast type ");
         stream.print("\t          ");
         stream.println("(use with -c++ only)");
@@ -1126,6 +1126,7 @@ public final class Smc
         stream.println("\t-tcl      Generate [incr Tcl] code");
         stream.println("\t-vb       Generate VB.Net code");
         stream.println("\t-csharp   Generate C# code");
+        stream.println("\t-lua      Generate Lua code");
         stream.println("\t-python   Generate Python code");
         stream.println("\t-perl     Generate Perl code");
         stream.println("\t-ruby     Generate Ruby code");
@@ -1136,8 +1137,8 @@ public final class Smc
             "    Note: statemap_file must end in \".sm\"");
         stream.print(
             "    Note: must select one of -c, -c++, -java, ");
-        stream.print("-tcl, -vb, -csharp, -perl, -python, ");
-        stream.println("-ruby, -table or -graph.");
+        stream.print("-tcl, -vb, -csharp, -lua, -perl, ");
+        stream.println(" -python, -ruby, -table or -graph.");
 
         return;
     }
@@ -1363,6 +1364,21 @@ public final class Smc
                     new PrintStream(sourceFileStream);
                 generator =
                     new SmcCSharpGenerator(
+                        sourceStream, srcFileBase);
+                break;
+
+            case LUA:
+                srcFileName =
+                    srcFilePath +
+                    srcFileBase +
+                    "_sm." +
+                    _suffix;
+                sourceFileStream =
+                    new FileOutputStream(srcFileName);
+                sourceStream =
+                    new PrintStream(sourceFileStream);
+                generator =
+                    new SmcLuaGenerator(
                         sourceStream, srcFileBase);
                 break;
 
@@ -1613,6 +1629,7 @@ public final class Smc
     /* package */ static final int PERL = 9;
     /* package */ static final int RUBY = 10;
     /* package */ static final int C = 11;
+    /* package */ static final int LUA = 12;
 
     // GraphViz detail level.
     /* package */ static final int NO_GRAPH_LEVEL = -1;
@@ -1651,7 +1668,7 @@ public final class Smc
     static
     {
         // Find in the static languages array.
-        _languages = new Language[12];
+        _languages = new Language[13];
         _languages[LANG_NOT_SET] =
             new Language(LANG_NOT_SET, "", "(not set)", "");
         _languages[C_PLUS_PLUS] =
@@ -1676,6 +1693,8 @@ public final class Smc
             new Language(RUBY, "-ru", "Ruby", "rb");
         _languages[C] =
             new Language(C, "-c", "C", "c");
+        _languages[LUA] =
+            new Language(LUA, "-lu", "Lua", "lua");
 
         // List<Integer> language = new ArrayList<Integer>();
         List languages = new ArrayList();
@@ -1694,7 +1713,7 @@ public final class Smc
         // +   -nocatch: all
         // +      -noex: C++
         // + -nostreams: C++
-        // +   -reflect: C#, Java, TCL, VB
+        // +   -reflect: C#, Java, TCL, VB, Lua, Perl, Python, Ruby
         // +    -return: all
         // +    -serial: C#, C++, Java, Tcl, VB
         // +    -suffix: all
@@ -1704,7 +1723,7 @@ public final class Smc
         // +  -vverbose: all
 
         // Set the options supporting all languages first.
-        for (target = C_PLUS_PLUS; target <= C; ++target)
+        for (target = C_PLUS_PLUS; target <= LUA; ++target)
         {
             languages.add(new Integer(target));
         }
@@ -1742,6 +1761,10 @@ public final class Smc
         languages.add(new Integer(JAVA));
         languages.add(new Integer(VB));
         languages.add(new Integer(TCL));
+        languages.add(new Integer(LUA));
+        languages.add(new Integer(PERL));
+        languages.add(new Integer(PYTHON));
+        languages.add(new Integer(RUBY));
         _optionMap.put(REFLECT_FLAG, languages);
 
         languages = new ArrayList();
@@ -1761,6 +1784,10 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.18  2007/01/03 15:37:38  fperrad
+// + Added Lua generator.
+// + Added -reflect option for Lua, Perl, Python and Ruby code generation
+//
 // Revision 1.17  2006/09/23 14:28:18  cwrapp
 // Final SMC, v. 4.3.3 check-in.
 //
