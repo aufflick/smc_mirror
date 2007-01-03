@@ -64,6 +64,7 @@ APP_SOURCES=	SmcLexerContext.java \
 		SmcGraphGenerator.java \
 		SmcHeaderCGenerator.java \
 		SmcCGenerator.java \
+		SmcLuaGenerator.java \
 		SmcPerlGenerator.java \
 		SmcRubyGenerator.java \
 		Smc.java
@@ -134,6 +135,9 @@ realclean :	clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.9  2007/01/03 15:35:57  fperrad
+# + Added Lua generator.
+#
 # Revision 1.8  2005/08/26 15:21:34  cwrapp
 # Final commit for release 4.2.0. See README.txt for more information.
 #
