@@ -302,17 +302,6 @@ public final class SmcLuaGenerator
             }
         }
 
-        // getState() method.
-        _source.print("function ");
-        _source.print(context);
-        _source.println("Context:getState ()");
-        _source.println("    if self._state == nil then");
-        _source.println("        error \"State Undefined\"");
-        _source.println("    end");
-        _source.println("    return self._state");
-        _source.println("end");
-        _source.println();
-
         // getOwner() method.
         _source.print("function ");
         _source.print(context);
@@ -1127,6 +1116,9 @@ public final class SmcLuaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2007/01/05 12:34:38  fperrad
+// + Remove getState() method generation.
+//
 // Revision 1.1  2007/01/03 15:22:39  fperrad
 // + Added Lua generator.
 //
