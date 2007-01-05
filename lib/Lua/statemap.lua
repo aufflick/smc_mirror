@@ -142,6 +142,14 @@ function FSMContext:getPreviousState ()
     return self._previous_state
 end
 
+function FSMContext:getState ()
+    -- Gets the current state.
+    if self._state == nil then
+        error "State Undefined"
+    end
+    return self._state
+end
+
 function FSMContext:setState (state)
     -- Sets the current state to the specified state.
     assert(state ~= nil, "undefined state.")
