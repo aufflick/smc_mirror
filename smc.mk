@@ -26,6 +26,8 @@
 #   examples/C#.
 #   Francois Perrord contributed the Python code generator and
 #   examples/Python.
+#   Chris Liscio contributed Objective-C code generation and
+#   examples/ObjC.
 #
 # RCS ID
 # $Id$
@@ -38,7 +40,7 @@
 # Macros.
 #
 
-VERSION=	4_3_3
+VERSION=	4_4_0
 
 STAGING_DIR=	../staging
 SMC_STAGING_DIR=$(STAGING_DIR)/smc
@@ -60,6 +62,9 @@ $(SMC_STAGING_DIR) :	$(STAGING_DIR)
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.12  2007/01/15 00:23:46  cwrapp
+# Release 4.4.0 initial commit.
+#
 # Revision 1.11  2006/09/16 15:04:27  cwrapp
 # Initial v. 4.3.3 check-in.
 #

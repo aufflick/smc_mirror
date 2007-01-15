@@ -22,6 +22,8 @@
 //   examples/C#.
 //   Francois Perrad contributed the Python code generation and
 //   examples/Python.
+//   Chris Liscio contributed the Objective-C code generation
+//   and examples/ObjC.
 //
 // RCS ID
 // $Id$
@@ -1796,6 +1798,9 @@ public final class SmcVBGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2007/01/15 00:23:52  cwrapp
+// Release 4.4.0 initial commit.
+//
 // Revision 1.7  2006/09/23 14:28:19  cwrapp
 // Final SMC, v. 4.3.3 check-in.
 //

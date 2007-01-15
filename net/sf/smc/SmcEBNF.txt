@@ -22,6 +22,8 @@
 //   examples/C#.
 //   Francois Perrad contributed the Python code generation and
 //   examples/Python.
+//   Chris Liscio contributed the Objective-C code generation
+//   and examples/ObjC.
 //
 // RCS ID
 // $Id$
@@ -114,6 +116,9 @@ comment2 := '/*' .* '*/'
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2007/01/15 00:23:51  cwrapp
+// Release 4.4.0 initial commit.
+//
 // Revision 1.1  2006/09/17 16:26:06  cwrapp
 // Initial v. 4.3.3 check-in.
 //

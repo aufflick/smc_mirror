@@ -1,11 +1,11 @@
 # 
 # The contents of this file are subject to the Mozilla Public
 # License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
+# except in compliance with the License. You may obtain a copy
+# of the License at http://www.mozilla.org/MPL/
 # 
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+# Software distributed under the License is distributed on an
+# "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
 # 
@@ -56,6 +56,7 @@ install : 	$(LIB_STAGING_DIR)
 		$(MAKE) -C C++ install
 		$(MAKE) -C CSharp install
 		$(MAKE) -C Java install
+		$(MAKE) -C ObjC install
 		$(MAKE) -C Perl install
 		$(MAKE) -C Python install
 		$(MAKE) -C Ruby install
@@ -66,6 +67,7 @@ uninstall :
 		$(MAKE) -C C++ uninstall
 		$(MAKE) -C CSharp uninstall
 		$(MAKE) -C Java uninstall
+		$(MAKE) -C ObjC uninstall
 		$(MAKE) -C Perl uninstall
 		$(MAKE) -C Python uninstall
 		$(MAKE) -C Ruby uninstall
@@ -76,6 +78,7 @@ clean :
 		$(MAKE) -C C++ clean
 		$(MAKE) -C CSharp clean
 		$(MAKE) -C Java clean
+		$(MAKE) -C ObjC clean
 		$(MAKE) -C Perl clean
 		$(MAKE) -C Python clean
 		$(MAKE) -C Ruby clean
@@ -86,6 +89,7 @@ realclean :
 		$(MAKE) -C C++ realclean
 		$(MAKE) -C CSharp realclean
 		$(MAKE) -C Java realclean
+		$(MAKE) -C ObjC realclean
 		$(MAKE) -C Perl realclean
 		$(MAKE) -C Python realclean
 		$(MAKE) -C Ruby realclean
@@ -94,6 +98,9 @@ realclean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.9  2007/01/15 00:23:50  cwrapp
+# Release 4.4.0 initial commit.
+#
 # Revision 1.8  2006/09/16 15:04:28  cwrapp
 # Initial v. 4.3.3 check-in.
 #

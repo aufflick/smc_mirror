@@ -22,6 +22,8 @@
 //   examples/C#.
 //   Francois Perrad contributed the Python code generation and
 //   examples/Python.
+//   Chris Liscio contributed the Objective-C code generation
+//   and examples/ObjC.
 //
 // RCS ID
 // $Id$
@@ -49,7 +51,7 @@ public final class SmcParameter
         // While Tcl is weakly typed, it still differentiates
         // between call-by-value and call-by-name. By default,
         // SMC generates call-by-value.
-        if (Smc._targetLanguage == Smc.TCL)
+        if (Smc._targetLanguage.index() == Smc.TCL)
         {
             _type = "value";
         }
@@ -139,6 +141,9 @@ public final class SmcParameter
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2007/01/15 00:23:51  cwrapp
+// Release 4.4.0 initial commit.
+//
 // Revision 1.5  2006/09/16 15:04:29  cwrapp
 // Initial v. 4.3.3 check-in.
 //

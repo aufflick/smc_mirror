@@ -25,6 +25,8 @@
  *   examples/C#.
  *   Francois Perrad contributed the Python code generation and
  *   examples/Python.
+ *   Chris Liscio contributed the Objective-C code generation
+ *   and examples/ObjC.
  *
  * smcParser --
  *
@@ -35,6 +37,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.15  2007/01/15 00:23:51  cwrapp
+ * Release 4.4.0 initial commit.
+ *
  * Revision 1.14  2007/01/03 15:23:05  fperrad
  * + Added Lua generator.
  *

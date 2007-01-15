@@ -13,7 +13,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 - 2005. Charles W. Rapp.
+// Copyright (C) 2000 - 2006. Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s):
@@ -21,7 +21,11 @@
 //   (Name withheld) contributed the C# code generation and
 //   examples/C#.
 //   Francois Perrad contributed the Python code generation and
-//   examples/Python.
+//   examples/Python, Perl code generation and examples/Perl,
+//   Ruby code generation and examples/Ruby, Lua code generation
+//   and examples/Lua.
+//   Chris Liscio contributed the Objective-C code generation
+//   and examples/ObjC.
 //
 // SMC --
 //
@@ -46,6 +50,8 @@ import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.reflect.Constructor;
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,7 +74,7 @@ public final class Smc
         _errorMsg = new String();
 
         // The default smc output level is 1.
-        _targetLanguage = LANG_NOT_SET;
+        _targetLanguage = null;
         _version = VERSION;
         _debug = false;
         _nostreams = false;
@@ -160,7 +166,7 @@ public final class Smc
                         SmcSyntaxChecker checker =
                             new SmcSyntaxChecker(
                                 _sourceFileName,
-                                _targetLanguage);
+                                _targetLanguage.index());
 
                         if (_verbose == true)
                         {
@@ -514,7 +520,7 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        _languages[_targetLanguage].name() +
+                        _targetLanguage.name() +
                         " does not support " +
                         SYNC_FLAG +
                         ".";
@@ -539,7 +545,7 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        _languages[_targetLanguage].name() +
+                        _targetLanguage.name() +
                         " does not support " +
                         SUFFIX_FLAG +
                         ".";
@@ -565,7 +571,7 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        _languages[_targetLanguage].name() +
+                        _targetLanguage.name() +
                         " does not support " +
                         CAST_FLAG +
                         ".";
@@ -600,7 +606,7 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        _languages[_targetLanguage].name() +
+                        _targetLanguage.name() +
                         " does not support " +
                         DIRECTORY_FLAG +
                         ".";
@@ -638,7 +644,7 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        _languages[_targetLanguage].name() +
+                        _targetLanguage.name() +
                         " does not support " +
                         HEADER_FLAG +
                         ".";
@@ -676,7 +682,7 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        _languages[_targetLanguage].name() +
+                        _targetLanguage.name() +
                         " does not support " +
                         GLEVEL_FLAG +
                         ".";
@@ -717,7 +723,7 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        _languages[_targetLanguage].name() +
+                        _targetLanguage.name() +
                         " does not support " +
                         DEBUG_FLAG +
                         ".";
@@ -734,7 +740,7 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        _languages[_targetLanguage].name() +
+                        _targetLanguage.name() +
                         " does not support " +
                         NO_STREAMS_FLAG +
                         ".";
@@ -751,7 +757,7 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        _languages[_targetLanguage].name() +
+                        _targetLanguage.name() +
                         " does not support " +
                         NO_EXCEPTIONS_FLAG +
                         ".";
@@ -768,7 +774,7 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        _languages[_targetLanguage].name() +
+                        _targetLanguage.name() +
                         " does not support " +
                         NO_CATCH_FLAG +
                         ".";
@@ -785,7 +791,7 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        _languages[_targetLanguage].name() +
+                        _targetLanguage.name() +
                         " does not support " +
                         RETURN_FLAG +
                         ".";
@@ -802,7 +808,7 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        _languages[_targetLanguage].name() +
+                        _targetLanguage.name() +
                         " does not support " +
                         REFLECT_FLAG +
                         ".";
@@ -819,7 +825,7 @@ public final class Smc
                 {
                     retcode = false;
                     _errorMsg =
-                        _languages[_targetLanguage].name() +
+                        _targetLanguage.name() +
                         " does not support " +
                         SERIAL_FLAG +
                         ".";
@@ -859,7 +865,7 @@ public final class Smc
         {
             // no-op.
         }
-        else if (_targetLanguage == LANG_NOT_SET)
+        else if (_targetLanguage == null)
         {
             retcode = false;
             _errorMsg = "Target language was not specified.";
@@ -946,11 +952,11 @@ public final class Smc
     // arguments. Throws an IllegalArgumentException if more than
     // one target language is specified.
     // As a side effect sets the default suffix.
-    private static int _findTargetLanguage(String[] args)
+    private static Language _findTargetLanguage(String[] args)
     {
         int i;
         Language lang;
-        int retval = LANG_NOT_SET;
+        Language retval = null;
 
         for (i = 0; i < args.length; ++i)
         {
@@ -958,8 +964,7 @@ public final class Smc
             if ((lang = _findLanguage(args[i])) != null)
             {
                 // Only one target langugage can be specified.
-                if (_targetLanguage != LANG_NOT_SET &&
-                    _targetLanguage != lang.index())
+                if (retval != null && retval != lang)
                 {
                     throw (
                         new IllegalArgumentException(
@@ -968,7 +973,7 @@ public final class Smc
                 }
                 else
                 {
-                    retval = lang.index();
+                    retval = lang;
                     _suffix = lang.suffix();
                 }
             }
@@ -1006,7 +1011,7 @@ public final class Smc
 
         return (
             languages != null &&
-            languages.contains(new Integer(_targetLanguage)));
+            languages.contains(_targetLanguage));
     }
 
     // Returns true if the string is a valid C++ cast.
@@ -1069,8 +1074,11 @@ public final class Smc
         stream.print(" [-d directory]");
         stream.print(" [-headerd directory]");
         stream.print(" [-glevel int]");
-        stream.print(" {-c | -c++ | -java | -tcl | -vb | -csharp | ");
-        stream.print("-lua | -python | -perl | -ruby | -table | -graph}");
+        stream.print(
+            " {-c | -c++ | -csharp | -graph | -java | -lua | ");
+        stream.print(
+            "-objc | -perl | -python | -ruby | -table | ");
+        stream.print("-tcl | -vb");
         stream.println(" statemap_file");
         stream.println("    where:");
         stream.println(
@@ -1112,33 +1120,37 @@ public final class Smc
         stream.println("(use with -c++ only)");
         stream.println(
             "\t-d        Place generated files in directory");
-        stream.println(
-            "\t-headerd  Place generated header files in directory");
+        stream.print(
+            "\t-headerd  Place generated header files in ");
+        stream.println("directory");
         stream.print("\t          ");
         stream.println("(use with -c, -c++ only)");
-        stream.println(
-            "\t-glevel   Detail level from 0 (least) to 2 (greatest)");
+        stream.print(
+            "\t-glevel   Detail level from 0 (least) to 2 ");
+        stream.println("(greatest)");
         stream.print("\t          ");
         stream.println("(use with -graph only)");
         stream.println("\t-c        Generate C code");
         stream.println("\t-c++      Generate C++ code");
-        stream.println("\t-java     Generate Java code");
-        stream.println("\t-tcl      Generate [incr Tcl] code");
-        stream.println("\t-vb       Generate VB.Net code");
         stream.println("\t-csharp   Generate C# code");
+        stream.println("\t-graph    Generate GraphViz DOT file");
+        stream.println("\t-java     Generate Java code");
         stream.println("\t-lua      Generate Lua code");
-        stream.println("\t-python   Generate Python code");
+        stream.println("\t-objc     Generate Objective-C code");
         stream.println("\t-perl     Generate Perl code");
+        stream.println("\t-python   Generate Python code");
         stream.println("\t-ruby     Generate Ruby code");
         stream.println("\t-table    Generate HTML table code");
-        stream.println("\t-graph    Generate GraphViz DOT file");
+        stream.println("\t-tcl      Generate [incr Tcl] code");
+        stream.println("\t-vb       Generate VB.Net code");
         stream.println();
         stream.println(
             "    Note: statemap_file must end in \".sm\"");
         stream.print(
-            "    Note: must select one of -c, -c++, -java, ");
-        stream.print("-tcl, -vb, -csharp, -lua, -perl, ");
-        stream.println(" -python, -ruby, -table or -graph.");
+            "    Note: must select one of -c, -c++, -csharp, ");
+        stream.print("-graph, -java, -lua, -objc, -perl, ");
+        stream.println(
+            "-python, -ruby, -table, -tcl or -vb.");
 
         return;
     }
@@ -1168,9 +1180,13 @@ public final class Smc
             "." + System.getProperty("file.separator");
         String srcFileBase =
             _sourceFileName.substring(0, endIndex);
+        String headerFileName = "";
+        FileOutputStream headerFileStream = null;
+        PrintStream headerStream = null;
+        SmcCodeGenerator headerGenerator = null;
         String srcFileName = "";
         FileOutputStream sourceFileStream = null;
-        PrintStream sourceStream;
+        PrintStream sourceStream = null;
         SmcCodeGenerator generator = null;
 
         // For some strange reason I get the wrong
@@ -1201,263 +1217,58 @@ public final class Smc
             srcFilePath = _outputDirectory;
         }
 
-        // Open the output files. The file names
-        // are based on the input file name.
-        switch (_targetLanguage)
+        // Create the header file name and generator -
+        // if the language uses a header file.
+        if (_targetLanguage.hasHeaderFile() == true)
         {
-            // For C++ two files are generated: the .h and the
-            // .cpp.
-            case C_PLUS_PLUS:
-                // Generate the header file first. If -headerd
-                // was specified, then place the file there.
-                // -headerd takes precedence over -d.
-                if (_headerDirectory != null)
-                {
-                    srcFileName =
-                        _headerDirectory +
-                        srcFileBase +
-                        "_sm.h";
-                }
-                else
-                {
-                    srcFileName =
-                        srcFilePath +
-                        srcFileBase +
-                        "_sm.h";
-                }
+            String headerPath = srcFilePath;
 
-                sourceFileStream =
-                    new FileOutputStream(srcFileName);
-                sourceStream =
-                    new PrintStream(sourceFileStream);
-                fsm.accept(
-                    new SmcHeaderGenerator(
-                        sourceStream, srcFileBase));
-                sourceFileStream.flush();
-                sourceFileStream.close();
+            // If -headerd was specified, then place the file
+            // there. -headerd takes precedence over -d.
+            if (_headerDirectory != null)
+            {
+                headerPath = _headerDirectory;
+            }
 
-                if (_verbose == true)
-                {
-                    System.out.print("[wrote ");
-                    System.out.print(srcFileName);
-                    System.out.println("]");
-                }
-
-                srcFileName =
-                    srcFilePath +
-                    srcFileBase +
-                    "_sm." +
-                    _suffix;
-                sourceFileStream =
-                    new FileOutputStream(srcFileName);
-                sourceStream =
-                    new PrintStream(sourceFileStream);
-                generator =
-                    new SmcCppGenerator(
-                        sourceStream, srcFileBase);
-                break;
-
-            case C:
-                // Generate the header file first. If -headerd
-                // was specified, then place the file there.
-                // -headerd takes precedence over -d.
-                if (_headerDirectory != null)
-                {
-                    srcFileName =
-                        _headerDirectory +
-                        srcFileBase +
-                        "_sm.h";
-                }
-                else
-                {
-                    srcFileName =
-                        srcFilePath +
-                        srcFileBase +
-                        "_sm.h";
-                }
-
-                sourceFileStream =
-                    new FileOutputStream(srcFileName);
-                sourceStream =
-                    new PrintStream(sourceFileStream);
-                fsm.accept(
-                    new SmcHeaderCGenerator(
-                        sourceStream, srcFileBase));
-                sourceFileStream.flush();
-                sourceFileStream.close();
-
-                if (_verbose == true)
-                {
-                    System.out.print("[wrote ");
-                    System.out.print(srcFileName);
-                    System.out.println("]");
-                }
-
-                srcFileName =
-                    srcFilePath +
-                    srcFileBase +
-                    "_sm." +
-                    _suffix;
-                sourceFileStream =
-                    new FileOutputStream(srcFileName);
-                sourceStream =
-                    new PrintStream(sourceFileStream);
-                generator =
-                    new SmcCGenerator(
-                        sourceStream, srcFileBase);
-                break;
-
-            case JAVA:
-                srcFileName =
-                    srcFilePath +
-                    srcFileBase +
-                    "Context." +
-                    _suffix;
-                sourceFileStream =
-                    new FileOutputStream(srcFileName);
-                sourceStream =
-                    new PrintStream(sourceFileStream);
-                generator =
-                    new SmcJavaGenerator(
-                        sourceStream, srcFileBase);
-                break;
-
-            case TCL:
-                srcFileName =
-                    srcFilePath +
-                    srcFileBase +
-                    "_sm." +
-                    _suffix;
-                sourceFileStream =
-                    new FileOutputStream(srcFileName);
-                sourceStream =
-                    new PrintStream(sourceFileStream);
-                generator =
-                    new SmcTclGenerator(
-                        sourceStream, srcFileBase);
-                break;
-
-            case VB:
-                srcFileName =
-                    srcFilePath +
-                    srcFileBase +
-                    "_sm." +
-                    _suffix;
-                sourceFileStream =
-                    new FileOutputStream(srcFileName);
-                sourceStream =
-                    new PrintStream(sourceFileStream);
-                generator =
-                    new SmcVBGenerator(
-                        sourceStream, srcFileBase);
-                break;
-
-            case C_SHARP:
-                srcFileName =
-                    srcFilePath +
-                    srcFileBase +
-                    "_sm." +
-                    _suffix;
-                sourceFileStream =
-                    new FileOutputStream(srcFileName);
-                sourceStream =
-                    new PrintStream(sourceFileStream);
-                generator =
-                    new SmcCSharpGenerator(
-                        sourceStream, srcFileBase);
-                break;
-
-            case LUA:
-                srcFileName =
-                    srcFilePath +
-                    srcFileBase +
-                    "_sm." +
-                    _suffix;
-                sourceFileStream =
-                    new FileOutputStream(srcFileName);
-                sourceStream =
-                    new PrintStream(sourceFileStream);
-                generator =
-                    new SmcLuaGenerator(
-                        sourceStream, srcFileBase);
-                break;
-
-            case PYTHON:
-                srcFileName =
-                    srcFilePath +
-                    srcFileBase +
-                    "_sm." +
-                    _suffix;
-                sourceFileStream =
-                    new FileOutputStream(srcFileName);
-                sourceStream =
-                    new PrintStream(sourceFileStream);
-                generator =
-                    new SmcPythonGenerator(
-                        sourceStream, srcFileBase);
-                break;
-
-            case PERL:
-                srcFileName =
-                    srcFilePath +
-                    srcFileBase +
-                    "_sm." +
-                    _suffix;
-                sourceFileStream =
-                    new FileOutputStream(srcFileName);
-                sourceStream =
-                    new PrintStream(sourceFileStream);
-                generator =
-                    new SmcPerlGenerator(
-                        sourceStream, srcFileBase);
-                break;
-
-            case RUBY:
-                srcFileName =
-                    srcFilePath +
-                    srcFileBase +
-                    "_sm." +
-                    _suffix;
-                sourceFileStream =
-                    new FileOutputStream(srcFileName);
-                sourceStream =
-                    new PrintStream(sourceFileStream);
-                generator =
-                    new SmcRubyGenerator(
-                        sourceStream, srcFileBase);
-                break;
-
-            case TABLE:
-                srcFileName =
-                    srcFilePath +
-                    srcFileBase +
-                    "_sm." +
-                    _suffix;
-                sourceFileStream =
-                    new FileOutputStream(srcFileName);
-                sourceStream =
-                    new PrintStream(sourceFileStream);
-                generator =
-                    new SmcTableGenerator(
-                        sourceStream, srcFileBase);
-                break;
-
-            case GRAPH:
-                srcFileName =
-                    srcFilePath +
-                    srcFileBase +
-                    "_sm." +
-                    _suffix;
-                sourceFileStream =
-                    new FileOutputStream(srcFileName);
-                sourceStream =
-                    new PrintStream(sourceFileStream);
-                generator =
-                    new SmcGraphGenerator(
-                        sourceStream, srcFileBase);
-                break;
+            headerFileName =
+                _targetLanguage.sourceFile(
+                    headerPath, srcFileBase, "h");
+            headerFileStream =
+                new FileOutputStream(headerFileName);
+            headerStream =
+                new PrintStream(headerFileStream);
+            headerGenerator =
+                _targetLanguage.headerGenerator(
+                    headerStream, srcFileBase);
         }
 
+        // Create the language-specific source code generator.
+        srcFileName =
+            _targetLanguage.sourceFile(
+                srcFilePath, srcFileBase, _suffix);
+        sourceFileStream =
+            new FileOutputStream(srcFileName);
+        sourceStream =
+            new PrintStream(sourceFileStream);
+        generator =
+            _targetLanguage.generator(sourceStream, srcFileBase);
+
+        // Generate the header file first.
+        if (headerGenerator != null)
+        {
+            fsm.accept(headerGenerator);
+            headerFileStream.flush();
+            headerFileStream.close();
+
+            if (_verbose == true)
+            {
+                System.out.print("[wrote ");
+                System.out.print(headerFileName);
+                System.out.println("]");
+            }
+        }
+
+        // Now output the FSM in the target language.
         if (generator != null)
         {
             fsm.accept(generator);
@@ -1479,7 +1290,17 @@ public final class Smc
 // Inner classes
 //
 
-    private static final class Language
+    // The Language class explicitly stores each target
+    // language's properties:
+    // + The *start* of the command line option.
+    // + The language's full name.
+    // + The default file name suffix.
+    // + The file name format for the generated SMC files.
+    // + The language's SmcCodeGenerator subclass.
+    // + Whether the language also generates a header file and
+    //   that header file SmcCodeGenerator subclass.
+
+    /* package */ static final class Language
     {
     //-----------------------------------------------------------
     // Member methods.
@@ -1489,36 +1310,148 @@ public final class Smc
         public Language(int index,
                         String optionFlag,
                         String name,
-                        String suffix)
+                        String suffix,
+                        String sourceNameFormat,
+                        Class generator,
+                        boolean headerFlag,
+                        Class headerGenerator)
         {
+            Class[] params = new Class[2];
+            Constructor sourceCtor = null;
+            Constructor headerCtor = null;
+
             _index = index;
             _optionFlag = optionFlag;
             _name = name;
             _suffix = suffix;
+            _sourceNameFormat = sourceNameFormat;
+            _headerFlag = headerFlag;
+
+            params[0] = PrintStream.class;
+            params[1] = String.class;
+            if (generator != null)
+            {
+                try
+                {
+                    sourceCtor =
+                        generator.getDeclaredConstructor(params);
+                }
+                catch (NoSuchMethodException methoex)
+                {}
+            }
+
+            if (headerGenerator != null)
+            {
+                try
+                {
+                    headerCtor =
+                        headerGenerator.getDeclaredConstructor(
+                            params);
+                }
+                catch (NoSuchMethodException methoex)
+                {}
+            }
+
+            _generator = sourceCtor;
+            _headerGenerator = headerCtor;
         }
 
         //-------------------------------------------------------
         // Get methods.
         //
 
-        int index()
+        public int index()
         {
             return (_index);
         }
 
-        String optionFlag()
+        public String optionFlag()
         {
             return (_optionFlag);
         }
 
-        String name()
+        public String name()
         {
             return (_name);
         }
 
-        String suffix()
+        public String suffix()
         {
             return (_suffix);
+        }
+
+        public String sourceFile(String path,
+                                 String basename,
+                                 String suffix)
+        {
+            MessageFormat formatter =
+                new MessageFormat(_sourceNameFormat);
+            Object[] args = new Object[3];
+
+            args[0] = path;
+            args[1] = basename;
+            args[2] = suffix;
+
+            return (formatter.format(args));
+        }
+
+        public SmcCodeGenerator generator(PrintStream stream,
+                                          String basename)
+        {
+            SmcCodeGenerator retval = null;
+
+            try
+            {
+                Object[] args = new Object[2];
+
+                args[0] = stream;
+                args[1] = basename;
+
+                retval =
+                    (SmcCodeGenerator)
+                        _generator.newInstance(args);
+            }
+            catch (Exception jex)
+            {
+                // Ignore. Return null.
+            }
+
+            return (retval);
+        }
+
+        public boolean hasHeaderFile()
+        {
+            return (_headerFlag);
+        }
+
+        public SmcCodeGenerator
+            headerGenerator(PrintStream stream,
+                            String basename)
+        {
+            SmcCodeGenerator retval = null;
+
+            try
+            {
+                Object[] args = new Object[2];
+
+                args[0] = stream;
+                args[1] = basename;
+
+                retval =
+                    (SmcCodeGenerator)
+                        _headerGenerator.newInstance(args);
+            }
+            catch (Exception jex)
+            {
+                // Ignore. Return null.
+            }
+
+            return (retval);
+        }
+
+        public String toString()
+        {
+            return (_name);
         }
 
         //
@@ -1533,6 +1466,10 @@ public final class Smc
         private final String _optionFlag;
         private final String _name;
         private final String _suffix;
+        private final String _sourceNameFormat;
+        private final Constructor _generator;
+        private final boolean _headerFlag;
+        private final Constructor _headerGenerator;
     }
 
 //---------------------------------------------------------------
@@ -1608,7 +1545,7 @@ public final class Smc
 
     // Map each command line option flag to the target languages
     // supporting the flag.
-    // private static Map<String, List<int>> _optionMap;
+    // private static Map<String, List<Language>> _optionMap;
     private static Map _optionMap;
 
     //-----------------------------------------------------------
@@ -1616,7 +1553,7 @@ public final class Smc
     //
 
     // Specifies target programming language.
-    /* package */ static int _targetLanguage;
+    /* package */ static Language _targetLanguage;
     /* package */ static final int LANG_NOT_SET = 0;
     /* package */ static final int C_PLUS_PLUS = 1;
     /* package */ static final int JAVA = 2;
@@ -1629,7 +1566,9 @@ public final class Smc
     /* package */ static final int PERL = 9;
     /* package */ static final int RUBY = 10;
     /* package */ static final int C = 11;
-    /* package */ static final int LUA = 12;
+    /* package */ static final int OBJECTIVE_C = 12;
+    /* package */ static final int LUA = 13;
+    /* package */ static final int LANGUAGE_COUNT = 14;
 
     // GraphViz detail level.
     /* package */ static final int NO_GRAPH_LEVEL = -1;
@@ -1644,7 +1583,7 @@ public final class Smc
     /* package */ static final int TRANS_POP = 3;
 
     private static final String APP_NAME = "smc";
-    private static final String VERSION = "v. 4.3.2";
+    private static final String VERSION = "v. 4.4.0";
 
     // Command line option flags.
     private static final String CAST_FLAG = "-cast";
@@ -1668,39 +1607,152 @@ public final class Smc
     static
     {
         // Find in the static languages array.
-        _languages = new Language[13];
+        _languages = new Language[LANGUAGE_COUNT];
         _languages[LANG_NOT_SET] =
-            new Language(LANG_NOT_SET, "", "(not set)", "");
-        _languages[C_PLUS_PLUS] =
-            new Language(C_PLUS_PLUS, "-c+", "C++", "cpp");
-        _languages[JAVA] =
-            new Language(JAVA, "-j", "Java", "java");
-        _languages[TCL] =
-            new Language(TCL, "-tc", "[incr Tcl]", "tcl");
-        _languages[VB] =
-            new Language(VB, "-vb", "VB.net", "vb");
-        _languages[C_SHARP] =
-            new Language(C_SHARP, "-cs", "C#", "cs");
-        _languages[PYTHON] =
-            new Language(PYTHON, "-py", "Python", "py");
-        _languages[TABLE] =
-            new Language(TABLE, "-ta", "-table", "html");
-        _languages[GRAPH] =
-            new Language(GRAPH, "-gr", "-graph", "dot");
-        _languages[PERL] =
-            new Language(PERL, "-pe", "Perl", "pm");
-        _languages[RUBY] =
-            new Language(RUBY, "-ru", "Ruby", "rb");
+            new Language(LANG_NOT_SET,
+                         "",
+                         "(not set)",
+                         "",
+                         null,
+                         null,
+                         false,
+                         null);
         _languages[C] =
-            new Language(C, "-c", "C", "c");
+            new Language(
+                C,
+                "-c",
+                "C",
+                "c",
+                "{0}{1}_sm.{2}",
+                SmcCGenerator.class,
+                true,
+                SmcHeaderCGenerator.class);
+        _languages[C_PLUS_PLUS] =
+            new Language(
+                C_PLUS_PLUS,
+                "-c+",
+                "C++",
+                "cpp",
+                "{0}{1}_sm.{2}",
+                SmcCppGenerator.class,
+                true,
+                SmcHeaderGenerator.class);
+        _languages[C_SHARP] =
+            new Language(
+                C_SHARP,
+                "-cs",
+                "C#",
+                "cs",
+                "{0}{1}_sm.{2}",
+                SmcCSharpGenerator.class,
+                false,
+                null);
+        _languages[JAVA] =
+            new Language(
+                JAVA,
+                "-j",
+                "Java",
+                "java",
+                "{0}{1}Context.{2}",
+                SmcJavaGenerator.class,
+                false,
+                null);
+        _languages[GRAPH] =
+            new Language(
+                GRAPH,
+                "-gr",
+                "-graph",
+                "dot",
+                "{0}{1}_sm.{2}",
+                SmcGraphGenerator.class,
+                false,
+                null);
         _languages[LUA] =
-            new Language(LUA, "-lu", "Lua", "lua");
+            new Language(
+                LUA,
+                "-l",
+                "Lua",
+                "lua",
+                "{0}{1}_sm.{2}",
+                SmcLuaGenerator.class,
+                false,
+                null);
+        _languages[OBJECTIVE_C] =
+            new Language(
+                OBJECTIVE_C,
+                "-objc",
+                "Objective-C",
+                "m",
+                "{0}{1}_sm.{2}",
+                SmcObjCGenerator.class,
+                true,
+                SmcHeaderObjCGenerator.class);
+        _languages[PERL] =
+            new Language(
+                PERL,
+                "-pe",
+                "Perl",
+                "pm",
+                "{0}{1}_sm.{2}",
+                SmcPerlGenerator.class,
+                false,
+                null);
+        _languages[PYTHON] =
+            new Language(
+                PYTHON,
+                "-py",
+                "Python",
+                "py",
+                "{0}{1}_sm.{2}",
+                SmcPythonGenerator.class,
+                false,
+                null);
+        _languages[RUBY] =
+            new Language(
+                RUBY,
+                "-ru",
+                "Ruby",
+                "rb",
+                "{0}{1}_sm.{2}",
+                SmcRubyGenerator.class,
+                false,
+                null);
+        _languages[TABLE] =
+            new Language(
+                TABLE,
+                "-ta",
+                "-table",
+                "html",
+                "{0}{1}_sm.{2}",
+                SmcTableGenerator.class,
+                false,
+                null);
+        _languages[TCL] =
+            new Language(
+                TCL,
+                "-tc",
+                "[incr Tcl]",
+                "tcl",
+                "{0}{1}_sm.{2}",
+                SmcTclGenerator.class,
+                false,
+                null);
+        _languages[VB] =
+            new Language(
+                VB,
+                "-vb",
+                "VB.net",
+                "vb",
+                "{0}{1}_sm.{2}",
+                SmcVBGenerator.class,
+                false,
+                null);
 
         // List<Integer> language = new ArrayList<Integer>();
         List languages = new ArrayList();
         int target;
 
-        // _optionMap = new HashMap<String, List<Integer>>();
+        // _optionMap = new HashMap<String, List<Language>>();
         _optionMap = new HashMap();
 
         // Languages supporting each option:
@@ -1708,12 +1760,13 @@ public final class Smc
         // +         -d: all
         // +         -g: all
         // +    -glevel: graph
-        // +    -header: C, C++
+        // +    -header: C, C++, Objective C
         // +      -help: all
         // +   -nocatch: all
         // +      -noex: C++
         // + -nostreams: C++
-        // +   -reflect: C#, Java, TCL, VB, Lua, Perl, Python, Ruby
+        // +   -reflect: C#, Java, TCL, VB, Lua, Perl, Python,
+        //               Ruby
         // +    -return: all
         // +    -serial: C#, C++, Java, Tcl, VB
         // +    -suffix: all
@@ -1723,9 +1776,11 @@ public final class Smc
         // +  -vverbose: all
 
         // Set the options supporting all languages first.
-        for (target = C_PLUS_PLUS; target <= LUA; ++target)
+        for (target = (LANG_NOT_SET + 1);
+             target < LANGUAGE_COUNT;
+             ++target)
         {
-            languages.add(new Integer(target));
+            languages.add(_languages[target]);
         }
 
         _optionMap.put(DIRECTORY_FLAG, languages);
@@ -1740,20 +1795,21 @@ public final class Smc
 
         // Set the options supported by less than all langugages.
         languages = new ArrayList();
-        languages.add(new Integer(C_PLUS_PLUS));
+        languages.add(_languages[C_PLUS_PLUS]);
         _optionMap.put(CAST_FLAG, languages);
         _optionMap.put(NO_EXCEPTIONS_FLAG, languages);
         _optionMap.put(NO_STREAMS_FLAG, languages);
 
         languages = new ArrayList();
-        languages.add(new Integer(C_PLUS_PLUS));
-        languages.add(new Integer(C));
+        languages.add(_languages[C_PLUS_PLUS]);
+        languages.add(_languages[C]);
+        languages.add(_languages[OBJECTIVE_C]);
         _optionMap.put(HEADER_FLAG, languages);
 
         languages = new ArrayList();
-        languages.add(new Integer(C_SHARP));
-        languages.add(new Integer(JAVA));
-        languages.add(new Integer(VB));
+        languages.add(_languages[C_SHARP]);
+        languages.add(_languages[JAVA]);
+        languages.add(_languages[VB]);
         _optionMap.put(SYNC_FLAG, languages);
 
         languages = new ArrayList();
@@ -1768,15 +1824,15 @@ public final class Smc
         _optionMap.put(REFLECT_FLAG, languages);
 
         languages = new ArrayList();
-        languages.add(new Integer(C_SHARP));
-        languages.add(new Integer(JAVA));
-        languages.add(new Integer(VB));
-        languages.add(new Integer(TCL));
-        languages.add(new Integer(C_PLUS_PLUS));
+        languages.add(_languages[C_SHARP]);
+        languages.add(_languages[JAVA]);
+        languages.add(_languages[VB]);
+        languages.add(_languages[TCL]);
+        languages.add(_languages[C_PLUS_PLUS]);
         _optionMap.put(SERIAL_FLAG, languages);
 
         languages = new ArrayList();
-        languages.add(new Integer(GRAPH));
+        languages.add(_languages[GRAPH]);
         _optionMap.put(GLEVEL_FLAG, languages);
     }
 }
@@ -1784,6 +1840,9 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.19  2007/01/15 00:23:50  cwrapp
+// Release 4.4.0 initial commit.
+//
 // Revision 1.18  2007/01/03 15:37:38  fperrad
 // + Added Lua generator.
 // + Added -reflect option for Lua, Perl, Python and Ruby code generation

@@ -22,6 +22,8 @@
 //   examples/C#.
 //   Francois Perrad contributed the Python code generation and
 //   examples/Python.
+//   Chris Liscio contributed the Objective-C code generation
+//   and examples/ObjC.
 //
 // RCS ID
 // $Id$
@@ -178,6 +180,12 @@ public final class SmcCSharpGenerator
         _source.println("//");
         _source.println();
 
+		// State Changed event.
+		_source.print(_indent);
+		_source.println(
+            "    public event EventHandler StateChanged;");
+		_source.println();
+
         // State property.
         _source.print(_indent);
         _source.print("    public ");
@@ -258,6 +266,17 @@ public final class SmcCSharpGenerator
 
         _source.print(indent2);
         _source.println("_state = value;");
+
+		// Notifies listener
+		_source.print(indent2);
+		_source.println("if (StateChanged != null)");
+		_source.print(indent2);
+		_source.println("{");
+		_source.print(indent2);
+		_source.println(
+            "    StateChanged(this, EventArgs.Empty);");
+		_source.print(indent2);
+		_source.println("}");
 
         // If we are in a lock block, close it.
         if (Smc.isSynchronized() == true)
@@ -2037,6 +2056,9 @@ public final class SmcCSharpGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2007/01/15 00:23:50  cwrapp
+// Release 4.4.0 initial commit.
+//
 // Revision 1.8  2006/09/16 15:04:28  cwrapp
 // Initial v. 4.3.3 check-in.
 //

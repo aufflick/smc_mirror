@@ -21,7 +21,11 @@
 #   (Name withheld) contributed the C# code generation and
 #   examples/C#.
 #   Francois Perrad contributed the Python code generation and
-#   examples/Python.
+#   examples/Python, Perl code generation adn examples, Ruby
+#   code generation and examples, Lua code generation and
+#   examples.
+#   Chris Liscio contributed the Objective-C code generation
+#   and examples/ObjC.
 #
 # RCS ID
 # $Id$
@@ -67,6 +71,8 @@ APP_SOURCES=	SmcLexerContext.java \
 		SmcLuaGenerator.java \
 		SmcPerlGenerator.java \
 		SmcRubyGenerator.java \
+		SmcHeaderObjCGenerator.java \
+		SmcObjCGenerator.java \
 		Smc.java
 
 PACKAGE_NAME=	net.sf.smc
@@ -135,6 +141,9 @@ realclean :	clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.10  2007/01/15 00:23:50  cwrapp
+# Release 4.4.0 initial commit.
+#
 # Revision 1.9  2007/01/03 15:35:57  fperrad
 # + Added Lua generator.
 #

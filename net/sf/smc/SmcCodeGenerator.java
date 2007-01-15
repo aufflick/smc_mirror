@@ -22,6 +22,8 @@
 //   examples/C#.
 //   Francois Perrad contributed the Python code generation and
 //   examples/Python.
+//   Chris Liscio contributed the Objective-C code generation
+//   and examples/ObjC.
 //
 // RCS ID
 // $Id$
@@ -34,6 +36,8 @@ package net.sf.smc;
 
 import java.io.PrintStream;
 import java.io.StringWriter;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Base class for all target language code generators.
@@ -46,7 +50,7 @@ import java.io.StringWriter;
 public abstract class SmcCodeGenerator
     extends SmcVisitor
 {
-//-----------------------------------------------------------------
+//---------------------------------------------------------------
 // Member methods
 //
 
@@ -102,7 +106,28 @@ public abstract class SmcCodeGenerator
                  endState.equals(currentState) == true));
     }
 
-//-----------------------------------------------------------------
+    // Returns true if each of the transition guards uses
+    // the nil end state.
+    protected boolean allNilEndStates(List guards)
+    {
+        Iterator git;
+        SmcGuard guard;
+        boolean retcode = true;
+
+        for (git = guards.iterator();
+             git.hasNext() == true && retcode == true;
+            )
+        {
+            guard = (SmcGuard) git.next();
+            retcode =
+                (guard.getTransType() == Smc.TRANS_SET &&
+                 (guard.getEndState()).equals("nil") == true);
+        }
+
+        return (retcode);
+    }
+
+//---------------------------------------------------------------
 // Member data
 //
 
@@ -129,6 +154,9 @@ public abstract class SmcCodeGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2007/01/15 00:23:50  cwrapp
+// Release 4.4.0 initial commit.
+//
 // Revision 1.2  2006/09/16 15:04:28  cwrapp
 // Initial v. 4.3.3 check-in.
 //

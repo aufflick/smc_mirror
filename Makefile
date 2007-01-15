@@ -26,6 +26,8 @@
 #   examples/C#.
 #   Francois Perrad contributed the Python code generator and
 #   examples/Python.
+#   Chris Liscio contributed Objective-C code generation and
+#   examples/ObjC.
 #
 # RCS ID
 # $Id$
@@ -123,6 +125,9 @@ realclean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.11  2007/01/15 00:23:46  cwrapp
+# Release 4.4.0 initial commit.
+#
 # Revision 1.10  2005/11/07 19:34:53  cwrapp
 # Changes in release 4.3.0:
 # New features:

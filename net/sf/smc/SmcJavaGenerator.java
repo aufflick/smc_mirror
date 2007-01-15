@@ -13,7 +13,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2005. Charles W. Rapp.
+// Copyright (C) 2005, 2006. Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s):
@@ -22,6 +22,8 @@
 //   examples/C#.
 //   Francois Perrad contributed the Python code generation and
 //   examples/Python.
+//   Chris Liscio contributed the Objective-C code generation
+//   and examples/ObjC.
 //
 // RCS ID
 // $Id$
@@ -1639,6 +1641,9 @@ public final class SmcJavaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2007/01/15 00:23:51  cwrapp
+// Release 4.4.0 initial commit.
+//
 // Revision 1.8  2006/09/16 15:04:29  cwrapp
 // Initial v. 4.3.3 check-in.
 //

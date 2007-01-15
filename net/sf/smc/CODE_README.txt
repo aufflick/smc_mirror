@@ -1,5 +1,72 @@
                               SMC -
                   The State Machine Compiler
+                        Version 4.4.0
+
+
+
++ Major changes
+---------------
+
+Added Objective-C code generator and examples. Use the command
+line option -objc to generate Objective-C header and source
+files.
+
+Add Lua code generator and examples. Use the command line option
+-lua to generate Lua source file.
+
+
++ Minor changes
+---------------
+
+(C#, VB) The _debugFlag and _debugStream are deprecated and no
+         longer used. Instead, System.Diagnostics.Trace is
+         used. The SMC programmer is responsible for defining
+         the TRACE directive during compilation so the Trace
+         will be included in the executable.
+
+         The SMC programmer is also responsible for configuring
+         Trace to send the trace output to the desired
+         destination.
+
+         There are no longer separate C# and VB dlls but a
+         single lib/DotNet directory containing four DLLs:
+         + debug with Trace support,
+         + debug without Trace support,
+         + release with Trace support and
+         + release without Trace support.
+         (SF feature 1440302)
+
+
++ Bug fixes
+-----------
+
+(C++)
+    The FSMContext copy constructor C++ statemap.h incorrectly
+    included an unused parameter variable name which results in
+    compiler warnings. This variable name is removed.
+    (SF bug 1580746)
+
+(All)
+    SMC -version reported the incorrect version. Corrected in
+    this release.
+    (SF bug 1580791)
+
+(C++)
+    Using the -d with -c++ resulted in generating an invalid
+    #include. The #include is now corrected.
+    (SF bug 1592619)
+
+(C++)
+    Unused local variable loopbackFlag generated, resulting in
+    compiler warnings. This variable no longer generated if
+    unused.
+    (SF bug 1596933)
+
+
+
+
+                              SMC -
+                  The State Machine Compiler
                         Version 4.3.3
 
 

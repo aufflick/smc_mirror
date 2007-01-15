@@ -448,7 +448,7 @@ EXHIBIT A -Mozilla Public License.
 
      The Initial Developer of the Original Code is _Charles W. Rapp_______.
      Portions created by _Charles W. Rapp______ are Copyright (C) ______
-     _2000_-_2005_Charles W. Rapp_. All Rights Reserved.
+     _2000_-_2006._Charles W. Rapp_. All Rights Reserved.
 
      Contributor(s): Eitan_Suez,_Francois_Perrad___________.
 

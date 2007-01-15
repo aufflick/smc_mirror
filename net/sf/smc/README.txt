@@ -52,8 +52,6 @@ SMC's command line options are:
                (use with -java, -vb and -csharp only).
     -noex    : Do not generate C++ exception throws
                (use with -c++ only).
-    -noglob  : Do no generate static variables
-               (use with -c++ only).
     -nocatch : Do not generate try/catch/rethrow code
                (not recommended).
     -serial  : Generate serialization code.
@@ -64,38 +62,43 @@ SMC's command line options are:
     -cast <cast type>
              : use this C++ cast type
                (use with -c++ only).
+    -headerd <directory>
+             : Place generated header files in directory.
+               (use with -c, -c++, -objc only).
     -d <directory>
-             : Placed generated files in directory.
+             : Place generated files in directory.
     -glevel <0 - 2>
              : Graph detail level from 0 (least) to 2 (greatest)
                (use with -graph only).
     -c       : Generate C code.
     -c++     : Generate C++ code.
     -csharp  : Generate C# code.
+    -graph   : Generate a Graphviz DOT file.
     -java    : Generate Java code.
     -lua     : Generate Lua code.
+    -objc    : Generate Objective-C code.
     -perl    : Generate Perl code.
     -python  : Generate Python code.
     -ruby    : Generate Ruby code.
+    -table   : Generate an HTML table.
     -tcl     : Generate [incr Tcl] code.
     -vb      : Generate VB.Net code.
-    -table   : Generate an HTML table.
-    -graph   : Generate a Graphviz DOT file.
 
     NOTE: Source files *must* end in ".sm" or ".SM".
           Exactly one of the following must be specified:
           + -c
           + -c++
-          + -java
-          + -tcl
-          + -vb
           + -csharp
+          + -graph
+          + -java
           + -lua
+          + -objc
           + -perl
           + -python
           + -ruby
           + -table
-          + -graph
+          + -tcl
+          + -vb
 
 
 + Notices

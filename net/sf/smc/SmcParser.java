@@ -22,6 +22,8 @@
 //   examples/C#.
 //   Francois Perrad contributed the Python code generation and
 //   examples/Python.
+//   Chris Liscio contributed the Objective-C code generation
+//   and examples/ObjC.
 //
 // RCS ID
 // $Id$
@@ -244,7 +246,7 @@ public final class SmcParser
 
     /* package */ int getTargetLanguage()
     {
-        return (Smc._targetLanguage);
+        return (Smc._targetLanguage.index());
     }
 
     // Put the lexer into raw mode.
@@ -1405,6 +1407,9 @@ public final class SmcParser
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.14  2007/01/15 00:23:51  cwrapp
+// Release 4.4.0 initial commit.
+//
 // Revision 1.13  2006/09/16 15:04:29  cwrapp
 // Initial v. 4.3.3 check-in.
 //

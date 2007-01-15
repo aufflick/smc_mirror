@@ -2,7 +2,7 @@
 
                                SMC
                      The State Machine Compiler
-                         (Version: 4.3.3)
+                         (Version: 4.4.0)
 
                      http://smc.sourceforge.net
 
@@ -13,7 +13,13 @@
 
 New Features:
 
-None.
++ Added Objective-C generator and examples.
+  Contributor: Chris Liscio
+
++ Add Lua code generator and examples. Use the command line
+  option -lua to generate Lua source file.
+  Contributor: Francois Perrard
+
 
 Minor changes
 
@@ -39,39 +45,30 @@ Minor changes
   SourceForge CVS.
   (SF feature 1440302)
 
-+ Updated ant task to support SMC's -reflect option.
-
 
 Bug Fixes:
 
-+ (C)
-  When -g was used, generated code was not strictly ANSI C
-   compliant. This was corrected.
-  (SF bug 1550093)
++ (C++)
+    The FSMContext copy constructor C++ statemap.h incorrectly
+    included an unused parameter variable name which results in
+    compiler warnings. This variable name is removed.
+    (SF bug 1580746)
 
-+ (GraphViz)
-  Generated DOT file was incorrect when state names
-  begin with a lower-case letter. This was corrected.
-  (SF bug 1549777)
-
-+ (Java)
-  Incorrectly generate setOwner() method twice when -serial
-  flag is specified.
-  (SF bug 1555456)
++ (All)
+    SMC -version reported the incorrect version. Corrected in
+    this release.
+    (SF bug 1580791)
 
 + (C++)
-  Removed incorrectly placed semicolon following namespace
-  closing brace.
-  (SF bug 1556372)
+    Using the -d with -c++ resulted in generating an invalid
+    #include. The #include is now corrected.
+    (SF bug 1592619)
 
-+ (Python)
-  Added missing "pass" statement to empty "else:" block.
-  (SF bug 1558366)
-
-+ (VB)
-  Added namespace support. %package is now honored when
-  generating VB.net code.
-  (SF feature request 1544657)
++ (C++)
+    Unused local variable loopbackFlag generated, resulting in
+    compiler warnings. This variable no longer generated if
+    unused.
+    (SF bug 1596933)
 
 
 
@@ -118,7 +115,7 @@ Java Standard Edition can be downloaded for FREE from
 
                     http://java.sun.com/j2se/
 
-SMC currently supports nine programming languages:
+SMC currently supports ten programming languages:
   1. C,
   2. C++,
   3. C#,
@@ -126,8 +123,9 @@ SMC currently supports nine programming languages:
   5. Perl,
   6. Python,
   7. Ruby,
-  8. [incr Tcl] and
-  9. VB.Net.
+  8. [incr Tcl],
+  9. VB.Net and
+ 10. Objective-C
 
 SMC is also able to generate an HTML table representation of your
 FSM and a GraphViz DOT file representation
@@ -182,6 +180,13 @@ The download package's directory layout is:
          |     |        |
          |     |        +-Release-+-statemap.dll
          |     |
+         |     |
+         |     +-ObjC-+-README.txt
+         |     |      |
+         |     |      +-statemap.h
+         |     |      |
+         |     |      +-statemap.m
+         |     |
          |     +-Perl-+-MANIFEST
          |     |      |
          |     |      +-Makefile.pl
@@ -216,7 +221,7 @@ The download package's directory layout is:
          |
          +-misc-+-smc.ico (smc Windows icon)
          |
-         +-examples-+-C++--+-EX1 (C++ source code and build files)
+         +-examples-+-Ant--+-EX1 (Java source code, Ant built)
          |          |      |
          |          |      +-EX2
          |          |      |
@@ -227,6 +232,34 @@ The download package's directory layout is:
          |          |      +-EX5
          |          |      |
          |          |      +-EX6
+         |          |      |
+         |          |      +-EX7
+         |          |
+         |          |-C----+-EX1 (C source code, Makefiles)
+         |          |      |
+         |          |      +-EX2
+         |          |      |
+         |          |      +-EX3
+         |          |      |
+         |          |      +-EX4
+         |          |
+         |          +-C++--+-EX1 (C++ source code, Makefiles)
+         |          |      |
+         |          |      +-EX2
+         |          |      |
+         |          |      +-EX3
+         |          |      |
+         |          |      +-EX4
+         |          |      |
+         |          |      +-EX5
+         |          |      |
+         |          |      +-EX6
+         |          |
+         |          +-CSharp-+-EX1 (C# source code)
+         |          |        |
+         |          |        +-EX2
+         |          |        |
+         |          |        +-EX3
          |          |
          |          +-Java-+-EX1 (Java source code, Makefiles)
          |          |      |
@@ -242,6 +275,49 @@ The download package's directory layout is:
          |          |      |
          |          |      +-EX7
          |          |
+         |          |-ObjC-+-EX1 (Objective C source code)
+         |          |      |
+         |          |      +-EX2
+         |          |      |
+         |          |      +-EX3
+         |          |      |
+         |          |      +-EX4
+         |          |      |
+         |          |      +-EX5
+         |          |      |
+         |          |      +-EX7 (Mac OSX XCode Project)
+         |          |
+         |          |-Perl-+-EX1 (Perl source code)
+         |          |      |
+         |          |      +-EX2
+         |          |      |
+         |          |      +-EX3
+         |          |      |
+         |          |      +-EX4
+         |          |      |
+         |          |      +-EX7
+         |          |
+         |          |
+         |          +-Python-+-EX1 (Python source code)
+         |          |        |
+         |          |        +-EX2
+         |          |        |
+         |          |        +-EX3
+         |          |        |
+         |          |        +-EX4
+         |          |        |
+         |          |        +-EX7
+         |          |
+         |          +-Ruby-+-EX1 (Ruby source code)
+         |          |      |
+         |          |      +-EX2
+         |          |      |
+         |          |      +-EX3
+         |          |      |
+         |          |      +-EX4
+         |          |      |
+         |          |      +-EX7
+         |          |
          |          +-Tcl--+-EX1 (Tcl source code)
          |          |      |
          |          |      +-EX2
@@ -253,40 +329,12 @@ The download package's directory layout is:
          |          |      +-EX5
          |          |
          |          +-VB---+-EX1 (VB.Net source code)
-         |          |      |
-         |          |      +-EX2
-         |          |      |
-         |          |      +-EX3
-         |          |      |
-         |          |      +-EX4
-         |          |
-         |          +-CSharp-+-EX1 (C# source code)
-         |          |        |
-         |          |        +-EX3
-         |          |
-         |          +-Ant--+-EX1 (Java source code, Ant built)
-         |          |      |
-         |          |      +-EX2
-         |          |      |
-         |          |      +-EX3
-         |          |      |
-         |          |      +-EX4
-         |          |      |
-         |          |      +-EX5
-         |          |      |
-         |          |      +-EX6
-         |          |      |
-         |          |      +-EX7
-         |          |
-         |          +-Python-+-EX1 (Python source code)
-         |                   |
-         |                   +-EX2
-         |                   |
-         |                   +-EX3
-         |                   |
-         |                   +-EX4
-         |                   |
-         |                   +-EX7
+         |                 |
+         |                 +-EX2
+         |                 |
+         |                 +-EX3
+         |                 |
+         |                 +-EX4
          |
          +-tools-+-maven-+-plugin.jelly
                  |       |

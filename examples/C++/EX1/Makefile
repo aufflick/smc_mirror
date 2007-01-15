@@ -1,11 +1,11 @@
 # 
 # The contents of this file are subject to the Mozilla Public
 # License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
+# except in compliance with the License. You may obtain a copy
+# of the License at http://www.mozilla.org/MPL/
 # 
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+# Software distributed under the License is distributed on an
+# "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
 # 
@@ -22,15 +22,7 @@
 # $Id$
 #
 # CHANGE LOG
-# $Log$
-# Revision 1.6  2006/09/17 16:26:06  cwrapp
-# Initial v. 4.3.3 check-in.
-#
-# Revision 1.5  2005/05/28 13:31:16  cwrapp
-# Updated C++ examples.
-#
-# Revision 1.0  2003/12/14 19:12:26  charlesr
-# Initial revision
+# (See the bottom of this file.)
 #
 
 TARGET    = checkstring
@@ -65,3 +57,19 @@ test :		$(TARGET)
 
 clean :
 		-rm -f $(TARGET) $(OBJECTS) *_sm.h *_sm.cpp
+
+#
+# CHANGE LOG
+# $Log$
+# Revision 1.7  2007/01/15 00:23:48  cwrapp
+# Release 4.4.0 initial commit.
+#
+# Revision 1.6  2006/09/17 16:26:06  cwrapp
+# Initial v. 4.3.3 check-in.
+#
+# Revision 1.5  2005/05/28 13:31:16  cwrapp
+# Updated C++ examples.
+#
+# Revision 1.0  2003/12/14 19:12:26  charlesr
+# Initial revision
+#

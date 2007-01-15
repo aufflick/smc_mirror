@@ -13,7 +13,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2005. Charles W. Rapp.
+// Copyright (C) 2005, 2006. Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s):
@@ -22,6 +22,8 @@
 //   examples/C#.
 //   Francois Perrad contributed the Python code generation and
 //   examples/Python.
+//   Chris Liscio contributed the Objective-C code generation
+//   and examples/ObjC.
 //
 // RCS ID
 // $Id$
@@ -49,11 +51,12 @@ import java.util.StringTokenizer;
 public final class SmcCppGenerator
     extends SmcCodeGenerator
 {
-//-----------------------------------------------------------------
+//---------------------------------------------------------------
 // Member methods
 //
 
-    public SmcCppGenerator(PrintStream source, String srcfileBase)
+    public SmcCppGenerator(PrintStream source,
+                           String srcfileBase)
     {
         super (source, srcfileBase);
 
@@ -129,6 +132,10 @@ public final class SmcCppGenerator
             _source.print(headerDirectory);
         }
         // Else they are in the same directory.
+        else if (srcDirectory != null)
+        {
+            _source.print(srcDirectory);
+        }
         _source.print(_srcfileBase);
         _source.println("_sm.h\"");
 
@@ -181,7 +188,7 @@ public final class SmcCppGenerator
             }
         }
 
-        // Statically declare all derive state classes.
+        // Statically declare all derived state classes.
         _source.print(_indent);
         _source.println("// Static class declarations.");
         for (mapIt = fsm.getMaps().iterator(), index = 0;
@@ -663,7 +670,12 @@ public final class SmcCppGenerator
             _source.println("& ctxt = context.getOwner();");
         }
 
-        if (defaultFlag == true)
+        // The loopbackFlag local variable is needed if there
+        // is one guard with a non-nil end state. Conversely,
+        // if all the transition guards use a nil end state,
+        // then we don't use the loopbackFlag local variable.
+        if (defaultFlag == true &&
+            allNilEndStates(guards) == false)
         {
             _source.print(_indent);
             _source.println("    bool loopbackFlag = false;");
@@ -712,7 +724,8 @@ public final class SmcCppGenerator
                 _source.println("context.getDebugStream();");
                 _source.println();
                 _source.print(_indent);
-                _source.print("        str << \"TRANSITION   : ");
+                _source.print(
+                    "        str << \"TRANSITION   : ");
                 _source.print(mapName);
                 _source.print(" ");
                 _source.print(transName);
@@ -1349,7 +1362,7 @@ public final class SmcCppGenerator
         return;
     }
 
-//-----------------------------------------------------------------
+//---------------------------------------------------------------
 // Member data
 //
 }
@@ -1357,6 +1370,9 @@ public final class SmcCppGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2007/01/15 00:23:50  cwrapp
+// Release 4.4.0 initial commit.
+//
 // Revision 1.5  2006/09/16 15:04:28  cwrapp
 // Initial v. 4.3.3 check-in.
 //
@@ -1372,16 +1388,17 @@ public final class SmcCppGenerator
 //
 // + Added -reflect option for Java, C#, VB.Net and Tcl code
 //   generation. When used, allows applications to query a state
-//   about its supported transitions. Returns a list of transition
-//   names. This feature is useful to GUI developers who want to
-//   enable/disable features based on the current state. See
-//   Programmer's Manual section 11: On Reflection for more
-//   information.
+//   about its supported transitions. Returns a list of
+//   transition names. This feature is useful to GUI developers
+//   who want to enable/disable features based on the current
+//   state. See Programmer's Manual section 11: On Reflection
+//   for more information.
 //
-// + Updated LICENSE.txt with a missing final paragraph which allows
-//   MPL 1.1 covered code to work with the GNU GPL.
+// + Updated LICENSE.txt with a missing final paragraph which
+//   allows MPL 1.1 covered code to work with the GNU GPL.
 //
-// + Added a Maven plug-in and an ant task to a new tools directory.
+// + Added a Maven plug-in and an ant task to a new tools
+//   directory.
 //   Added Eiten Suez's SMC tutorial (in PDF) to a new docs
 //   directory.
 //
@@ -1393,9 +1410,9 @@ public final class SmcCppGenerator
 //
 // + A note: the SMC FAQ incorrectly stated that C/C++ generated
 //   code is thread safe. This is wrong. C/C++ generated is
-//   certainly *not* thread safe. Multi-threaded C/C++ applications
-//   are required to synchronize access to the FSM to allow for
-//   correct performance.
+//   certainly *not* thread safe. Multi-threaded C/C++
+//   applications are required to synchronize access to the FSM
+//   to allow for correct performance.
 //
 // + (Java) The generated getState() method is now public.
 //
@@ -1406,8 +1423,8 @@ public final class SmcCppGenerator
 // Added Francois Perrad to Contributors section for Python work.
 //
 // Revision 1.1  2005/02/21 15:13:03  charlesr
-// Modified isLoopback() to new signature due to moving method from
-// SmcGuard to SmcCodeGenerator.
+// Modified isLoopback() to new signature due to moving method
+// from SmcGuard to SmcCodeGenerator.
 //
 // Revision 1.0  2005/02/03 17:10:26  charlesr
 // Initial revision

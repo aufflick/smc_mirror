@@ -13,7 +13,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 - 2005. Charles W. Rapp.
+// Copyright (C) 2000 - 2006. Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
@@ -22,6 +22,8 @@
 //   examples/C#.
 //   Francois Perrad contributed the Python code generation and
 //   examples/Python.
+//   Chris Liscio contributed the Objective-C code generation
+//   and examples/ObjC.
 //
 // RCS ID
 // $Id$
@@ -32,9 +34,9 @@
 
 package net.sf.smc;
 
+import java.io.EOFException;
 import java.io.InputStream;
 import java.io.IOException;
-import java.io.EOFException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -345,7 +347,8 @@ import java.util.Map;
                 {
                     _tokenBuffer.append(_currentChar);
 
-                    // Only RAW and RAW2 use the concept of depth.
+                    // Only RAW and RAW2 use the concept of
+                    // depth.
                     if (_mode != RAW3)
                     {
                         if (_currentChar == _closeChar)
@@ -379,7 +382,8 @@ import java.util.Map;
         {
             StringBuffer msg = new StringBuffer(80);
 
-            msg.append("User source code contains an unbalanced ");
+            msg.append(
+                "User source code contains an unbalanced ");
             msg.append(_openChar);
             msg.append(", ");
             msg.append(_closeChar);
@@ -508,7 +512,8 @@ import java.util.Map;
         {
             StringBuffer msg = new StringBuffer(80);
 
-            msg.append("User source code contains an unbalanced ");
+            msg.append(
+                "User source code contains an unbalanced ");
             msg.append(_openChar);
             msg.append(", ");
             msg.append(_closeChar);
@@ -678,7 +683,8 @@ import java.util.Map;
     // Maps % keywords to an integer value.
     private static Map _PercentKeywordMap;
 
-    // Create an array which maps ASCII characters to transitions.
+    // Create an array which maps ASCII characters to
+    // transitions.
     private static Method[] _TransMethod;
 
     //-----------------------------------------------------------
@@ -845,21 +851,23 @@ import java.util.Map;
 
             transName = "unicode";
             unicode =
-                fsmClass.getDeclaredMethod("unicode",
+                fsmClass.getDeclaredMethod(transName,
                                            paramTypes);
 
             transName = "whitespace";
             whitespace =
-                fsmClass.getDeclaredMethod("whitespace",
+                fsmClass.getDeclaredMethod(transName,
                                            paramTypes);
 
             transName = "alpha";
             alpha =
-                fsmClass.getDeclaredMethod("alpha", paramTypes);
+                fsmClass.getDeclaredMethod(transName,
+                                           paramTypes);
 
             transName = "digit";
             digit =
-                fsmClass.getDeclaredMethod("digit", paramTypes);
+                fsmClass.getDeclaredMethod(transName,
+                                           paramTypes);
 
             // Set all transitions to unicode and then set known
             // characters to other transitions.
@@ -903,67 +911,67 @@ import java.util.Map;
             // Visible characters.
             transName = "percent";
             _TransMethod['%'] =
-                fsmClass.getDeclaredMethod("percent",
+                fsmClass.getDeclaredMethod(transName,
                                            paramTypes);
             transName = "left_paren";
             _TransMethod['('] =
-                fsmClass.getDeclaredMethod("left_paren",
+                fsmClass.getDeclaredMethod(transName,
                                            paramTypes);
             transName = "right_paren";
             _TransMethod[')'] =
-                fsmClass.getDeclaredMethod("right_paren",
+                fsmClass.getDeclaredMethod(transName,
                                            paramTypes);
             transName = "asterisk";
             _TransMethod['*'] =
-                fsmClass.getDeclaredMethod("asterisk",
+                fsmClass.getDeclaredMethod(transName,
                                            paramTypes);
             transName = "comma";
             _TransMethod[','] =
-                fsmClass.getDeclaredMethod("comma",
+                fsmClass.getDeclaredMethod(transName,
                                            paramTypes);
             transName = "period";
             _TransMethod['.'] =
-                fsmClass.getDeclaredMethod("period",
+                fsmClass.getDeclaredMethod(transName,
                                            paramTypes);
             transName = "slash";
             _TransMethod['/'] =
-                fsmClass.getDeclaredMethod("slash",
+                fsmClass.getDeclaredMethod(transName,
                                            paramTypes);
             transName = "colon";
             _TransMethod[':'] =
-                fsmClass.getDeclaredMethod("colon",
+                fsmClass.getDeclaredMethod(transName,
                                            paramTypes);
             transName = "semicolon";
             _TransMethod[';'] =
-                fsmClass.getDeclaredMethod("semicolon",
+                fsmClass.getDeclaredMethod(transName,
                                            paramTypes);
             transName = "left_bracket";
             _TransMethod['['] =
-                fsmClass.getDeclaredMethod("left_bracket",
+                fsmClass.getDeclaredMethod(transName,
                                            paramTypes);
             // Right bracket is not needed as it is consumed by
             // raw text processing.
             transName = "underscore";
             _TransMethod['_'] =
-                fsmClass.getDeclaredMethod("underscore",
+                fsmClass.getDeclaredMethod(transName,
                                            paramTypes);
             transName = "left_brace";
             _TransMethod['{'] =
-                fsmClass.getDeclaredMethod("left_brace",
+                fsmClass.getDeclaredMethod(transName,
                                            paramTypes);
             transName = "right_brace";
             _TransMethod['}'] =
-                fsmClass.getDeclaredMethod("right_brace",
+                fsmClass.getDeclaredMethod(transName,
                                            paramTypes);
 
             transName = "equal";
             _TransMethod['='] =
-                fsmClass.getDeclaredMethod("equal",
+                fsmClass.getDeclaredMethod(transName,
                                            paramTypes);
 
             transName = "dollar";
             _TransMethod['$'] =
-                fsmClass.getDeclaredMethod("dollar",
+                fsmClass.getDeclaredMethod(transName,
                                            paramTypes);
         }
         catch (NoSuchMethodException ex1)
@@ -978,7 +986,8 @@ import java.util.Map;
         catch (SecurityException ex2)
         {
             System.err.println(
-                "INITIALIZATION ERROR! Not allowed to access SmcLexerContext." +
+                "INITIALIZATION ERROR! Not allowed to access " +
+                "SmcLexerContext." +
                 transName +
                 ".");
             System.exit(1);
@@ -1067,6 +1076,9 @@ import java.util.Map;
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2007/01/15 00:23:51  cwrapp
+// Release 4.4.0 initial commit.
+//
 // Revision 1.9  2006/09/16 15:04:29  cwrapp
 // Initial v. 4.3.3 check-in.
 //

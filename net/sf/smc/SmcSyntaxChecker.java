@@ -22,6 +22,8 @@
 //   examples/C#.
 //   Francois Perrad contributed the Python code generation and
 //   examples/Python.
+//   Chris Liscio contributed the Objective-C code generation
+//   and examples/ObjC.
 //
 // RCS ID
 // $Id$
@@ -217,7 +219,7 @@ public final class SmcSyntaxChecker
 
         // If this is Tcl, then make sure the parameter types
         // are either value or reference.
-        if (Smc._targetLanguage == Smc.TCL)
+        if (_targetLanguage == Smc.TCL)
         {
             for (it = transition.getParameters().iterator();
                  it.hasNext() == true;
@@ -335,7 +337,7 @@ public final class SmcSyntaxChecker
         // Reference means that this parameters name is passed
         // (no $ is prepended). Verify that the type name is one
         // of these two.
-        if (Smc._targetLanguage == Smc.TCL &&
+        if (_targetLanguage == Smc.TCL &&
             typeName.equals(
                 SmcParameter.TCL_VALUE_TYPE) == false &&
             typeName.equals(
