@@ -13,11 +13,10 @@
 #
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
-# Copyright (C) 2000 - 2007. Charles W. Rapp.
+# Copyright (C) 2000 Charles W. Rapp.
 # All Rights Reserved.
 #
 # Contributor(s):
-#       Port to Ruby by Francois Perrad, francois.perrad@gadz.org
 #
 # RCS ID
 # $Id$
@@ -31,19 +30,19 @@
 #
 
 SM_SOURCES=     AppClass.sm
-SOURCES=        $(SM_SOURCES:%.sm=%_sm.rb)
+SOURCES=        $(SM_SOURCES:%.sm=%_sm.tcl)
 
 # Uncomment to turn on reflection.
 # REFLECT = 	-reflect
 
 SMC=            java -jar ../../../bin/Smc.jar
-SMC_FLAGS=      -ruby -g $(REFLECT)
+SMC_FLAGS=      -tcl -g $(REFLECT)
 
 #################################################################
 # Rules.
 #
 
-%_sm.rb : %.sm
+%_sm.tcl : %.sm
 		$(SMC) $(SMC_FLAGS) $<
 
 all :           checkstring test
@@ -51,28 +50,19 @@ all :           checkstring test
 checkstring :   $(SOURCES)
 
 clean :
-		-rm *_sm.rb
+		-rm *_sm.tcl
 
 test:
-		-ruby -I ../../../lib/Ruby -w checkstring.rb ""
-		-ruby -I ../../../lib/Ruby -w checkstring.rb 000
-		-ruby -I ../../../lib/Ruby -w checkstring.rb 00011
-		-ruby -I ../../../lib/Ruby -w checkstring.rb 111
-		-ruby -I ../../../lib/Ruby -w checkstring.rb 000111100
-		-ruby -I ../../../lib/Ruby -w checkstring.rb 00011a1b10c0
+		-tclsh checkstring.tcl ""
+		-tclsh checkstring.tcl 000
+		-tclsh checkstring.tcl 00011
+		-tclsh checkstring.tcl 111
+		-tclsh checkstring.tcl 000111100
+		-tclsh checkstring.tcl 00011a1b10c0
 
 #
 # CHANGE LOG
 # $Log$
-# Revision 1.4  2007/01/15 16:58:57  cwrapp
+# Revision 1.1  2007/01/15 16:58:59  cwrapp
 # Release 4.4.0 second commit.
-#
-# Revision 1.3  2007/01/03 14:43:23  fperrad
-# + Added -reflect option for Perl, Python and Ruby code generation
-#
-# Revision 1.2  2006/09/17 16:26:06  cwrapp
-# Initial v. 4.3.3 check-in.
-#
-# Revision 1.1  2005/06/16 17:52:03  fperrad
-# Added Ruby examples 1 - 4 and 7.
 #

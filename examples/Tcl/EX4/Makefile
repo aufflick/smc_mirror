@@ -13,11 +13,10 @@
 #
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
-# Copyright (C) 2000 - 2007. Charles W. Rapp.
+# Copyright (C) 2007. Charles W. Rapp.
 # All Rights Reserved.
 #
 # Contributor(s):
-#       Port to Ruby by Francois Perrad, francois.perrad@gadz.org
 #
 # RCS ID
 # $Id$
@@ -30,49 +29,43 @@
 # Macros.
 #
 
-SM_SOURCES=     AppClass.sm
-SOURCES=        $(SM_SOURCES:%.sm=%_sm.rb)
+TARGET=		Traffic
+
+SM_SOURCES=	VEHICLE.SM \
+		stoplight.sm
+
+SOURCES=	$(SM_SOURCES:%.sm=%_sm.tcl) \
+		$(SM_SOURCES:%.SM=%_sm.tcl)
 
 # Uncomment to turn on reflection.
 # REFLECT = 	-reflect
 
-SMC=            java -jar ../../../bin/Smc.jar
-SMC_FLAGS=      -ruby -g $(REFLECT)
+SMC=		java -jar ../../../bin/Smc.jar
+SMC_FLAGS=	-tcl -g $(REFLECT)
 
 #################################################################
 # Rules.
 #
 
-%_sm.rb : %.sm
+%_sm.tcl : %.sm
 		$(SMC) $(SMC_FLAGS) $<
 
-all :           checkstring test
+%_sm.tcl : %.SM
+		$(SMC) $(SMC_FLAGS) $<
 
-checkstring :   $(SOURCES)
+all :		$(TARGET) test
+
+$(TARGET) :	$(SOURCES)
+
+test :		$(SOURCES)
+		wish TRAFFIC.TCL
 
 clean :
-		-rm *_sm.rb
-
-test:
-		-ruby -I ../../../lib/Ruby -w checkstring.rb ""
-		-ruby -I ../../../lib/Ruby -w checkstring.rb 000
-		-ruby -I ../../../lib/Ruby -w checkstring.rb 00011
-		-ruby -I ../../../lib/Ruby -w checkstring.rb 111
-		-ruby -I ../../../lib/Ruby -w checkstring.rb 000111100
-		-ruby -I ../../../lib/Ruby -w checkstring.rb 00011a1b10c0
+		-rm *_sm.tcl
 
 #
 # CHANGE LOG
 # $Log$
-# Revision 1.4  2007/01/15 16:58:57  cwrapp
+# Revision 1.1  2007/01/15 16:58:59  cwrapp
 # Release 4.4.0 second commit.
-#
-# Revision 1.3  2007/01/03 14:43:23  fperrad
-# + Added -reflect option for Perl, Python and Ruby code generation
-#
-# Revision 1.2  2006/09/17 16:26:06  cwrapp
-# Initial v. 4.3.3 check-in.
-#
-# Revision 1.1  2005/06/16 17:52:03  fperrad
-# Added Ruby examples 1 - 4 and 7.
 #

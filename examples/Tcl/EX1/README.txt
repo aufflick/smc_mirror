@@ -4,8 +4,8 @@
                           Tcl Example 1
 
 
-This state machine "recognizes" the string 0*1* (which includes the
-empty string).
+This state machine "recognizes" the string 0*1* (which includes
+the empty string).
 
 
 + Building

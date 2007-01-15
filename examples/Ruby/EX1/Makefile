@@ -1,11 +1,11 @@
 #
 # The contents of this file are subject to the Mozilla Public
 # License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
+# except in compliance with the License. You may obtain a copy
+# of the License at http://www.mozilla.org/MPL/
 #
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+# Software distributed under the License is distributed on an
+# "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
 #
@@ -13,7 +13,7 @@
 #
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
-# Copyright (C) 2000 Charles W. Rapp.
+# Copyright (C) 2000 - 2007. Charles W. Rapp.
 # All Rights Reserved.
 #
 # Contributor(s):
@@ -23,16 +23,11 @@
 # $Id$
 #
 # CHANGE LOG
-# $Log$
-# Revision 1.3  2007/01/03 14:43:23  fperrad
-# + Added -reflect option for Perl, Python and Ruby code generation
+# (See the bottom of this file.)
 #
-# Revision 1.2  2006/09/17 16:26:06  cwrapp
-# Initial v. 4.3.3 check-in.
-#
-# Revision 1.1  2005/06/16 17:52:03  fperrad
-# Added Ruby examples 1 - 4 and 7.
-#
+
+#################################################################
+# Macros.
 #
 
 SM_SOURCES=     AppClass.sm
@@ -44,12 +39,16 @@ SOURCES=        $(SM_SOURCES:%.sm=%_sm.rb)
 SMC=            java -jar ../../../bin/Smc.jar
 SMC_FLAGS=      -ruby -g $(REFLECT)
 
-all :           checkstring
+#################################################################
+# Rules.
+#
 
 %_sm.rb : %.sm
 		$(SMC) $(SMC_FLAGS) $<
 
-checkstring :   $(SOURCES)
+all :           checkstring test
+
+checkstring :   $(SOURCES) test
 
 clean :
 		-rm *_sm.rb
@@ -61,3 +60,19 @@ test:
 		-ruby -I ../../../lib/Ruby checkstring.rb 111
 		-ruby -I ../../../lib/Ruby checkstring.rb 000111100
 		-ruby -I ../../../lib/Ruby checkstring.rb 00011a1b10c0
+
+#
+# CHANGE LOG
+# $Log$
+# Revision 1.4  2007/01/15 16:58:57  cwrapp
+# Release 4.4.0 second commit.
+#
+# Revision 1.3  2007/01/03 14:43:23  fperrad
+# + Added -reflect option for Perl, Python and Ruby code generation
+#
+# Revision 1.2  2006/09/17 16:26:06  cwrapp
+# Initial v. 4.3.3 check-in.
+#
+# Revision 1.1  2005/06/16 17:52:03  fperrad
+# Added Ruby examples 1 - 4 and 7.
+#

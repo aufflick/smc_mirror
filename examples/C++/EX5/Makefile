@@ -23,6 +23,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.5  2007/01/15 16:58:56  cwrapp
+# Release 4.4.0 second commit.
+#
 # Revision 1.4  2005/05/28 13:31:18  cwrapp
 # Updated C++ examples.
 #
@@ -44,11 +47,16 @@ OBJECTS   = $(SOURCES:.cpp=.o)
 
 ##############
 
+%_sm.h %_sm.cpp : %.sm
+	$(SMC) $(SMCFLAGS) $<
+
+all	: $(TARGET) test
+
 $(TARGET) : $(HEADERS) $(SOURCES)
 	$(CXX) $(CPPFLAGS) -o $@ $(SOURCES)
 
-%_sm.h %_sm.cpp : %.sm
-	$(SMC) $(SMCFLAGS) $<
+test	: $(TARGET)
+	$(TARGET)
 
 clean :
 	rm -f $(TARGET) $(OBJECTS) *_sm.h *_sm.cpp

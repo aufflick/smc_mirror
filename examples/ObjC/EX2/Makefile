@@ -40,11 +40,21 @@ OBJECTS   = $(SOURCES:.m=.o)
 
 ##############
 
+%_sm.h %_sm.m : %.sm
+		$(SMC) $(SMCFLAGS) $<
+
+all :		$(TARGET) test
+
 $(TARGET) :	$(HEADERS) $(SOURCES)
 		$(GCC) $(CPPFLAGS) -o $@ $(SOURCES)
 
-%_sm.h %_sm.m : %.sm
-		$(SMC) $(SMCFLAGS) $<
+test :		$(TARGET)
+		-checkstring ""
+		-checkstring 000
+		-checkstring 00011
+		-checkstring 111
+		-checkstring 000111100
+		-checkstring 00011a1b10c0
 
 clean :
 		-rm -f $(TARGET) $(OBJECTS) *_sm.h *_sm.m
@@ -52,6 +62,9 @@ clean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2007/01/15 16:58:56  cwrapp
+# Release 4.4.0 second commit.
+#
 # Revision 1.1  2007/01/15 00:23:49  cwrapp
 # Release 4.4.0 initial commit.
 #
