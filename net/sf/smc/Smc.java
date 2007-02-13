@@ -1813,14 +1813,14 @@ public final class Smc
         _optionMap.put(SYNC_FLAG, languages);
 
         languages = new ArrayList();
-        languages.add(new Integer(C_SHARP));
-        languages.add(new Integer(JAVA));
-        languages.add(new Integer(VB));
-        languages.add(new Integer(TCL));
-        languages.add(new Integer(LUA));
-        languages.add(new Integer(PERL));
-        languages.add(new Integer(PYTHON));
-        languages.add(new Integer(RUBY));
+        languages.add(_languages[C_SHARP]);
+        languages.add(_languages[JAVA]);
+        languages.add(_languages[VB]);
+        languages.add(_languages[TCL]);
+        languages.add(_languages[LUA]);
+        languages.add(_languages[PERL]);
+        languages.add(_languages[PYTHON]);
+        languages.add(_languages[RUBY]);
         _optionMap.put(REFLECT_FLAG, languages);
 
         languages = new ArrayList();
@@ -1840,6 +1840,9 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.20  2007/02/13 18:43:19  cwrapp
+// Reflect options fix.
+//
 // Revision 1.19  2007/01/15 00:23:50  cwrapp
 // Release 4.4.0 initial commit.
 //
