@@ -23,27 +23,10 @@ New Features:
 
 Minor changes
 
-+ (C#, VB)
-  The _debugFlag and _debugStream are deprecated and no
-  longer used. Instead, System.Diagnostics.Trace is now
-  used. The SMC programmer is responsible for defining
-  the TRACE directive during compilation so the Trace
-  will be included in the executable.
-
-  The SMC programmer is also responsible for configuring
-  Trace to send the trace output to the desired destination.
-
-  There are no longer separate C# and VB DLLs but a single
-  lib/DotNet directory containing four DLLs:
-  + debug with Trace support,
-  + debug without Trace support,
-  + release with Trace support and
-  + release without Trace support.
-
-  The smc/lib/VB source code is no longer in the source
-  code release package but may still be accessed via
-  SourceForge CVS.
-  (SF feature 1440302)
++ (C#, VB.Net) Added StateChanged event to the generated context
+  class. Registered event handlers are informed when the FSM
+  changes state.
+  (SF feature 1570050)
 
 
 Bug Fixes:
@@ -104,7 +87,8 @@ YES, you issue state transitions:
 
         _myFSM.HandleMessage(msg);
 
-Congratulations! You've integrated a state machine into your object.
+Congratulations! You've integrated a state machine into your
+object.
 
 SMC is written in Java and is truly "Write once, run anywhere".
 If you have at least the Java Standard Edition v. 1.4.1 loaded,
@@ -120,12 +104,13 @@ SMC currently supports ten programming languages:
   2. C++,
   3. C#,
   4. Java,
-  5. Perl,
-  6. Python,
-  7. Ruby,
-  8. [incr Tcl],
-  9. VB.Net and
- 10. Objective-C
+  5. Lua,
+  6. Objective-C,
+  7. Perl,
+  8. Python,
+  9. Ruby,
+ 10. [incr Tcl] and
+ 11. VB.Net.
 
 SMC is also able to generate an HTML table representation of your
 FSM and a GraphViz DOT file representation
@@ -181,6 +166,10 @@ The download package's directory layout is:
          |     |        +-Release-+-statemap.dll
          |     |
          |     |
+         |     +-Lua--+-README
+         |     |      |
+         |     |      +-statemap.h
+         |     |
          |     +-ObjC-+-README.txt
          |     |      |
          |     |      +-statemap.h
@@ -235,7 +224,7 @@ The download package's directory layout is:
          |          |      |
          |          |      +-EX7
          |          |
-         |          |-C----+-EX1 (C source code, Makefiles)
+         |          +-C----+-EX1 (C source code, Makefiles)
          |          |      |
          |          |      +-EX2
          |          |      |
@@ -275,7 +264,13 @@ The download package's directory layout is:
          |          |      |
          |          |      +-EX7
          |          |
-         |          |-ObjC-+-EX1 (Objective C source code)
+         |          +-Lua--+-EX1 (Lua source code)
+         |          |      |
+         |          |      +-EX2
+         |          |      |
+         |          |      +-EX3
+         |          |
+         |          +-ObjC-+-EX1 (Objective C source code)
          |          |      |
          |          |      +-EX2
          |          |      |
@@ -287,7 +282,7 @@ The download package's directory layout is:
          |          |      |
          |          |      +-EX7 (Mac OSX XCode Project)
          |          |
-         |          |-Perl-+-EX1 (Perl source code)
+         |          +-Perl-+-EX1 (Perl source code)
          |          |      |
          |          |      +-EX2
          |          |      |
@@ -390,9 +385,9 @@ You may want to take the following steps.
 + Add the full path to .../Smc/lib to your TCLLIBPATH environment
   variable.
 
-The tools directory includes a Maven plug-in (http://www.maven.org)
-and an ant task to help integrate SMC into other development
-environments.
+The tools directory includes a Maven plug-in
+(http://www.maven.org) and an ant task to help integrate SMC
+into other development environments.
 
 An Eclipse plug-in is not yet available.
 

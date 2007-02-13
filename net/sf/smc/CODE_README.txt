@@ -18,23 +18,11 @@ Add Lua code generator and examples. Use the command line option
 + Minor changes
 ---------------
 
-(C#, VB) The _debugFlag and _debugStream are deprecated and no
-         longer used. Instead, System.Diagnostics.Trace is
-         used. The SMC programmer is responsible for defining
-         the TRACE directive during compilation so the Trace
-         will be included in the executable.
-
-         The SMC programmer is also responsible for configuring
-         Trace to send the trace output to the desired
-         destination.
-
-         There are no longer separate C# and VB dlls but a
-         single lib/DotNet directory containing four DLLs:
-         + debug with Trace support,
-         + debug without Trace support,
-         + release with Trace support and
-         + release without Trace support.
-         (SF feature 1440302)
+(C#, VB.Net)
+    Added StateChanged event to the generated context
+    class. Registered event handlers are informed when the FSM
+    changes state.
+    (SF feature 1570050)
 
 
 + Bug fixes
