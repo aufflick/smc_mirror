@@ -61,7 +61,7 @@ public final class SmcHeaderObjCGenerator
         super (source, srcfileBase);
 
         _indent = "";
-    }
+    } // end of SmcHeaderObjCGenerator(PrintStream, String)
 
     public void visit(SmcFSM fsm)
     {
@@ -69,19 +69,11 @@ public final class SmcHeaderObjCGenerator
         String packageName = fsm.getPackage();
         String context = fsm.getContext();
         String mapName;
-        List transList;
+        List<SmcTransition> transList;
         String separator;
-        List params;
-        Iterator it;
-        Iterator mapIt;
-        Iterator transIt;
-        Iterator pit;
-        String declaration;
+        List<SmcParameter> params;
+        Iterator<SmcParameter> pit;
         int packageDepth = 0;
-        SmcMap map;
-        SmcState state;
-        SmcTransition trans;
-        SmcParameter param;
         int index;
 
         // Include required standard .h files.
@@ -93,11 +85,8 @@ public final class SmcHeaderObjCGenerator
         // Forward declare all the state classes in all the maps.
         _source.print(_indent);
         _source.println("// Forward declarations.");
-        for (mapIt = fsm.getMaps().iterator();
-             mapIt.hasNext() == true;
-            )
+        for (SmcMap map: fsm.getMaps())
         {
-            map = ((SmcMap) mapIt.next());
             mapName = map.getName();
 
             // class <map name>;
@@ -107,12 +96,8 @@ public final class SmcHeaderObjCGenerator
             _source.println(";");
 
             // Iterate over the map's states.
-            for (it = map.getStates().iterator();
-                 it.hasNext() == true;
-                )
+            for (SmcState state: map.getStates())
             {
-                state = (SmcState) it.next();
-
                 _source.print(_indent);
                 _source.print("@class ");
                 _source.print(mapName);
@@ -146,11 +131,8 @@ public final class SmcHeaderObjCGenerator
         _source.println(";");
 
         // Do user-specified forward declarations now.
-        for (it = fsm.getDeclarations().iterator();
-             it.hasNext() == true;
-            )
+        for (String declaration: fsm.getDeclarations())
         {
-            declaration = (String) it.next();
             _source.print(_indent);
             _source.print(declaration);
 
@@ -189,12 +171,8 @@ public final class SmcHeaderObjCGenerator
         transList = fsm.getTransitions();
 
         // Output the global transition declarations.
-        for (transIt = transList.iterator();
-             transIt.hasNext() == true;
-            )
+        for (SmcTransition trans: transList)
         {
-            trans = (SmcTransition) transIt.next();
-
             // Don't output the default state here.
             if (trans.getName().equals("Default") == false)
             {                
@@ -205,13 +183,9 @@ public final class SmcHeaderObjCGenerator
                 _source.print(context);
                 _source.print("Context*)context");
 
-                params = trans.getParameters();
-                for (pit = params.iterator();
-                     pit.hasNext() == true;
-                    )
+                for (SmcParameter param:
+                         trans.getParameters())
                 {
-                    param = (SmcParameter) pit.next();
-
                     _source.print(" :");
                     param.accept(this);
                 }
@@ -234,11 +208,9 @@ public final class SmcHeaderObjCGenerator
 
         // Generate the map classes. The maps will, in turn,
         // generate the state classes.
-        for (mapIt = fsm.getMaps().iterator();
-             mapIt.hasNext() == true;
-            )
+        for (SmcMap map: fsm.getMaps())
         {
-            ((SmcMap) mapIt.next()).accept(this);
+            map.accept(this);
         }
 
         // Generate the FSM context class.
@@ -283,24 +255,22 @@ public final class SmcHeaderObjCGenerator
         
         // Generate a method for every transition in every map
         // *except* the default transition.
-        for (transIt = transList.iterator();
-             transIt.hasNext() == true;
-            )
+        for (SmcTransition trans: transList)
         {
-            trans = (SmcTransition) transIt.next();
             if (trans.getName().equals("Default") == false)
             {
+                SmcParameter param;
+
                 _source.print(_indent);
                 _source.print("- (void)");
                 _source.print(trans.getName());
 
-                params = trans.getParameters();
-                for (pit = params.iterator(),
+                for (pit = (trans.getParameters()).iterator(),
                        separator = ":";
                      pit.hasNext() == true;
                      separator = " :")
                 {
-                    param = (SmcParameter) pit.next();
+                    param = pit.next();
 
                     _source.print(separator);
                     param.accept(this);
@@ -316,7 +286,7 @@ public final class SmcHeaderObjCGenerator
         _source.println();
 
         return;
-    }
+    } // end of visit(SmcFSM)
 
     // Generate the map class declaration and then the state
     // classes:
@@ -331,8 +301,6 @@ public final class SmcHeaderObjCGenerator
     {
         String context = map.getFSM().getContext();
         String mapName = map.getName();
-        Iterator it;
-        SmcState state;
         String stateName;
 
         _source.print(_indent);
@@ -344,11 +312,8 @@ public final class SmcHeaderObjCGenerator
         _source.println("}");
         
         // Define class methods to access the state instances
-        for (it = map.getStates().iterator();
-             it.hasNext() == true;
-            )
+        for (SmcState state: map.getStates())
         {
-            state = (SmcState) it.next();
             stateName = state.getClassName();
 
             _source.print(_indent);
@@ -390,11 +355,10 @@ public final class SmcHeaderObjCGenerator
         {
             SmcState defaultState = map.getDefaultState();
 
-            for (it = defaultState.getTransitions().iterator();
-                 it.hasNext() == true;
-                )
+            for (SmcTransition transition:
+                     defaultState.getTransitions())
             {
-                ((SmcTransition) it.next()).accept(this);
+                transition.accept(this);
             }
         }
 
@@ -404,15 +368,13 @@ public final class SmcHeaderObjCGenerator
         _source.println();
 
         // Now output the state class declarations.
-        for (it = map.getStates().iterator();
-             it.hasNext() == true;
-            )
+        for (SmcState state: map.getStates())
         {
-            ((SmcState) it.next()).accept(this);
+            state.accept(this);
         }
 
         return;
-    }
+    } // end of visit(SmcMap)
 
     // Generate the state's class declaration.
     //
@@ -429,8 +391,7 @@ public final class SmcHeaderObjCGenerator
         String context = map.getFSM().getContext();
         String mapName = map.getName();
         String stateName = state.getClassName();
-        List actions;
-        Iterator it;
+        List<SmcAction> actions;
 
         _source.print(_indent);
         _source.print("@interface ");
@@ -464,11 +425,9 @@ public final class SmcHeaderObjCGenerator
             _source.println("Context*)context;");        }
 
         // Now generate the transition methods.
-        for (it = state.getTransitions().iterator();
-             it.hasNext() == true;
-            )
+        for (SmcTransition transition: state.getTransitions())
         {
-            ((SmcTransition) it.next()).accept(this);
+            transition.accept(this);
         }
 
         // End of the state class declaration.
@@ -477,7 +436,7 @@ public final class SmcHeaderObjCGenerator
         _source.println();
 
         return;
-    }
+    } // end of visit(SmcState)
 
     // Generate the transition method declaration.
     //
@@ -486,8 +445,6 @@ public final class SmcHeaderObjCGenerator
     {
         SmcState state = transition.getState();
         String stateName = state.getClassName();
-        String virtual = "";
-        Iterator pit;
 
         _source.print(_indent);
         _source.print("- (void)");
@@ -498,19 +455,17 @@ public final class SmcHeaderObjCGenerator
         _source.print("Context*)context");
 
         // Add user-defined parameters.
-        for (pit = transition.getParameters().iterator();
-             pit.hasNext() == true;
-            )
+        for (SmcParameter parameter: transition.getParameters())
         {
             _source.print(" :");
-            ((SmcParameter) pit.next()).accept(this);
+            parameter.accept(this);
         }
 
         // End of transition method declaration.
         _source.println(";");
 
         return;
-    }
+    } // end of visit(SmcTransition)
 
     public void visit(SmcParameter parameter)
     {
@@ -520,16 +475,19 @@ public final class SmcHeaderObjCGenerator
         _source.print(parameter.getName());
 
         return;
-    }
+    } // end of visit(SmcParameter)
 
 //---------------------------------------------------------------
 // Member data
 //
-}
+} // end of class SmcHeaderObjCGenerator
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2007/02/21 13:55:27  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.1  2007/01/15 00:23:51  cwrapp
 // Release 4.4.0 initial commit.
 //

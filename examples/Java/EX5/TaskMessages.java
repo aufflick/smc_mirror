@@ -1,11 +1,11 @@
 //
 // The contents of this file are subject to the Mozilla Public
 // License Version 1.1 (the "License"); you may not use this file
-// except in compliance with the License. You may obtain a copy of
-// the License at http://www.mozilla.org/MPL/
+// except in compliance with the License. You may obtain a copy
+// of the License at http://www.mozilla.org/MPL/
 // 
-// Software distributed under the License is distributed on an "AS
-// IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+// Software distributed under the License is distributed on an
+// "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2007/02/21 13:41:00  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.4  2005/05/28 13:51:24  cwrapp
 // Update Java examples 1 - 7.
 //
@@ -64,8 +67,9 @@ public final class TaskMessages
         Locale currentLocale = new Locale("en", "US");
 
         // Put together the date/time output format.
-        _timestampFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss",
-                                                currentLocale);
+        _timestampFormat =
+            new SimpleDateFormat(
+                "MM/dd/yyyy hh:mm:ss", currentLocale);
 
         // Set the initial level.
         _level = level;
@@ -101,7 +105,8 @@ public final class TaskMessages
         return((Component) _pane);
     }
 
-    public void handleEvent(String event, Map args)
+    public void handleEvent(String event,
+                            Map<String, Object> args)
     {
         Integer level;
         String name;
@@ -158,8 +163,9 @@ public final class TaskMessages
             output.append(name.substring(0, stringLength));
 
             // Pad to the message field's beginning.
-            output.append(_padding.substring(0,
-                                             (NAME_LEN - stringLength + 1)));
+            output.append(
+                _padding.substring(
+                    0, (NAME_LEN - stringLength + 1)));
 
             output.append(message);
             output.append(_newLine);

@@ -1,11 +1,11 @@
 //
 // The contents of this file are subject to the Mozilla Public
 // License Version 1.1 (the "License"); you may not use this file
-// except in compliance with the License. You may obtain a copy of
-// the License at http://www.mozilla.org/MPL/
+// except in compliance with the License. You may obtain a copy
+// of the License at http://www.mozilla.org/MPL/
 // 
-// Software distributed under the License is distributed on an "AS
-// IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+// Software distributed under the License is distributed on an
+// "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
@@ -13,7 +13,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 - 2003 Charles W. Rapp.
+// Copyright (C) 2000 - 2007. Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2007/02/21 13:45:08  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.4  2005/05/28 13:51:24  cwrapp
 // Update Java examples 1 - 7.
 //
@@ -58,8 +61,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.ListIterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -95,7 +99,8 @@ public final class Telephone
                 {
                     public void windowClosing(WindowEvent e)
                     {
-                        // The window is going away NOW. Just exit.
+                        // The window is going away NOW.
+                        // Just exit.
                         System.exit(0);
                     }
                 }
@@ -114,7 +119,7 @@ public final class Telephone
         _receiverButton = null;
         _dialButtons = new JButton[12];
 
-        _timerMap = new HashMap();
+        _timerMap = new HashMap<String, TelephoneTimer>();
 
         _playbackThread = null;
 
@@ -130,15 +135,14 @@ public final class Telephone
 
     public void issueTimeout(String timer)
     {
-        TelephoneTimer task =
-            (TelephoneTimer) _timerMap.remove(timer);
+        TelephoneTimer task = _timerMap.remove(timer);
 
         if (task != null && _fsm != null)
         {
             try
             {
                 Method transition =
-                    (Method) _timerTransitionMap.get(timer);
+                    _timerTransitionMap.get(timer);
                 Object[] args;
 
                 if (transition != null)
@@ -229,8 +233,7 @@ public final class Telephone
 
     public void resetTimer(String name)
     {
-        TelephoneTimer task =
-            (TelephoneTimer) _timerMap.get(name);
+        TelephoneTimer task = _timerMap.get(name);
         long delay;
 
         if (task != null)
@@ -245,8 +248,7 @@ public final class Telephone
 
     public void stopTimer(String name)
     {
-        TelephoneTimer task =
-            (TelephoneTimer) _timerMap.remove(name);
+        TelephoneTimer task = _timerMap.remove(name);
 
         if (task != null)
         {
@@ -258,7 +260,7 @@ public final class Telephone
 
     public void play(String name)
     {
-        AudioData audioData = (AudioData) _audioMap.get(name);
+        AudioData audioData = _audioMap.get(name);
 
         if (audioData != null)
         {
@@ -292,9 +294,10 @@ public final class Telephone
             }
             else
             {
-                System.err.println("There is no audio clip named \"dtmf_" +
-                                   name +
-                                   "\".");
+                System.err.println(
+                    "There is no audio clip named \"dtmf_" +
+                    name +
+                    "\".");
             }
         }
         catch (NumberFormatException formex)
@@ -305,7 +308,7 @@ public final class Telephone
 
     public void loop(String name)
     {
-        AudioData audioData = (AudioData) _audioMap.get(name);
+        AudioData audioData = _audioMap.get(name);
 
         if (audioData != null)
         {
@@ -313,9 +316,10 @@ public final class Telephone
         }
         else
         {
-            System.err.println("There is no audio clip named \"" +
-                               name +
-                               "\".");
+            System.err.println(
+                "There is no audio clip named \"" +
+                name +
+                "\".");
         }
 
         return;
@@ -323,7 +327,7 @@ public final class Telephone
 
     public void stopLoop(String name)
     {
-        AudioData audioData = (AudioData) _audioMap.get(name);
+        AudioData audioData = _audioMap.get(name);
 
         if (audioData != null)
         {
@@ -331,9 +335,10 @@ public final class Telephone
         }
         else
         {
-            System.err.println("There is no audio clip named \"" +
-                               name +
-                               "\".");
+            System.err.println(
+                "There is no audio clip named \"" +
+                name +
+                "\".");
         }
 
         return;
@@ -353,10 +358,9 @@ public final class Telephone
     public void playEmergency()
     {
         AudioData audioData;
-        LinkedList audioList = new LinkedList();
+        List<AudioData> audioList = new LinkedList<AudioData>();
 
-        audioData =
-            (AudioData) _audioMap.get("911");
+        audioData = _audioMap.get("911");
         audioList.add(audioData);
 
         _playbackThread = new PlaybackThread(audioList, this);
@@ -369,10 +373,9 @@ public final class Telephone
     public void playNYCTemp()
     {
         AudioData audioData;
-        LinkedList audioList = new LinkedList();
+        List<AudioData> audioList = new LinkedList<AudioData>();
 
-        audioData =
-            (AudioData) _audioMap.get("NYC_temp");
+        audioData = _audioMap.get("NYC_temp");
         audioList.add(audioData);
 
         _playbackThread = new PlaybackThread(audioList, this);
@@ -386,10 +389,9 @@ public final class Telephone
     public void playDepositMoney()
     {
         AudioData audioData;
-        LinkedList audioList = new LinkedList();
+        List<AudioData> audioList = new LinkedList<AudioData>();
 
-        audioData =
-            (AudioData) _audioMap.get("50_cents_please");
+        audioData = _audioMap.get("50_cents_please");
         audioList.add(audioData);
 
         _playbackThread = new PlaybackThread(audioList, this);
@@ -408,24 +410,24 @@ public final class Telephone
         int seconds = calendar.get(Calendar.SECOND);
         int am_pm = calendar.get(Calendar.AM_PM);
         AudioData clip;
-        LinkedList clipList = new LinkedList();
+        List<AudioData> clipList = new LinkedList<AudioData>();
 
-        clip = (AudioData) _audioMap.get("the_time_is");
+        clip = _audioMap.get("the_time_is");
         clipList.add(clip);
 
         // 1. Read the hour.
-        clip = (AudioData) _audioMap.get(Integer.toString(hour));
+        clip = _audioMap.get(Integer.toString(hour));
         clipList.add(clip);
 
         // Is this on the hour exactly?
         if (minute == 0 && seconds == 0)
         {
-            clip = (AudioData) _audioMap.get("oclock");
+            clip = _audioMap.get("oclock");
             clipList.add(clip);
 
             _soundMeridian(am_pm, clipList);
 
-            clip = (AudioData) _audioMap.get("exactly");
+            clip = _audioMap.get("exactly");
             clipList.add(clip);
         }
         else
@@ -438,23 +440,23 @@ public final class Telephone
             // 3. Read the seconds.
             if (seconds == 0)
             {
-                clip = (AudioData) _audioMap.get("exactly");
+                clip = _audioMap.get("exactly");
                 clipList.add(clip);
             }
             else
             {
-                clip = (AudioData) _audioMap.get("and");
+                clip = _audioMap.get("and");
                 clipList.add(clip);
 
                 _soundNumber(seconds, false, clipList);
 
                 if (seconds == 1)
                 {
-                    clip = (AudioData) _audioMap.get("second");
+                    clip = _audioMap.get("second");
                 }
                 else
                 {
-                    clip = (AudioData) _audioMap.get("seconds");
+                    clip = _audioMap.get("seconds");
                 }
                 clipList.add(clip);
             }
@@ -470,16 +472,14 @@ public final class Telephone
     public void playInvalidNumber()
     {
         AudioData audioData;
-        LinkedList audioList = new LinkedList();
+        List<AudioData> audioList = new LinkedList<AudioData>();
 
-        audioData =
-            (AudioData) _audioMap.get("you_dialed");
+        audioData = _audioMap.get("you_dialed");
         audioList.add(audioData);
 
         _soundPhoneNumber(audioList);
 
-        audioData =
-            (AudioData) _audioMap.get("could_not_be_completed");
+        audioData = _audioMap.get("could_not_be_completed");
         audioList.add(audioData);
 
         // Play the message in a separate thread.
@@ -610,7 +610,7 @@ public final class Telephone
         // Load in sound URLs.
         try
         {
-            _audioMap = new HashMap();
+            _audioMap = new HashMap<String, AudioData>();
 
             urlString = directory + "ring.au";
             soundURL = new URL(urlString);
@@ -682,7 +682,8 @@ public final class Telephone
             audioData = new AudioData(soundURL, 1400);
             _audioMap.put("seconds", audioData);
 
-            urlString = directory + "the_number_you_have_dialed.au";
+            urlString =
+                directory + "the_number_you_have_dialed.au";
             soundURL = new URL(urlString);
             audioData = new AudioData(soundURL, 1800);
             _audioMap.put("you_dialed", audioData);
@@ -1088,17 +1089,17 @@ public final class Telephone
         gridConstraints.ipady = 2;
         gridConstraints.weightx = 0.0;
         gridConstraints.weighty = 0.0;
-        gridbag.setConstraints(_dialButtons[11], gridConstraints);
+        gridbag.setConstraints(
+            _dialButtons[11], gridConstraints);
         pane.add(_dialButtons[11]);
 
         return;
     }
 
-    private void _soundPhoneNumber(LinkedList audioList)
+    private void _soundPhoneNumber(List<AudioData> audioList)
     {
         int i;
         String digit;
-        AudioData data;
 
         // If this is a long distance number, sound out the
         // area code first.
@@ -1107,8 +1108,7 @@ public final class Telephone
             for (i = 0; i < _areaCode.length(); ++i)
             {
                 digit = _areaCode.substring(i, (i + 1));
-                data = (AudioData) _audioMap.get(digit);
-                audioList.add(data);
+                audioList.add(_audioMap.get(digit));
             }
         }
 
@@ -1116,8 +1116,7 @@ public final class Telephone
         for (i = 0; i < _exchange.length(); ++i)
         {
             digit = _exchange.substring(i, (i + 1));
-            data = (AudioData) _audioMap.get(digit);
-            audioList.add(data);
+            audioList.add(_audioMap.get(digit));
         }
 
         // Only long distance and local numbers have a local
@@ -1127,26 +1126,27 @@ public final class Telephone
             for (i = 0; i < _local.length(); ++i)
             {
                 digit = _local.substring(i, (i + 1));
-                data = (AudioData) _audioMap.get(digit);
-                audioList.add(data);
+                audioList.add(_audioMap.get(digit));
             }
         }
 
         return;
     }
 
-    private void _soundMeridian(int am_pm, LinkedList audioList)
+    private void _soundMeridian(int am_pm,
+                                List<AudioData> audioList)
     {
         AudioData clip;
 
         if (am_pm == Calendar.AM)
         {
-            clip = (AudioData) _audioMap.get("AM");
+            clip = _audioMap.get("AM");
         }
         else
         {
-            clip = (AudioData) _audioMap.get("PM");
+            clip = _audioMap.get("PM");
         }
+
         audioList.add(clip);
 
         return;
@@ -1154,23 +1154,18 @@ public final class Telephone
 
     private void _soundNumber(int number,
                               boolean zeroFlag,
-                              LinkedList audioList)
+                              List<AudioData> audioList)
     {
-        AudioData clip;
-
         if (number < 10 && zeroFlag == true)
         {
-            clip = (AudioData) _audioMap.get("oh");
-            audioList.add(clip);
-            clip =
-                (AudioData) _audioMap.get(Integer.toString(number));
-            audioList.add(clip);
+            audioList.add(_audioMap.get("oh"));
+            audioList.add(
+                _audioMap.get(Integer.toString(number)));
         }
         else if (number < 20)
         {
-            clip =
-                (AudioData) _audioMap.get(Integer.toString(number));
-            audioList.add(clip);
+            audioList.add(
+                _audioMap.get(Integer.toString(number)));
         }
         else
         {
@@ -1179,15 +1174,13 @@ public final class Telephone
 
             // Read the ten's digit first and then the
             // remainder - if not zero.
-            clip =
-                (AudioData) _audioMap.get(Integer.toString(tensDigit));
-            audioList.add(clip);
+            audioList.add(
+                _audioMap.get(Integer.toString(tensDigit)));
 
             if (onesDigit != 0)
             {
-                clip =
-                    (AudioData) _audioMap.get(Integer.toString(onesDigit));
-                audioList.add(clip);
+                audioList.add(
+                    _audioMap.get(Integer.toString(onesDigit)));
             }
         }
 
@@ -1257,13 +1250,13 @@ public final class Telephone
 
     // Zounds! It's sounds!
     private AudioClip[] _dtmf;
-    private Map _audioMap;
+    private Map<String, AudioData> _audioMap;
     private PlaybackThread _playbackThread;
 
     // Timer objects.
-    private Map _timerMap;
+    private Map<String, TelephoneTimer> _timerMap;
     private static Timer _timer;
-    private static Map _timerTransitionMap;
+    private static Map<String, Method> _timerTransitionMap;
 
     // The telephone's time display.
     private static SimpleDateFormat _ClockFormatter = null;
@@ -1284,7 +1277,7 @@ public final class Telephone
     static
     {
         _timer = new Timer(true);
-        _timerTransitionMap = new HashMap();
+        _timerTransitionMap = new HashMap<String, Method>();
 
         _ClockFormatter =
             new SimpleDateFormat("    HH:mm a    MMMM dd, yyyy");
@@ -1298,19 +1291,23 @@ public final class Telephone
         {
             _timerTransitionMap.put(
                 "ClockTimer",
-                context.getDeclaredMethod("ClockTimer", parameters)
+                context.getDeclaredMethod(
+                    "ClockTimer", parameters)
                 );
             _timerTransitionMap.put(
                 "OffHookTimer",
-                context.getDeclaredMethod("OffHookTimer", parameters)
+                context.getDeclaredMethod(
+                    "OffHookTimer", parameters)
                 );
             _timerTransitionMap.put(
                 "LoopTimer",
-                context.getDeclaredMethod("LoopTimer", parameters)
+                context.getDeclaredMethod(
+                    "LoopTimer", parameters)
                 );
             _timerTransitionMap.put(
                 "RingTimer",
-                context.getDeclaredMethod("RingTimer", parameters)
+                context.getDeclaredMethod(
+                    "RingTimer", parameters)
                 );
         }
         catch (NoSuchMethodException nsmex)
@@ -1441,28 +1438,25 @@ public final class Telephone
 
         public void run()
         {
-            ListIterator it;
+            Iterator<AudioData> it;
             AudioData clip = null;
 
             _thread = Thread.currentThread();
-            
-            for (it = _audioList.listIterator(),
-                     _continueFlag = true;
-                 it.hasNext() == true && _continueFlag == true;
-                )
-            {
-                clip = (AudioData) it.next();
 
-                try
+            try
+            {
+                for (it = _audioList.iterator();
+                     it.hasNext() == true;
+                    )
                 {
+                    clip = it.next();
+
                     clip.play();
                     clip = null;
                 }
-                catch (InterruptedException interrupt)
-                {
-                    _continueFlag = false;
-                }
             }
+            catch (InterruptedException interrupt)
+            {}
 
             // Stop the currently playing sound.
             if (clip != null)
@@ -1493,7 +1487,7 @@ public final class Telephone
             return;
         }
 
-        private PlaybackThread(LinkedList audioList,
+        private PlaybackThread(List<AudioData> audioList,
                                Telephone owner)
         {
             _audioList = audioList;
@@ -1504,7 +1498,7 @@ public final class Telephone
 
     // Member data.
 
-        private LinkedList _audioList;
+        private List<AudioData> _audioList;
         private Telephone _owner;
         private boolean _continueFlag;
         private Thread _thread;

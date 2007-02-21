@@ -37,6 +37,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.16  2007/02/21 13:56:16  cwrapp
+ * Moved Java code to release 1.5.0
+ *
  * Revision 1.15  2007/01/15 00:23:51  cwrapp
  * Release 4.4.0 initial commit.
  *
@@ -682,7 +685,7 @@ EntryStart
 
 EntryEnd
 {
-	actionsDone(actions: List, lineNumber: int)
+	actionsDone(actions: List<SmcAction>, lineNumber: int)
 		StateStart
 		{
 			setEntryAction(actions);
@@ -711,7 +714,7 @@ ExitStart
 
 ExitEnd
 {
-	actionsDone(actions: List, lineNumber: int)
+	actionsDone(actions: List<SmcAction>, lineNumber: int)
 		StateStart
 		{
 			setExitAction(actions);
@@ -895,7 +898,7 @@ TransParams
 {
     // The "Default" transition may not have parameters.
     // But create a bogus transition before continuing.
-    paramsDone(params: java.util.List, lineNumber: int)
+    paramsDone(params: List<SmcParameter>, lineNumber: int)
       [ctxt.getTransitionName().equalsIgnoreCase(
            "Default") == true &&
        params.isEmpty() == false]
@@ -906,14 +909,14 @@ TransParams
             createTransition(params, lineNumber);
         }
 
-    paramsDone(params: java.util.List, lineNumber: int)
+    paramsDone(params: List<SmcParameter>, lineNumber: int)
         TransNext
         {
             createTransition(params, lineNumber);
         }
 
     // Create a bogus transition and keep going.
-    paramsError(params: java.util.List, lineNumber: int)
+    paramsError(params: List<SmcParameter>, lineNumber: int)
         TransNext
         {
             createTransition(params, lineNumber);
@@ -1301,7 +1304,7 @@ ActionStart
 
 ActionEnd
 {
-    actionsDone(actions: List, lineNumber: int)
+    actionsDone(actions: List<SmcAction>, lineNumber: int)
 		Transitions
 	    {
 			setActions(actions);
@@ -1596,7 +1599,7 @@ ActionName
 
 ActionArgs
 {
-	argsDone(args: List)
+	argsDone(args: List<String>)
 		ActionEnd
 		{
 			setActionArgs(args);

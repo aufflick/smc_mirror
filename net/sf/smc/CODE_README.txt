@@ -1,5 +1,26 @@
                               SMC -
                   The State Machine Compiler
+                        Version 5.0.0
+
+
+
++ Major changes
+---------------
+
+Moved to Java 5. SMC cannot be run on Java 1.4.x.
+
+
++ Bug fixes
+-----------
+
+(All)
+    Corrected command line processing bug introduced in v. 4.4.0.
+    (SF bug 1659593)
+
+
+
+                              SMC -
+                  The State Machine Compiler
                         Version 4.4.0
 
 

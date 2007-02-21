@@ -57,7 +57,7 @@ public final class SmcMap
 
         _fsm = fsm;
         _defaultState = null;
-        _states = (List) new ArrayList();
+        _states = new ArrayList<SmcState>();
     }
 
     public SmcFSM getFSM()
@@ -65,14 +65,15 @@ public final class SmcMap
         return (_fsm);
     }
 
-    public List getStates()
+    public List<SmcState> getStates()
     {
         return(_states);
     }
 
     public void addState(SmcState state)
     {
-        if (state.getInstanceName().compareTo("DefaultState") == 0)
+        if (state.getInstanceName().compareTo(
+                "DefaultState") == 0)
         {
             _defaultState = state;
         }
@@ -87,14 +88,14 @@ public final class SmcMap
     public boolean findState(SmcState state)
     {
         SmcState state2;
-        Iterator it;
+        Iterator<SmcState> it;
         boolean retval;
 
         for (it = _states.iterator(), retval = false;
              it.hasNext() == true && retval == false;
             )
         {
-            state2 = (SmcState) it.next();
+            state2 = it.next();
             if (state.getInstanceName().equals(
                     state2.getInstanceName()) == true)
             {
@@ -108,14 +109,14 @@ public final class SmcMap
     public boolean isKnownState(String stateName)
     {
         SmcState state;
-        Iterator it;
+        Iterator<SmcState> it;
         boolean retval;
 
         for (it = _states.iterator(), retval = false;
              it.hasNext() == true && retval == false;
             )
         {
-            state = (SmcState) it.next();
+            state = it.next();
             if (stateName.equals(
                     state.getInstanceName()) == true)
             {
@@ -137,12 +138,10 @@ public final class SmcMap
     }
 
     // Return all transitions appearing in this map.
-    public List getTransitions()
+    public List<SmcTransition> getTransitions()
     {
-        SmcState state;
-        Iterator stateIt;
-        List trans_list;
-        List retval;
+        List<SmcTransition> transList;
+        List<SmcTransition> retval;
 
         // If this map has a default state, then initialize the
         // transition list to the default state's transitions.
@@ -150,31 +149,29 @@ public final class SmcMap
         if (_defaultState != null)
         {
             retval =
-                (List) new ArrayList(_defaultState.getTransitions());
+                new ArrayList<SmcTransition>(
+                    _defaultState.getTransitions());
         }
         else
         {
-            retval = (List) new ArrayList();
+            retval = new ArrayList<SmcTransition>();
         }
 
         // Get each state's transition list and merge it into the
         // results.
-        for (stateIt = _states.iterator();
-             stateIt.hasNext() == true;
-            )
+        for (SmcState state: _states)
         {
-            state = (SmcState) stateIt.next();
-            trans_list = state.getTransitions();
+            transList = state.getTransitions();
             retval =
                 Smc.merge(
-                    trans_list,
+                    transList,
                     retval,
-                    new Comparator() {
-                        public int compare(Object o1,
-                                           Object o2) {
-                            return(
-                                ((SmcTransition) o1).compareTo(
-                                    ((SmcTransition) o2)));
+                    new Comparator<SmcTransition>()
+                    {
+                        public int compare(SmcTransition o1,
+                                           SmcTransition o2)
+                        {
+                            return(o1.compareTo(o2));
                         }
                     });
         }
@@ -182,18 +179,16 @@ public final class SmcMap
         return(retval);
     }
 
-    public List getUndefinedDefaultTransitions()
+    public List<SmcTransition> getUndefinedDefaultTransitions()
     {
-        List retval = (List) new ArrayList();
-        List definedDefaultTransitions;
-        Iterator stateIt;
-        Iterator transIt;
-        SmcTransition transition;
-        SmcState state;
+        List<SmcTransition> retval =
+            new ArrayList<SmcTransition>();
+        List<SmcTransition> definedDefaultTransitions;
 
         if (_defaultState == null)
         {
-            definedDefaultTransitions = (List) new ArrayList();
+            definedDefaultTransitions =
+                new ArrayList<SmcTransition>();
         }
         else
         {
@@ -201,11 +196,12 @@ public final class SmcMap
                     _defaultState.getTransitions();
             Collections.sort(
                 definedDefaultTransitions,
-                new Comparator() {
-                    public int compare(Object o1,
-                                       Object o2) {
-                        return(((SmcTransition) o1).compareTo(
-                                   (SmcTransition) o2));
+                new Comparator<SmcTransition>()
+                {
+                    public int compare(SmcTransition o1,
+                                       SmcTransition o2)
+                    {
+                        return(o1.compareTo(o2));
                     }
                 });
         }
@@ -214,19 +210,14 @@ public final class SmcMap
         // For each transition that is *not* defined in the
         // default state, create a default definition for that
         // transition.
-        for (stateIt = _states.iterator();
-             stateIt.hasNext() == true;
-            )
+        for (SmcState state: _states)
         {
-            state = (SmcState) stateIt.next();
-            for (transIt = state.getTransitions().iterator();
-                 transIt.hasNext() == true;
-                )
+            for (SmcTransition transition:
+                     state.getTransitions())
             {
                 // Create the default transition only if it is
                 // not already in the default transition list.
                 // DO NOT ADD TRANSITIONS NAMED "DEFAULT".
-                transition = (SmcTransition) transIt.next();
                 if (transition.getName().equals(
                         "Default") != false &&
                     definedDefaultTransitions.contains(
@@ -244,8 +235,6 @@ public final class SmcMap
     public String toString()
     {
         String retval;
-        Iterator state_it;
-        SmcState state;
 
         retval = "%map " + _name;
         if (_defaultState != null)
@@ -253,11 +242,8 @@ public final class SmcMap
             retval += "\n" + _defaultState;
         }
 
-        for (state_it = _states.iterator();
-             state_it.hasNext() == true;
-            )
+        for (SmcState state: _states)
         {
-            state = (SmcState) state_it.next();
             retval += "\n" + state;
         }
 
@@ -289,7 +275,7 @@ public final class SmcMap
 //
 
     private SmcFSM _fsm;
-    private List _states;
+    private List<SmcState> _states;
     private SmcState _defaultState;
 
     //-----------------------------------------------------------
@@ -303,6 +289,9 @@ public final class SmcMap
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2007/02/21 13:55:52  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.8  2007/01/15 00:23:51  cwrapp
 // Release 4.4.0 initial commit.
 //

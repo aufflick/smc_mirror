@@ -58,11 +58,11 @@ public final class SmcTableGenerator
                              String srcfileBase)
     {
         super (source, srcfileBase);
-    }
+    } // end of SmcTableGenerator(PrintStream, String)
 
     public void visit(SmcFSM fsm)
     {
-        Iterator it;
+        Iterator<SmcMap> mit;
         String separator;
 
         // Output the top-of-page HTML.
@@ -76,12 +76,12 @@ public final class SmcTableGenerator
         _source.println("  <body>");
 
         // Have each map generate its HTML table.
-        for (it = fsm.getMaps().iterator(), separator = "";
-             it.hasNext();
+        for (mit = fsm.getMaps().iterator(), separator = "";
+             mit.hasNext();
              separator = "    <p>\n")
         {
             _source.print(separator);
-            ((SmcMap) it.next()).accept(this);
+            (mit.next()).accept(this);
         }
 
         // Output the end-of-page HTML.
@@ -89,18 +89,15 @@ public final class SmcTableGenerator
         _source.println("</html>");
 
         return;
-    }
+    } // end of visit(SmcFSM)
 
     public void visit(SmcMap map)
     {
         String mapName = map.getName();
-        List transitions = map.getTransitions();
-        List params;
+        List<SmcTransition> transitions = map.getTransitions();
+        List<SmcParameter> params;
         int transitionCount = transitions.size() + 1;
-        Iterator it;
-        Iterator it2;
-        SmcState state;
-        SmcTransition transition;
+        Iterator<SmcParameter> it;
         SmcTransition defaultTransition = null;
         String transName;
         boolean firstFlag;
@@ -137,11 +134,8 @@ public final class SmcTableGenerator
         _source.println("        </th>");
 
         // Place each transition name into the header.
-        for (it = transitions.iterator();
-             it.hasNext() == true;
-            )
+        for (SmcTransition transition: transitions)
         {
-            transition = (SmcTransition) it.next();
             transName = transition.getName();
             params = transition.getParameters();
 
@@ -156,14 +150,14 @@ public final class SmcTableGenerator
 
                 // If the transition has parameters, output
                 // them now.
-                if (params.size() > 0)
+                if (params.isEmpty() == false)
                 {
                     _source.println("          <br>");
                     _source.print("          (");
 
-                    for (it2 = params.iterator(),
+                    for (it = params.iterator(),
                              firstFlag = true;
-                         it2.hasNext() == true;
+                         it.hasNext() == true;
                          firstFlag = false)
                     {
                         if (firstFlag == false)
@@ -173,7 +167,7 @@ public final class SmcTableGenerator
                             _source.print("          ");
                         }
 
-                        ((SmcParameter) it2.next()).accept(this);
+                        (it.next()).accept(this);
                     }
 
                     _source.println(")");
@@ -191,12 +185,8 @@ public final class SmcTableGenerator
 
         // The table header is finished. Now have each state
         // output its row.
-        for (it = map.getStates().iterator();
-             it.hasNext() == true;
-            )
+        for (SmcState state: map.getStates())
         {
-            state = (SmcState) it.next();
-
             // Output the row start.
             _source.println("      <tr>");
 
@@ -210,17 +200,14 @@ public final class SmcTableGenerator
             // does not store its transitions in any particular
             // order. Therefore we must output the state's
             // transitions for it.
-            for (it2 = transitions.iterator();
-                 it2.hasNext() == true;
-                )
+            for (SmcTransition transition: transitions)
             {
-                transition = (SmcTransition) it2.next();
                 transName = transition.getName();
                 params = transition.getParameters();
 
-                // Since we are placing the default transition at the
-                // right-most column, don't output it here if it
-                // should locally defined.
+                // Since we are placing the default transition
+                // at the right-most column, don't output it
+                // here if it should locally defined.
                 if (transName.equals("Default") == true)
                 {
                     // If this state has a false transition,
@@ -232,8 +219,8 @@ public final class SmcTableGenerator
                 {
                     _source.println("        <td>");
 
-                    // We have the default transition definition in
-                    // hand. We need the state's transition.
+                    // We have the default transition definition
+                    // in hand. We need the state's transition.
                     transition =
                         state.findTransition(transName, params);
                     if (transition != null)
@@ -271,13 +258,11 @@ public final class SmcTableGenerator
         _source.println("    </table>");
 
         return;
-    }
+    } // end of visit(SmcMap)
 
     public void visit(SmcState state)
     {
-        List actions;
-        Iterator it;
-        SmcTransition transition;
+        List<SmcAction> actions;
 
         // Output the row data. This consists of:
         // + the state name.
@@ -291,12 +276,13 @@ public final class SmcTableGenerator
 
         _source.println("        <td>");
         actions = state.getEntryActions();
-        if (actions != null && actions.size() > 0)
+        if (actions != null && actions.isEmpty() == false)
         {
             _source.println("          <pre>");
-            for (it = actions.iterator(); it.hasNext() == true;)
+
+            for (SmcAction action: actions)
             {
-                ((SmcAction) it.next()).accept(this);
+                action.accept(this);
             }
             _source.println("          </pre>");
         }
@@ -304,12 +290,12 @@ public final class SmcTableGenerator
 
         _source.println("        <td>");
         actions = state.getExitActions();
-        if (actions != null && actions.size() > 0)
+        if (actions != null && actions.isEmpty() == false)
         {
             _source.println("          <pre>");
-            for (it = actions.iterator(); it.hasNext() == true;)
+            for (SmcAction action: actions)
             {
-                ((SmcAction) it.next()).accept(this);
+                action.accept(this);
             }
             _source.println("          </pre>");
         }
@@ -319,17 +305,14 @@ public final class SmcTableGenerator
         //       to guarantee correct transition ordering.
 
         return;
-    }
+    } // end of visit(SmcState)
 
     public void visit(SmcTransition transition)
     {
-        Iterator it;
-
-        for (it = transition.getGuards().iterator();
-             it.hasNext() == true;)
+        for (SmcGuard guard: transition.getGuards())
         {
             _source.println();
-            ((SmcGuard) it.next()).accept(this);
+            guard.accept(this);
         }
 
         return;
@@ -345,8 +328,7 @@ public final class SmcTableGenerator
         int transType = guard.getTransType();
         String condition = guard.getCondition();
         String endStateName = guard.getEndState();
-        Iterator it;
-        List actions = guard.getActions();
+        List<SmcAction> actions = guard.getActions();
 
         // Print out the guard (if there is one).
         if (condition.length() > 0)
@@ -428,20 +410,20 @@ public final class SmcTableGenerator
             _source.println("  {");
 
             _indent = "    ";
-            for (it = actions.iterator(); it.hasNext() == true;)
+            for (SmcAction action: actions)
             {
-                ((SmcAction) it.next()).accept(this);
+                action.accept(this);
             }
 
             _source.println("  }");
         }
 
         return;
-    }
+    } // end of visit(SmcGuard)
 
     public void visit(SmcAction action)
     {
-        Iterator it;
+        Iterator<String> it;
         String sep;
 
         _source.print(_indent);
@@ -453,28 +435,31 @@ public final class SmcTableGenerator
              sep = ", ")
         {
             _source.print(sep);
-            _source.print(((String) it.next()).trim());
+            _source.print((it.next()).trim());
         }
 
         _source.println(");");
 
         return;
-    }
+    } // end of visit(SmcAction)
 
     public void visit(SmcParameter parameter)
     {
         _source.print(parameter.getType());
         return;
-    }
+    } // end of visit(SmcParameter)
 
 //---------------------------------------------------------------
 // Member data
 //
-}
+} // end of class SmcTableGenerator
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2007/02/21 13:56:51  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.4  2007/01/15 00:23:52  cwrapp
 // Release 4.4.0 initial commit.
 //

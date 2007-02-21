@@ -1,11 +1,11 @@
 //
 // The contents of this file are subject to the Mozilla Public
 // License Version 1.1 (the "License"); you may not use this file
-// except in compliance with the License. You may obtain a copy of
-// the License at http://www.mozilla.org/MPL/
+// except in compliance with the License. You may obtain a copy
+// of the License at http://www.mozilla.org/MPL/
 // 
-// Software distributed under the License is distributed on an "AS
-// IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+// Software distributed under the License is distributed on an
+// "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2007/02/21 13:38:38  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.5  2005/05/28 13:51:24  cwrapp
 // Update Java examples 1 - 7.
 //
@@ -38,16 +41,27 @@
 
 package smc_ex4;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.geom.*;
-import java.util.*;
-import javax.swing.*;
+import java.awt.BasicStroke;
+import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 public final class TrafficCanvas
     extends Canvas
 {
+//---------------------------------------------------------------
 // Member methods.
+//
 
     public TrafficCanvas()
     {
@@ -60,13 +74,13 @@ public final class TrafficCanvas
 
         // Create an empty vehicle list. Vehicles will be added
         // when the "NewVehicle" timer expires.
-        _vehicleList = new LinkedList();
+        _vehicleList = new LinkedList<Vehicle>();
 
         _vehicleSpeed = 2;
 
         // When vehicles move off the canvas, add them to this
         // remove list for later removal.
-        _removeList = new LinkedList();
+        _removeList = new LinkedList<Vehicle>();
 
         _newVehicleTimerDuration = 4000;
         _lightChanged = false;
@@ -85,7 +99,8 @@ public final class TrafficCanvas
 
     public int getMaxX()
     {
-        return(CANVAS_CORNER.x + CANVAS_SIZE.width - VEHICLE_SIZE.width);
+        return((CANVAS_CORNER.x + CANVAS_SIZE.width) -
+               VEHICLE_SIZE.width);
     }
 
     public int getMinY()
@@ -161,13 +176,8 @@ public final class TrafficCanvas
         _vehicleSpeed = speed;
 
         // Tell all vehicles their new speed.
-        ListIterator i;
-        Vehicle vehicle;
-        for (i = _vehicleList.listIterator(0);
-             i.hasNext() == true;
-             )
+        for (Vehicle vehicle: _vehicleList)
         {
-            vehicle = (Vehicle) i.next();
             vehicle.setSpeed(speed);
         }
 
@@ -241,13 +251,8 @@ public final class TrafficCanvas
                                   RECT_CORNERS[2].y));
 
         // Paint the vehicles.
-        ListIterator i;
-        Vehicle vehicle;
-        for (i = _vehicleList.listIterator(0);
-             i.hasNext() == true;
-             )
+        for (Vehicle vehicle: _vehicleList)
         {
-            vehicle = (Vehicle) i.next();
             vehicle.paint(g2);
         }
 
@@ -330,13 +335,8 @@ public final class TrafficCanvas
             _repaintTimer.stop();
         }
 
-        ListIterator i;
-        Vehicle vehicle;
-        for (i = _vehicleList.listIterator(0);
-             i.hasNext() == true;
-             )
+        for (Vehicle vehicle: _vehicleList)
         {
-            vehicle = (Vehicle) i.next();
             vehicle.stopDemo(getGraphics());
         }
 
@@ -349,48 +349,37 @@ public final class TrafficCanvas
 
     public synchronized void lightChanged(int lightDirection)
     {
-        Vehicle vehicle;
-        ListIterator listit;
-
         // Tell all the vehicles stopped at the light that they
         // can go.
         switch (lightDirection)
         {
             case EW_LIGHT:
-                for (listit = _stoplightQueue[EASTLIGHT].listIterator(0);
-                     listit.hasNext();
-                    )
+                for (Vehicle vehicle:
+                         _stoplightQueue[EASTLIGHT])
                 {
-                    vehicle = (Vehicle) listit.next();
                     vehicle.lightGreen();
                 }
                 _stoplightQueue[EASTLIGHT].clear();
 
-                for (listit = _stoplightQueue[WESTLIGHT].listIterator(0);
-                     listit.hasNext();
-                    )
+                for (Vehicle vehicle:
+                         _stoplightQueue[WESTLIGHT])
                 {
-                    vehicle = (Vehicle) listit.next();
                     vehicle.lightGreen();
                 }
                 _stoplightQueue[WESTLIGHT].clear();
                 break;
 
             case NS_LIGHT:
-                for (listit = _stoplightQueue[NORTHLIGHT].listIterator(0);
-                     listit.hasNext();
-                    )
+                for (Vehicle vehicle:
+                         _stoplightQueue[NORTHLIGHT])
                 {
-                    vehicle = (Vehicle) listit.next();
                     vehicle.lightGreen();
                 }
                 _stoplightQueue[NORTHLIGHT].clear();
 
-                for (listit = _stoplightQueue[SOUTHLIGHT].listIterator(0);
-                     listit.hasNext();
-                    )
+                for (Vehicle vehicle:
+                         _stoplightQueue[SOUTHLIGHT])
                 {
-                    vehicle = (Vehicle) listit.next();
                     vehicle.lightGreen();
                 }
                 _stoplightQueue[SOUTHLIGHT].clear();
@@ -426,8 +415,9 @@ public final class TrafficCanvas
         // what canvas it appears.
         // Start with the east-bound vehicle starting from
         // the west edge.
-        startingPoint.setLocation(0,
-                                  (RECT_CORNERS[2].y + CURB_OFFSET));
+        startingPoint.setLocation(
+            0,
+            (RECT_CORNERS[2].y + CURB_OFFSET));
         vehicle = new Vehicle(startingPoint,
                               EAST,
                               _vehicleSpeed,
@@ -441,8 +431,9 @@ public final class TrafficCanvas
         _vehicleList.add(vehicle);
 
         // South-bound starting on north edge.
-        startingPoint.setLocation((RECT_CORNERS[1].x + CURB_OFFSET),
-                                  0);
+        startingPoint.setLocation(
+            (RECT_CORNERS[1].x + CURB_OFFSET),
+            0);
         vehicle = null;
         vehicle = new Vehicle(startingPoint,
                               SOUTH,
@@ -453,8 +444,9 @@ public final class TrafficCanvas
         _vehicleList.add(vehicle);
 
         // West-bound starting on east edge.
-        startingPoint.setLocation((RECT_CORNERS[4].x - VEHICLE_SIZE.width),
-                                  (RECT_CORNERS[1].y + CURB_OFFSET));
+        startingPoint.setLocation(
+            (RECT_CORNERS[4].x - VEHICLE_SIZE.width),
+            (RECT_CORNERS[1].y + CURB_OFFSET));
         vehicle = new Vehicle(startingPoint,
                               WEST,
                               _vehicleSpeed,
@@ -464,8 +456,9 @@ public final class TrafficCanvas
         _vehicleList.add(vehicle);
 
         // North-bound starting on south edge.
-        startingPoint.setLocation((RECT_CORNERS[2].x + CURB_OFFSET),
-                                  (RECT_CORNERS[4].y - VEHICLE_SIZE.height));
+        startingPoint.setLocation(
+            (RECT_CORNERS[2].x + CURB_OFFSET),
+            (RECT_CORNERS[4].y - VEHICLE_SIZE.height));
         vehicle = new Vehicle(startingPoint,
                               NORTH,
                               _vehicleSpeed,
@@ -479,14 +472,11 @@ public final class TrafficCanvas
 
     public synchronized void handleRepaintTimeout()
     {
+        Iterator<Vehicle> it;
+
         // Tell each vehicle to move.
-        ListIterator i;
-        Vehicle vehicle;
-        for (i = _vehicleList.listIterator(0);
-             i.hasNext() == true;
-            )
+        for (Vehicle vehicle: _vehicleList)
         {
-            vehicle = (Vehicle) i.next();
             vehicle.move((Graphics2D) getGraphics());
         }
 
@@ -504,11 +494,11 @@ public final class TrafficCanvas
         // the two separate vehicle lists is to avoid
         // removing items from a list which is being
         // iterated over.
-        for (i = _removeList.listIterator(0);
-             i.hasNext() == true;
+        for (it = _removeList.iterator();
+             it.hasNext() == true;
             )
         {
-            _vehicleList.remove((Vehicle) i.next());
+            _vehicleList.remove(it.next());
         }
 
         // Clear the remove list as its contents are no
@@ -548,7 +538,8 @@ public final class TrafficCanvas
         return(retval);
     }
 
-    public int getDistanceToIntersection(Point location, Point direction)
+    public int getDistanceToIntersection(Point location,
+                                         Point direction)
     {
         int retval = 0;
         int queueSize;
@@ -664,11 +655,13 @@ public final class TrafficCanvas
         {
             // Use an inner class to receive the timeout.
             _newVehicleTimer =
-                    new javax.swing.Timer(_newVehicleTimerDuration,
-                                          new NewVehicleTimeoutListener(this));
+                    new javax.swing.Timer(
+                        _newVehicleTimerDuration,
+                        new NewVehicleTimeoutListener(this));
 
             // Start creating new vehicle right away.
-            _newVehicleTimer.setInitialDelay((int) INITIAL_NEW_VEHICLE_DELAY);
+            _newVehicleTimer.setInitialDelay(
+                (int) INITIAL_NEW_VEHICLE_DELAY);
             currTime = System.currentTimeMillis();
             _newVehicleTimer.start();
 
@@ -694,8 +687,9 @@ public final class TrafficCanvas
         {
             // Use an inner class to receive the timeout.
             _repaintTimer =
-                    new javax.swing.Timer(REPAINT_TIME,
-                                          new RepaintTimeoutListener(this));
+                    new javax.swing.Timer(
+                        REPAINT_TIME,
+                        new RepaintTimeoutListener(this));
         }
 
         if (_repaintTimer.isRunning() == false)
@@ -706,7 +700,9 @@ public final class TrafficCanvas
         return;
     }
 
+//---------------------------------------------------------------
 // Member data.
+//
 
     //----------------------------------------
     // DYNANMIC DATA
@@ -715,28 +711,28 @@ public final class TrafficCanvas
     private Stoplight _stopLight;
 
     // List of all existing vehicles.
-    LinkedList _vehicleList;
+    private List<Vehicle> _vehicleList;
 
     // List of all defunct vehicles.
-    LinkedList _removeList;
+    private List<Vehicle> _removeList;
 
     // Timer data.
-    int _newVehicleTimerDuration;
-    long _nextNewVehicleTimeout;
-    javax.swing.Timer _newVehicleTimer;
-    javax.swing.Timer _repaintTimer;
+    private int _newVehicleTimerDuration;
+    private long _nextNewVehicleTimeout;
+    private javax.swing.Timer _newVehicleTimer;
+    private javax.swing.Timer _repaintTimer;
 
     // How fast vehicles move.
-    int _vehicleSpeed;
+    private int _vehicleSpeed;
 
     // Set to true when the light has changed and
     // so needs to be repainted.
-    boolean _lightChanged;
+    private boolean _lightChanged;
 
     // For each light, keep a list of vehicles waiting for that
     // light to turn green. When the light does turn green, tell
     // the vehicles that it is okay to continue.
-    LinkedList[] _stoplightQueue;
+    private List<Vehicle>[] _stoplightQueue;
 
     //----------------------------------------
     // STATIC DATA
@@ -794,22 +790,26 @@ public final class TrafficCanvas
         CANVAS_CORNER = new Point(0, 0);
         CANVAS_SIZE = new Dimension(250, 250);
 
-        FIELD_SIZE = new Dimension((int) (CANVAS_SIZE.width * 0.4),
-                                   (int) (CANVAS_SIZE.height * 0.4));
+        FIELD_SIZE =
+            new Dimension((int) (CANVAS_SIZE.width * 0.4),
+                          (int) (CANVAS_SIZE.height * 0.4));
 
         ROAD_WIDTH = CANVAS_SIZE.width - (FIELD_SIZE.width * 2);
         LANE_WIDTH = ROAD_WIDTH / 2;
         VEHICLE_SIZE = new Dimension(6, 6);
-        CURB_OFFSET = (int) ((LANE_WIDTH - VEHICLE_SIZE.width) / 2);
+        CURB_OFFSET =
+            (int) ((LANE_WIDTH - VEHICLE_SIZE.width) / 2);
 
         RECT_CORNERS = new Point[5];
         RECT_CORNERS[0] = new Point(0, 0);
         RECT_CORNERS[1] = new Point(FIELD_SIZE.width,
                                     FIELD_SIZE.height);
-        RECT_CORNERS[2] = new Point((int) (CANVAS_SIZE.width * 0.5),
-                                    (int) (CANVAS_SIZE.height * 0.5));
-        RECT_CORNERS[3] = new Point((CANVAS_SIZE.width - FIELD_SIZE.width),
-                                    (CANVAS_SIZE.height - FIELD_SIZE.height));
+        RECT_CORNERS[2] =
+            new Point((int) (CANVAS_SIZE.width * 0.5),
+                      (int) (CANVAS_SIZE.height * 0.5));
+        RECT_CORNERS[3] =
+            new Point((CANVAS_SIZE.width - FIELD_SIZE.width),
+                      (CANVAS_SIZE.height - FIELD_SIZE.height));
         RECT_CORNERS[4] = new Point(CANVAS_SIZE.width,
                                     CANVAS_SIZE.height);
 

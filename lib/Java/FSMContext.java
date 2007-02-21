@@ -28,6 +28,9 @@
 //
 // Change Log
 // $Log$
+// Revision 1.8  2007/02/21 13:50:59  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.7  2005/05/28 18:44:13  cwrapp
 // Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
 //
@@ -150,7 +153,7 @@ public abstract class FSMContext
 
         if (_stateStack == null)
         {
-            _stateStack = new java.util.Stack();
+            _stateStack = new java.util.Stack<State>();
         }
 
         _stateStack.push(_state);
@@ -176,7 +179,7 @@ public abstract class FSMContext
         {
             // The pop method removes the top element
             // from the stack and returns it.
-            _state = (State) _stateStack.pop();
+            _state = _stateStack.pop();
 
             if (_stateStack.isEmpty() == true)
             {
@@ -221,7 +224,7 @@ public abstract class FSMContext
     transient protected State _previousState;
 
     // This stack is used when a push transition is taken.
-    transient protected java.util.Stack _stateStack;
+    transient protected java.util.Stack<State> _stateStack;
 
     // When this flag is set to true, this class will print
     // out debug messages.

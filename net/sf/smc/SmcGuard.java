@@ -116,14 +116,14 @@ public final class SmcGuard
         return;
     }
 
-    public List getActions()
+    public List<SmcAction> getActions()
     {
         return (_actions);
     }
 
-    public void setActions(List actions)
+    public void setActions(List<SmcAction> actions)
     {
-        _actions = (List) new ArrayList(actions);
+        _actions = new ArrayList<SmcAction>(actions);
         return;
     }
 
@@ -168,16 +168,12 @@ public final class SmcGuard
         }
 
         retval.append(" {\n");
-        if (_actions.size() > 0)
+        if (_actions.isEmpty() == false)
         {
-            Iterator ait;
-
-            for (ait = _actions.iterator();
-                 ait.hasNext() == true;
-                )
+            for (SmcAction action: _actions)
             {
                 retval.append("    ");
-                retval.append((SmcAction) ait.next());
+                retval.append(action);
                 retval.append(";\n");
             }
         }
@@ -258,7 +254,7 @@ public final class SmcGuard
     private String _endState;
     private String _pushState;
     private String _popArgs;
-    private List _actions;
+    private List<SmcAction> _actions;
 
     //-----------------------------------------------------------
     // Constants.
@@ -269,6 +265,9 @@ public final class SmcGuard
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2007/02/21 13:54:54  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.10  2007/01/15 00:23:51  cwrapp
 // Release 4.4.0 initial commit.
 //

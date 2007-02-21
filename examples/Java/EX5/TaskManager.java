@@ -1,11 +1,11 @@
 //
 // The contents of this file are subject to the Mozilla Public
 // License Version 1.1 (the "License"); you may not use this file
-// except in compliance with the License. You may obtain a copy of
-// the License at http://www.mozilla.org/MPL/
+// except in compliance with the License. You may obtain a copy
+// of the License at http://www.mozilla.org/MPL/
 // 
-// Software distributed under the License is distributed on an "AS
-// IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+// Software distributed under the License is distributed on an
+// "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
@@ -30,6 +30,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2007/02/21 13:40:56  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.5  2005/05/28 13:51:24  cwrapp
 // Update Java examples 1 - 7.
 //
@@ -43,9 +46,9 @@ import javax.swing.Timer;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.ListIterator;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -59,9 +62,9 @@ public final class TaskManager
         TaskController control = new TaskController();
 
         _runningTask = null;
-        _runnableTaskQueue = new LinkedList();
-        _blockedTaskList = new LinkedList();
-        _timerTable = new HashMap();
+        _runnableTaskQueue = new LinkedList<Task>();
+        _blockedTaskList = new LinkedList<Task>();
+        _timerTable = new HashMap<String, Timer>();
         _exitCode = 0;
 
         _fsm = new TaskManagerContext(this);
@@ -86,10 +89,11 @@ public final class TaskManager
         }
         else if (taskExists(name) == true)
         {
-            sendMessage(0,
-                        "Cannot create task named \"" +
-                        name +
-                        "\" - a task with that name already exists.");
+            sendMessage(
+                0,
+                "Cannot create task named \"" +
+                name +
+                "\" - a task with that name already exists.");
         }
         else
         {
@@ -175,7 +179,8 @@ public final class TaskManager
         if ((task = findTask(taskName)) != null)
         {
             // Is this task on the blocked list?
-            if ((taskIndex = _blockedTaskList.indexOf(task)) >= 0)
+            taskIndex = _blockedTaskList.indexOf(task);
+            if (taskIndex >= 0)
             {
                 TaskController control = new TaskController();
 
@@ -301,8 +306,9 @@ public final class TaskManager
                 _runningTask = null;
                 _fsm.TaskDeleted();
             }
-            else if ((taskIndex = _runnableTaskQueue.indexOf(task))
-                         >= 0)
+            else if (
+                (taskIndex =
+                     _runnableTaskQueue.indexOf(task)) >= 0)
             {
                 _runnableTaskQueue.remove(taskIndex);
             }
@@ -351,7 +357,7 @@ public final class TaskManager
         Timer timer;
 
         // Remove the timer from the table and stop it.
-        if ((timer = (Timer) _timerTable.remove(name)) != null)
+        if ((timer = _timerTable.remove(name)) != null)
         {
             timer.stop();
         }
@@ -364,7 +370,7 @@ public final class TaskManager
     public void sendMessage(int level, String message)
     {
         TaskController control = new TaskController();
-        Map args = new HashMap();
+        Map<String, Object> args = new HashMap<String, Object>();
 
         args.put("level", new Integer(level));
         args.put("object", "TaskManager");
@@ -418,7 +424,7 @@ public final class TaskManager
     // and have it start running.
     public void startTask()
     {
-        ListIterator taskIt;
+        Iterator<Task> taskIt;
         Task task;
         int index;
         int taskIndex;
@@ -426,14 +432,14 @@ public final class TaskManager
         int currentMinPriority;
 
         // Find the task with the lowest priority.
-        for (taskIt = _runnableTaskQueue.listIterator(0),
+        for (taskIt = _runnableTaskQueue.iterator(),
                      currentMinPriority = Integer.MAX_VALUE,
                      index = 0,
                      taskIndex = -1;
              taskIt.hasNext() == true;
              ++index)
         {
-            task = (Task) taskIt.next();
+            task = taskIt.next();
             taskPriority = task.getDynamicPriority();
 
             // Is the new task's priority less than
@@ -467,16 +473,8 @@ public final class TaskManager
     // Cancel all existing timers.
     public void stopAllTimers()
     {
-        Iterator entryIt;
-        Map.Entry mapEntry;
-        Timer timer;
-
-        for (entryIt = _timerTable.entrySet().iterator();
-             entryIt.hasNext() == true;
-             )
+        for (Timer timer: _timerTable.values())
         {
-            mapEntry = (Map.Entry) entryIt.next();
-            timer = (Timer) mapEntry.getValue();
             timer.stop();
         }
 
@@ -488,40 +486,28 @@ public final class TaskManager
     public void stopAllTasks()
     {
         TaskController control = new TaskController();
-        ListIterator listIt;
-        Task task;
 
         // Put all tasks into the blocked list. As they report
         // that they are stopped, remove the tasks.
         //
         // Do the blocked list first.
-        for (listIt = _blockedTaskList.listIterator(0);
-             listIt.hasNext() == true;
-             )
+        for (Task task: _blockedTaskList)
         {
-            task = (Task) listIt.next();
-
             sendMessage(3,
                         "Stopping task " +
                         task.getName() +
                         ".");
-            control.postMessage(task.getName(),
-                                "stop");
+            control.postMessage(task.getName(), "stop");
         }
 
         // Do the runnable tasks next.
-        for (listIt = _runnableTaskQueue.listIterator(0);
-             listIt.hasNext() == true;
-             )
+        for (Task task: _runnableTaskQueue)
         {
-            task = (Task) listIt.next();
-
             sendMessage(3,
                         "Stopping task " +
                         task.getName() +
                         ".");
-            control.postMessage(task.getName(),
-                                "stop");
+            control.postMessage(task.getName(), "stop");
             _blockedTaskList.add(task);
         }
         _runnableTaskQueue.clear();
@@ -571,11 +557,7 @@ public final class TaskManager
 
     public Task findTask(String taskName)
     {
-        ListIterator taskIt;
-        Task task;
-        Task retval;
-
-        retval = null;
+        Task retval = null;
 
         // Is the running task the one we are looking for?
         if (_runningTask != null &&
@@ -586,28 +568,24 @@ public final class TaskManager
         else
         {
             // Is the task in the runnable queue?
-            for (taskIt = _runnableTaskQueue.listIterator(0);
-                 taskIt.hasNext() == true && retval == null;
-                )
+            for (Task task: _runnableTaskQueue)
             {
-                task = (Task) taskIt.next();
                 if (taskName.compareTo(task.getName()) == 0)
                 {
                     retval = task;
+                    break;
                 }
             }
 
             // Is this task in the blocked list?
             if (retval == null)
             {
-                for (taskIt = _blockedTaskList.listIterator(0);
-                     taskIt.hasNext() == true && retval == null;
-                    )
+                for (Task task: _blockedTaskList)
                 {
-                    task = (Task) taskIt.next();
                     if (taskName.compareTo(task.getName()) == 0)
                     {
                         retval = task;
+                        break;
                     }
                 }
             }
@@ -622,10 +600,11 @@ public final class TaskManager
         return(findTask(name) == null ? false : true);
     }
 
-    // Issue the state machine transition associated with this timer
-    // name. Also, remove the now defunct timer from the timer
-    // table.
-    public void handleEvent(String eventName, Map args)
+    // Issue the state machine transition associated with this
+    // timer name. Also, remove the now defunct timer from the
+    // timer table.
+    public void handleEvent(String eventName,
+                            Map<String, Object> args)
     {
         String taskName;
 
@@ -723,16 +702,16 @@ public final class TaskManager
     private TaskManagerContext _fsm;
 
     // Runnable task queue, sorted by priority.
-    private LinkedList _runnableTaskQueue;
+    private List<Task> _runnableTaskQueue;
 
     // Blocked task list.
-    private LinkedList _blockedTaskList;
+    private List<Task> _blockedTaskList;
 
     // The currently running task.
     private Task _runningTask;
 
     // Task manager's various timers.
-    private Map _timerTable;
+    private Map<String, Timer> _timerTable;
 
     // The application's exit code.
     private int _exitCode;
@@ -751,7 +730,8 @@ public final class TaskManager
 
         public void actionPerformed(ActionEvent e)
         {
-            Map args = new HashMap();
+            Map<String, Object> args =
+                new HashMap<String, Object>();
 
             _owner.handleEvent(_timerName, args);
             return;

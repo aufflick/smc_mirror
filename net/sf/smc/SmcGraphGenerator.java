@@ -61,13 +61,10 @@ public final class SmcGraphGenerator
         super (source, srcfileBase);
 
         _parameters = null;
-    }
+    } // end of SmcGraphGenerator(PrintStream, String)
 
     public void visit(SmcFSM fsm)
     {
-        Iterator it;
-        SmcMap map;
-
         // Create one overall graph and place each map in a
         // subgraph.
         _source.println("digraph ");
@@ -79,10 +76,8 @@ public final class SmcGraphGenerator
         _source.println();
 
         // Have each map generate its subgraph.
-        for (it = fsm.getMaps().iterator(); it.hasNext();)
+        for (SmcMap map: fsm.getMaps())
         {
-            map = (SmcMap) it.next();
-
             _source.print("    subgraph cluster_");
             _source.print(map.getName());
             _source.println(" {");
@@ -98,20 +93,14 @@ public final class SmcGraphGenerator
         _source.println("}");
 
         return;
-    }
+    } // end of visit(SmcFSM)
 
     public void visit(SmcMap map)
     {
         String mapName = map.getName();
         int graphLevel = Smc.graphLevel();
-        Iterator it;
-        Iterator it2;
         SmcState defaultState = map.getDefaultState();
-        List transitions = map.getTransitions();
-        SmcState state;
-        SmcTransition transition;
-        Iterator guardIt;
-        SmcGuard guard;
+        List<SmcTransition> transitions = map.getTransitions();
         String popArgs;
 
         _source.println();
@@ -127,11 +116,9 @@ public final class SmcGraphGenerator
         _source.println();
 
         // Output the state names first.
-        for (it = map.getStates().iterator();
-             it.hasNext() == true;
-            )
+        for (SmcState state: map.getStates())
         {
-            ((SmcState) it.next()).accept(this);
+            state.accept(this);
         }
 
         // Output the default state - if there is one and it
@@ -143,16 +130,10 @@ public final class SmcGraphGenerator
         }
 
         // Now output the pop transitions as "nodes".
-        for (it = transitions.iterator(); it.hasNext() == true;)
+        for (SmcTransition transition: transitions)
         {
-            transition = (SmcTransition) it.next();
-
-            for (it2 = transition.getGuards().iterator();
-                 it2.hasNext() == true;
-                )
+            for (SmcGuard guard: transition.getGuards())
             {
-                guard = (SmcGuard) it2.next();
-
                 if (guard.getTransType() == Smc.TRANS_POP)
                 {
                     // Graph Level 0, 1: Output the pop
@@ -186,17 +167,12 @@ public final class SmcGraphGenerator
         _source.println("        //");
 
         // For each state, output its transitions.
-        for (it = map.getStates().iterator();
-             it.hasNext() == true;
-            )
+        for (SmcState state: map.getStates())
         {
-            state = (SmcState) it.next();
-
-            for (it2 = state.getTransitions().iterator();
-                 it2.hasNext() == true;
-                )
+            for (SmcTransition transition:
+                     state.getTransitions())
             {
-                ((SmcTransition) it2.next()).accept(this);
+                transition.accept(this);
                 _source.println();
             }
         }
@@ -204,18 +180,16 @@ public final class SmcGraphGenerator
         // Have the default state output its transitions last.
         if (defaultState != null)
         {
-            for (it =
-                     defaultState.getTransitions().iterator();
-                 it.hasNext() == true;
-                )
+            for (SmcTransition transition:
+                     defaultState.getTransitions())
             {
-                ((SmcTransition) it.next()).accept(this);
+                transition.accept(this);
                 _source.println();
             }
         }
 
         return;
-    }
+    } // end of visit(SmcMap)
 
     public void visit(SmcState state)
     {
@@ -249,22 +223,22 @@ public final class SmcGraphGenerator
         // exit actions.
         else
         {
-            List actions;
-            Iterator it;
+            List<SmcAction> actions;
+            Iterator<SmcAction> it;
             String sep;
 
             _source.print("            [label=\"{\\N| Entry:");
 
             // Output the entry actions, one per line.
             actions = state.getEntryActions();
-            if (actions != null && actions.size() > 0)
+            if (actions != null && actions.isEmpty() == false)
             {
                 for (it = actions.iterator(), sep = " ";
                      it.hasNext() == true;
                      sep = "\\l")
                 {
                     _source.print(sep);
-                    ((SmcAction) it.next()).accept(this);
+                    (it.next()).accept(this);
                 }
             }
 
@@ -272,14 +246,14 @@ public final class SmcGraphGenerator
 
             // Output the exit actions, one per line.
             actions = state.getExitActions();
-            if (actions != null && actions.size() > 0)
+            if (actions != null && actions.isEmpty() == false)
             {
                 for (it = actions.iterator(), sep = " ";
                      it.hasNext() == true;
                      sep = "\\l")
                 {
                     _source.print(sep);
-                    ((SmcAction) it.next()).accept(this);
+                    (it.next()).accept(this);
                 }
             }
 
@@ -289,12 +263,13 @@ public final class SmcGraphGenerator
         _source.println();
 
         return;
-    }
+    } // end of visit(SmcState)
 
     public void visit(SmcTransition transition)
     {
-        List parameters = transition.getParameters();
-        Iterator it;
+        List<SmcParameter> parameters =
+            transition.getParameters();
+        Iterator<SmcParameter> pit;
 
         // Graph level 2: add parameters to transition name.
         // Generate the parameters once and pass the string to
@@ -308,26 +283,25 @@ public final class SmcGraphGenerator
             String sep;
 
             _source = new PrintStream(baos);
-            for (it = parameters.iterator(), sep = "";
-                 it.hasNext() == true;
+            for (pit = parameters.iterator(), sep = "";
+                 pit.hasNext() == true;
                  sep = ", ")
             {
-                ((SmcParameter) it.next()).accept(this);
+                (pit.next()).accept(this);
             }
 
             _parameters = baos.toString();
             _source = pstream;
         }
 
-        for (it = transition.getGuards().iterator();
-             it.hasNext() == true;)
+        for (SmcGuard guard: transition.getGuards())
         {
             _source.println();
-            ((SmcGuard) it.next()).accept(this);
+            guard.accept(this);
         }
 
         return;
-    }
+    } // end of visit(SmcTransition)
 
     public void visit(SmcGuard guard)
     {
@@ -342,8 +316,7 @@ public final class SmcGraphGenerator
         String pushStateName = guard.getPushState();
         String condition = guard.getCondition();
         int graphLevel = Smc.graphLevel();
-        List actions = guard.getActions();
-        Iterator it;
+        List<SmcAction> actions = guard.getActions();
 
         _source.print("        \"");
         _source.print(mapName);
@@ -434,9 +407,9 @@ public final class SmcGraphGenerator
         {
             _source.print("/\\l");
 
-            for (it = actions.iterator(); it.hasNext() == true;)
+            for (SmcAction action: actions)
             {
-                ((SmcAction) it.next()).accept(this);
+                action.accept(this);
                 _source.print("\\l");
             }
         }
@@ -444,7 +417,7 @@ public final class SmcGraphGenerator
         _source.print("\"];");
 
         return;
-    }
+    } // end of visit(SmcGuard)
 
     public void visit(SmcAction action)
     {
@@ -461,7 +434,7 @@ public final class SmcGraphGenerator
 
             if (graphLevel == Smc.GRAPH_LEVEL_2)
             {
-                Iterator it;
+                Iterator<String> it;
                 String arg;
                 String sep;
 
@@ -473,7 +446,7 @@ public final class SmcGraphGenerator
                      it.hasNext() == true;
                      sep = ", ")
                 {
-                    arg = ((String) it.next()).trim();
+                    arg = (it.next()).trim();
 
                     _source.print(sep);
 
@@ -485,7 +458,8 @@ public final class SmcGraphGenerator
 
                     // Then replace all double quotes with
                     // a backslash double qoute.
-                    _source.print(arg.replaceAll("\"", "\\\\\""));
+                    _source.print(
+                        arg.replaceAll("\"", "\\\\\""));
                 }
 
                 _source.print(")");
@@ -495,7 +469,7 @@ public final class SmcGraphGenerator
         }
 
         return;
-    }
+    } // end of visit(SmcAction)
 
     public void visit(SmcParameter parameter)
     {
@@ -504,7 +478,7 @@ public final class SmcGraphGenerator
         _source.print(parameter.getType());
 
         return;
-    }
+    } // end of visit(SmcParameter)
 
 //---------------------------------------------------------------
 // Member data
@@ -512,11 +486,14 @@ public final class SmcGraphGenerator
 
     // Store the serialized parameters here.
     private String _parameters;
-}
+} // end of class SmcGraphGenerator
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2007/02/21 13:54:51  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.5  2007/01/15 00:23:51  cwrapp
 // Release 4.4.0 initial commit.
 //

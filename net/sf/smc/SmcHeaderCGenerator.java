@@ -50,7 +50,7 @@ import java.util.List;
 public final class SmcHeaderCGenerator
     extends SmcCodeGenerator
 {
-//-----------------------------------------------------------------
+//---------------------------------------------------------------
 // Member methods
 //
 
@@ -58,27 +58,15 @@ public final class SmcHeaderCGenerator
                               String srcfileBase)
     {
         super (source, srcfileBase);
-    }
+    } // end of SmcHeaderCGenerator(PrintStream, String)
 
     public void visit(SmcFSM fsm)
     {
         String srcfileCaps;
         String packageName = fsm.getPackage();
         String context = fsm.getContext();
-        String mapName;
-        List transList;
-        String separator;
-        List params;
-        Iterator it;
-        Iterator mapIt;
-        Iterator transIt;
-        Iterator pit;
-        String declaration;
-        SmcMap map;
-        SmcState state;
-        SmcTransition trans;
-        SmcParameter param;
-        int index;
+        List<SmcTransition> transList;
+        List<SmcParameter> params;
 
         // If a package has been specified, 
         if (packageName != null && packageName.length() > 0)
@@ -116,11 +104,8 @@ public final class SmcHeaderCGenerator
         _source.println();
 
         // Do user-specified forward declarations now.
-        for (it = fsm.getDeclarations().iterator();
-             it.hasNext() == true;
-            )
+        for (String declaration: fsm.getDeclarations())
         {
-            declaration = (String) it.next();
             _source.print(declaration);
 
             // Add a semicolon if the user did not use one.
@@ -162,12 +147,8 @@ public final class SmcHeaderCGenerator
         transList = fsm.getTransitions();
 
         // Output the global transition declarations.
-        for (transIt = transList.iterator();
-             transIt.hasNext() == true;
-            )
+        for (SmcTransition trans: transList)
         {
-            trans = (SmcTransition) transIt.next();
-
             // Don't output the default state here.
             if (trans.getName().equals("Default") == false)
             {
@@ -178,12 +159,8 @@ public final class SmcHeaderCGenerator
                 _source.print("Context*");
 
                 params = trans.getParameters();
-                for (pit = params.iterator();
-                     pit.hasNext() == true;
-                    )
+                for (SmcParameter param: params)
                 {
-                    param = (SmcParameter) pit.next();
-
                     _source.print(", ");
                     _source.print(param.getType());
                 }
@@ -205,11 +182,9 @@ public final class SmcHeaderCGenerator
 
         // Generate the map classes. The maps will, in turn,
         // generate the state classes.
-        for (mapIt = fsm.getMaps().iterator();
-             mapIt.hasNext() == true;
-            )
+        for (SmcMap map: fsm.getMaps())
         {
-            ((SmcMap) mapIt.next()).accept(this);
+            map.accept(this);
         }
 
         // Generate the FSM context class.
@@ -241,11 +216,8 @@ public final class SmcHeaderCGenerator
 
         // Generate a method for every transition in every map
         // *except* the default transition.
-        for (transIt = transList.iterator();
-             transIt.hasNext() == true;
-            )
+        for (SmcTransition trans: transList)
         {
-            trans = (SmcTransition) transIt.next();
             if (trans.getName().equals("Default") == false)
             {
                 _source.print("extern void ");
@@ -257,12 +229,8 @@ public final class SmcHeaderCGenerator
                 _source.print("Context*");
 
                 params = trans.getParameters();
-                for (pit = params.iterator();
-                     pit.hasNext() == true;
-                    )
+                for (SmcParameter param: params)
                 {
-                    param = (SmcParameter) pit.next();
-
                     _source.print(", ");
                     _source.print(param.getType());
                 }
@@ -274,7 +242,7 @@ public final class SmcHeaderCGenerator
         _source.println("#endif");
 
         return;
-    }
+    } // end of visit(SmcFSM)
 
     // Generate the map class declaration
     public void visit(SmcMap map)
@@ -282,8 +250,6 @@ public final class SmcHeaderCGenerator
         String packageName = map.getFSM().getPackage();
         String context = map.getFSM().getContext();
         String mapName = map.getName();
-        Iterator it;
-        SmcState state;
 
         // If a package has been specified, 
         if (packageName != null && packageName.length() > 0)
@@ -291,11 +257,8 @@ public final class SmcHeaderCGenerator
               context = packageName + "_" + context;
         }
 
-        for (it = map.getStates().iterator();
-             it.hasNext() == true;
-            )
+        for (SmcState state: map.getStates())
         {
-            state = (SmcState) it.next();
             _source.print("extern const struct ");
             _source.print(context);
             _source.print("State ");
@@ -311,16 +274,19 @@ public final class SmcHeaderCGenerator
         }
 
         return;
-    }
+    } // end of visit(SmcMap)
 
-//-----------------------------------------------------------------
+//---------------------------------------------------------------
 // Member data
 //
-}
+} // end of class SmcHeaderCGenerator
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2007/02/21 13:55:02  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.5  2007/01/15 00:23:51  cwrapp
 // Release 4.4.0 initial commit.
 //

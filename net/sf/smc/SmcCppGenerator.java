@@ -61,7 +61,7 @@ public final class SmcCppGenerator
         super (source, srcfileBase);
 
         _indent = "";
-    }
+    } // end of SmcCppGenerator(PrintStream, String)
 
     // This method generates the following code:
     //
@@ -87,20 +87,15 @@ public final class SmcCppGenerator
         String rawSource = fsm.getSource();
         String context = fsm.getContext();
         String mapName;
-        List transList;
+        List<SmcTransition> transList;
         String separator;
-        List params;
-        Iterator it;
-        Iterator mapIt;
-        Iterator stateIt;
-        Iterator transIt;
-        Iterator pit;
+        List<SmcParameter> params;
+        Iterator<SmcMap> mapIt;
+        Iterator<SmcState> stateIt;
         String declaration;
         int packageDepth = 0;
         SmcMap map;
         SmcState state;
-        SmcTransition trans;
-        SmcParameter param;
         int index;
 
         // Dump out the raw source code, if any.
@@ -111,12 +106,10 @@ public final class SmcCppGenerator
         }
 
         // Generate #includes.
-        for (it = fsm.getIncludes().iterator();
-             it.hasNext() == true;
-            )
+        for (String include: fsm.getIncludes())
         {
             _source.print("#include ");
-            _source.println(((String) it.next()));
+            _source.println(include);
         }
 
         // Include the context file last.
@@ -145,12 +138,10 @@ public final class SmcCppGenerator
         _source.println("using namespace statemap;");
 
         // Do user-specified imports now.
-        for (it = fsm.getImports().iterator();
-             it.hasNext() == true;
-            )
+        for (String imp: fsm.getImports())
         {
             _source.print("using namespace ");
-            _source.print((String) it.next());
+            _source.print(imp);
             _source.println(";");
         }
 
@@ -195,13 +186,13 @@ public final class SmcCppGenerator
              mapIt.hasNext() == true;
             )
         {
-            map = (SmcMap) mapIt.next();
+            map = mapIt.next();
             mapName = map.getName();
             for (stateIt = map.getStates().iterator();
                  stateIt.hasNext() == true;
                  ++index)
             {
-                state = (SmcState) stateIt.next();
+                state = stateIt.next();
                 _source.print(_indent);
                 _source.print(mapName);
                 _source.print("_");
@@ -247,13 +238,13 @@ public final class SmcCppGenerator
                  mapIt.hasNext() == true;
                 )
             {
-                map = (SmcMap) mapIt.next();
+                map = mapIt.next();
                 mapName = map.getName();
                 for (stateIt = map.getStates().iterator();
                      stateIt.hasNext() == true;
                      separator = ",")
                 {
-                    state = (SmcState) stateIt.next();
+                    state = stateIt.next();
                     _source.print(separator);
                     _source.println();
                     _source.print(_indent);
@@ -302,8 +293,9 @@ public final class SmcCppGenerator
                 _source.println(
                     "            IndexOutOfBoundsException(");
                 _source.print(_indent);
-                _source.println(
-                    "                stateId, MIN_INDEX, MAX_INDEX));");
+                _source.print(
+                    "                stateId, MIN_INDEX, ");
+                _source.println("MAX_INDEX));");
             }
 
             _source.print(_indent);
@@ -323,12 +315,8 @@ public final class SmcCppGenerator
         transList = fsm.getTransitions();
 
         // Output the default transition definitions.
-        for (transIt = transList.iterator();
-             transIt.hasNext() == true;
-            )
+        for (SmcTransition trans: transList)
         {
-            trans = (SmcTransition) transIt.next();
-
             if (trans.getName().equals("Default") == false)
             {
                 _source.println();
@@ -342,12 +330,10 @@ public final class SmcCppGenerator
                 _source.print("Context& context");
 
                 params = trans.getParameters();
-                for (pit = params.iterator();
-                     pit.hasNext() == true;
-                    )
+                for (SmcParameter param: params)
                 {
                     _source.print(", ");
-                    ((SmcParameter) pit.next()).accept(this);
+                    param.accept(this);
                 }
 
                 _source.println(")");
@@ -383,7 +369,8 @@ public final class SmcCppGenerator
             _source.print(_indent);
             _source.println("    {");
 
-            // Are we using C++ iostreams or the app's TRACE macro?
+            // Are we using C++ iostreams or the app's TRACE
+            // macro?
             if (Smc.isNoStreams() == true)
             {
                 // The TRACE macro.
@@ -448,7 +435,7 @@ public final class SmcCppGenerator
              mapIt.hasNext() == true;
             )
         {
-            ((SmcMap) mapIt.next()).accept(this);
+            (mapIt.next()).accept(this);
         }
 
         // If a namespace was specified, then put the
@@ -471,35 +458,30 @@ public final class SmcCppGenerator
         }
 
         return;
-    }
+    } // end of visit(SmcFSM)
 
     public void visit(SmcMap map)
     {
-        Iterator it;
-
         // Declare the user-defined default transitions first.
         if (map.hasDefaultState() == true)
         {
             SmcState defaultState = map.getDefaultState();
 
-            for (it = defaultState.getTransitions().iterator();
-                 it.hasNext() == true;
-                )
+            for (SmcTransition trans:
+                     defaultState.getTransitions())
             {
-                ((SmcTransition) it.next()).accept(this);
+                trans.accept(this);
             }
         }
 
         // Have each state now generate its code.
-        for (it = map.getStates().iterator();
-             it.hasNext() == true;
-            )
+        for (SmcState state: map.getStates())
         {
-            ((SmcState) it.next()).accept(this);
+            state.accept(this);
         }
 
         return;
-    }
+    } // end of visit(SmcMap)
 
     public void visit(SmcState state)
     {
@@ -508,13 +490,12 @@ public final class SmcCppGenerator
         String mapName = map.getName();
         String className = state.getClassName();
         String indent2;
-        List actions;
-        Iterator it;
+        List<SmcAction> actions;
 
         // Add the Entry() and Exit() methods if this state
         // defines them.
         actions = state.getEntryActions();
-        if (actions != null && actions.size() > 0)
+        if (actions != null && actions.isEmpty() == false)
         {
             _source.println();
             _source.print(_indent);
@@ -538,9 +519,9 @@ public final class SmcCppGenerator
             // Generate the actions associated with this code.
             indent2 = _indent;
             _indent = _indent + "    ";
-            for (it = actions.iterator(); it.hasNext() == true;)
+            for (SmcAction action: actions)
             {
-                ((SmcAction) it.next()).accept(this);
+                action.accept(this);
             }
             _indent = indent2;
 
@@ -552,7 +533,7 @@ public final class SmcCppGenerator
         }
 
         actions = state.getExitActions();
-        if (actions != null && actions.size() > 0)
+        if (actions != null && actions.isEmpty() == false)
         {
             _source.println();
             _source.print(_indent);
@@ -576,9 +557,9 @@ public final class SmcCppGenerator
             // Generate the actions associated with this code.
             indent2 = _indent;
             _indent = _indent + "    ";
-            for (it = actions.iterator(); it.hasNext() == true;)
+            for (SmcAction action: actions)
             {
-                ((SmcAction) it.next()).accept(this);
+                action.accept(this);
             }
             _indent = indent2;
 
@@ -590,15 +571,13 @@ public final class SmcCppGenerator
         }
 
         // Have the transitions generate their code.
-        for (it = state.getTransitions().iterator();
-             it.hasNext() == true;
-            )
+        for (SmcTransition trans: state.getTransitions())
         {
-            ((SmcTransition) it.next()).accept(this);
+            trans.accept(this);
         }
 
         return;
-    }
+    } // end of visit(SmcState)
 
     public void visit(SmcTransition transition)
     {
@@ -610,10 +589,10 @@ public final class SmcCppGenerator
         String transName = transition.getName();
         boolean defaultFlag = false;
         boolean nullCondition = false;
-        List guards = transition.getGuards();
-        Iterator git;
+        List<SmcGuard> guards = transition.getGuards();
+        Iterator<SmcGuard> git;
         SmcGuard guard;
-        Iterator pit;
+        Iterator<SmcParameter> pit;
         String fqStateName;
 
         // Set a flag to denote if this is a Default state
@@ -646,12 +625,10 @@ public final class SmcCppGenerator
         _source.print("Context& context");
 
         // Add user-defined parameters.
-        for (pit = transition.getParameters().iterator();
-             pit.hasNext() == true;
-            )
+        for (SmcParameter param: transition.getParameters())
         {
             _source.print(", ");
-            ((SmcParameter) pit.next()).accept(this);
+            param.accept(this);
         }
 
         _source.println(")");
@@ -712,7 +689,7 @@ public final class SmcCppGenerator
                      sep = ", ")
                 {
                     _source.print(sep);
-                    ((SmcParameter) pit.next()).accept(this);
+                    (pit.next()).accept(this);
                 }
 
                 _source.println(")\\n\\r\");");
@@ -737,7 +714,7 @@ public final class SmcCppGenerator
                      sep = ", ")
                 {
                     _source.print(sep);
-                    ((SmcParameter) pit.next()).accept(this);
+                    (pit.next()).accept(this);
                 }
 
                 _source.println(")\"");
@@ -757,7 +734,7 @@ public final class SmcCppGenerator
              git.hasNext() == true;
              ++_guardIndex)
         {
-            guard = (SmcGuard) git.next();
+            guard = git.next();
 
             // Count up the number of guards with no condition.
             if (guard.getCondition().length() == 0)
@@ -793,13 +770,10 @@ public final class SmcCppGenerator
             _source.print("(context");
 
             // Output user-defined parameters.
-            for (pit = transition.getParameters().iterator();
-                 pit.hasNext() == true;
-                )
+            for (SmcParameter param: transition.getParameters())
             {
                 _source.print(", ");
-                _source.print(
-                    ((SmcParameter) pit.next()).getName());
+                _source.print(param.getName());
             }
             _source.println(");");
             _source.print(_indent);
@@ -817,7 +791,7 @@ public final class SmcCppGenerator
         _source.println("}");
 
         return;
-    }
+    } // end of visit(SmcTransition)
 
     public void visit(SmcGuard guard)
     {
@@ -838,7 +812,7 @@ public final class SmcCppGenerator
         String fqEndStateName = "";
         String pushStateName = guard.getPushState();
         String condition = guard.getCondition();
-        List actions = guard.getActions();
+        List<SmcAction> actions = guard.getActions();
 
         // If this guard's end state is not of the form
         // "map::state", then prepend the map name to the state
@@ -1054,8 +1028,6 @@ public final class SmcCppGenerator
         }
         else
         {
-            Iterator ait;
-
             // v. 2.0.2: Place the actions inside a try/catch
             // block. This way the state will be set before an
             // exception leaves the transition method.
@@ -1078,11 +1050,9 @@ public final class SmcCppGenerator
             indent4 = _indent;
             _indent = indent3;
 
-            for (ait = actions.iterator();
-                 ait.hasNext() == true;
-                )
+            for (SmcAction action: actions)
             {
-                ((SmcAction) ait.next()).accept(this);
+                action.accept(this);
             }
 
             _indent = indent4;
@@ -1127,7 +1097,8 @@ public final class SmcCppGenerator
 
                     _source.println();
                     _source.print(indent3);
-                    _source.println("if (loopbackFlag == false)");
+                    _source.println(
+                        "if (loopbackFlag == false)");
                     _source.print(indent3);
                     _source.println("{");
                 }
@@ -1167,7 +1138,8 @@ public final class SmcCppGenerator
         // catch-all block.
         // v. 2.2.0: Check if the user has turned off this
         // feature first.
-        if (actions.size() > 0 && Smc.isNoCatch() == false)
+        if (actions.isEmpty() == false &&
+            Smc.isNoCatch() == false)
         {
             _source.print(indent2);
             _source.println("}");
@@ -1316,12 +1288,12 @@ public final class SmcCppGenerator
         }
 
         return;
-    }
+    } // end of visit(SmcGuard)
 
     public void visit(SmcAction action)
     {
         String name = action.getName();
-        Iterator it;
+        Iterator<String> it;
         String sep;
 
         // Need to distinguish between FSMContext actions and
@@ -1345,13 +1317,13 @@ public final class SmcCppGenerator
              sep = ", ")
         {
             _source.print(sep);
-            _source.print((String) it.next());
+            _source.print(it.next());
         }
 
         _source.println(");");
 
         return;
-    }
+    } // end of visit(SmcAction)
 
     public void visit(SmcParameter parameter)
     {
@@ -1360,16 +1332,19 @@ public final class SmcCppGenerator
         _source.print(parameter.getName());
 
         return;
-    }
+    } // end of visit(SmcParameter)
 
 //---------------------------------------------------------------
 // Member data
 //
-}
+} // end of class SmcCppGenerator
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2007/02/21 13:54:27  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.6  2007/01/15 00:23:50  cwrapp
 // Release 4.4.0 initial commit.
 //

@@ -82,14 +82,14 @@ public final class SmcAction
         return;
     }
 
-    public List getArguments()
+    public List<String> getArguments()
     {
         return (_arguments);
     }
 
-    public void setArguments(List args)
+    public void setArguments(List<String> args)
     {
-        _arguments = (List) new ArrayList(args);
+        _arguments = new ArrayList<String>(args);
         return;
     }
 
@@ -99,8 +99,8 @@ public final class SmcAction
 
         if ((retval = _name.compareTo(action.getName())) == 0)
         {
-            Iterator ait1;
-            Iterator ait2;
+            Iterator<String> ait1;
+            Iterator<String> ait2;
             String s1;
             String s2;
 
@@ -109,8 +109,8 @@ public final class SmcAction
                  ait1.hasNext() == true && retval == 0;
                 )
             {
-                s1 = (String) ait1.next();
-                s2 = (String) ait2.next();
+                s1 = ait1.next();
+                s2 = ait2.next();
 
                 retval = s1.compareTo(s2);
             }
@@ -121,7 +121,7 @@ public final class SmcAction
 
     public String toString()
     {
-        Iterator ait;
+        Iterator<String> ait;
         String sep;
         StringBuffer retval = new StringBuffer(40);
 
@@ -133,7 +133,7 @@ public final class SmcAction
              sep = ", ")
         {
             retval.append(sep);
-            retval.append((String) ait.next());
+            retval.append(ait.next());
         }
 
         retval.append(')');
@@ -159,7 +159,7 @@ public final class SmcAction
 //
 
     // The action's argument list.
-    private List _arguments;
+    private List<String> _arguments;
 
     // Is this action a .Net property assignment?
     private boolean _propertyFlag;
@@ -171,6 +171,9 @@ public final class SmcAction
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2007/02/21 13:53:52  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.9  2007/01/15 00:23:50  cwrapp
 // Release 4.4.0 initial commit.
 //

@@ -1,11 +1,11 @@
 //
 // The contents of this file are subject to the Mozilla Public
 // License Version 1.1 (the "License"); you may not use this file
-// except in compliance with the License. You may obtain a copy of
-// the License at http://www.mozilla.org/MPL/
+// except in compliance with the License. You may obtain a copy
+// of the License at http://www.mozilla.org/MPL/
 // 
-// Software distributed under the License is distributed on an "AS
-// IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+// Software distributed under the License is distributed on an
+// "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2007/02/21 13:40:48  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.4  2005/05/28 13:51:24  cwrapp
 // Update Java examples 1 - 7.
 //
@@ -126,8 +129,10 @@ public final class TaskDialog
         _taskNameField = new JTextField(TaskMessages.NAME_LEN);
         _taskNameLabel = new JLabel("Task Name: ");
         _taskNameLabel.setLabelFor(_taskNameField);
-        _taskNameLabel.setVerticalTextPosition(SwingConstants.CENTER);
-        _taskNameLabel.setHorizontalTextPosition(SwingConstants.RIGHT);
+        _taskNameLabel.setVerticalTextPosition(
+            SwingConstants.CENTER);
+        _taskNameLabel.setHorizontalTextPosition(
+            SwingConstants.RIGHT);
 
         // Use a slider for the task runtime.
         _taskRuntimeSlider = new JSlider(JSlider.HORIZONTAL,
@@ -141,8 +146,10 @@ public final class TaskDialog
         _taskRuntimeSlider.setSnapToTicks(true);
         _taskRuntimeLabel = new JLabel("Runtime (secs.): ");
         _taskRuntimeLabel.setLabelFor(_taskRuntimeSlider);
-        _taskRuntimeLabel.setVerticalTextPosition(SwingConstants.CENTER);
-        _taskRuntimeLabel.setHorizontalTextPosition(SwingConstants.RIGHT);
+        _taskRuntimeLabel.setVerticalTextPosition(
+            SwingConstants.CENTER);
+        _taskRuntimeLabel.setHorizontalTextPosition(
+            SwingConstants.RIGHT);
 
         // Use a slider for the task priority.
         _taskPrioritySlider = new JSlider(JSlider.HORIZONTAL,
@@ -156,8 +163,10 @@ public final class TaskDialog
         _taskPrioritySlider.setSnapToTicks(true);
         _taskPriorityLabel = new JLabel("Task Priority: ");
         _taskPriorityLabel.setLabelFor(_taskPrioritySlider);
-        _taskPriorityLabel.setVerticalTextPosition(SwingConstants.CENTER);
-        _taskPriorityLabel.setHorizontalTextPosition(SwingConstants.RIGHT);
+        _taskPriorityLabel.setVerticalTextPosition(
+            SwingConstants.CENTER);
+        _taskPriorityLabel.setHorizontalTextPosition(
+            SwingConstants.RIGHT);
 
         // Create four buttons: OK, Apply, Reset and Cancel.
         _okButton = new JButton("OK");
@@ -206,10 +215,11 @@ public final class TaskDialog
                 new GridBagConstraints();
 
         JPanel pane = new JPanel();
-        pane.setBorder(BorderFactory.createEmptyBorder(30, // top
-                                                       30, // left
-                                                       30, // bottom
-                                                       30) // right
+        pane.setBorder(
+            BorderFactory.createEmptyBorder(30, // top
+                                            30, // left
+                                            30, // bottom
+                                            30) // right
                        );
         pane.setLayout(gridbag);
 
@@ -232,21 +242,24 @@ public final class TaskDialog
         gridConstraints.gridx = 0;
         gridConstraints.gridy = 1;
         gridConstraints.gridwidth = 1;
-        gridbag.setConstraints(_taskRuntimeLabel, gridConstraints);
+        gridbag.setConstraints(_taskRuntimeLabel,
+                               gridConstraints);
         pane.add(_taskRuntimeLabel);
 
         gridConstraints.anchor = GridBagConstraints.NORTH;
         gridConstraints.gridx = 1;
         gridConstraints.gridy = 1;
         gridConstraints.gridwidth = GridBagConstraints.REMAINDER;
-        gridbag.setConstraints(_taskRuntimeSlider, gridConstraints);
+        gridbag.setConstraints(_taskRuntimeSlider,
+                               gridConstraints);
         pane.add(_taskRuntimeSlider);
 
         gridConstraints.anchor = GridBagConstraints.NORTH;
         gridConstraints.gridx = 0;
         gridConstraints.gridy = 2;
         gridConstraints.gridwidth = 1;
-        gridbag.setConstraints(_taskPriorityLabel, gridConstraints);
+        gridbag.setConstraints(_taskPriorityLabel,
+                               gridConstraints);
         pane.add(_taskPriorityLabel);
 
         gridConstraints.anchor = GridBagConstraints.NORTH;
@@ -289,7 +302,7 @@ public final class TaskDialog
                             int runtime,
                             int priority)
     {
-        Map args = new HashMap();
+        Map<String, Object> args = new HashMap<String, Object>();
         TaskController control = new TaskController();
 
         args.put("Task Name", name);

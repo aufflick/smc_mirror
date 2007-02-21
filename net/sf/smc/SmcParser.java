@@ -62,7 +62,7 @@ public final class SmcParser
                      boolean debugFlag)
     {
         _name = name;
-        _messages = (List) new ArrayList();
+        _messages = new ArrayList<SmcMessage>();
         _lexer = new SmcLexer(istream, debugFlag);
         _parserFSM = new SmcParserContext(this);
         _parserFSM.setDebugFlag(debugFlag);
@@ -157,7 +157,7 @@ public final class SmcParser
      * Returns the parser's warning and error messages list.
      * @return the parser's warning and error messages list.
      */
-    public List getMessages()
+    public List<SmcMessage> getMessages()
     {
         return (_messages);
     }
@@ -531,7 +531,7 @@ public final class SmcParser
         return;
     }
 
-    /* package */ void setEntryAction(List actions)
+    /* package */ void setEntryAction(List<SmcAction> actions)
     {
         // Verify there is an in-progress state.
         if (_stateInProgress == null)
@@ -554,7 +554,7 @@ public final class SmcParser
         return;
     }
 
-    /* package */ void setExitAction(List actions)
+    /* package */ void setExitAction(List<SmcAction> actions)
     {
         // Verify there is an in-progress state.
         if (_stateInProgress == null)
@@ -633,8 +633,9 @@ public final class SmcParser
 
     // Create a transition object with the current token as its
     // name.
-    /* package */ void createTransition(List params,
-                                        int lineNumber)
+    /* package */ void
+        createTransition(List<SmcParameter> params,
+                         int lineNumber)
     {
         if (_transitionInProgress != null)
         {
@@ -671,7 +672,7 @@ public final class SmcParser
                 if (_parserFSM.getDebugFlag() == true)
                 {
                     PrintStream os = _parserFSM.getDebugStream();
-                    Iterator pit;
+                    Iterator<SmcParameter> pit;
                     String sep;
                     StringBuffer buffer = new StringBuffer(80);
 
@@ -684,7 +685,7 @@ public final class SmcParser
                          sep = ", ")
                     {
                         buffer.append(sep);
-                        buffer.append((SmcParameter) pit.next());
+                        buffer.append(pit.next());
                     }
 
                     buffer.append(')');
@@ -713,7 +714,8 @@ public final class SmcParser
     // name.
     /* package */ void createTransition(int lineNumber)
     {
-        createTransition(new ArrayList(), lineNumber);
+        createTransition(new ArrayList<SmcParameter>(),
+                         lineNumber);
         return;
     }
 
@@ -855,7 +857,7 @@ public final class SmcParser
     }
 
     // Set the guard's actions.
-    /* package */ void setActions(List actions)
+    /* package */ void setActions(List<SmcAction> actions)
     {
         if (_guardInProgress == null)
         {
@@ -891,15 +893,15 @@ public final class SmcParser
     {
         if (_paramList == null)
         {
-            _paramList = (List) new ArrayList();
+            _paramList = new ArrayList<SmcParameter>();
         }
 
         return;
     }
 
-    /* package */ List getParamList()
+    /* package */ List<SmcParameter> getParamList()
     {
-        List retval = _paramList;
+        List<SmcParameter> retval = _paramList;
 
         _paramList = null;
 
@@ -989,15 +991,15 @@ public final class SmcParser
         }
         else
         {
-            _actionList = (List) new ArrayList();
+            _actionList = new ArrayList<SmcAction>();
         }
 
         return;
     }
 
-    /* package */ List getActionList()
+    /* package */ List<SmcAction> getActionList()
     {
-        List retval = _actionList;
+        List<SmcAction> retval = _actionList;
 
         _actionList = null;
 
@@ -1032,7 +1034,7 @@ public final class SmcParser
         return;
     }
 
-    /* package */ void setActionArgs(List args)
+    /* package */ void setActionArgs(List<String> args)
     {
         if (_actionInProgress == null)
         {
@@ -1128,22 +1130,23 @@ public final class SmcParser
         }
         else
         {
-            _argList = (List) new ArrayList();
+            _argList = new ArrayList<String>();
         }
 
         return;
     }
 
-    /* package */ List getArgsList()
+    /* package */ List<String> getArgsList()
     {
-        List retval = _argList;
+        List<String> retval = _argList;
 
         _argList = null;
 
         return(retval);
     }
 
-    /* package */ void createArgument(String name, int lineNumber)
+    /* package */ void
+        createArgument(String name, int lineNumber)
     {
         if (_argInProgress != null)
         {
@@ -1217,7 +1220,7 @@ public final class SmcParser
 
     // Store warning and error messages into this list. Do not
     // output them. That is up to the application.
-    private List _messages;
+    private List<SmcMessage> _messages;
 
     // The parse state map.
     private SmcParserContext _parserFSM;
@@ -1242,13 +1245,13 @@ public final class SmcParser
     private String _argInProgress;
 
     // Store parsed parameters here.
-    private List _paramList;
+    private List<SmcParameter> _paramList;
 
     // Store parsed transition actions here.
-    private List _actionList;
+    private List<SmcAction> _actionList;
 
     // Store parsed action arguments here.
-    private List _argList;
+    private List<String> _argList;
 
     private int _lineNumber;
 
@@ -1407,6 +1410,9 @@ public final class SmcParser
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.15  2007/02/21 13:56:09  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.14  2007/01/15 00:23:51  cwrapp
 // Release 4.4.0 initial commit.
 //

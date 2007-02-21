@@ -56,10 +56,10 @@ public final class SmcVBGenerator
 //
 
     public SmcVBGenerator(PrintStream source,
-                            String srcfileBase)
+                          String srcfileBase)
     {
         super (source, srcfileBase);
-    }
+    } // end of SmcVBGenerator(PrintStream, String)
 
     public void visit(SmcFSM fsm)
     {
@@ -67,19 +67,14 @@ public final class SmcVBGenerator
         String packageName = fsm.getPackage();
         String context = fsm.getContext();
         String startState = fsm.getStartState();
-        List maps = fsm.getMaps();
-        List transitions;
-        Iterator it;
-        Iterator it2;
-        SmcMap map;
-        SmcState state;
-        SmcTransition trans;
+        List<SmcMap> maps = fsm.getMaps();
+        List<SmcTransition> transitions;
+        List<SmcParameter> params;
+        Iterator<SmcParameter> pit;
         String transName;
-        SmcParameter param;
         String vbState;
         String separator;
         int index;
-        List params;
         String indent2;
 
         // Dump out the raw source code, if any.
@@ -97,12 +92,10 @@ public final class SmcVBGenerator
         }
 
         // Do user-specified imports now.
-        for (it = fsm.getImports().iterator();
-             it.hasNext() == true;
-            )
+        for (String imp: fsm.getImports())
         {
             _source.print("Imports ");
-            _source.println(it.next());
+            _source.println(imp);
         }
 
         // If serialization is on, then import the .Net
@@ -194,20 +187,14 @@ public final class SmcVBGenerator
             _source.print("        {");
 
             // For each map, ...
-            for (it = maps.iterator(), separator = " _";
-                 it.hasNext() == true;
-                )
+            separator = " _";
+            for (SmcMap map: maps)
             {
-                map = (SmcMap) it.next();
                 mapName = map.getName();
 
                 // and for each map state, ...
-                for (it2 = map.getStates().iterator();
-                     it2.hasNext() == true;
-                     separator = ", _")
+                for (SmcState state: map.getStates())
                 {
-                    state = (SmcState) it2.next();
-
                     // Add its singleton instance to the array.
                     _source.println(separator);
                     _source.print(_indent);
@@ -215,6 +202,8 @@ public final class SmcVBGenerator
                     _source.print(mapName);
                     _source.print(".");
                     _source.print(state.getClassName());
+
+                    separator = ", _";
                 }
             }
 
@@ -349,10 +338,8 @@ public final class SmcVBGenerator
         // formatted: set transition name, call the current
         // state's transition method, clear the transition name.
         transitions = fsm.getTransitions();
-        for (it = transitions.iterator(); it.hasNext() == true;)
+        for (SmcTransition trans: transitions)
         {
-            trans = (SmcTransition) it.next();
-
             // Ignore the default transition.
             if (trans.getName().equals("Default") == false)
             {
@@ -363,12 +350,12 @@ public final class SmcVBGenerator
 
                 // Now output the transition's parameters.
                 params = trans.getParameters();
-                for (it2 = params.iterator(), separator = "";
-                     it2.hasNext() == true;
+                for (pit = params.iterator(), separator = "";
+                     pit.hasNext() == true;
                      separator = ", ")
                 {
                     _source.print(separator);
-                    ((SmcParameter) it2.next()).accept(this);
+                    (pit.next()).accept(this);
                 }
                 _source.println(")");
                 _source.println();
@@ -399,12 +386,8 @@ public final class SmcVBGenerator
                 _source.print(trans.getName());
                 _source.print("(Me");
 
-                for (it2 = params.iterator();
-                     it2.hasNext() == true;
-                    )
+                for (SmcParameter param: params)
                 {
-                    param = (SmcParameter) it2.next();
-
                     _source.print(", ");
                     _source.print(param.getName());
                 }
@@ -648,10 +631,8 @@ public final class SmcVBGenerator
         _source.println();
 
         // Generate the default transition definitions.
-        for (it = transitions.iterator(); it.hasNext() == true;)
+        for (SmcTransition trans: transitions)
         {
-            trans = (SmcTransition) it.next();
-
             // Don't generate the Default transition here.
             if (trans.getName().equals("Default") == false)
             {
@@ -662,12 +643,10 @@ public final class SmcVBGenerator
                 _source.print(context);
                 _source.print("Context");
 
-                for (it2 = trans.getParameters().iterator();
-                     it2.hasNext() == true;
-                    )
+                for (SmcParameter param: trans.getParameters())
                 {
                     _source.print(", ");
-                    ((SmcParameter) it2.next()).accept(this);
+                    param.accept(this);
                 }
 
                 _source.println(")");
@@ -730,9 +709,9 @@ public final class SmcVBGenerator
         _source.println("End Class");
 
         // Have each map print out its source code now.
-        for (it = maps.iterator(); it.hasNext();)
+        for (SmcMap map: maps)
         {
-            ((SmcMap) it.next()).accept(this);
+            map.accept(this);
         }
 
         // If a package has been specified, then generate
@@ -744,17 +723,15 @@ public final class SmcVBGenerator
         }
 
         return;
-    }
+    } // end of visit(SmcFSM)
 
     public void visit(SmcMap map)
     {
-        List definedDefaultTransitions;
+        List<SmcTransition> definedDefaultTransitions;
         SmcState defaultState = map.getDefaultState();
         String context = map.getFSM().getContext();
         String mapName = map.getName();
-        List states = map.getStates();
-        Iterator it;
-        SmcState state;
+        List<SmcState> states = map.getStates();
         String stateName;
 
         // Initialize the default transition list to all the
@@ -766,7 +743,8 @@ public final class SmcVBGenerator
         }
         else
         {
-            definedDefaultTransitions = (List) new ArrayList();
+            definedDefaultTransitions =
+                new ArrayList<SmcTransition>();
         }
 
         // Declare the map class. Declare it as abstract to
@@ -786,9 +764,8 @@ public final class SmcVBGenerator
         _source.println();
 
         // Declare each of the state class member data.
-        for (it = states.iterator(); it.hasNext() == true;)
+        for (SmcState state: states)
         {
-            state = (SmcState) it.next();
             stateName = state.getClassName();
 
             _source.print(_indent);
@@ -891,18 +868,16 @@ public final class SmcVBGenerator
         _source.println();
 
         // Declare the user-defined default transitions first.
-        for (it = definedDefaultTransitions.iterator();
-             it.hasNext() == true;
-            )
+        for (SmcTransition transition: definedDefaultTransitions)
         {
-            ((SmcTransition) it.next()).accept(this);
+            transition.accept(this);
         }
 
         // If reflection is on, then define the transitions list.
         if (Smc.isReflection() == true)
         {
-            List allTransitions = map.getFSM().getTransitions();
-            SmcTransition transition;
+            List<SmcTransition> allTransitions =
+                map.getFSM().getTransitions();
             String transName;
             int transDefinition;
 
@@ -928,11 +903,8 @@ public final class SmcVBGenerator
             _source.println("_transitions = New Hashtable()");
 
             // Now place the transition names into the list.
-            for (it = allTransitions.iterator();
-                 it.hasNext() == true;
-                )
+            for (SmcTransition transition: allTransitions)
             {
-                transition = (SmcTransition) it.next();
                 transName = transition.getName();
 
                 // If the transition is defined in this map's
@@ -966,21 +938,20 @@ public final class SmcVBGenerator
 
         // Have each state now generate its code. Each state
         // class is an inner class.
-        for (it = states.iterator(); it.hasNext() == true;)
+        for (SmcState state: states)
         {
-            ((SmcState) it.next()).accept(this);
+            state.accept(this);
         }
 
         return;
-    }
+    } // end of visit(SmcMap)
 
     public void visit(SmcState state)
     {
         SmcMap map = state.getMap();
         String context = map.getFSM().getContext();
         String mapName = map.getName();
-        List actions;
-        Iterator it;
+        List<SmcAction> actions;
 
         // Declare the state class.
         _source.println();
@@ -1063,9 +1034,9 @@ public final class SmcVBGenerator
             _source.println();
 
             // Generate the actions associated with this code.
-            for (it = actions.iterator(); it.hasNext() == true;)
+            for (SmcAction action: actions)
             {
-                ((SmcAction) it.next()).accept(this);
+                action.accept(this);
             }
 
             _source.print(_indent);
@@ -1091,9 +1062,9 @@ public final class SmcVBGenerator
             _source.println();
 
             // Generate the actions associated with this code.
-            for (it = actions.iterator(); it.hasNext() == true;)
+            for (SmcAction action: actions)
             {
-                ((SmcAction) it.next()).accept(this);
+                action.accept(this);
             }
 
             _source.print(_indent);
@@ -1101,22 +1072,21 @@ public final class SmcVBGenerator
         }
 
         // Have each transition generate its code.
-        for (it = state.getTransitions().iterator();
-             it.hasNext() == true;
-            )
+        for (SmcTransition transition: state.getTransitions())
         {
-            ((SmcTransition) it.next()).accept(this);
+            transition.accept(this);
         }
 
         // If reflection is on, then generate the transitions
         // list.
         if (Smc.isReflection() == true)
         {
-            List allTransitions = map.getFSM().getTransitions();
-            List stateTransitions = state.getTransitions();
+            List<SmcTransition> allTransitions =
+                map.getFSM().getTransitions();
+            List<SmcTransition> stateTransitions =
+                state.getTransitions();
+            List<SmcTransition> defaultTransitions;
             SmcState defaultState = map.getDefaultState();
-            List defaultTransitions;
-            SmcTransition transition;
             String transName;
             int transDefinition;
 
@@ -1129,7 +1099,8 @@ public final class SmcVBGenerator
             }
             else
             {
-                defaultTransitions = (List) new ArrayList();
+                defaultTransitions =
+                    new ArrayList<SmcTransition>();
             }
 
             _source.println();
@@ -1154,11 +1125,8 @@ public final class SmcVBGenerator
             _source.println("_transitions = New Hashtable()");
 
             // Now place the transition names into the list.
-            for (it = allTransitions.iterator();
-                 it.hasNext() == true;
-                )
+            for (SmcTransition transition: allTransitions)
             {
-                transition = (SmcTransition) it.next();
                 transName = transition.getName();
 
                 // If the transition is in this state, then its
@@ -1199,7 +1167,7 @@ public final class SmcVBGenerator
         _source.println("End Class");
 
         return;
-    }
+    } // end of visit(SmcState)
 
     public void visit(SmcTransition transition)
     {
@@ -1209,12 +1177,13 @@ public final class SmcVBGenerator
         String mapName = map.getName();
         String stateName = state.getClassName();
         String transName = transition.getName();
-        List parameters = transition.getParameters();
-        List guards = transition.getGuards();
+        List<SmcParameter> parameters =
+            transition.getParameters();
+        List<SmcGuard> guards = transition.getGuards();
         boolean nullCondition = false;
-        Iterator it;
+        Iterator<SmcParameter> pit;
+        Iterator<SmcGuard> git;
         SmcGuard guard;
-        SmcParameter param;
 
         _source.println();
         _source.print(_indent);
@@ -1236,10 +1205,10 @@ public final class SmcVBGenerator
         _source.print("Context");
 
         // Add user-defined parameters.
-        for (it = parameters.iterator(); it.hasNext() == true;)
+        for (SmcParameter param: parameters)
         {
             _source.print(", ");
-            ((SmcParameter) it.next()).accept(this);
+            param.accept(this);
         }
         _source.println(")");
         _source.println();
@@ -1282,12 +1251,12 @@ public final class SmcVBGenerator
             _source.print(transName);
 
             _source.print("(");
-            for (it = parameters.iterator(), sep = "";
-                 it.hasNext() == true;
+            for (pit = parameters.iterator(), sep = "";
+                 pit.hasNext() == true;
                  sep = ", ")
             {
                 _source.print(sep);
-                ((SmcParameter) it.next()).accept(this);
+                (pit.next()).accept(this);
             }
             _source.print(")");
 
@@ -1297,13 +1266,13 @@ public final class SmcVBGenerator
         }
 
         // Loop through the guards and print each one.
-        for (it = guards.iterator(),
+        for (git = guards.iterator(),
                  _guardIndex = 0,
                  _guardCount = guards.size();
-             it.hasNext() == true;
+             git.hasNext() == true;
              ++_guardIndex)
         {
-            guard = (SmcGuard) it.next();
+            guard = git.next();
 
             // Count up the guards with no condition.
             if (guard.getCondition().length() == 0)
@@ -1328,13 +1297,10 @@ public final class SmcVBGenerator
             _source.print(transName);
             _source.print("(context");
 
-            for (it = parameters.iterator();
-                 it.hasNext() == true;
-                )
+            for (SmcParameter param: parameters)
             {
                 _source.print(", ");
-                _source.print(
-                    ((SmcParameter) it.next()).getName());
+                _source.print(param.getName());
             }
 
             _source.println(")");
@@ -1353,7 +1319,7 @@ public final class SmcVBGenerator
         _source.println("    End Sub");
 
         return;
-    }
+    } // end of visit(SmcTransition)
 
     public void visit(SmcGuard guard)
     {
@@ -1375,7 +1341,7 @@ public final class SmcVBGenerator
         String fqEndStateName = "";
         String pushStateName = guard.getPushState();
         String condition = guard.getCondition();
-        List actions = guard.getActions();
+        List<SmcAction> actions = guard.getActions();
 
         // If this guard's end state is not of the form
         // "map::state", then prepend the map name to the
@@ -1557,7 +1523,6 @@ public final class SmcVBGenerator
         }
         else
         {
-            Iterator it;
             String tempIndent;
 
             // Now that we are in the transition, clear the
@@ -1584,9 +1549,9 @@ public final class SmcVBGenerator
 
             tempIndent = _indent;
             _indent = indent2;
-            for (it = actions.iterator(); it.hasNext() == true;)
+            for (SmcAction action: actions)
             {
-                ((SmcAction) it.next()).accept(this);
+                action.accept(this);
             }
             _indent = tempIndent;
 
@@ -1729,13 +1694,13 @@ public final class SmcVBGenerator
         }
 
         return;
-    }
+    } // end of visit(SmcGuard)
 
     public void visit(SmcAction action)
     {
         String name = action.getName();
-        List arguments = action.getArguments();
-        Iterator it;
+        List<String> arguments = action.getArguments();
+        Iterator<String> it;
         String sep;
 
         // Need to distinguish between FSMContext actions and
@@ -1778,7 +1743,7 @@ public final class SmcVBGenerator
         }
 
         return;
-    }
+    } // end of visit(SmcAction)
 
     public void visit(SmcParameter parameter)
     {
@@ -1788,16 +1753,19 @@ public final class SmcVBGenerator
         _source.print(parameter.getType());
 
         return;
-    }
+    } // end of visit(SmcParameter)
 
 //---------------------------------------------------------------
 // Member data
 //
-}
+} // end of class SmcVBGenerator
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2007/02/21 13:57:07  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.8  2007/01/15 00:23:52  cwrapp
 // Release 4.4.0 initial commit.
 //

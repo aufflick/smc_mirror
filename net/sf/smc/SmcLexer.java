@@ -191,17 +191,16 @@ import java.util.Map;
     // type to WORD.
     /* package */ void checkKeyword()
     {
-        Integer tokenType;
+        String tokenStr = _tokenBuffer.toString();
 
-        _token.setValue(_tokenBuffer.toString());
+        _token.setValue(tokenStr);
         _stopFlag = true;
 
-        tokenType = (Integer) _KeywordMap.get(_token.getValue());
-        if (tokenType != null)
+        if (_KeywordMap.containsKey(tokenStr) == true)
         {
-            _token.setType(tokenType.intValue());
+            _token.setType(_KeywordMap.get(tokenStr));
         }
-        else if (_token.getValue().length() > 0)
+        else if (tokenStr.length() > 0)
         {
             _token.setType(SmcLexer.WORD);
         }
@@ -215,16 +214,14 @@ import java.util.Map;
 
     /* package */ void checkPercentKeyword()
     {
-        Integer tokenType;
+        String tokenStr = _tokenBuffer.toString();
 
-        _token.setValue(_tokenBuffer.toString());
+        _token.setValue(tokenStr);
         _stopFlag = true;
 
-        tokenType =
-            (Integer) _PercentKeywordMap.get(_token.getValue());
-        if (tokenType != null)
+        if (_PercentKeywordMap.containsKey(tokenStr) == true)
         {
-            _token.setType(tokenType.intValue());
+            _token.setType(_PercentKeywordMap.get(tokenStr));
         }
         else
         {
@@ -678,10 +675,10 @@ import java.util.Map;
     //
 
     private static String[] _TypeName;
-    private static Map _KeywordMap;
+    private static Map<String, Integer> _KeywordMap;
 
     // Maps % keywords to an integer value.
-    private static Map _PercentKeywordMap;
+    private static Map<String, Integer> _PercentKeywordMap;
 
     // Create an array which maps ASCII characters to
     // transitions.
@@ -808,33 +805,27 @@ import java.util.Map;
         _TypeName[SmcLexer.DOLLAR] = "DOLLAR";
 
         // Set up the keyword |-> token value map.
-        _KeywordMap = (Map) new HashMap(KEYWORD_COUNT);
-        _KeywordMap.put("Entry", new Integer(SmcLexer.ENTRY));
-        _KeywordMap.put("Exit", new Integer(SmcLexer.EXIT));
-        _KeywordMap.put("pop", new Integer(SmcLexer.POP));
-        _KeywordMap.put("push", new Integer(SmcLexer.PUSH));
+        _KeywordMap =
+            new HashMap<String, Integer>(KEYWORD_COUNT);
+        _KeywordMap.put("Entry", SmcLexer.ENTRY);
+        _KeywordMap.put("Exit", SmcLexer.EXIT);
+        _KeywordMap.put("pop", SmcLexer.POP);
+        _KeywordMap.put("push", SmcLexer.PUSH);
 
         // Set up the percent keyword |-> token value map.
         _PercentKeywordMap =
-            (Map) new HashMap(PERCENT_KEYWORD_COUNT);
-        _PercentKeywordMap.put(
-            "%start", new Integer(SmcLexer.START_STATE));
-        _PercentKeywordMap.put(
-            "%map", new Integer(SmcLexer.MAP_NAME));
-        _PercentKeywordMap.put(
-            "%class", new Integer(SmcLexer.CLASS_NAME));
-        _PercentKeywordMap.put(
-            "%header", new Integer(SmcLexer.HEADER_FILE));
-        _PercentKeywordMap.put(
-            "%include", new Integer(SmcLexer.INCLUDE_FILE));
-        _PercentKeywordMap.put(
-            "%package", new Integer(SmcLexer.PACKAGE_NAME));
-        _PercentKeywordMap.put(
-            "%import", new Integer(SmcLexer.IMPORT));
-        _PercentKeywordMap.put(
-            "%declare", new Integer(SmcLexer.DECLARE));
-        _PercentKeywordMap.put(
-            "%access", new Integer(SmcLexer.ACCESS));
+            new HashMap<String, Integer>(PERCENT_KEYWORD_COUNT);
+        _PercentKeywordMap.put("%start", SmcLexer.START_STATE);
+        _PercentKeywordMap.put("%map", SmcLexer.MAP_NAME);
+        _PercentKeywordMap.put("%class", SmcLexer.CLASS_NAME);
+        _PercentKeywordMap.put("%header", SmcLexer.HEADER_FILE);
+        _PercentKeywordMap.put("%include",
+                               SmcLexer.INCLUDE_FILE);
+        _PercentKeywordMap.put("%package",
+                               SmcLexer.PACKAGE_NAME);
+        _PercentKeywordMap.put("%import", SmcLexer.IMPORT);
+        _PercentKeywordMap.put("%declare", SmcLexer.DECLARE);
+        _PercentKeywordMap.put("%access", SmcLexer.ACCESS);
 
         // Set up the transition map.
         _TransMethod = new Method[SmcLexer.MAX_ASCII_CHAR];
@@ -1076,6 +1067,9 @@ import java.util.Map;
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2007/02/21 13:55:38  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.10  2007/01/15 00:23:51  cwrapp
 // Release 4.4.0 initial commit.
 //

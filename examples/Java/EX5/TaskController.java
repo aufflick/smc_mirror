@@ -1,11 +1,11 @@
 //
 // The contents of this file are subject to the Mozilla Public
 // License Version 1.1 (the "License"); you may not use this file
-// except in compliance with the License. You may obtain a copy of
-// the License at http://www.mozilla.org/MPL/
+// except in compliance with the License. You may obtain a copy
+// of the License at http://www.mozilla.org/MPL/
 // 
-// Software distributed under the License is distributed on an "AS
-// IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+// Software distributed under the License is distributed on an
+// "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2007/02/21 13:40:45  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.5  2005/05/28 13:51:24  cwrapp
 // Update Java examples 1 - 7.
 //
@@ -42,8 +45,9 @@ import javax.swing.Timer;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.ListIterator;
+import java.util.List;
 import java.util.Map;
 
 public final class TaskController
@@ -53,12 +57,12 @@ public final class TaskController
     public TaskController()
     {}
 
-    public void register(String name, Object obj)
+    public void register(String name, TaskEventListener listener)
     {
         // Has an object already registered under this name?
         if (_objectMap.containsKey(name) == false)
         {
-            _objectMap.put(name, obj);
+            _objectMap.put(name, listener);
         }
 
         return;
@@ -66,17 +70,17 @@ public final class TaskController
 
     public void deregister(String name)
     {
-        ListIterator messIt;
+        Iterator<Message> messIt;
         Message message;
 
         _objectMap.remove(name);
 
         // Remove all messages queued for this object.
-        for (messIt = _messageQueue.listIterator(0);
+        for (messIt = _messageQueue.iterator();
              messIt.hasNext() == true;
              )
         {
-            message = (Message) messIt.next();
+            message = messIt.next();
             if (message._recepient.compareTo(name) == 0)
             {
                 messIt.remove();
@@ -89,7 +93,7 @@ public final class TaskController
     public void postMessage(String recepient,
                             String event)
     {
-        Map args = new HashMap();
+        Map<String, Object> args = new HashMap<String, Object>();
 
         postMessage(recepient, event, args);
 
@@ -98,7 +102,7 @@ public final class TaskController
 
     public void postMessage(String recepient,
                             String event,
-                            Map args)
+                            Map<String, Object> args)
     {
         // Is there a known recepient?
         if (_objectMap.containsKey(recepient) == true)
@@ -135,8 +139,7 @@ public final class TaskController
         while (notSent == true && _messageQueue.size() > 0)
         {
             message = (Message) _messageQueue.remove(0);
-            listener =
-                    (TaskEventListener) _objectMap.get(message._recepient);
+            listener = _objectMap.get(message._recepient);
             if (listener != null)
             {
                 notSent = false;
@@ -157,10 +160,10 @@ public final class TaskController
 // Member Data.
 
     // Each object has a unique name. Map each name to an object.
-    private static Map _objectMap;
+    private static Map<String, TaskEventListener> _objectMap;
 
     // Messages yet to be sent.
-    private static LinkedList _messageQueue;
+    private static List<Message> _messageQueue;
 
     // When this timer expires, it is time to send another
     // message.
@@ -168,8 +171,8 @@ public final class TaskController
 
     static
     {
-        _objectMap = new HashMap();
-        _messageQueue = new LinkedList();
+        _objectMap = new HashMap<String, TaskEventListener>();
+        _messageQueue = new LinkedList<Message>();
         _sendTimer = null;
     }
 
@@ -179,7 +182,7 @@ public final class TaskController
     {
         private Message(String recepient,
                         String event,
-                        Map args)
+                        Map<String, Object> args)
         {
             super();
 
@@ -190,7 +193,7 @@ public final class TaskController
 
         private String _recepient;
         private String _event;
-        private Map _args;
+        private Map<String, Object> _args;
     }
 
     private final class SendTimerListener

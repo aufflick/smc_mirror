@@ -85,7 +85,7 @@ BIN_DIR=	../../../bin
 INSTALL_DIR=	../../../../staging/smc/bin
 
 JAVAC=		javac
-JAVAC_FLAGS=	-d . -g -classpath $(APP_CLASSPATH)
+JAVAC_FLAGS=	-d . -g -Xlint:unchecked -classpath $(APP_CLASSPATH)
 
 SMC=		java -jar $(BIN_DIR)/Smc.jar
 SMC_FLAGS=	-java -g
@@ -141,6 +141,9 @@ realclean :	clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.11  2007/02/21 13:53:25  cwrapp
+# Moved Java code to release 1.5.0
+#
 # Revision 1.10  2007/01/15 00:23:50  cwrapp
 # Release 4.4.0 initial commit.
 #

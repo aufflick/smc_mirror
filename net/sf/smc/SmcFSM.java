@@ -57,13 +57,13 @@ public final class SmcFSM
         _source = "";
         _context = "";
         _header = "";
-        _includeList = (List) new ArrayList();
+        _includeList = new ArrayList<String>();
         _package = null;
-        _importList = (List) new ArrayList();
-        _declareList = (List) new ArrayList();
+        _importList = new ArrayList<String>();
+        _declareList = new ArrayList<String>();
         _accessLevel = "";
         _headerLine = -1;
-        _maps = (List) new ArrayList();
+        _maps = new ArrayList<SmcMap>();
     }
 
     public String getSource()
@@ -139,7 +139,7 @@ public final class SmcFSM
         return;
     }
 
-    public List getIncludes()
+    public List<String> getIncludes()
     {
         return (_includeList);
     }
@@ -175,7 +175,7 @@ public final class SmcFSM
         return;
     }
 
-    public List getImports()
+    public List<String> getImports()
     {
         return (_importList);
     }
@@ -202,7 +202,7 @@ public final class SmcFSM
         return (_declareList.size());
     }
 
-    public List getDeclarations()
+    public List<String> getDeclarations()
     {
         return (_declareList);
     }
@@ -219,7 +219,7 @@ public final class SmcFSM
 
     public SmcMap findMap(String name)
     {
-        Iterator mapIt;
+        Iterator<SmcMap> mapIt;
         SmcMap map;
         SmcMap retval;
 
@@ -227,7 +227,7 @@ public final class SmcFSM
              mapIt.hasNext() == true && retval == null;
             )
         {
-            map = (SmcMap) mapIt.next();
+            map = mapIt.next();
             if (map.getName().compareTo(name) == 0)
             {
                 retval = map;
@@ -237,7 +237,7 @@ public final class SmcFSM
         return (retval);
     }
 
-    public List getMaps()
+    public List<SmcMap> getMaps()
     {
         return (_maps);
     }
@@ -249,26 +249,22 @@ public final class SmcFSM
     }
 
     // Returns the list of all known transitions, all maps.
-    public List getTransitions()
+    public List<SmcTransition> getTransitions()
     {
-        Iterator mit;
-        SmcMap map;
-        Comparator comparator =
-            new Comparator() {
-                public int compare(Object o1,
-                                   Object o2)
+        Comparator<SmcTransition> comparator =
+            new Comparator<SmcTransition>()
+            {
+                public int compare(SmcTransition o1,
+                                   SmcTransition o2)
                 {
-                    return(
-                        ((SmcTransition) o1).compareTo(
-                            (SmcTransition) o2));
+                    return(o1.compareTo(o2));
                 }
             };
-        List retval = (List) new ArrayList();
+        List<SmcTransition> retval =
+            new ArrayList<SmcTransition>();
 
-        for (mit = _maps.iterator(); mit.hasNext() == true;)
+        for (SmcMap map: _maps)
         {
-            map = (SmcMap) mit.next();
-
             // Merge the new transitions into the current set.
             retval =
                 Smc.merge(
@@ -293,9 +289,6 @@ public final class SmcFSM
 
     public void dump(PrintStream stream)
     {
-        Iterator map_it;
-        SmcMap map;
-
         stream.print("Start State: ");
         stream.println(_startState);
         stream.print("     Source:");
@@ -313,25 +306,18 @@ public final class SmcFSM
 
         if (Smc._targetLanguage.hasHeaderFile() == true)
         {
-            Iterator it;
-
-            for (it = _includeList.iterator();
-                 it.hasNext() == true;
-                )
+            for (String include: _includeList)
             {
                 stream.print("     Include: ");
-                stream.println(((String) it.next()));
+                stream.println(include);
             }
         }
 
         stream.println("       Maps:");
         stream.println();
 
-        for (map_it = _maps.iterator();
-             map_it.hasNext() == true;
-            )
+        for (SmcMap map: _maps)
         {
-            map = (SmcMap) map_it.next();
             stream.println(map);
         }
 
@@ -358,16 +344,16 @@ public final class SmcFSM
     // For C++ only. List of include files. Will be output to
     // the .cpp file in the same order as they appear in the
     // .sm file.
-    private List _includeList;
+    private List<String> _includeList;
 
     // This code is placed in this package/namespace.
     private String _package;
 
     // Place names of imports in this list.
-    private List _importList;
+    private List<String> _importList;
 
     // Place forward declarations in this list.
-    private List _declareList;
+    private List<String> _declareList;
 
     // The context class access level. Empty string by default.
     private String _accessLevel;
@@ -377,12 +363,15 @@ public final class SmcFSM
     private int _headerLine;
 
     // The state maps.
-    private List _maps;
+    private List<SmcMap> _maps;
 }
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2007/02/21 13:54:45  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.5  2007/01/15 00:23:51  cwrapp
 // Release 4.4.0 initial commit.
 //
@@ -395,16 +384,17 @@ public final class SmcFSM
 //
 // + Added -reflect option for Java, C#, VB.Net and Tcl code
 //   generation. When used, allows applications to query a state
-//   about its supported transitions. Returns a list of transition
-//   names. This feature is useful to GUI developers who want to
-//   enable/disable features based on the current state. See
-//   Programmer's Manual section 11: On Reflection for more
-//   information.
+//   about its supported transitions. Returns a list of
+//   transition names. This feature is useful to GUI developers
+//   who want to enable/disable features based on the current
+//   state. See Programmer's Manual section 11: On Reflection
+//   for more information.
 //
 // + Updated LICENSE.txt with a missing final paragraph which allows
 //   MPL 1.1 covered code to work with the GNU GPL.
 //
-// + Added a Maven plug-in and an ant task to a new tools directory.
+// + Added a Maven plug-in and an ant task to a new tools
+//   directory.
 //   Added Eiten Suez's SMC tutorial (in PDF) to a new docs
 //   directory.
 //
@@ -416,15 +406,15 @@ public final class SmcFSM
 //
 // + A note: the SMC FAQ incorrectly stated that C/C++ generated
 //   code is thread safe. This is wrong. C/C++ generated is
-//   certainly *not* thread safe. Multi-threaded C/C++ applications
-//   are required to synchronize access to the FSM to allow for
-//   correct performance.
+//   certainly *not* thread safe. Multi-threaded C/C++
+//   applications are required to synchronize access to the FSM
+//   to allow for correct performance.
 //
 // + (Java) The generated getState() method is now public.
 //
 // Revision 1.2  2005/06/30 10:44:23  cwrapp
-// Added %access keyword which allows developers to set the generate Context
-// class' accessibility level in Java and C#.
+// Added %access keyword which allows developers to set the
+// generate Context class' accessibility level in Java and C#.
 //
 // Revision 1.1  2005/05/28 19:28:42  cwrapp
 // Moved to visitor pattern.

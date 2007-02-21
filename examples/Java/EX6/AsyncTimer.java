@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2007/02/21 13:42:53  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.4  2005/05/28 13:51:24  cwrapp
 // Update Java examples 1 - 7.
 //
@@ -62,8 +65,11 @@ public final class AsyncTimer
         }
         else
         {
-            // Create a new thread and pass in the necessary info.
-            TimerThread NewTimer = new TimerThread(name, millisecs, listener);
+            // Create a new thread and pass in the necessary
+            // info.
+            TimerThread NewTimer =
+                new TimerThread(name, millisecs, listener);
+
             _timerMap.put(name, NewTimer);
 
             // Start the timer.
@@ -82,7 +88,7 @@ public final class AsyncTimer
         TimerThread Timer;
 
         // If there is no such timer, fail this request.
-        if ((Timer = (TimerThread) _timerMap.get(name)) == null)
+        if ((Timer = _timerMap.get(name)) == null)
         {
             Retcode = false;
         }
@@ -104,7 +110,7 @@ public final class AsyncTimer
         TimerThread Timer;
 
         // If there is no such timer, fail this request.
-        if ((Timer = (TimerThread) _timerMap.get(name)) == null)
+        if ((Timer = _timerMap.get(name)) == null)
         {
             Retcode = false;
         }
@@ -122,15 +128,15 @@ public final class AsyncTimer
     // Stop a running timer.
     public static boolean stopTimer(String name)
     {
-        TimerThread Timer;
+        TimerThread timer;
 
         // First, tell the timer to stop. Then remove
         // the timer from the map.
-        if ((Timer = (TimerThread) _timerMap.get(name)) != null)
+        if ((timer = (TimerThread) _timerMap.get(name)) != null)
         {
-            Timer.stopTimer();
+            timer.stopTimer();
             _timerMap.remove(name);
-            Timer.interrupt();
+            timer.interrupt();
         }
 
         // This method always succeeds because even if the timer
@@ -141,13 +147,10 @@ public final class AsyncTimer
     // Stop all running timers.
     public static void stopAllTimers()
     {
-        Iterator i = _timerMap.keySet().iterator();
-
-        while (i.hasNext())
+        for (TimerThread timer: _timerMap.values())
         {
-            TimerThread Timer = (TimerThread) i.next();
-            Timer.stopTimer();
-            Timer.interrupt();
+            timer.stopTimer();
+            timer.interrupt();
         }
 
         // Remove all the timer threads from the map.
@@ -164,10 +167,10 @@ public final class AsyncTimer
     }
 
     // Keep track of all the currently running timers.
-    private static Map _timerMap;
+    private static Map<String, TimerThread> _timerMap;
 
     static {
-        _timerMap = new HashMap();
+        _timerMap = new HashMap<String, TimerThread>();
     }
 
     // The timer thread class.
@@ -215,7 +218,8 @@ public final class AsyncTimer
 
                     // Only issue this timeout if the timer
                     // was not stopped.
-                    if (_wasStopped == false && _wasReset == false)
+                    if (_wasStopped == false &&
+                        _wasReset == false)
                     {
                         // The timer has successfully done
                         // its task.

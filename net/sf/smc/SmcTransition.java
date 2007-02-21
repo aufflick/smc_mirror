@@ -47,7 +47,7 @@ public final class SmcTransition
 //
 
     public SmcTransition(String name,
-                         List parameters,
+                         List<SmcParameter> parameters,
                          int lineNumber,
                          SmcState state)
     {
@@ -55,7 +55,7 @@ public final class SmcTransition
 
         _state = state;
         _parameters = parameters;
-        _guards = (List) new ArrayList();
+        _guards = new ArrayList<SmcGuard>();
     }
 
     public boolean equals(Object obj)
@@ -92,7 +92,8 @@ public final class SmcTransition
         return(retval);
     }
 
-    public int compareTo(String name, List parameters)
+    public int compareTo(String name,
+                         List<SmcParameter> parameters)
     {
         int retval;
 
@@ -109,7 +110,7 @@ public final class SmcTransition
         return (_state);
     }
 
-    public List getParameters()
+    public List<SmcParameter> getParameters()
     {
         return(_parameters);
     }
@@ -120,7 +121,7 @@ public final class SmcTransition
         return;
     }
 
-    public List getGuards()
+    public List<SmcGuard> getGuards()
     {
         return(_guards);
     }
@@ -129,7 +130,7 @@ public final class SmcTransition
     // variable.
     public boolean hasCtxtReference()
     {
-        Iterator guardIt;
+        Iterator<SmcGuard> guardIt;
         boolean retcode;
 
         // Stop as soon as we know that ctxt is referenced.
@@ -138,7 +139,7 @@ public final class SmcTransition
             )
         {
             retcode =
-                ((SmcGuard) guardIt.next()).hasCtxtReference();
+                (guardIt.next()).hasCtxtReference();
         }
 
         return (retcode);
@@ -148,7 +149,7 @@ public final class SmcTransition
     // end state.
     public boolean hasNonNilEndState()
     {
-        Iterator guardIt;
+        Iterator<SmcGuard> guardIt;
         SmcGuard guard;
         boolean retcode;
 
@@ -158,7 +159,7 @@ public final class SmcTransition
              guardIt.hasNext() == true && retcode == false;
             )
         {
-            guard = (SmcGuard) guardIt.next();
+            guard = guardIt.next();
             retcode =
                 !guard.getEndState().equals(SmcGuard.NIL_STATE);
         }
@@ -170,30 +171,25 @@ public final class SmcTransition
     {
         StringBuffer retval = new StringBuffer(512);
         String sep;
-        Iterator it;
+        Iterator<SmcParameter> pit;
 
         retval.append(_name);
         retval.append("(");
 
-        for (it = _parameters.iterator(), sep = "";
-             it.hasNext() == true;
+        for (pit = _parameters.iterator(), sep = "";
+             pit.hasNext() == true;
              sep = ", ")
         {
             retval.append(sep);
-            retval.append((SmcParameter) it.next());
+            retval.append(pit.next());
         }
 
         retval.append(")");
 
-        if (_guards.size() > 0)
+        if (_guards.isEmpty() == false)
         {
-            SmcGuard guard;
-
-            for (it = _guards.iterator();
-                 it.hasNext() == true;
-                )
+            for (SmcGuard guard: _guards)
             {
-                guard = (SmcGuard) it.next();
                 retval.append("\n");
                 retval.append(guard);
             }
@@ -216,10 +212,10 @@ public final class SmcTransition
     //-----------------------------------------------------------
 
     // Compare this transition's parameters with the given list.
-    private int _compareParams(List params)
+    private int _compareParams(List<SmcParameter> params)
     {
-        Iterator pit1;
-        Iterator pit2;
+        Iterator<SmcParameter> pit1;
+        Iterator<SmcParameter> pit2;
         SmcParameter param1;
         SmcParameter param2;
         int retval;
@@ -235,8 +231,8 @@ public final class SmcTransition
                      retval == 0;
                 )
             {
-                param1 = (SmcParameter) pit1.next();
-                param2 = (SmcParameter) pit2.next();
+                param1 = pit1.next();
+                param2 = pit2.next();
                 retval = param1.compareTo(param2);
             }
         }
@@ -250,13 +246,16 @@ public final class SmcTransition
 //
 
     private SmcState _state;
-    private List _parameters;
-    private List _guards;
+    private List<SmcParameter> _parameters;
+    private List<SmcGuard> _guards;
 }
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2007/02/21 13:56:58  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.8  2007/01/15 00:23:52  cwrapp
 // Release 4.4.0 initial commit.
 //

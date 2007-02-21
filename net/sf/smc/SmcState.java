@@ -71,7 +71,7 @@ public final class SmcState
 
         _entryActions = null;
         _exitActions = null;
-        _transitions = (List) new ArrayList();
+        _transitions = new ArrayList<SmcTransition>();
     }
 
     public SmcMap getMap()
@@ -94,48 +94,46 @@ public final class SmcState
         return(_instanceName);
     }
 
-    public List getEntryActions()
+    public List<SmcAction> getEntryActions()
     {
         return(_entryActions);
     }
 
-    public void setEntryActions(List actions)
+    public void setEntryActions(List<SmcAction> actions)
     {
-        _entryActions = (List) new ArrayList(actions);
+        _entryActions = new ArrayList<SmcAction>(actions);
         return;
     }
 
-    public List getExitActions()
+    public List<SmcAction> getExitActions()
     {
         return(_exitActions);
     }
 
-    public void setExitActions(List actions)
+    public void setExitActions(List<SmcAction> actions)
     {
-        _exitActions = (List) new ArrayList(actions);
+        _exitActions = new ArrayList<SmcAction>(actions);
         return;
     }
 
-    public List getTransitions()
+    public List<SmcTransition> getTransitions()
     {
         return(_transitions);
     }
 
-    public SmcTransition findTransition(String name,
-                                        List parameters)
+    public SmcTransition
+        findTransition(String name,
+                       List<SmcParameter> parameters)
     {
-        Iterator transIt;
+        Iterator<SmcTransition> transIt;
         SmcTransition transition;
-        Iterator pit;
-        SmcParameter parameter;
         SmcTransition retval;
 
-        for (transIt = _transitions.iterator(),
-                     retval = null;
+        for (transIt = _transitions.iterator(), retval = null;
              transIt.hasNext() == true && retval == null;
             )
         {
-            transition = (SmcTransition) transIt.next();
+            transition = transIt.next();
             if (name.equals(transition.getName()) == true &&
                 transition.compareTo(name, parameters) == 0)
             {
@@ -160,7 +158,6 @@ public final class SmcState
 
     public String toString()
     {
-        Iterator it;
         StringBuffer retval = new StringBuffer(512);
 
         retval.append(_instanceName);
@@ -168,11 +165,9 @@ public final class SmcState
         if (_entryActions != null && _entryActions.size() > 0)
         {
             retval.append("\n\tEntry {");
-            for (it = _entryActions.iterator();
-                 it.hasNext() == true;
-                )
+            for (SmcAction action: _entryActions)
             {
-                retval.append((SmcAction) it.next());
+                retval.append(action);
                 retval.append('\n');
             }
             retval.append("}");
@@ -181,22 +176,18 @@ public final class SmcState
         if (_exitActions != null && _exitActions.size() > 0)
         {
             retval.append("\n\tExit {");
-            for (it = _exitActions.iterator();
-                 it.hasNext() == true;
-                )
+            for (SmcAction action: _exitActions)
             {
-                retval.append((SmcAction) it.next());
+                retval.append(action);
                 retval.append('\n');
             }
             retval.append("}");
         }
 
-        for (it = _transitions.iterator();
-             it.hasNext() == true;
-            )
+        for (SmcTransition transition: _transitions)
         {
             retval.append("\n");
-            retval.append((SmcTransition) it.next());
+            retval.append(transition);
         }
 
         return (retval.toString());
@@ -223,14 +214,17 @@ public final class SmcState
     private SmcMap _map;
     private String _className;
     private String _instanceName;
-    private List _entryActions;
-    private List _exitActions;
-    private List _transitions;
+    private List<SmcAction> _entryActions;
+    private List<SmcAction> _exitActions;
+    private List<SmcTransition> _transitions;
 }
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2007/02/21 13:56:44  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.8  2007/01/15 00:23:52  cwrapp
 // Release 4.4.0 initial commit.
 //

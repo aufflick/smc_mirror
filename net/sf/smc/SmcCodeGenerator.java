@@ -108,9 +108,9 @@ public abstract class SmcCodeGenerator
 
     // Returns true if each of the transition guards uses
     // the nil end state.
-    protected boolean allNilEndStates(List guards)
+    protected boolean allNilEndStates(List<SmcGuard> guards)
     {
-        Iterator git;
+        Iterator<SmcGuard> git;
         SmcGuard guard;
         boolean retcode = true;
 
@@ -118,7 +118,7 @@ public abstract class SmcCodeGenerator
              git.hasNext() == true && retcode == true;
             )
         {
-            guard = (SmcGuard) git.next();
+            guard = git.next();
             retcode =
                 (guard.getTransType() == Smc.TRANS_SET &&
                  (guard.getEndState()).equals("nil") == true);
@@ -154,6 +154,9 @@ public abstract class SmcCodeGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2007/02/21 13:54:20  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.3  2007/01/15 00:23:50  cwrapp
 // Release 4.4.0 initial commit.
 //

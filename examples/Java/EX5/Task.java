@@ -1,11 +1,11 @@
 //
 // The contents of this file are subject to the Mozilla Public
 // License Version 1.1 (the "License"); you may not use this file
-// except in compliance with the License. You may obtain a copy of
-// the License at http://www.mozilla.org/MPL/
+// except in compliance with the License. You may obtain a copy
+// of the License at http://www.mozilla.org/MPL/
 // 
-// Software distributed under the License is distributed on an "AS
-// IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+// Software distributed under the License is distributed on an
+// "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
@@ -13,7 +13,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 - 2003 Charles W. Rapp.
+// Copyright (C) 2000 - 2007. Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2007/02/21 13:40:36  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.5  2005/05/28 13:51:24  cwrapp
 // Update Java examples 1 - 7.
 //
@@ -59,7 +62,7 @@ public final class Task
         _runtime = time * 1000;
         _timeLeft = _runtime;
         _runStartTime = null;
-        _timerTable = new HashMap();
+        _timerTable = new HashMap<String, Timer>();
 
         _fsm = new TaskContext(this);
 
@@ -74,11 +77,11 @@ public final class Task
         _suspendStartTime = new Date();
 
         // Have this task placed on the task display.
-        Map args = new HashMap();
-        args.put(new String("name"), name);
-        args.put(new String("status"), new String("Suspended"));
-        args.put(new String("priority"), new Integer(priority));
-        args.put(new String("runtime"), new Integer(time));
+        Map<String, Object> args = new HashMap<String, Object>();
+        args.put("name", name);
+        args.put("status", "Suspended");
+        args.put("priority", new Integer(priority));
+        args.put("runtime", new Integer(time));
 
         control.postMessage("Task GUI",
                             "Task Created",
@@ -126,7 +129,8 @@ public final class Task
         Date currTime = new Date();
         long retval;
 
-        retval = currTime.getTime() - _suspendStartTime.getTime();
+        retval =
+            (currTime.getTime() - _suspendStartTime.getTime());
         return((int) retval);
     }
 
@@ -139,7 +143,8 @@ public final class Task
         return(retval);
     }
 
-    public void handleEvent(String eventName, Map args)
+    public void handleEvent(String eventName,
+                            Map<String, Object> args)
     {
         if (eventName.compareTo("start") == 0)
         {
@@ -216,7 +221,7 @@ public final class Task
         Timer timer;
 
         // Remove the timer from the table and stop it.
-        if ((timer = (Timer) _timerTable.remove(name)) != null)
+        if ((timer = _timerTable.remove(name)) != null)
         {
             timer.stop();
         }
@@ -229,11 +234,11 @@ public final class Task
     public void sendMessage(int level, String message)
     {
         TaskController control = new TaskController();
-        Map args = new HashMap();
+        Map<String, Object> args = new HashMap<String, Object>();
 
-        args.put(new String("level"), new Integer(level));
-        args.put(new String("object"), _name);
-        args.put(new String("message"), message);
+        args.put("level", new Integer(level));
+        args.put("object", _name);
+        args.put("message", message);
         control.postMessage("Message GUI",
                             "Post Message",
                             args);
@@ -245,10 +250,10 @@ public final class Task
     public void stateUpdate(String change)
     {
         TaskController controller = new TaskController();
-        Map args = new HashMap();
+        Map<String, Object> args = new HashMap<String, Object>();
 
-        args.put(new String("name"), _name);
-        args.put(new String("status"), change);
+        args.put("name", _name);
+        args.put("status", change);
         controller.postMessage("Task GUI",
                                "Task State Update",
                                args);
@@ -262,7 +267,7 @@ public final class Task
         int timeLeft;
         int percentComplete;
         Date currTime = new Date();
-        Map args = new HashMap();
+        Map<String, Object> args = new HashMap<String, Object>();
 
         timeLeft =
                 _timeLeft -
@@ -278,8 +283,8 @@ public final class Task
                 (int) (((((float) (_runtime - timeLeft)) /
                          ((float) _runtime))) * 100.0);
 
-        args.put(new String("name"), _name);
-        args.put(new String("percentComplete"),
+        args.put("name", _name);
+        args.put("percentComplete",
                  new Integer(percentComplete));
         control.postMessage("Task GUI",
                             "Task % Update",
@@ -321,12 +326,13 @@ public final class Task
     {
         TaskController control = new TaskController();
         Date currTime = new Date();
-        Map args = new HashMap();
+        Map<String, Object> args = new HashMap<String, Object>();
         int percentComplete;
 
         _timeLeft =
                 _timeLeft -
-                ((int) (currTime.getTime() - _runStartTime.getTime()));
+                ((int) (currTime.getTime() -
+                        _runStartTime.getTime()));
         if (_timeLeft < 0)
         {
             _timeLeft = 0;
@@ -334,8 +340,8 @@ public final class Task
 
         percentComplete = getPercentComplete();
 
-        args.put(new String("name"), _name);
-        args.put(new String("percentComplete"),
+        args.put("name", _name);
+        args.put("percentComplete",
                  new Integer(percentComplete));
         control.postMessage("Task GUI",
                             "Task % Update",
@@ -354,9 +360,9 @@ public final class Task
     public void updateTaskMan(String state)
     {
         TaskController control = new TaskController();
-        Map args = new HashMap();
+        Map<String, Object> args = new HashMap<String, Object>();
 
-        args.put(new String("Task Name"), _name);
+        args.put("Task Name", _name);
         control.postMessage("Task Manager",
                             state,
                             args);
@@ -400,7 +406,7 @@ public final class Task
     private Date _suspendStartTime;
 
     // Put internal timers here.
-    private Map _timerTable;
+    private Map<String, Timer> _timerTable;
 
 // Inner Classes
 
@@ -417,7 +423,8 @@ public final class Task
 
         public void actionPerformed(ActionEvent e)
         {
-            Map args = new HashMap();
+            Map<String, Object> args =
+                new HashMap<String, Object>();
 
             _owner.handleEvent(_name, args);
             return;

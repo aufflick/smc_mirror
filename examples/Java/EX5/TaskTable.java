@@ -1,11 +1,11 @@
 //
 // The contents of this file are subject to the Mozilla Public
 // License Version 1.1 (the "License"); you may not use this file
-// except in compliance with the License. You may obtain a copy of
-// the License at http://www.mozilla.org/MPL/
+// except in compliance with the License. You may obtain a copy
+// of the License at http://www.mozilla.org/MPL/
 // 
-// Software distributed under the License is distributed on an "AS
-// IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+// Software distributed under the License is distributed on an
+// "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
@@ -13,7 +13,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 - 2003 Charles W. Rapp.
+// Copyright (C) 2000 - 2007. Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
@@ -30,6 +30,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2007/02/21 13:41:08  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.4  2005/05/28 13:51:24  cwrapp
 // Update Java examples 1 - 7.
 //
@@ -55,8 +58,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseAdapter;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.ListIterator;
+import java.util.List;
 import java.util.Map;
 
 // This class displays the status of existing tasks.
@@ -69,7 +73,7 @@ public final class TaskTable
     {
         TaskController control = new TaskController();
 
-        _timerTable = new HashMap();
+        _timerTable = new HashMap<String, Timer>();
 
         // Create the pop-up menu which is associated with the
         // table but actually is row dependent.
@@ -78,19 +82,25 @@ public final class TaskTable
         _taskTableModel = new TaskTableModel();
         _taskTable = new JTable(_taskTableModel)
         {
-            public TableCellRenderer getCellRenderer(int row, int column)
+            public TableCellRenderer getCellRenderer(int row,
+                                                     int column)
             {
-                TableColumn tableColumn = getColumnModel().getColumn(column);
-                TableCellRenderer renderer = tableColumn.getCellRenderer();
+                TableColumn tableColumn =
+                    getColumnModel().getColumn(column);
+                TableCellRenderer renderer =
+                    tableColumn.getCellRenderer();
+
                 if (renderer == null)
                 {
                     Class c = getColumnClass(column);
-                    if( c.equals(Object.class) )
+
+                    if (c.equals(Object.class))
                     {
                         Object o = getValueAt(row, column);
+
                         if( o != null )
                         {
-                            c = getValueAt(row,column).getClass();
+                            c = o.getClass();
                         }
                     }
 
@@ -101,11 +111,13 @@ public final class TaskTable
             }
         };
 
-        _taskTable.setPreferredScrollableViewportSize(new Dimension(500, 105));
+        _taskTable.setPreferredScrollableViewportSize(
+            new Dimension(500, 105));
         _taskTable.setRowHeight(20);
 
-        _taskTable.setDefaultRenderer(JComponent.class,
-                                      new JComponentCellRenderer());
+        _taskTable.setDefaultRenderer(
+            JComponent.class,
+            new JComponentCellRenderer());
 
         // Have the scrollable pane catch the mouse event but
         // interpret it through the task table.
@@ -135,7 +147,8 @@ public final class TaskTable
                 if (row >= 0 &&
                     row < _taskTableModel.getRowCount())
                 {
-                    taskName = _taskTableModel.getTaskNameAt(row);
+                    taskName =
+                        _taskTableModel.getTaskNameAt(row);
                     status = _taskTableModel.getStatusAt(row);
                     if (status.compareTo("Done") != 0)
                     {
@@ -160,7 +173,8 @@ public final class TaskTable
         return((Component) _pane);
     }
 
-    public void handleEvent(String event, Map args)
+    public void handleEvent(String event,
+                            Map<String, Object> args)
     {
         String name;
         String status;
@@ -181,7 +195,7 @@ public final class TaskTable
                                    runtime,
                                    priority);
         }
-        else if (event.compareTo("Task State Update") == 0)
+        else if (event.equals("Task State Update") == true)
         {
             name = (String) args.get("name");
             status = (String) args.get("status");
@@ -189,20 +203,22 @@ public final class TaskTable
             // Update the row.
             updateTaskStatus(name, status);
         }
-        else if (event.compareTo("Task % Update") == 0)
+        else if (event.equals("Task % Update") == true)
         {
             int rowIndex;
 
             name = (String) args.get("name");
-            percentComplete = (Integer) args.get("percentComplete");
+            percentComplete =
+                (Integer) args.get("percentComplete");
 
             // Find the task's row based on the task's name.
             rowIndex = _taskTableModel.findRow(name);
 
             // Update the row.
-            _taskTableModel.setValueAt(percentComplete, rowIndex, 4);
+            _taskTableModel.setValueAt(
+                percentComplete, rowIndex, 4);
         }
-        else if (event.compareTo("Remove Task") == 0)
+        else if (event.equals("Remove Task") == true)
         {
             name = (String) args.get("name");
 
@@ -247,8 +263,8 @@ public final class TaskTable
             Timer timer;
 
             timer = new Timer(REMOVE_TIMEOUT,
-                              new RemoveTimerListener(taskName,
-                                                      this));
+                              new RemoveTimerListener(
+                                  taskName, this));
             timer.setRepeats(false);
             _timerTable.put(taskName, timer);
 
@@ -266,7 +282,7 @@ public final class TaskTable
     private JScrollPane _pane;
 
     // Put internal timers here.
-    private Map _timerTable;
+    private Map<String, Timer> _timerTable;
 
     // How long we should wait before removing tasks.
     private static final int REMOVE_TIMEOUT = 2000;
@@ -305,7 +321,7 @@ public final class TaskTable
             }
             else
             {
-                taskRow = (Object[]) _data.get(row);
+                taskRow = _data.get(row);
                 retval = taskRow[col];
             }
 
@@ -361,7 +377,7 @@ public final class TaskTable
         {
             if (row >= 0 && row < _data.size())
             {
-                Object[] taskRow = (Object[]) _data.get(row);
+                Object[] taskRow = _data.get(row);
 
                 // Only the status and percent complete can be
                 // updated.
@@ -385,7 +401,7 @@ public final class TaskTable
 
         private TaskTableModel()
         {
-            _data = new LinkedList();
+            _data = new LinkedList<Object[]>();
         }
 
         // Add a new row to the table.
@@ -437,18 +453,18 @@ public final class TaskTable
 
         private int findRow(String name)
         {
-            ListIterator it;
+            Iterator<Object[]> it;
             int i;
             int retval;
             Object[] row;
 
-            for (it = _data.listIterator(0),
+            for (it = _data.iterator(),
                          i = 0,
                          retval = -1;
                  retval < 0 && it.hasNext() == true;
                  ++i)
             {
-                row = (Object[]) it.next();
+                row = it.next();
                 if (name.compareTo((String) row[0]) == 0)
                 {
                     retval = i;
@@ -463,18 +479,19 @@ public final class TaskTable
                 "Priority", "% Complete"
         };
 
-        private LinkedList _data;
+        private List<Object[]> _data;
     }
 
     private final class JComponentCellRenderer
         implements TableCellRenderer
     {
-        public Component getTableCellRendererComponent(JTable table,
-                                                       Object value,
-                                                       boolean isSelected,
-                                                       boolean hasFocus,
-                                                       int row,
-                                                       int column)
+        public Component
+            getTableCellRendererComponent(JTable table,
+                                          Object value,
+                                          boolean isSelected,
+                                          boolean hasFocus,
+                                          int row,
+                                          int column)
         {
             return((JComponent) value);
         }
@@ -493,7 +510,8 @@ public final class TaskTable
 
         public void actionPerformed(ActionEvent e)
         {
-            Map args = new HashMap();
+            Map<String, Object> args =
+                new HashMap<String, Object>();
 
             args.put("name", _taskName);
             _owner.handleEvent("Remove Task", args);

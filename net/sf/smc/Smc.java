@@ -13,7 +13,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 - 2006. Charles W. Rapp.
+// Copyright (C) 2000 - 2007. Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s):
@@ -84,7 +84,7 @@ public final class Smc
         _serial = false;
         _castType = "dynamic_cast";
         _graphLevel = GRAPH_LEVEL_0;
-        _sourceFileList = (List) new ArrayList();
+        _sourceFileList = new ArrayList<String>();
         _verbose = false;
         _fsmVerbose = false;
         _return = false;
@@ -97,7 +97,7 @@ public final class Smc
         {
             retcode = 1;
             System.err.println(APP_NAME + ": " + _errorMsg);
-            _usage(System.err);
+            // _usage(System.err);
         }
         // Arguments check out - start compiling..
         else
@@ -105,7 +105,7 @@ public final class Smc
             SmcLexer lexer;
             SmcParser parser;
             SmcFSM fsm;
-            Iterator sit;
+            Iterator<String> sit;
             boolean checkFlag;
             long startTime = 0;
             long finishTime;
@@ -271,7 +271,7 @@ public final class Smc
         {
             return;
         }
-    }
+    } // end of main(String[])
 
     public static String sourceFileName()
     {
@@ -335,14 +335,18 @@ public final class Smc
 
     // Merge two lists together, returning an ordered list with
     // no multiple entries.
-    public static List merge(List l1, List l2, Comparator c)
+    public static List<SmcTransition>
+        merge(List<SmcTransition> l1,
+              List<SmcTransition> l2,
+              Comparator<SmcTransition> c)
     {
         int result;
-        Iterator it1;
-        Iterator it2;
-        Object e1;
-        Object e2;
-        List retval = (List) new ArrayList();
+        Iterator<SmcTransition> it1;
+        Iterator<SmcTransition> it2;
+        SmcTransition e1;
+        SmcTransition e2;
+        List<SmcTransition> retval =
+            new ArrayList<SmcTransition>();
 
         // First, make certain that both lists are sorted.
         Collections.sort(l1, c);
@@ -452,15 +456,10 @@ public final class Smc
     // Outputs a list of warning and error messages.
     public static void outputMessages(String srcFileName,
                                       PrintStream stream,
-                                      List messages)
+                                      List<SmcMessage> messages)
     {
-        Iterator mit;
-        SmcMessage message;
-
-        for (mit = messages.iterator(); mit.hasNext() == true;)
+        for (SmcMessage message: messages)
         {
-            message = (SmcMessage) mit.next();
-
             stream.print(srcFileName);
             stream.print(':');
             stream.print(message.getLineNumber());
@@ -503,6 +502,12 @@ public final class Smc
                 retcode = false;
                 _errorMsg = argex.getMessage();
             }
+
+            if (retcode == true && _targetLanguage == null)
+            {
+                retcode = false;
+                _errorMsg = "Target language was not specified.";
+            }
         }
 
         // Parse all options first. Keep going until an error is
@@ -514,7 +519,13 @@ public final class Smc
                  args[i].startsWith("-") == true;
              i += argsConsumed, argsConsumed = 0)
         {
-            if (args[i].startsWith("-sy") == true)
+            // Ignore the target language flags - they have
+            // been processed.
+            if (_findLanguage(args[i]) != null)
+            {
+                argsConsumed = 1;
+            }
+            else if (args[i].startsWith("-sy") == true)
             {
                 if (_supportsOption(SYNC_FLAG) == false)
                 {
@@ -836,12 +847,6 @@ public final class Smc
                     argsConsumed = 1;
                 }
             }
-            // Ignore the target language flags - they have
-            // been processed.
-            else if (_findLanguage(args[i]) != null)
-            {
-                argsConsumed = 1;
-            }
             else if (args[i].startsWith("-verb") == true)
             {
                 _verbose = true;
@@ -861,18 +866,9 @@ public final class Smc
             }
         }
 
-        if (helpFlag == true || retcode == false)
-        {
-            // no-op.
-        }
-        else if (_targetLanguage == null)
-        {
-            retcode = false;
-            _errorMsg = "Target language was not specified.";
-        }
         // Was a state map source file given? It must be the
         // last argument in the list.
-        else if (retcode == true)
+        if (helpFlag == false && retcode == true)
         {
             if (i == args.length)
             {
@@ -993,7 +989,7 @@ public final class Smc
              index < _languages.length && retval == null;
              ++index)
         {
-            if (option.startsWith(
+            if (option.equals(
                     _languages[index].optionFlag()) == true)
             {
                 retval = _languages[index];
@@ -1007,7 +1003,7 @@ public final class Smc
     // option.
     private static boolean _supportsOption(String option)
     {
-        List languages = (List) _optionMap.get(option);
+        List<Language> languages = _optionMap.get(option);
 
         return (
             languages != null &&
@@ -1484,7 +1480,7 @@ public final class Smc
     private static String _sourceFileName;
 
     // The state map source code to be compiled.
-    private static List _sourceFileList;
+    private static List<String> _sourceFileList;
 
     // Append this suffix to the end of the output file.
     private static String _suffix;
@@ -1546,7 +1542,7 @@ public final class Smc
     // Map each command line option flag to the target languages
     // supporting the flag.
     // private static Map<String, List<Language>> _optionMap;
-    private static Map _optionMap;
+    private static Map<String, List<Language>> _optionMap;
 
     //-----------------------------------------------------------
     // Constants.
@@ -1583,7 +1579,7 @@ public final class Smc
     /* package */ static final int TRANS_POP = 3;
 
     private static final String APP_NAME = "smc";
-    private static final String VERSION = "v. 4.4.0";
+    private static final String VERSION = "v. 5.0.0";
 
     // Command line option flags.
     private static final String CAST_FLAG = "-cast";
@@ -1630,7 +1626,7 @@ public final class Smc
         _languages[C_PLUS_PLUS] =
             new Language(
                 C_PLUS_PLUS,
-                "-c+",
+                "-c++",
                 "C++",
                 "cpp",
                 "{0}{1}_sm.{2}",
@@ -1640,7 +1636,7 @@ public final class Smc
         _languages[C_SHARP] =
             new Language(
                 C_SHARP,
-                "-cs",
+                "-csharp",
                 "C#",
                 "cs",
                 "{0}{1}_sm.{2}",
@@ -1650,7 +1646,7 @@ public final class Smc
         _languages[JAVA] =
             new Language(
                 JAVA,
-                "-j",
+                "-java",
                 "Java",
                 "java",
                 "{0}{1}Context.{2}",
@@ -1660,7 +1656,7 @@ public final class Smc
         _languages[GRAPH] =
             new Language(
                 GRAPH,
-                "-gr",
+                "-graph",
                 "-graph",
                 "dot",
                 "{0}{1}_sm.{2}",
@@ -1670,7 +1666,7 @@ public final class Smc
         _languages[LUA] =
             new Language(
                 LUA,
-                "-l",
+                "-lua",
                 "Lua",
                 "lua",
                 "{0}{1}_sm.{2}",
@@ -1690,7 +1686,7 @@ public final class Smc
         _languages[PERL] =
             new Language(
                 PERL,
-                "-pe",
+                "-perl",
                 "Perl",
                 "pm",
                 "{0}{1}_sm.{2}",
@@ -1700,7 +1696,7 @@ public final class Smc
         _languages[PYTHON] =
             new Language(
                 PYTHON,
-                "-py",
+                "-python",
                 "Python",
                 "py",
                 "{0}{1}_sm.{2}",
@@ -1710,7 +1706,7 @@ public final class Smc
         _languages[RUBY] =
             new Language(
                 RUBY,
-                "-ru",
+                "-ruby",
                 "Ruby",
                 "rb",
                 "{0}{1}_sm.{2}",
@@ -1720,7 +1716,7 @@ public final class Smc
         _languages[TABLE] =
             new Language(
                 TABLE,
-                "-ta",
+                "-table",
                 "-table",
                 "html",
                 "{0}{1}_sm.{2}",
@@ -1730,7 +1726,7 @@ public final class Smc
         _languages[TCL] =
             new Language(
                 TCL,
-                "-tc",
+                "-tcl",
                 "[incr Tcl]",
                 "tcl",
                 "{0}{1}_sm.{2}",
@@ -1748,12 +1744,10 @@ public final class Smc
                 false,
                 null);
 
-        // List<Integer> language = new ArrayList<Integer>();
-        List languages = new ArrayList();
+        List<Language> languages = new ArrayList<Language>();
         int target;
 
-        // _optionMap = new HashMap<String, List<Language>>();
-        _optionMap = new HashMap();
+        _optionMap = new HashMap<String, List<Language>>();
 
         // Languages supporting each option:
         // +      -cast: C++
@@ -1794,25 +1788,25 @@ public final class Smc
         _optionMap.put(VVERBOSE_FLAG, languages);
 
         // Set the options supported by less than all langugages.
-        languages = new ArrayList();
+        languages = new ArrayList<Language>();
         languages.add(_languages[C_PLUS_PLUS]);
         _optionMap.put(CAST_FLAG, languages);
         _optionMap.put(NO_EXCEPTIONS_FLAG, languages);
         _optionMap.put(NO_STREAMS_FLAG, languages);
 
-        languages = new ArrayList();
+        languages = new ArrayList<Language>();
         languages.add(_languages[C_PLUS_PLUS]);
         languages.add(_languages[C]);
         languages.add(_languages[OBJECTIVE_C]);
         _optionMap.put(HEADER_FLAG, languages);
 
-        languages = new ArrayList();
+        languages = new ArrayList<Language>();
         languages.add(_languages[C_SHARP]);
         languages.add(_languages[JAVA]);
         languages.add(_languages[VB]);
         _optionMap.put(SYNC_FLAG, languages);
 
-        languages = new ArrayList();
+        languages = new ArrayList<Language>();
         languages.add(_languages[C_SHARP]);
         languages.add(_languages[JAVA]);
         languages.add(_languages[VB]);
@@ -1823,7 +1817,7 @@ public final class Smc
         languages.add(_languages[RUBY]);
         _optionMap.put(REFLECT_FLAG, languages);
 
-        languages = new ArrayList();
+        languages = new ArrayList<Language>();
         languages.add(_languages[C_SHARP]);
         languages.add(_languages[JAVA]);
         languages.add(_languages[VB]);
@@ -1831,7 +1825,7 @@ public final class Smc
         languages.add(_languages[C_PLUS_PLUS]);
         _optionMap.put(SERIAL_FLAG, languages);
 
-        languages = new ArrayList();
+        languages = new ArrayList<Language>();
         languages.add(_languages[GRAPH]);
         _optionMap.put(GLEVEL_FLAG, languages);
     }
@@ -1840,6 +1834,9 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.21  2007/02/21 13:53:38  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.20  2007/02/13 18:43:19  cwrapp
 // Reflect options fix.
 //

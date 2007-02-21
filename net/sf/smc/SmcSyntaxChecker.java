@@ -65,9 +65,9 @@ public final class SmcSyntaxChecker
 
         _fsmName = fsm;
         _targetLanguage = targetLanguage;
-        _messages = (List) new ArrayList();
+        _messages = new ArrayList<SmcMessage>();
         _checkFlag = true;
-    }
+    } // end of SmcSyntaxCheck(String, int)
 
     /**
      * Returns <code>true</code> if no errors were found and
@@ -78,16 +78,16 @@ public final class SmcSyntaxChecker
     public boolean isValid()
     {
         return (_checkFlag);
-    }
+    } // end of isValid()
 
     /**
      * Returns a list of warning and error messages.
      * @return a list of warning and error messages.
      */
-    public List getMessages()
+    public List<SmcMessage> getMessages()
     {
         return (_messages);
-    }
+    } // end of getMessages()
 
     //-----------------------------------------------------------
     // SmcVisitor Methods.
@@ -100,7 +100,6 @@ public final class SmcSyntaxChecker
         String context = fsm.getContext();
         String header = fsm.getHeader();
         int headerLine = fsm.getHeaderLine();
-        Iterator mapIt;
 
         // Check if the start state and class has been
         // specified (and header file for C++ generation).
@@ -163,27 +162,21 @@ public final class SmcSyntaxChecker
         // Check if all the end states are valid.
         // Check each map in turn. But don't stop when an error
         // is found - check all the transitions.
-        for (mapIt = fsm.getMaps().iterator();
-             mapIt.hasNext() == true;
-            )
+        for (SmcMap map: fsm.getMaps())
         {
-            ((SmcMap) mapIt.next()).accept(this);
+            map.accept(this);
         }
 
         return;
-    }
+    } // end of visit(SmcFSM)
 
     // Check the map's states.
     public void visit(SmcMap map)
     {
-        Iterator stateIt;
-
         // Check the real states first.
-        for (stateIt = map.getStates().iterator();
-             stateIt.hasNext() == true;
-            )
+        for (SmcState state: map.getStates())
         {
-            ((SmcState) stateIt.next()).accept(this);
+            state.accept(this);
         }
 
         // Now check the default state.
@@ -193,39 +186,33 @@ public final class SmcSyntaxChecker
         }
 
         return;
-    }
+    } // end of visit(SmcMap)
 
     // Check if the state's transitions contain valid end states.
     public void visit(SmcState state)
     {
-        Iterator transIt;
-
-        for (transIt = state.getTransitions().iterator();
-             transIt.hasNext() == true;
-            )
+        for (SmcTransition transition: state.getTransitions())
         {
-            ((SmcTransition) transIt.next()).accept(this);
+            transition.accept(this);
         }
 
         return;
-    }
+    } // end of visit(SmcState)
 
     // Check the transition's guards.
     public void visit(SmcTransition transition)
     {
-        List guards = transition.getGuards();
+        List<SmcGuard> guards = transition.getGuards();
         int guardCount = guards.size();
-        Iterator it;
 
         // If this is Tcl, then make sure the parameter types
         // are either value or reference.
         if (_targetLanguage == Smc.TCL)
         {
-            for (it = transition.getParameters().iterator();
-                 it.hasNext() == true;
-                )
+            for (SmcParameter parameter:
+                     transition.getParameters())
             {
-                ((SmcParameter) it.next()).accept(this);
+                parameter.accept(this);
             }
         }
 
@@ -237,13 +224,12 @@ public final class SmcSyntaxChecker
             String mapName = state.getMap().getName();
             String stateName = state.getClassName();
             String transName = transition.getName();
-            List conditions = (List) new ArrayList(guardCount);
-            SmcGuard guard;
+            List<String> conditions =
+                new ArrayList<String>(guardCount);
             String condition;
 
-            for (it = guards.iterator(); it.hasNext() == true;)
+            for (SmcGuard guard: guards)
             {
-                guard = (SmcGuard) it.next();
                 condition = guard.getCondition();
 
                 // Each guard must have a unique condition.
@@ -279,13 +265,13 @@ public final class SmcSyntaxChecker
             }
         }
 
-        for (it = guards.iterator(); it.hasNext() == true;)
+        for (SmcGuard guard: guards)
         {
-            ((SmcGuard) it.next()).accept(this);
+            guard.accept(this);
         }
 
         return;
-    }
+    } // end of visit(SmcTransition)
 
     // Now check if the guard has a valid end state.
     public void visit(SmcGuard guard)
@@ -324,7 +310,7 @@ public final class SmcSyntaxChecker
         }
 
         return;
-    }
+    } // end of visit(SmcGuard)
 
     // Check if the parameter types are acceptable.
     public void visit(SmcParameter parameter)
@@ -360,7 +346,7 @@ public final class SmcSyntaxChecker
         }
 
         return;
-    }
+    } // end of visit(SmcParameter)
 
     //
     // end of SmcVisitor Methods.
@@ -419,7 +405,7 @@ public final class SmcSyntaxChecker
         }
 
         return (retval);
-    }
+    } // end of _findState(String, SmcGuard)
 
 //---------------------------------------------------------------
 // Member data
@@ -433,8 +419,15 @@ public final class SmcSyntaxChecker
 
     // Store warning and error messages in this list. Do not
     // output them. Let the application do that.
-    private List _messages;
+    private List<SmcMessage> _messages;
 
     // Set this flag to false if the check fails.
     private boolean _checkFlag;
-}
+} // end of SmcSyntaxCheck
+
+//
+// CHANGE LOG
+// $Log$
+// Revision 1.6  2007/02/21 13:56:47  cwrapp
+// Moved Java code to release 1.5.0
+//

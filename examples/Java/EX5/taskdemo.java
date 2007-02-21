@@ -1,11 +1,11 @@
 //
 // The contents of this file are subject to the Mozilla Public
 // License Version 1.1 (the "License"); you may not use this file
-// except in compliance with the License. You may obtain a copy of
-// the License at http://www.mozilla.org/MPL/
+// except in compliance with the License. You may obtain a copy
+// of the License at http://www.mozilla.org/MPL/
 // 
-// Software distributed under the License is distributed on an "AS
-// IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+// Software distributed under the License is distributed on an
+// "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
@@ -13,7 +13,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 - 2003 Charles W. Rapp.
+// Copyright (C) 2000 - 2007. Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
@@ -30,6 +30,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2007/02/21 13:41:11  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.4  2005/05/28 13:51:24  cwrapp
 // Update Java examples 1 - 7.
 //
@@ -121,7 +124,8 @@ public final class taskdemo
             public void stateChanged(ChangeEvent e) {
                 JSlider slider = (JSlider) e.getSource();
                 TaskController control = new TaskController();
-                Map args = new HashMap();
+                Map<String, Object> args =
+                    new HashMap<String, Object>();
 
                 args.put("level",
                          new Integer(slider.getValue()));
@@ -140,8 +144,10 @@ public final class taskdemo
 
         _levelLabel = new JLabel("Message Level: ");
         _levelLabel.setLabelFor(_levelSlider);
-        _levelLabel.setVerticalTextPosition(SwingConstants.CENTER);
-        _levelLabel.setHorizontalTextPosition(SwingConstants.RIGHT);
+        _levelLabel.setVerticalTextPosition(
+            SwingConstants.CENTER);
+        _levelLabel.setHorizontalTextPosition(
+            SwingConstants.RIGHT);
 
         // There are two buttons: "Create Task..." and "Quit".
         // The first button makes visible the task dialog, the
@@ -158,7 +164,8 @@ public final class taskdemo
         _quitButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 TaskController control = new TaskController();
-                Map args = new HashMap();
+                Map<String, Object> args =
+                    new HashMap<String, Object>();
 
                 args.put("Exit Code", new Integer(0));
                 control.postMessage("Task Manager",
@@ -170,7 +177,8 @@ public final class taskdemo
 
         // Layout the components.
         GridBagLayout gridbag = new GridBagLayout();
-        GridBagConstraints gridConstraints = new GridBagConstraints();
+        GridBagConstraints gridConstraints =
+            new GridBagConstraints();
         pane.setLayout(gridbag);
 
         // Put table's scrollable pane inside this pane.

@@ -59,7 +59,7 @@ public final class SmcCSharpGenerator
                               String srcfileBase)
     {
         super (source, srcfileBase);
-    }
+    } // end of SmcCSharpGenerator(PrintStream, String)
 
     public void visit(SmcFSM fsm)
     {
@@ -68,17 +68,14 @@ public final class SmcCSharpGenerator
         String context = fsm.getContext();
         String startState = fsm.getStartState();
         String accessLevel = fsm.getAccessLevel();
-        List maps = fsm.getMaps();
-        List transitions;
-        Iterator it;
-        Iterator it2;
-        SmcMap map;
-        SmcTransition trans;
+        List<SmcMap> maps = fsm.getMaps();
+        List<SmcTransition> transitions;
+        Iterator<SmcParameter> pit;
         String transName;
         String csState;
         String separator;
         int index;
-        List params;
+        List<SmcParameter> params;
         String indent2;
 
         // If the access level has not been set, then the
@@ -125,12 +122,10 @@ public final class SmcCSharpGenerator
         _source.println();
 
         // Do user-specified imports now.
-        for (it = fsm.getImports().iterator();
-             it.hasNext() == true;
-            )
+        for (String imp: fsm.getImports())
         {
             _source.print("using ");
-            _source.print(it.next());
+            _source.print(imp);
             _source.println(";");
         }
 
@@ -469,9 +464,8 @@ public final class SmcCSharpGenerator
         // Generate the default transition methods.
         // First get the transition list.
         transitions = fsm.getTransitions();
-        for (it = transitions.iterator(); it.hasNext() == true;)
+        for (SmcTransition trans: transitions)
         {
-            trans = (SmcTransition) it.next();
             transName = trans.getName();
 
             // Ignore the default transition.
@@ -484,12 +478,12 @@ public final class SmcCSharpGenerator
 
                 // Now output the transition's parameters.
                 params = trans.getParameters();
-                for (it2 = params.iterator(), separator = "";
-                     it2.hasNext() == true;
+                for (pit = params.iterator(), separator = "";
+                     pit.hasNext() == true;
                      separator = ", ")
                 {
                     _source.print(separator);
-                    ((SmcParameter) it2.next()).accept(this);
+                    (pit.next()).accept(this);
                 }
                 _source.println(")");
                 _source.print(_indent);
@@ -524,13 +518,10 @@ public final class SmcCSharpGenerator
                 _source.print(transName);
                 _source.print("(this");
 
-                for (it2 = params.iterator();
-                     it2.hasNext() == true;
-                    )
+                for (SmcParameter param: params)
                 {
                     _source.print(", ");
-                    _source.print(
-                        ((SmcParameter) it2.next()).getName());
+                    _source.print(param.getName());
                 }
                 _source.println(");");
                 _source.print(indent2);
@@ -664,7 +655,10 @@ public final class SmcCSharpGenerator
         // array.
         if (Smc.isSerial() == true)
         {
+            Iterator<SmcMap> mit;
+            SmcMap map;
             String mapName;
+            Iterator<SmcState> sit;
             SmcState state;
 
             _source.print(_indent);
@@ -682,18 +676,18 @@ public final class SmcCSharpGenerator
             _source.print(_indent);
             _source.print("    {");
 
-            for (it = maps.iterator(), separator = "";
-                 it.hasNext() == true;
+            for (mit = maps.iterator(), separator = "";
+                 mit.hasNext() == true;
                 )
             {
-                map = (SmcMap) it.next();
+                map = mit.next();
                 mapName = map.getName();
 
-                for (it2 = map.getStates().iterator();
-                     it2.hasNext() == true;
+                for (sit = map.getStates().iterator();
+                     sit.hasNext() == true;
                      separator = ",")
                 {
-                    state = (SmcState) it2.next();
+                    state = sit.next();
                     _source.println(separator);
                     _source.print(_indent);
                     _source.print("        ");
@@ -789,9 +783,8 @@ public final class SmcCSharpGenerator
         _source.println();
 
         // Transition methods (except default).
-        for (it = transitions.iterator(); it.hasNext() == true;)
+        for (SmcTransition trans: transitions)
         {
-            trans = (SmcTransition) it.next();
             transName = trans.getName();
 
             if (transName.equals("Default") == false)
@@ -804,12 +797,10 @@ public final class SmcCSharpGenerator
                 _source.print(context);
                 _source.print("Context context");
 
-                for (it2 = trans.getParameters().iterator();
-                     it2.hasNext() == true;
-                    )
+                for (SmcParameter param: trans.getParameters())
                 {
                     _source.print(", ");
-                    ((SmcParameter) it2.next()).accept(this);
+                    param.accept(this);
                 }
 
                 _source.println(")");
@@ -882,9 +873,9 @@ public final class SmcCSharpGenerator
         _source.println("    }");
 
         // Have each map print out its source code now.
-        for (it = maps.iterator(); it.hasNext() == true;)
+        for (SmcMap map: maps)
         {
-            ((SmcMap) it.next()).accept(this);
+            map.accept(this);
         }
 
         // Close the context class.
@@ -900,18 +891,16 @@ public final class SmcCSharpGenerator
         }
 
         return;
-    }
+    } // end of visit(SmcFSM)
 
     public void visit(SmcMap map)
     {
-        List definedDefaultTransitions;
+        List<SmcTransition> definedDefaultTransitions;
         SmcState defaultState = map.getDefaultState();
         String context = map.getFSM().getContext();
         String mapName = map.getName();
         String indent2;
-        List states = map.getStates();
-        Iterator it;
-        SmcState state;
+        List<SmcState> states = map.getStates();
 
         // Initialize the default transition list to all the
         // default state's transitions.
@@ -922,7 +911,8 @@ public final class SmcCSharpGenerator
         }
         else
         {
-            definedDefaultTransitions = (List) new ArrayList();
+            definedDefaultTransitions =
+                new ArrayList<SmcTransition>();
         }
 
         // Declare the map class and make it abstract to prevent
@@ -958,10 +948,8 @@ public final class SmcCSharpGenerator
         _source.println("        //");
 
         // Declare each of the state class member data.
-        for (it = states.iterator(); it.hasNext() == true;)
+        for (SmcState state: states)
         {
-            state = (SmcState) it.next();
-
             _source.print(_indent);
             _source.println("        [NonSerialized]");
             _source.print(_indent);
@@ -1076,11 +1064,9 @@ public final class SmcCSharpGenerator
         // Declare the user-defined transitions first.
         indent2 = _indent;
         _indent = _indent + "        ";
-        for (it = definedDefaultTransitions.iterator();
-             it.hasNext() == true;
-            )
+        for (SmcTransition trans: definedDefaultTransitions)
         {
-            ((SmcTransition) it.next()).accept(this);
+            trans.accept(this);
         }
         _indent = indent2;
 
@@ -1094,16 +1080,16 @@ public final class SmcCSharpGenerator
         _source.println("    // Inner classes.");
         _source.print(_indent);
         _source.println("    //");
-        for (it = states.iterator(); it.hasNext() == true;)
+        for (SmcState state: states)
         {
-            ((SmcState) it.next()).accept(this);
+            state.accept(this);
         }
 
         // If reflection is on, then define the transitions list.
         if (Smc.isReflection() == true)
         {
-            List allTransitions = map.getFSM().getTransitions();
-            SmcTransition transition;
+            List<SmcTransition> allTransitions =
+                map.getFSM().getTransitions();
             String transName;
             int transDefinition;
 
@@ -1139,11 +1125,8 @@ public final class SmcCSharpGenerator
             _source.println("_transitions = new Hashtable();");
 
             // Now place the transition names into the list.
-            for (it = allTransitions.iterator();
-                 it.hasNext() == true;
-                )
+            for (SmcTransition transition: allTransitions)
             {
-                transition = (SmcTransition) it.next();
                 transName = transition.getName();
 
                 // If the transition is defined in this map's
@@ -1175,7 +1158,7 @@ public final class SmcCSharpGenerator
         _source.println("    }");
 
         return;
-    }
+    } // end of visit(SmcMap)
 
     public void visit(SmcState state)
     {
@@ -1183,9 +1166,8 @@ public final class SmcCSharpGenerator
         String context = map.getFSM().getContext();
         String mapName = map.getName();
         String stateName = state.getClassName();
-        List actions;
+        List<SmcAction> actions;
         String indent2;
-        Iterator it;
 
         // Declare the inner state class.
         _source.println();
@@ -1278,9 +1260,9 @@ public final class SmcCSharpGenerator
             // Generate the actions associated with this code.
             indent2 = _indent;
             _indent = _indent + "                ";
-            for (it = actions.iterator(); it.hasNext() == true;)
+            for (SmcAction action: actions)
             {
-                ((SmcAction) it.next()).accept(this);
+                action.accept(this);
             }
             _indent = indent2;
 
@@ -1314,9 +1296,9 @@ public final class SmcCSharpGenerator
             // Generate the actions associated with this code.
             indent2 = _indent;
             _indent = _indent + "                ";
-            for (it = actions.iterator(); it.hasNext() == true;)
+            for (SmcAction action: actions)
             {
-                ((SmcAction) it.next()).accept(this);
+                action.accept(this);
             }
 
             // End of the Exit() method.
@@ -1329,11 +1311,9 @@ public final class SmcCSharpGenerator
         // Have each transition generate its code.
         indent2 = _indent;
         _indent = _indent + "            ";
-        for (it = state.getTransitions().iterator();
-             it.hasNext() == true;
-            )
+        for (SmcTransition trans: state.getTransitions())
         {
-            ((SmcTransition) it.next()).accept(this);
+            trans.accept(this);
         }
         _indent = indent2;
 
@@ -1341,11 +1321,12 @@ public final class SmcCSharpGenerator
         // map.
         if (Smc.isReflection() == true)
         {
-            List allTransitions = map.getFSM().getTransitions();
-            List stateTransitions = state.getTransitions();
+            List<SmcTransition> allTransitions =
+                map.getFSM().getTransitions();
+            List<SmcTransition> stateTransitions =
+                state.getTransitions();
             SmcState defaultState = map.getDefaultState();
-            List defaultTransitions;
-            SmcTransition transition;
+            List<SmcTransition> defaultTransitions;
             String transName;
             int transDefinition;
 
@@ -1358,7 +1339,8 @@ public final class SmcCSharpGenerator
             }
             else
             {
-                defaultTransitions = (List) new ArrayList();
+                defaultTransitions =
+                    new ArrayList<SmcTransition>();
             }
 
             _source.println();
@@ -1395,11 +1377,8 @@ public final class SmcCSharpGenerator
             _source.println("_transitions = new Hashtable();");
 
             // Now place the transition names into the list.
-            for (it = allTransitions.iterator();
-                 it.hasNext() == true;
-                )
+            for (SmcTransition transition: allTransitions)
             {
-                transition = (SmcTransition) it.next();
                 transName = transition.getName();
 
                 // If the transition is in this state, then its
@@ -1439,7 +1418,7 @@ public final class SmcCSharpGenerator
         _source.println("        }");
 
         return;
-    }
+    } // end of visit(SmcState)
 
     public void visit(SmcTransition transition)
     {
@@ -1449,10 +1428,11 @@ public final class SmcCSharpGenerator
         String mapName = map.getName();
         String stateName = state.getClassName();
         String transName = transition.getName();
-        List parameters = transition.getParameters();
-        List guards = transition.getGuards();
+        List<SmcParameter> parameters =
+            transition.getParameters();
+        List<SmcGuard> guards = transition.getGuards();
         boolean nullCondition = false;
-        Iterator it;
+        Iterator<SmcGuard> git;
         SmcGuard guard;
 
         _source.println();
@@ -1464,10 +1444,10 @@ public final class SmcCSharpGenerator
         _source.print("Context context");
 
         // Add user-defined parameters.
-        for (it = parameters.iterator(); it.hasNext() == true;)
+        for (SmcParameter param: parameters)
         {
             _source.print(", ");
-            ((SmcParameter) it.next()).accept(this);
+            param.accept(this);
         }
         _source.println(")");
 
@@ -1505,12 +1485,10 @@ public final class SmcCSharpGenerator
 
             // Output the transition parameters.
             _source.print("(");
-            for (it = parameters.iterator();
-                 it.hasNext() == true;
-                )
+            for (SmcParameter param: parameters)
             {
                 _source.print(", ");
-                ((SmcParameter) it.next()).accept(this);
+                param.accept(this);
             }
             _source.print(")");
             _source.println("\");");
@@ -1521,11 +1499,11 @@ public final class SmcCSharpGenerator
         // Loop through the guards and print each one.
         _guardIndex = 0;
         _guardCount = guards.size();
-        for (it = guards.iterator();
-             it.hasNext() == true;
+        for (git = guards.iterator();
+             git.hasNext() == true;
              ++_guardIndex)
         {
-            guard = (SmcGuard) it.next();
+            guard = git.next();
 
             // Count up the guards with no condition.
             if (guard.getCondition().length() == 0)
@@ -1561,13 +1539,10 @@ public final class SmcCSharpGenerator
             _source.print("        base.");
             _source.print(transName);
             _source.print("(context");
-            for (it = parameters.iterator();
-                 it.hasNext() == true;
-                )
+            for (SmcParameter param: parameters)
             {
                 _source.print(", ");
-                _source.print(
-                    ((SmcParameter) it.next()).getName());
+                _source.print(param.getName());
             }
             _source.println(");");
 
@@ -1589,7 +1564,7 @@ public final class SmcCSharpGenerator
         _source.println("}");
 
         return;
-    }
+    } // end of visit(SmcTransition)
 
     public void visit(SmcGuard guard)
     {
@@ -1610,7 +1585,7 @@ public final class SmcCSharpGenerator
         String fqEndStateName = "";
         String pushStateName = guard.getPushState();
         String condition = guard.getCondition();
-        List actions = guard.getActions();
+        List<SmcAction> actions = guard.getActions();
         boolean hasActions = !(actions.isEmpty());
 
         // If this guard's end state is not of the form
@@ -1792,8 +1767,6 @@ public final class SmcCSharpGenerator
         }
         else
         {
-            Iterator it;
-
             // Now that we are in the transition, clear the
             // current state.
             _source.print(indent2);
@@ -1821,9 +1794,9 @@ public final class SmcCSharpGenerator
 
             indent4 = _indent;
             _indent = indent3;
-            for (it = actions.iterator(); it.hasNext() == true;)
+            for (SmcAction action: actions)
             {
-                ((SmcAction) it.next()).accept(this);
+                action.accept(this);
             }
             _indent = indent4;
 
@@ -1990,13 +1963,13 @@ public final class SmcCSharpGenerator
         }
 
         return;
-    }
+    } // end of visit(SmcGuard)
 
     public void visit(SmcAction action)
     {
         String name = action.getName();
-        List arguments = action.getArguments();
-        Iterator it;
+        List<String> arguments = action.getArguments();
+        Iterator<String> it;
         String sep;
 
         _source.print(_indent);
@@ -2011,7 +1984,7 @@ public final class SmcCSharpGenerator
         }
         else if (action.isProperty() == true)
         {
-            String arg = (String) arguments.get(0);
+            String arg = arguments.get(0);
 
             _source.print("ctxt.");
             _source.print(name);
@@ -2030,14 +2003,14 @@ public final class SmcCSharpGenerator
                  sep = ", ")
             {
                 _source.print(sep);
-                _source.print((String) it.next());
+                _source.print(it.next());
             }
 
             _source.println(");");
         }
 
         return;
-    }
+    } // end of visit(SmcAction)
 
     public void visit(SmcParameter parameter)
     {
@@ -2046,16 +2019,19 @@ public final class SmcCSharpGenerator
         _source.print(parameter.getName());
 
         return;
-    }
+    } // end of visit(SmcParameter)
 
 //---------------------------------------------------------------
 // Member data
 //
-}
+} // end of class SmcCSharpGenerator
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2007/02/21 13:54:15  cwrapp
+// Moved Java code to release 1.5.0
+//
 // Revision 1.9  2007/01/15 00:23:50  cwrapp
 // Release 4.4.0 initial commit.
 //

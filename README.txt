@@ -2,7 +2,7 @@
 
                                SMC
                      The State Machine Compiler
-                         (Version: 4.4.0)
+                         (Version: 5.0.0)
 
                      http://smc.sourceforge.net
 
@@ -13,52 +13,32 @@
 
 New Features:
 
-+ Added Objective-C generator and examples.
-  Contributor: Chris Liscio
-
-+ Add Lua code generator and examples. Use the command line
-  option -lua to generate Lua source file.
-  Contributor: Francois Perrard
+None.
 
 
-Minor changes
+Major changes:
 
-+ (C#, VB.Net) Added StateChanged event to the generated context
-  class. Registered event handlers are informed when the FSM
-  changes state.
-  (SF feature 1570050)
++ Moved to Java 5. SMC cannot be run on Java 1.4.x.
+
+
+Minor changes:
+
+None.
 
 
 Bug Fixes:
 
-+ (C++)
-    The FSMContext copy constructor C++ statemap.h incorrectly
-    included an unused parameter variable name which results in
-    compiler warnings. This variable name is removed.
-    (SF bug 1580746)
-
 + (All)
-    SMC -version reported the incorrect version. Corrected in
-    this release.
-    (SF bug 1580791)
+    Corrected command line processing bug introduced in v. 4.4.0.
+    (SF bug 1659593)
 
-+ (C++)
-    Using the -d with -c++ resulted in generating an invalid
-    #include. The #include is now corrected.
-    (SF bug 1592619)
-
-+ (C++)
-    Unused local variable loopbackFlag generated, resulting in
-    compiler warnings. This variable no longer generated if
-    unused.
-    (SF bug 1596933)
 
 
 
 1. System Requirements
 ----------------------
 
-+ JRE (Standard Edition) 1.4.1 or better.
++ JRE (Standard Edition) 1.5.0 or better.
 + Whatever JRE's requirements are (see http://java.sun.com/j2se/
   for more information).
 
@@ -91,7 +71,7 @@ Congratulations! You've integrated a state machine into your
 object.
 
 SMC is written in Java and is truly "Write once, run anywhere".
-If you have at least the Java Standard Edition v. 1.4.1 loaded,
+If you have at least the Java Standard Edition v. 1.5.0 loaded,
 then you can run SMC (if you have the Java Enterpise Edition, so
 much the better!)
 
