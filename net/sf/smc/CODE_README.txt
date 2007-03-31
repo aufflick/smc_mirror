@@ -17,6 +17,10 @@ Moved to Java 5. SMC cannot be run on Java 1.4.x.
     Corrected command line processing bug introduced in v. 4.4.0.
     (SF bug 1659593)
 
+(Makefile)
+    Corrected APP_CLASSPATH macro to work in Windows environment.
+    (SF bug 1687481)
+
 
 
                               SMC -

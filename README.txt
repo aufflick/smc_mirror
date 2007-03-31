@@ -32,6 +32,14 @@ Bug Fixes:
     Corrected command line processing bug introduced in v. 4.4.0.
     (SF bug 1659593)
 
++ (Source downnload)
+    Added SmcLuaGenerator.java to SmcSrc download package.
+    (SF bug 1687476)
+
++ (Makefile)
+    Corrected APP_CLASSPATH macro to work in Windows environment.
+    (SF bug 1687481)
+
 
 
 

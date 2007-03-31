@@ -79,7 +79,7 @@ PACKAGE_NAME=	net.sf.smc
 PACKAGE_DIR=	net/sf/smc
 
 STATEMAP_LIB_DIR=	../../../lib/Java
-APP_CLASSPATH=	"$(CLASSPATH):$(STATEMAP_LIB_DIR)/statemap.jar"
+APP_CLASSPATH=	"$(STATEMAP_LIB_DIR)/statemap.jar"
 
 BIN_DIR=	../../../bin
 INSTALL_DIR=	../../../../staging/smc/bin
@@ -141,6 +141,9 @@ realclean :	clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.12  2007/03/31 13:27:22  cwrapp
+# Version 5.0.0 check-in.
+#
 # Revision 1.11  2007/02/21 13:53:25  cwrapp
 # Moved Java code to release 1.5.0
 #

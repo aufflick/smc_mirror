@@ -776,6 +776,7 @@
 ./smc/net/sf/smc/SmcJavaGenerator.java
 ./smc/net/sf/smc/SmcLexer.java
 ./smc/net/sf/smc/SmcLexer.sm
+./smc/net/sf/smc/SmcLuaGenerator.java
 ./smc/net/sf/smc/SmcMap.java
 ./smc/net/sf/smc/SmcMessage.java
 ./smc/net/sf/smc/SmcObjCGenerator.java
