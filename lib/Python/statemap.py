@@ -125,8 +125,8 @@ class FSMContext:
 
 	def setState(self, state):
 		"""Sets the current state to the specified state."""
-		if isinstance(state, State) == False:
-			raise ValueError("state should be State")
+		if not isinstance(state, State):
+			raise ValueError("state should be a statemap.State")
 		self._state = state
 		if self._debug_flag:
 			self._debug_stream.write("NEW STATE    : %s\n" % self._state.getName())
@@ -142,8 +142,8 @@ class FSMContext:
 	def pushState(self, state):
 		"""Push the current state on top of the state stack
 		and make the specified state the current state."""
-		if isinstance(state, State) == False:
-			raise ValueError("state should be State")
+		if not isinstance(state, State):
+			raise ValueError("state should be a statemap.State")
 		if self._state != None:
 			self._state_stack.append(self._state)
 		self._state = state
