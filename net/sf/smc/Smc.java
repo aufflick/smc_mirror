@@ -3,19 +3,19 @@
 // License Version 1.1 (the "License"); you may not use this file
 // except in compliance with the License. You may obtain a copy
 // of the License at http://www.mozilla.org/MPL/
-// 
+//
 // Software distributed under the License is distributed on an
 // "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
-// 
+//
 // The Original Code is State Machine Compiler (SMC).
-// 
+//
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
 // Copyright (C) 2000 - 2007. Charles W. Rapp.
 // All Rights Reserved.
-// 
+//
 // Contributor(s):
 //   Eitan Suez contributed examples/Ant.
 //   (Name withheld) contributed the C# code generation and
@@ -23,7 +23,7 @@
 //   Francois Perrad contributed the Python code generation and
 //   examples/Python, Perl code generation and examples/Perl,
 //   Ruby code generation and examples/Ruby, Lua code generation
-//   and examples/Lua.
+//   and examples/Lua, Groovy code generation and examples/Groovy.
 //   Chris Liscio contributed the Objective-C code generation
 //   and examples/ObjC.
 //
@@ -151,7 +151,7 @@ public final class Smc
                         System.out.print(finishTime - startTime);
                         System.out.println("ms]");
                     }
-                    
+
                     if (fsm == null)
                     {
                         retcode = 1;
@@ -1071,10 +1071,10 @@ public final class Smc
         stream.print(" [-headerd directory]");
         stream.print(" [-glevel int]");
         stream.print(
-            " {-c | -c++ | -csharp | -graph | -java | -lua | ");
+            " {-c | -c++ | -csharp | -graph | -groovy | -java | ");
         stream.print(
-            "-objc | -perl | -python | -ruby | -table | ");
-        stream.print("-tcl | -vb");
+            "-lua | -objc | -perl | -python | -ruby | -table | ");
+        stream.print("-tcl | -vb}");
         stream.println(" statemap_file");
         stream.println("    where:");
         stream.println(
@@ -1093,7 +1093,7 @@ public final class Smc
         stream.println(
             "\t-sync     Synchronize generated Java code ");
         stream.print("\t          ");
-        stream.println("(use with -java, -vb and -csharp only)");
+        stream.println("(use with -java, -groovy, -vb and -csharp only)");
         stream.println(
             "\t-noex     Do not generate C++ exception throws ");
         stream.print("\t          ");
@@ -1110,7 +1110,7 @@ public final class Smc
         stream.println("\t-reflect  Generate reflection code");
         stream.print("\t          ");
         stream.print("(use with -java, -tcl, -vb, -csharp, ");
-        stream.println("-lua, -perl, -python and -ruby only)");
+        stream.println("-groovy, -lua, -perl, -python and -ruby only)");
         stream.println("\t-cast     Use this C++ cast type ");
         stream.print("\t          ");
         stream.println("(use with -c++ only)");
@@ -1130,6 +1130,7 @@ public final class Smc
         stream.println("\t-c++      Generate C++ code");
         stream.println("\t-csharp   Generate C# code");
         stream.println("\t-graph    Generate GraphViz DOT file");
+        stream.println("\t-grooyv   Generate Groovy code");
         stream.println("\t-java     Generate Java code");
         stream.println("\t-lua      Generate Lua code");
         stream.println("\t-objc     Generate Objective-C code");
@@ -1144,7 +1145,7 @@ public final class Smc
             "    Note: statemap_file must end in \".sm\"");
         stream.print(
             "    Note: must select one of -c, -c++, -csharp, ");
-        stream.print("-graph, -java, -lua, -objc, -perl, ");
+        stream.print("-graph, -groovy, -java, -lua, -objc, -perl, ");
         stream.println(
             "-python, -ruby, -table, -tcl or -vb.");
 
@@ -1564,7 +1565,8 @@ public final class Smc
     /* package */ static final int C = 11;
     /* package */ static final int OBJECTIVE_C = 12;
     /* package */ static final int LUA = 13;
-    /* package */ static final int LANGUAGE_COUNT = 14;
+    /* package */ static final int GROOVY = 14;
+    /* package */ static final int LANGUAGE_COUNT = 15;
 
     // GraphViz detail level.
     /* package */ static final int NO_GRAPH_LEVEL = -1;
@@ -1661,6 +1663,16 @@ public final class Smc
                 "dot",
                 "{0}{1}_sm.{2}",
                 SmcGraphGenerator.class,
+                false,
+                null);
+        _languages[GROOVY] =
+            new Language(
+                GROOVY,
+                "-groovy",
+                "Groovy",
+                "groovy",
+                "{0}{1}Context.{2}",
+                SmcGroovyGenerator.class,
                 false,
                 null);
         _languages[LUA] =
@@ -1760,11 +1772,11 @@ public final class Smc
         // +      -noex: C++
         // + -nostreams: C++
         // +   -reflect: C#, Java, TCL, VB, Lua, Perl, Python,
-        //               Ruby
+        //               Ruby, Groovy
         // +    -return: all
-        // +    -serial: C#, C++, Java, Tcl, VB
+        // +    -serial: C#, C++, Java, Tcl, VB, Groovy
         // +    -suffix: all
-        // +      -sync: C#, Java, VB
+        // +      -sync: C#, Java, VB, Groovy
         // +   -verbose: all
         // +   -version: all
         // +  -vverbose: all
@@ -1804,6 +1816,7 @@ public final class Smc
         languages.add(_languages[C_SHARP]);
         languages.add(_languages[JAVA]);
         languages.add(_languages[VB]);
+        languages.add(_languages[GROOVY]);
         _optionMap.put(SYNC_FLAG, languages);
 
         languages = new ArrayList<Language>();
@@ -1815,6 +1828,7 @@ public final class Smc
         languages.add(_languages[PERL]);
         languages.add(_languages[PYTHON]);
         languages.add(_languages[RUBY]);
+        languages.add(_languages[GROOVY]);
         _optionMap.put(REFLECT_FLAG, languages);
 
         languages = new ArrayList<Language>();
@@ -1823,6 +1837,7 @@ public final class Smc
         languages.add(_languages[VB]);
         languages.add(_languages[TCL]);
         languages.add(_languages[C_PLUS_PLUS]);
+        languages.add(_languages[GROOVY]);
         _optionMap.put(SERIAL_FLAG, languages);
 
         languages = new ArrayList<Language>();
@@ -1834,6 +1849,9 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.22  2007/07/16 06:28:06  fperrad
+// + Added Groovy generator.
+//
 // Revision 1.21  2007/02/21 13:53:38  cwrapp
 // Moved Java code to release 1.5.0
 //

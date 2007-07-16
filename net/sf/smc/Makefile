@@ -1,21 +1,21 @@
-# 
+#
 # The contents of this file are subject to the Mozilla Public
 # License Version 1.1 (the "License"); you may not use this file
 # except in compliance with the License. You may obtain a copy of
 # the License at http://www.mozilla.org/MPL/
-# 
+#
 # Software distributed under the License is distributed on an "AS
 # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
-# 
+#
 # The Original Code is State Machine Compiler (SMC).
-# 
+#
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
 # Copyright (C) 2000 - 2005. Charles W. Rapp.
 # All Rights Reserved.
-# 
+#
 # Contributor(s):
 #   Eitan Suez contributed examples/Ant.
 #   (Name withheld) contributed the C# code generation and
@@ -73,6 +73,7 @@ APP_SOURCES=	SmcLexerContext.java \
 		SmcRubyGenerator.java \
 		SmcHeaderObjCGenerator.java \
 		SmcObjCGenerator.java \
+		SmcGroovyGenerator.java \
 		Smc.java
 
 PACKAGE_NAME=	net.sf.smc
@@ -141,6 +142,9 @@ realclean :	clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.13  2007/07/16 06:28:06  fperrad
+# + Added Groovy generator.
+#
 # Revision 1.12  2007/03/31 13:27:22  cwrapp
 # Version 5.0.0 check-in.
 #

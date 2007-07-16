@@ -39,7 +39,7 @@ $ java -jar Smc.jar <options> <.sm source files>
 
 SMC's command line options are:
 
-    -suffix <suffix> 
+    -suffix <suffix>
              : Use this suffix on the output file.
     -g       : Add debugging to generated code.
     -nostreams
@@ -49,7 +49,7 @@ SMC's command line options are:
     -verbose : Output more compiler messages.
     -help    : Print this message to standard out and exit.
     -sync    : Synchronize generated Java code
-               (use with -java, -vb and -csharp only).
+               (use with -java, -groovy, -vb and -csharp only).
     -noex    : Do not generate C++ exception throws
                (use with -c++ only).
     -nocatch : Do not generate try/catch/rethrow code
@@ -58,7 +58,8 @@ SMC's command line options are:
     -return  : Smc.main() does not exit but simply returns.
                Use this option with ANT.
     -reflect : Generate reflection code.
-               (use with -java, -tcl, -vb and -csharp only).
+               (use with -java, -tcl, -vb, -csharp
+               -groovy, -lua, -perl, -python and -ruby only).
     -cast <cast type>
              : use this C++ cast type
                (use with -c++ only).
@@ -74,6 +75,7 @@ SMC's command line options are:
     -c++     : Generate C++ code.
     -csharp  : Generate C# code.
     -graph   : Generate a Graphviz DOT file.
+    -groovy  : Generate Groovy code.
     -java    : Generate Java code.
     -lua     : Generate Lua code.
     -objc    : Generate Objective-C code.
@@ -90,6 +92,7 @@ SMC's command line options are:
           + -c++
           + -csharp
           + -graph
+          + -groovy
           + -java
           + -lua
           + -objc
