@@ -849,7 +849,7 @@ public final class SmcPythonGenerator
             // 3. Only one guard,
             // 4. No condition,
             // 5. No actions,
-            // 6. Not a loopback or pop transition and
+            // 6. Not a loopback, push or pop transition and
             // 7. No debug code being generated.
             // then give this transition a pass.
             else if (_guardCount == 1 &&
@@ -857,10 +857,13 @@ public final class SmcPythonGenerator
                       entryActions.isEmpty() == true) &&
                      (exitActions == null ||
                       exitActions.isEmpty() == true) &&
+                     transType != Smc.TRANS_PUSH &&
                      transType != Smc.TRANS_POP &&
                      loopbackFlag == true &&
                      Smc.isDebug() == false)
             {
+                _source.print(indent2);
+                _source.println("# No actions.");
                 _source.print(indent2);
                 _source.println("pass");
             }
@@ -1071,6 +1074,9 @@ public final class SmcPythonGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2007/08/05 14:36:12  cwrapp
+// Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more informaiton.
+//
 // Revision 1.9  2007/02/21 13:56:27  cwrapp
 // Moved Java code to release 1.5.0
 //

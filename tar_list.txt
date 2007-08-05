@@ -1,8 +1,8 @@
-./smc/Makefile
-./smc/tar_list.txt
 ./smc/LICENSE.txt
+./smc/Makefile
 ./smc/README.txt
 ./smc/smc.mk
+./smc/tar_list.txt
 ./smc/applet/Makefile
 ./smc/applet/Telephone.java
 ./smc/applet/Telephone.sm
@@ -769,6 +769,7 @@
 ./smc/net/sf/smc/SmcElement.java
 ./smc/net/sf/smc/SmcFSM.java
 ./smc/net/sf/smc/SmcGraphGenerator.java
+./smc/net/sf/smc/SmcGroovyGenerator.java
 ./smc/net/sf/smc/SmcGuard.java
 ./smc/net/sf/smc/SmcHeaderCGenerator.java
 ./smc/net/sf/smc/SmcHeaderGenerator.java

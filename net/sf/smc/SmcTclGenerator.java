@@ -1360,30 +1360,22 @@ public final class SmcTclGenerator
     {
         String name = action.getName();
 
-        if (action.getDefault() == true)
+        _source.print(_indent);
+
+        // Need to distinguish between FSMContext actions and
+        // application class actions. If the action is
+        // "emptyStateStack", then pass it to the context.
+        // Otherwise, let the application class handle it.
+        if (name.equals("emptyStateStack") == true)
         {
-            _source.print(_indent);
-            _source.print(name);
+            _source.print("$context ");
         }
         else
         {
-            _source.print(_indent);
-
-            // Need to distinguish between FSMContext actions and
-            // application class actions. If the action is
-            // "emptyStateStack", then pass it to the context.
-            // Otherwise, let the application class handle it.
-            if (name.equals("emptyStateStack") == true)
-            {
-                _source.print("$context ");
-            }
-            else
-            {
-                _source.print("$ctxt ");
-            }
-
-            _source.print(name);
+            _source.print("$ctxt ");
         }
+
+        _source.print(name);
 
         for (String arg: action.getArguments())
         {
@@ -1484,6 +1476,9 @@ public final class SmcTclGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2007/08/05 14:36:12  cwrapp
+// Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more informaiton.
+//
 // Revision 1.5  2007/02/21 13:56:54  cwrapp
 // Moved Java code to release 1.5.0
 //

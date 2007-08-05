@@ -44,60 +44,188 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Actions are used in both transtions and state Entry and Exit
+ * clauses. Actions are implemented as methods in the FSM's
+ * context class.
+ * <p>
+ * Actions have two properties:
+ * <ol>
+ *   <li>
+ *     Property: if this flag is {@code true}, then the action
+ *     was a property assignment (var = value). This action is
+ *     supported only for C# and VB.Net target compilation.
+ *   </li>
+ *   <li>
+ *     Arguments: the action's arguments copied verbatim from
+ *     the SMC code. The SMC parser does not attempt to
+ *     interpret the actions beyond requiring that the arguments
+ *     are a comma-separated list.
+ *   </li>
+ * </ol>
+ *
+ * @author <a href="mailto:rapp@acm.org">Charles Rapp</a>
+ */
+
 public final class SmcAction
     extends SmcElement
+    implements Comparable<SmcAction>
 {
 //---------------------------------------------------------------
 // Member Methods
 //
 
-    public SmcAction(String name,
-                     int lineNumber)
+    //-----------------------------------------------------------
+    // Constructors.
+    //
+
+    /**
+     * Creates the named action appearing on the given .sm line.
+     * The action has no arguments and is not a property
+     * assignment by default.
+     * @param name the action's name should correspond to the
+     * FSM context method.
+     * @param lineNumber where the action appears in the .sm
+     * file.
+     */
+    public SmcAction(String name, int lineNumber)
     {
         super (name, lineNumber);
 
+        _arguments = null;
         _propertyFlag = false;
-        _default = false;
-    }
+    } // end of SmcAction(String, int)
 
+    /**
+     * Creates an action with all data members specified.
+     * @param name the action's name should correspond to the
+     * FSM context method.
+     * @param lineNumber where the action appears in the .sm
+     * file.
+     * @param propertyFlag if {@code true}, then this action is
+     * a .Net property assignment and {@code arguments} must be
+     * a non-{@code null} list with exactly one item.
+     * @param args the action's arguments. May be {@code null}.
+     * @exception IllegalArgumentException
+     * if {@code propertyFlag} is {@code true} and
+     * {@code arguments} is either {@code null} or does not
+     * contain exactly one item.
+     */
+    public SmcAction(String name,
+                     int lineNumber,
+                     boolean propertyFlag,
+                     List<String> arguments)
+        throws IllegalArgumentException
+    {
+        super (name, lineNumber);
+
+        if (propertyFlag == true &&
+            (arguments == null ||
+             arguments.size() != 1))
+        {
+            throw (
+                new IllegalArgumentException(
+                    "property must have exactly one argument"));
+        }
+        else
+        {
+            _arguments = arguments;
+            _propertyFlag = propertyFlag;
+        }
+    } // end of SmcAction(String, boolean, List<String>, int)
+
+    //
+    // end of Constructors.
+    //-----------------------------------------------------------
+
+    //-----------------------------------------------------------
+    // Get methods.
+    //
+
+    /**
+     * Returns {@code true} if this action is a .Net property
+     * assignment and {@code false} if not.
+     * @return {@code true} if this action is a .Net property
+     * assignment and {@code false} if not.
+     */
     public boolean isProperty()
     {
         return (_propertyFlag);
-    }
+    } // end of isProperty()
 
+    /**
+     * Returns the action's argument list. May return
+     * {@code null}.
+     * @return the action's argument list. May return
+     * {@code null}.
+     */
+    public List<String> getArguments()
+    {
+        return (_arguments);
+    } // end of getArguments()
+
+    //
+    // end of Get methods.
+    //-----------------------------------------------------------
+
+    //-----------------------------------------------------------
+    // Set methods.
+    //
+
+    /**
+     * If {@code flag} is {@code true}, then this action is a
+     * .Net property assignment.
+     * @param flag if {@code true}, then this action is a .Net
+     * property assignment.
+     */
     public void setProperty(boolean flag)
     {
         _propertyFlag = flag;
         return;
-    }
+    } // end of setProperty(boolean)
 
-    public boolean getDefault()
-    {
-        return (_default);
-    }
-
-    public void setDefault(boolean flag)
-    {
-        _default = flag;
-        return;
-    }
-
-    public List<String> getArguments()
-    {
-        return (_arguments);
-    }
-
+    /**
+     * Sets the action's arguments.
+     * @param args the action's arguments. May be {@code null}.
+     * @exception IllegalArgumentException
+     * if this is a property action and {@code arguments} is
+     * either {@code null} or does not contain exactly one item.
+     */
     public void setArguments(List<String> args)
+        throws IllegalArgumentException
     {
-        _arguments = new ArrayList<String>(args);
-        return;
-    }
+        if (_propertyFlag == true &&
+            (args == null || args.size() != 1))
+        {
+            throw (
+                new IllegalArgumentException(
+                    "property must have exactly one argument"));
+        }
+        else
+        {
+            _arguments = new ArrayList<String>(args);
+        }
 
+        return;
+    } // end of setArguments(List<String>)
+
+    //
+    // end of Set methods.
+    //-----------------------------------------------------------
+
+    /**
+     * Returns an integer value &lt;, = or &gt; zero depending
+     * on whether this action is &lt;, = or &gt; {@code action}.
+     * @param action comparison action object.
+     * @return an integer value &lt;, = or &gt; zero depending
+     * on whether this action is &lt;, = or &gt; {@code action}.
+     */
     public int compareTo(SmcAction action)
     {
-        int retval;
+        int retval = 0;
 
-        if ((retval = _name.compareTo(action.getName())) == 0)
+        if (this != action &&
+            (retval = _name.compareTo(action.getName())) == 0)
         {
             Iterator<String> ait1;
             Iterator<String> ait2;
@@ -105,8 +233,10 @@ public final class SmcAction
             String s2;
 
             for (ait1 = _arguments.iterator(),
-                     ait2 = action._arguments.iterator();   
-                 ait1.hasNext() == true && retval == 0;
+                     ait2 = action._arguments.iterator();
+                 ait1.hasNext() == true &&
+                     ait2.hasNext() == true &&
+                     retval == 0;
                 )
             {
                 s1 = ait1.next();
@@ -117,38 +247,61 @@ public final class SmcAction
         }
 
         return (retval);
-    }
+    } // end of compareTo(SmcAction)
 
+    /**
+     * Returns a textual representation of this action. If this
+     * is a .Net property, the format is
+     * "&lt;name&gt; = &lt;argument&gt;". Otherwise the format is
+     * "&lt;name&gt;(&lt;arg0&gt;[, &lt;argn&gt;])".
+     * @return a textual representation of this action.
+     */
     public String toString()
     {
-        Iterator<String> ait;
-        String sep;
         StringBuffer retval = new StringBuffer(40);
 
         retval.append(_name);
-        retval.append('(');
 
-        for (ait = _arguments.iterator(), sep = "";
-             ait.hasNext() == true;
-             sep = ", ")
+        if (_propertyFlag == true)
         {
-            retval.append(sep);
-            retval.append(ait.next());
+            retval.append(" = ");
+            retval.append(_arguments.get(0));
+        }
+        else
+        {
+            Iterator<String> ait;
+            String sep;
+
+            retval.append('(');
+
+            for (ait = _arguments.iterator(), sep = "";
+                 ait.hasNext() == true;
+                 sep = ", ")
+            {
+                retval.append(sep);
+                retval.append(ait.next());
+            }
+
+            retval.append(')');
         }
 
-        retval.append(')');
-
         return (retval.toString());
-    }
+    } // end of toString()
 
     //-----------------------------------------------------------
     // SmcElement Abstract Methods.
     //
 
+    /**
+     * Pass this action to the visitor for processing. Part of
+     * the Visitor pattern.
+     * @param visitor the object implementing the
+     * visit(SmcElement) method.
+     */
     public void accept(SmcVisitor visitor)
     {
         visitor.visit(this);
-    }
+    } // end of accept(SmcVisitor)
 
     //
     // end of SmcElement Abstract Methods.
@@ -163,14 +316,14 @@ public final class SmcAction
 
     // Is this action a .Net property assignment?
     private boolean _propertyFlag;
-
-    // Is this action for a default transition or not?
-    private boolean _default;
-}
+} // end of class SmcAction
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2007/08/05 14:36:11  cwrapp
+// Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more informaiton.
+//
 // Revision 1.10  2007/02/21 13:53:52  cwrapp
 // Moved Java code to release 1.5.0
 //

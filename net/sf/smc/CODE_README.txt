@@ -7,6 +7,9 @@
 + Major changes
 ---------------
 
+(Groovy)
+    Added support for Groovy programming language (-groovy).
+
 (Java)
     Added state change notification to FSMContext.
     (SF feature request 1570050)

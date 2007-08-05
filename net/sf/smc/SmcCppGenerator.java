@@ -118,6 +118,7 @@ public final class SmcCppGenerator
         _source.print("#include \"");
         if ((srcDirectory == null && headerDirectory != null) ||
             (srcDirectory != null &&
+             headerDirectory != null &&
              srcDirectory.equals(headerDirectory) == false))
         {
             // They are in different directories. Prepend the
@@ -1342,6 +1343,9 @@ public final class SmcCppGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2007/08/05 14:36:11  cwrapp
+// Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more informaiton.
+//
 // Revision 1.7  2007/02/21 13:54:27  cwrapp
 // Moved Java code to release 1.5.0
 //

@@ -13,7 +13,9 @@
 
 New Features:
 
-None.
++ (Groovy)
+    Added support for Groovy programming language (-groovy).
+    Examples not yet available.
 
 
 Major changes:
