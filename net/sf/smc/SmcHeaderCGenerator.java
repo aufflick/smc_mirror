@@ -278,8 +278,13 @@ public final class SmcHeaderCGenerator
             }
             _source.print(mapName);
             _source.print("_");
+<<<<<<< SmcHeaderCGenerator.java
+            _source.print(state.getInstanceName());
+            _source.println(";");    
+=======
             _source.print(state.getClassName());
             _source.println(";");
+>>>>>>> 1.7
         }
 
         return;
@@ -293,6 +298,9 @@ public final class SmcHeaderCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2007/08/05 14:29:44  cwrapp
+// Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more informaiton.
+//
 // Revision 1.7  2007/07/16 06:13:21  fperrad
 // + Added the generation of a DO NOT EDIT comment
 //

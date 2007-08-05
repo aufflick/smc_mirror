@@ -126,6 +126,7 @@ public final class SmcCGenerator
         _source.print("#include \"");
         if ((srcDirectory == null && headerDirectory != null) ||
             (srcDirectory != null &&
+             headerDirectory != null &&
              srcDirectory.equals(headerDirectory) == false))
         {
             // They are in different directories. Prepend the
@@ -133,6 +134,10 @@ public final class SmcCGenerator
             _source.print(headerDirectory);
         }
         // Else they are in the same directory.
+        else if (srcDirectory != null)
+        {
+            _source.print(srcDirectory);
+        }
         _source.print(_srcfileBase);
         _source.println("_sm.h\"");
 
@@ -231,6 +236,16 @@ public final class SmcCGenerator
                             "Default") == false)
                     {
                         _source.print("#define ");
+<<<<<<< SmcCGenerator.java
+                        _source.print(mapName); 
+                        _source.print("_"); 
+                        _source.print(state.getInstanceName()); 
+                        _source.print("_"); 
+                        _source.print(trans.getName()); 
+                        _source.print(" "); 
+                        _source.print(context); 
+                        _source.print("State_"); 
+=======
                         _source.print(mapName);
                         _source.print("_");
                         _source.print(state.getClassName());
@@ -239,26 +254,47 @@ public final class SmcCGenerator
                         _source.print(" ");
                         _source.print(context);
                         _source.print("State_");
+>>>>>>> 1.8
                         _source.println(trans.getName());
                     }
                 }
 
                 _source.print("#define ");
+<<<<<<< SmcCGenerator.java
+                _source.print(mapName); 
+                _source.print("_"); 
+                _source.print(state.getInstanceName()); 
+                _source.print("_Default "); 
+                _source.print(context); 
+=======
                 _source.print(mapName);
                 _source.print("_");
                 _source.print(state.getClassName());
                 _source.print("_Default ");
                 _source.print(context);
+>>>>>>> 1.8
                 _source.println("State_Default");
                 _source.print("#define ");
+<<<<<<< SmcCGenerator.java
+                _source.print(mapName); 
+                _source.print("_"); 
+                _source.print(state.getInstanceName()); 
+=======
                 _source.print(mapName);
                 _source.print("_");
                 _source.print(state.getClassName());
+>>>>>>> 1.8
                 _source.println("_Entry NULL");
                 _source.print("#define ");
+<<<<<<< SmcCGenerator.java
+                _source.print(mapName); 
+                _source.print("_"); 
+                _source.print(state.getInstanceName()); 
+=======
                 _source.print(mapName);
                 _source.print("_");
                 _source.print(state.getClassName());
+>>>>>>> 1.8
                 _source.println("_Exit NULL");
             }
 
@@ -401,7 +437,7 @@ public final class SmcCGenerator
 
                 for (SmcState state: map.getStates())
                 {
-                    stateName = state.getClassName();
+                    stateName = state.getInstanceName();
 
                     _source.print("#undef ");
                     _source.print(mapName);
@@ -433,6 +469,8 @@ public final class SmcCGenerator
         // Have each state now generate its code.
         for (SmcState state: map.getStates())
         {
+            stateName = state.getInstanceName();
+
             state.accept(this);
 
             _source.println();
@@ -441,15 +479,15 @@ public final class SmcCGenerator
             _source.print("State ");
             _source.print(mapName);
             _source.print("_");
-            _source.print(state.getClassName());
+            _source.print(stateName);
             _source.print(" = { POPULATE_STATE(");
             _source.print(mapName);
             _source.print("_");
-            _source.print(state.getClassName());
+            _source.print(stateName);
             _source.print("), \"");
             _source.print(mapName);
             _source.print("_");
-            _source.print(state.getClassName());
+            _source.print(stateName);
             _source.print("\", ");
             _source.print(
                 Integer.toString(map.getNextStateId()));
@@ -465,7 +503,7 @@ public final class SmcCGenerator
         String packageName = map.getFSM().getPackage();
         String context = map.getFSM().getContext();
         String mapName = map.getName();
-        String className = state.getClassName();
+        String instanceName = state.getInstanceName();
         String indent2;
         List<SmcAction> actions;
 
@@ -487,12 +525,12 @@ public final class SmcCGenerator
             _source.print("#undef ");
             _source.print(mapName);
             _source.print("_");
-            _source.print(className);
+            _source.print(instanceName);
             _source.println("_Entry");
             _source.print("void ");
             _source.print(mapName);
             _source.print("_");
-            _source.print(className);
+            _source.print(instanceName);
             _source.print("_Entry(struct ");
             _source.print(context);
             _source.println("Context *fsm)");
@@ -524,12 +562,12 @@ public final class SmcCGenerator
             _source.print("#undef ");
             _source.print(mapName);
             _source.print("_");
-            _source.print(className);
+            _source.print(instanceName);
             _source.println("_Exit");
             _source.print("void ");
             _source.print(mapName);
             _source.print("_");
-            _source.print(className);
+            _source.print(instanceName);
             _source.print("_Exit(struct ");
             _source.print(context);
             _source.println("Context *fsm)");
@@ -570,7 +608,7 @@ public final class SmcCGenerator
         String packageName = map.getFSM().getPackage();
         String context = map.getFSM().getContext();
         String mapName = map.getName();
-        String stateName = state.getClassName();
+        String stateName = state.getInstanceName();
         String transName = transition.getName();
         boolean defaultFlag = false;
         boolean nullCondition = false;
@@ -768,7 +806,7 @@ public final class SmcCGenerator
         String packageName = map.getFSM().getPackage();
         String context = map.getFSM().getContext();
         String mapName = map.getName();
-        String stateName = state.getClassName();
+        String stateName = state.getInstanceName();
         int transType = guard.getTransType();
         boolean defaultFlag =
             stateName.equalsIgnoreCase("Default");
@@ -1239,6 +1277,9 @@ public final class SmcCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2007/08/05 14:26:25  cwrapp
+// Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more informaiton.
+//
 // Revision 1.8  2007/07/16 06:13:21  fperrad
 // + Added the generation of a DO NOT EDIT comment
 //
