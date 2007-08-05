@@ -2,7 +2,7 @@
 
                                SMC
                      The State Machine Compiler
-                         (Version: 5.0.0)
+                         (Version: 5.0.1)
 
                      http://smc.sourceforge.net
 
@@ -18,8 +18,13 @@ None.
 
 Major changes:
 
-+ Moved to Java 5. SMC cannot be run on Java 1.4.x.
++ (Java)
+    Added state change notification to FSMContext.
+    (SF feature request 1570050)
 
++ (Programmer's Manual)
+    Added section 12: Event Notification which explains how state
+    change notification can be used in Java, C# and VB.Net.
 
 Minor changes:
 
@@ -28,17 +33,31 @@ None.
 
 Bug Fixes:
 
-+ (All)
-    Corrected command line processing bug introduced in v. 4.4.0.
-    (SF bug 1659593)
++ (C++)
+    Changed <string> include to <cstring> and fully qualified
+    strncpy to std::strncpy.
+    (SF bug 1708488)
 
-+ (Source downnload)
-    Added SmcLuaGenerator.java to SmcSrc download package.
-    (SF bug 1687476)
++ (C, C++)
+    Corrected C and C++ FSM header file include.
+    (SF bug 1699854)
 
-+ (Makefile)
-    Corrected APP_CLASSPATH macro to work in Windows environment.
-    (SF bug 1687481)
++ (C)
+    Corrected error which generated incorrect C code when state
+    names began with a lower case letter (state "connected"
+    would generate uncompilable C code while "Connected" did
+    not).
+    (SF bug 1751740)
+
++ (Programmer's Manul)
+    Corrected C# example code in section 7.
+    (SF bug 1711484)
+
++ (Python)
+    Corrected error where a "pass" clause was incorrectly
+    inserted in a non-empty method body of an actionless,
+    unguarded, push transition was compiled without the
+    -g option.
 
 
 

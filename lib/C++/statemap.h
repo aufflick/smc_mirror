@@ -65,7 +65,7 @@
 #endif
 #if ! defined(SMC_NO_EXCEPTIONS)
 #include <stdexcept>
-#include <string>
+#include <cstring>
 #endif
 
 // Limit names to 100 ASCII characters.
@@ -86,7 +86,7 @@ namespace statemap
         {
             retval = new char[MAX_NAME_LEN + 1];
             retval[MAX_NAME_LEN] = '\0';
-            (void) strncpy(retval, s, MAX_NAME_LEN);
+            (void) std::strncpy(retval, s, MAX_NAME_LEN);
         }
 
         return (retval);
@@ -808,6 +808,9 @@ namespace statemap
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2007/08/05 12:58:54  cwrapp
+// Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more information.
+//
 // Revision 1.10  2007/01/15 00:23:50  cwrapp
 // Release 4.4.0 initial commit.
 //

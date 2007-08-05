@@ -40,7 +40,7 @@
 # Macros.
 #
 
-VERSION=	5_0_0
+VERSION=	5_0_1
 
 STAGING_DIR=	../staging
 SMC_STAGING_DIR=$(STAGING_DIR)/smc
@@ -62,6 +62,9 @@ $(SMC_STAGING_DIR) :	$(STAGING_DIR)
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.14  2007/08/05 12:57:18  cwrapp
+# Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more information.
+#
 # Revision 1.13  2007/03/31 13:48:22  cwrapp
 # Version 5.0.0 check-in.
 #

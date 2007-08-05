@@ -29,6 +29,9 @@
  *
  * Change Log
  * $Log$
+ * Revision 1.2  2007/08/05 12:58:11  cwrapp
+ * Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more information.
+ *
  * Revision 1.1  2005/06/16 18:08:17  fperrad
  * Added C, Perl & Ruby.
  *
@@ -82,7 +85,7 @@ struct FSMContext
 #define FSM_STACK(fsm, stack) \
     (fsm)->_stack_start = &(stack)[0]; \
     (fsm)->_stack_curr = &(stack)[0]; \
-    (fsm)->_stack_max = &(stack)[0] + sizeof(stack)
+    (fsm)->_stack_max = &(stack)[0] + (sizeof(stack) / sizeof(void*))
 
 
 #define getState(fsm) \
