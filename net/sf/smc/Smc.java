@@ -1581,7 +1581,7 @@ public final class Smc
     /* package */ static final int TRANS_POP = 3;
 
     private static final String APP_NAME = "smc";
-    private static final String VERSION = "v. 5.0.0";
+    private static final String VERSION = "v. 5.0.1";
 
     // Command line option flags.
     private static final String CAST_FLAG = "-cast";
@@ -1849,6 +1849,9 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.23  2007/08/05 13:53:09  cwrapp
+// Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more information.
+//
 // Revision 1.22  2007/07/16 06:28:06  fperrad
 // + Added Groovy generator.
 //
