@@ -236,7 +236,6 @@ public final class SmcCGenerator
                             "Default") == false)
                     {
                         _source.print("#define ");
-<<<<<<< SmcCGenerator.java
                         _source.print(mapName); 
                         _source.print("_"); 
                         _source.print(state.getInstanceName()); 
@@ -244,57 +243,27 @@ public final class SmcCGenerator
                         _source.print(trans.getName()); 
                         _source.print(" "); 
                         _source.print(context); 
-                        _source.print("State_"); 
-=======
-                        _source.print(mapName);
-                        _source.print("_");
-                        _source.print(state.getClassName());
-                        _source.print("_");
-                        _source.print(trans.getName());
-                        _source.print(" ");
-                        _source.print(context);
                         _source.print("State_");
->>>>>>> 1.8
                         _source.println(trans.getName());
                     }
                 }
 
                 _source.print("#define ");
-<<<<<<< SmcCGenerator.java
                 _source.print(mapName); 
                 _source.print("_"); 
                 _source.print(state.getInstanceName()); 
                 _source.print("_Default "); 
-                _source.print(context); 
-=======
-                _source.print(mapName);
-                _source.print("_");
-                _source.print(state.getClassName());
-                _source.print("_Default ");
                 _source.print(context);
->>>>>>> 1.8
                 _source.println("State_Default");
                 _source.print("#define ");
-<<<<<<< SmcCGenerator.java
                 _source.print(mapName); 
                 _source.print("_"); 
-                _source.print(state.getInstanceName()); 
-=======
-                _source.print(mapName);
-                _source.print("_");
-                _source.print(state.getClassName());
->>>>>>> 1.8
+                _source.print(state.getInstanceName());
                 _source.println("_Entry NULL");
                 _source.print("#define ");
-<<<<<<< SmcCGenerator.java
                 _source.print(mapName); 
                 _source.print("_"); 
-                _source.print(state.getInstanceName()); 
-=======
-                _source.print(mapName);
-                _source.print("_");
-                _source.print(state.getClassName());
->>>>>>> 1.8
+                _source.print(state.getInstanceName());
                 _source.println("_Exit NULL");
             }
 
@@ -1277,6 +1246,9 @@ public final class SmcCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2007/08/05 14:50:54  cwrapp
+// Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more information.
+//
 // Revision 1.9  2007/08/05 14:26:25  cwrapp
 // Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more informaiton.
 //
