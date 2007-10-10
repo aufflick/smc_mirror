@@ -123,7 +123,7 @@ install :	$(INSTALL_DIR) $(JAR_FILE)
 		cp $(JAR_FILE) $(INSTALL_DIR)
 
 $(INSTALL_DIR) :
-		mkdir $(INSTALL_DIR)
+		mkdir -p $(INSTALL_DIR)
 
 tags :
 		$(TAGS) $(TAG_FLAGS)
@@ -142,6 +142,9 @@ realclean :	clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.14  2007/10/10 12:19:32  fperrad
+# - fix Makefile (mkdir)
+#
 # Revision 1.13  2007/07/16 06:28:06  fperrad
 # + Added Groovy generator.
 #
