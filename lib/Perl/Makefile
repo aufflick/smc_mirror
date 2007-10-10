@@ -32,7 +32,7 @@
 # Include the official macros.
 include ../../smc.mk
 
-SOURCES	= Makefile.pl MANIFEST README Statemap.pm test.pl
+SOURCES	= Makefile.PL MANIFEST README Changes Statemap.pm test.pl
 
 LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib
 PERL_LIB_STAGING_DIR=$(LIB_STAGING_DIR)/Perl
@@ -41,18 +41,18 @@ PERL_LIB_STAGING_DIR=$(LIB_STAGING_DIR)/Perl
 # Rules.
 #
 
-$(PERL_LIB_STAGING_DIR) : $(LIB_STAGING_DIR)
-		mkdir $(PERL_LIB_STAGING_DIR)
+$(PERL_LIB_STAGING_DIR) :
+		mkdir -p $(PERL_LIB_STAGING_DIR)
 
 install :	$(PERL_LIB_STAGING_DIR) $(SOURCES)
-		cp -f Makefile.pl $(PERL_LIB_STAGING_DIR)/Makefile.pl
+		cp -f Makefile.PL $(PERL_LIB_STAGING_DIR)/Makefile.PL
 		cp -f MANIFEST $(PERL_LIB_STAGING_DIR)/MANIFEST
 		cp -f README $(PERL_LIB_STAGING_DIR)/README
 		cp -f Statemap.pm $(PERL_LIB_STAGING_DIR)/Statemap.pm
 		cp -f test.pl $(PERL_LIB_STAGING_DIR)/test.pl
 
 uninstall :	$(PERL_LIB_STAGING_DIR)
-		-rm $(PERL_LIB_STAGING_DIR)/Makefile.pl
+		-rm $(PERL_LIB_STAGING_DIR)/Makefile.PL
 		-rm $(PERL_LIB_STAGING_DIR)/MANIFEST
 		-rm $(PERL_LIB_STAGING_DIR)/README
 		-rm $(PERL_LIB_STAGING_DIR)/Statemap.pm
@@ -65,6 +65,9 @@ realclean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2007/10/10 12:29:06  fperrad
+# - fix Makefile (mkdir)
+#
 # Revision 1.1  2005/09/19 15:30:56  cwrapp
 # Changes in release 4.2.2:
 # New features:

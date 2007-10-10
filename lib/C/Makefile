@@ -39,10 +39,10 @@ C_LIB_STAGING_DIR=$(LIB_STAGING_DIR)/C
 # Rules.
 #
 
-$(C_LIB_STAGING_DIR) : $(LIB_STAGING_DIR)
-		mkdir $(C_LIB_STAGING_DIR)
+$(C_LIB_STAGING_DIR) :
+		mkdir -p $(C_LIB_STAGING_DIR)
 
-install :	statemap.h $(C_LIB_STAGING_DIR)
+install :	$(C_LIB_STAGING_DIR) statemap.h
 		cp -f statemap.h $(C_LIB_STAGING_DIR)/statemap.h
 
 uninstall :
@@ -55,6 +55,9 @@ realclean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2007/10/10 12:29:05  fperrad
+# - fix Makefile (mkdir)
+#
 # Revision 1.1  2005/09/19 15:30:56  cwrapp
 # Changes in release 4.2.2:
 # New features:

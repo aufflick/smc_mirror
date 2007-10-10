@@ -41,18 +41,24 @@
 # Include the official macros.
 include ../../smc.mk
 
+SOURCES	= setup.py statemap.py
+
 LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib
+PYTHON_LIB_STAGING_DIR=$(LIB_STAGING_DIR)/Python
 
 #################################################################
 # Rules.
 #
 
-install :	$(LIB_STAGING_DIR) setup.py statemap.py
-		cp -f statemap.py $(LIB_STAGING_DIR)
-		cp -f setup.py $(LIB_STAGING_DIR)
+$(PYTHON_LIB_STAGING_DIR) :
+		mkdir -p $(PYTHON_LIB_STAGING_DIR)
+
+install :	$(PYTHON_LIB_STAGING_DIR) $(SOURCES)
+		cp -f statemap.py $(PYTHON_LIB_STAGING_DIR)/statemap.py
+		cp -f setup.py $(PYTHON_LIB_STAGING_DIR)/setup.py
 
 uninstall :
-		-rm $(LIB_STAGING_DIR)/setup.py
+		-rm $(PYTHON_LIB_STAGING_DIR)/*.py
 
 clean :
 
@@ -61,6 +67,9 @@ realclean :	clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.6  2007/10/10 12:29:06  fperrad
+# - fix Makefile (mkdir)
+#
 # Revision 1.5  2005/06/18 18:28:42  cwrapp
 # SMC v. 4.0.1
 #

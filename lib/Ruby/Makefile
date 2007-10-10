@@ -39,8 +39,8 @@ RUBY_LIB_STAGING_DIR=$(LIB_STAGING_DIR)/Ruby
 # Rules.
 #
 
-$(RUBY_LIB_STAGING_DIR) : $(LIB_STAGING_DIR)
-		mkdir $(RUBY_LIB_STAGING_DIR)
+$(RUBY_LIB_STAGING_DIR) :
+		mkdir -p $(RUBY_LIB_STAGING_DIR)
 
 install :	$(RUBY_LIB_STAGING_DIR) statemap.rb
 		cp -f statemap.rb $(RUBY_LIB_STAGING_DIR)/statemap.rb
@@ -57,6 +57,9 @@ realclean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2007/10/10 12:29:07  fperrad
+# - fix Makefile (mkdir)
+#
 # Revision 1.1  2005/09/19 15:30:56  cwrapp
 # Changes in release 4.2.2:
 # New features:

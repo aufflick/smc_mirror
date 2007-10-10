@@ -46,7 +46,7 @@ JAR_FLAGS=	cvf
 JAR_FILE=	$(PACKAGE_NAME).jar
 CP=		cp -f
 CHMOD=		chmod 444
-MKDIR=		mkdir
+MKDIR=		mkdir -p
 RM_F=		rm -f
 RM_RF=		rm -rf
 
@@ -63,7 +63,7 @@ $(JAR_FILE) :	$(LIB_SOURCES)
 		$(GROOVYC) $(LIB_SOURCES)
 		$(JAR) $(JAR_FLAGS) $(JAR_FILE) $(PACKAGE_NAME)
 
-$(GROOVY_LIB_STAGING_DIR) : $(LIB_STAGING_DIR)
+$(GROOVY_LIB_STAGING_DIR) :
 		$(MKDIR) $(GROOVY_LIB_STAGING_DIR)
 
 install :	$(GROOVY_LIB_STAGING_DIR) $(JAR_FILE)
@@ -84,6 +84,9 @@ realclean :	clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2007/10/10 12:29:06  fperrad
+# - fix Makefile (mkdir)
+#
 # Revision 1.1  2007/07/16 06:29:37  fperrad
 # + Added Groovy.
 #

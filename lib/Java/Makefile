@@ -59,9 +59,9 @@ $(JAR_FILE) :	$(LIB_SOURCES)
 		$(JAR) $(JAR_FLAGS) $(JAR_FILE) $(PACKAGE_NAME)
 
 $(CLASS_DIR) :
-		mkdir $(CLASS_DIR)
+		mkdir -p $(CLASS_DIR)
 
-install :	$(LIB_STAGING_DIR) $(JAR_FILE) $(CLASS_DIR)
+install :	$(JAR_FILE) $(CLASS_DIR)
 		cp -f $(JAR_FILE) ..
 		cp -f $(JAR_FILE) $(LIB_STAGING_DIR)
 		-chmod 444 $(LIB_STAGING_DIR)/$(JAR_FILE)
@@ -80,6 +80,9 @@ realclean :	clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.12  2007/10/10 12:29:06  fperrad
+# - fix Makefile (mkdir)
+#
 # Revision 1.11  2005/06/18 18:28:42  cwrapp
 # SMC v. 4.0.1
 #
