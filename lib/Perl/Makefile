@@ -48,6 +48,7 @@ install :	$(PERL_LIB_STAGING_DIR) $(SOURCES)
 		cp -f Makefile.PL $(PERL_LIB_STAGING_DIR)/Makefile.PL
 		cp -f MANIFEST $(PERL_LIB_STAGING_DIR)/MANIFEST
 		cp -f README $(PERL_LIB_STAGING_DIR)/README
+		cp -f Changes $(PERL_LIB_STAGING_DIR)/Changes
 		cp -f Statemap.pm $(PERL_LIB_STAGING_DIR)/Statemap.pm
 		cp -f test.pl $(PERL_LIB_STAGING_DIR)/test.pl
 
@@ -65,6 +66,9 @@ realclean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2007/10/10 13:04:38  fperrad
+# - fix Makefile (Changes)
+#
 # Revision 1.2  2007/10/10 12:29:06  fperrad
 # - fix Makefile (mkdir)
 #
