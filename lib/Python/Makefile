@@ -24,7 +24,7 @@
 #   Eitan Suez contributed examples/Ant.
 #   (Name withheld) contributed the C# code generation and
 #   examples/C#.
-#   Francois Perrord contributed the Python code generator and
+#   Francois Perrad contributed the Python code generator and
 #   examples/Python.
 #
 # RCS ID
@@ -43,6 +43,10 @@ include ../../smc.mk
 
 SOURCES	= setup.py statemap.py
 
+CP=		cp -f
+MKDIR=		mkdir -p
+RM_F=		rm -f
+
 LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib
 PYTHON_LIB_STAGING_DIR=$(LIB_STAGING_DIR)/Python
 
@@ -51,14 +55,14 @@ PYTHON_LIB_STAGING_DIR=$(LIB_STAGING_DIR)/Python
 #
 
 $(PYTHON_LIB_STAGING_DIR) :
-		mkdir -p $(PYTHON_LIB_STAGING_DIR)
+		$(MKDIR) $(PYTHON_LIB_STAGING_DIR)
 
 install :	$(PYTHON_LIB_STAGING_DIR) $(SOURCES)
-		cp -f statemap.py $(PYTHON_LIB_STAGING_DIR)/statemap.py
-		cp -f setup.py $(PYTHON_LIB_STAGING_DIR)/setup.py
+		$(CP) statemap.py $(PYTHON_LIB_STAGING_DIR)/statemap.py
+		$(CP) setup.py $(PYTHON_LIB_STAGING_DIR)/setup.py
 
 uninstall :
-		-rm $(PYTHON_LIB_STAGING_DIR)/*.py
+		-$(RM_F) $(PYTHON_LIB_STAGING_DIR)/*.py
 
 clean :
 
@@ -67,6 +71,9 @@ realclean :	clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.7  2007/10/11 12:48:35  fperrad
+# - refactor: Makefile with variables
+#
 # Revision 1.6  2007/10/10 12:29:06  fperrad
 # - fix Makefile (mkdir)
 #

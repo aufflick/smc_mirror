@@ -34,6 +34,10 @@ include ../../smc.mk
 
 SOURCES	= Makefile.PL MANIFEST README Changes Statemap.pm test.pl
 
+CP=		cp -f
+MKDIR=		mkdir -p
+RM_F=		rm -f
+
 LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib
 PERL_LIB_STAGING_DIR=$(LIB_STAGING_DIR)/Perl
 
@@ -42,22 +46,22 @@ PERL_LIB_STAGING_DIR=$(LIB_STAGING_DIR)/Perl
 #
 
 $(PERL_LIB_STAGING_DIR) :
-		mkdir -p $(PERL_LIB_STAGING_DIR)
+		$(MKDIR) $(PERL_LIB_STAGING_DIR)
 
 install :	$(PERL_LIB_STAGING_DIR) $(SOURCES)
-		cp -f Makefile.PL $(PERL_LIB_STAGING_DIR)/Makefile.PL
-		cp -f MANIFEST $(PERL_LIB_STAGING_DIR)/MANIFEST
-		cp -f README $(PERL_LIB_STAGING_DIR)/README
-		cp -f Changes $(PERL_LIB_STAGING_DIR)/Changes
-		cp -f Statemap.pm $(PERL_LIB_STAGING_DIR)/Statemap.pm
-		cp -f test.pl $(PERL_LIB_STAGING_DIR)/test.pl
+		$(CP) Makefile.PL $(PERL_LIB_STAGING_DIR)/Makefile.PL
+		$(CP) MANIFEST $(PERL_LIB_STAGING_DIR)/MANIFEST
+		$(CP) README $(PERL_LIB_STAGING_DIR)/README
+		$(CP) Changes $(PERL_LIB_STAGING_DIR)/Changes
+		$(CP) Statemap.pm $(PERL_LIB_STAGING_DIR)/Statemap.pm
+		$(CP) test.pl $(PERL_LIB_STAGING_DIR)/test.pl
 
 uninstall :	$(PERL_LIB_STAGING_DIR)
-		-rm $(PERL_LIB_STAGING_DIR)/Makefile.PL
-		-rm $(PERL_LIB_STAGING_DIR)/MANIFEST
-		-rm $(PERL_LIB_STAGING_DIR)/README
-		-rm $(PERL_LIB_STAGING_DIR)/Statemap.pm
-		-rm $(PERL_LIB_STAGING_DIR)/test.pl
+		-$(RM_F) $(PERL_LIB_STAGING_DIR)/Makefile.PL
+		-$(RM_F) $(PERL_LIB_STAGING_DIR)/MANIFEST
+		-$(RM_F) $(PERL_LIB_STAGING_DIR)/README
+		-$(RM_F) $(PERL_LIB_STAGING_DIR)/Statemap.pm
+		-$(RM_F) $(PERL_LIB_STAGING_DIR)/test.pl
 
 clean :
 
@@ -66,6 +70,9 @@ realclean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.4  2007/10/11 12:48:35  fperrad
+# - refactor: Makefile with variables
+#
 # Revision 1.3  2007/10/10 13:04:38  fperrad
 # - fix Makefile (Changes)
 #

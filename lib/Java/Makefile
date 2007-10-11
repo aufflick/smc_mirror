@@ -44,6 +44,11 @@ JAVAC_FLAGS=	-d . -g
 JAR=		jar
 JAR_FLAGS=	cvf
 JAR_FILE=	$(PACKAGE_NAME).jar
+CP=		cp -f
+CHMOD=		chmod 444
+MKDIR=		mkdir -p
+RM_F=		rm -f
+RM_RF=		rm -rf
 
 LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib
 CLASS_DIR=	$(LIB_STAGING_DIR)/$(PACKAGE_NAME)
@@ -59,27 +64,30 @@ $(JAR_FILE) :	$(LIB_SOURCES)
 		$(JAR) $(JAR_FLAGS) $(JAR_FILE) $(PACKAGE_NAME)
 
 $(CLASS_DIR) :
-		mkdir -p $(CLASS_DIR)
+		$(MKDIR) $(CLASS_DIR)
 
 install :	$(JAR_FILE) $(CLASS_DIR)
-		cp -f $(JAR_FILE) ..
-		cp -f $(JAR_FILE) $(LIB_STAGING_DIR)
-		-chmod 444 $(LIB_STAGING_DIR)/$(JAR_FILE)
-		cp -f $(PACKAGE_NAME)/*.class $(CLASS_DIR)
+		$(CP) $(JAR_FILE) ..
+		$(CP) $(JAR_FILE) $(LIB_STAGING_DIR)
+		-$(CHMOD) $(LIB_STAGING_DIR)/$(JAR_FILE)
+		$(CP) $(PACKAGE_NAME)/*.class $(CLASS_DIR)
 
 uninstall :
-		-rm ../$(JAR_FILE)
-		-rm $(LIB_STAGING_DIR)/$(JAR_FILE)
+		-$(RM_F) ../$(JAR_FILE)
+		-$(RM_F) $(LIB_STAGING_DIR)/$(JAR_FILE)
 
 clean :
-		-rm -f ./$(JAR_FILE) ./$(PACKAGE_NAME)/*
+		-$(RM_F) ./$(JAR_FILE) ./$(PACKAGE_NAME)/*
 
 realclean :	clean
-		-rm -fr ./statemap
+		-$(RM_RF) ./statemap
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.13  2007/10/11 12:48:35  fperrad
+# - refactor: Makefile with variables
+#
 # Revision 1.12  2007/10/10 12:29:06  fperrad
 # - fix Makefile (mkdir)
 #

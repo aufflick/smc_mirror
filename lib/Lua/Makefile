@@ -32,6 +32,12 @@
 # Include the official macros.
 include ../../smc.mk
 
+CP=		cp -f
+CHMOD=		chmod 444
+MKDIR=		mkdir -p
+RM_F=		rm -f
+RM_RF=		rm -rf
+
 LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib
 LUA_LIB_STAGING_DIR=$(LIB_STAGING_DIR)/Lua
 
@@ -40,15 +46,15 @@ LUA_LIB_STAGING_DIR=$(LIB_STAGING_DIR)/Lua
 #
 
 $(LUA_LIB_STAGING_DIR) : $(LIB_STAGING_DIR)
-		mkdir $(LUA_LIB_STAGING_DIR)
+		$(MKDIR) $(LUA_LIB_STAGING_DIR)
 
 install :	$(LUA_LIB_STAGING_DIR) statemap.lua
-		cp -f statemap.lua $(LUA_LIB_STAGING_DIR)/statemap.lua
-		cp -f README $(LUA_LIB_STAGING_DIR)/README
+		$(CP) statemap.lua $(LUA_LIB_STAGING_DIR)/statemap.lua
+		$(CP) README $(LUA_LIB_STAGING_DIR)/README
 
 uninstall :
-		-rm $(LUA_LIB_STAGING_DIR)/statemap.lua
-		-rm $(LUA_LIB_STAGING_DIR)/README
+		-$(RM_F) $(LUA_LIB_STAGING_DIR)/statemap.lua
+		-$(RM_F) $(LUA_LIB_STAGING_DIR)/README
 
 clean :
 
@@ -57,6 +63,9 @@ realclean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2007/10/11 12:48:35  fperrad
+# - refactor: Makefile with variables
+#
 # Revision 1.1  2007/01/03 15:49:23  fperrad
 # + Added Lua.
 #

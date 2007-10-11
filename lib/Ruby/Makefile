@@ -32,6 +32,10 @@
 # Include the official macros.
 include ../../smc.mk
 
+CP=		cp -f
+MKDIR=		mkdir -p
+RM_F=		rm -f
+
 LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib
 RUBY_LIB_STAGING_DIR=$(LIB_STAGING_DIR)/Ruby
 
@@ -40,15 +44,15 @@ RUBY_LIB_STAGING_DIR=$(LIB_STAGING_DIR)/Ruby
 #
 
 $(RUBY_LIB_STAGING_DIR) :
-		mkdir -p $(RUBY_LIB_STAGING_DIR)
+		$(MKDIR) $(RUBY_LIB_STAGING_DIR)
 
 install :	$(RUBY_LIB_STAGING_DIR) statemap.rb
-		cp -f statemap.rb $(RUBY_LIB_STAGING_DIR)/statemap.rb
-		cp -f README $(RUBY_LIB_STAGING_DIR)/README
+		$(CP) statemap.rb $(RUBY_LIB_STAGING_DIR)/statemap.rb
+		$(CP) README $(RUBY_LIB_STAGING_DIR)/README
 
 uninstall :
-		-rm $(RUBY_LIB_STAGING_DIR)/statemap.rb
-		-rm $(RUBY_LIB_STAGING_DIR)/README
+		-$(RM_F) $(RUBY_LIB_STAGING_DIR)/statemap.rb
+		-$(RM_F) $(RUBY_LIB_STAGING_DIR)/README
 
 clean :
 
@@ -57,6 +61,9 @@ realclean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2007/10/11 12:48:35  fperrad
+# - refactor: Makefile with variables
+#
 # Revision 1.2  2007/10/10 12:29:07  fperrad
 # - fix Makefile (mkdir)
 #

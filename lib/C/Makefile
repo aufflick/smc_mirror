@@ -32,6 +32,10 @@
 # Include the official macros.
 include ../../smc.mk
 
+CP=		cp -f
+MKDIR=		mkdir -p
+RM_F=		rm -f
+
 LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib
 C_LIB_STAGING_DIR=$(LIB_STAGING_DIR)/C
 
@@ -40,13 +44,13 @@ C_LIB_STAGING_DIR=$(LIB_STAGING_DIR)/C
 #
 
 $(C_LIB_STAGING_DIR) :
-		mkdir -p $(C_LIB_STAGING_DIR)
+		$(MKDIR) $(C_LIB_STAGING_DIR)
 
 install :	$(C_LIB_STAGING_DIR) statemap.h
-		cp -f statemap.h $(C_LIB_STAGING_DIR)/statemap.h
+		$(CP) statemap.h $(C_LIB_STAGING_DIR)/statemap.h
 
 uninstall :
-		-rm $(C_LIB_STAGING_DIR)/statemap.h
+		-$(RM_F) $(C_LIB_STAGING_DIR)/statemap.h
 
 clean :
 
@@ -55,6 +59,9 @@ realclean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2007/10/11 12:48:35  fperrad
+# - refactor: Makefile with variables
+#
 # Revision 1.2  2007/10/10 12:29:05  fperrad
 # - fix Makefile (mkdir)
 #
