@@ -24,6 +24,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2007/10/12 08:55:00  fperrad
+# - refactor: Makefile with variables
+#
 # Revision 1.1  2007/01/03 15:42:33  fperrad
 # + Added Lua examples 1 - 3.
 #
@@ -38,6 +41,7 @@ SOURCES=        $(SM_SOURCES:%.sm=%_sm.lua)
 
 SMC=            java -jar ../../../bin/Smc.jar
 SMC_FLAGS=      -lua -g $(REFLECT)
+RM_F=           rm -f
 
 export LUA_PATH=./?.lua;../../../lib/Lua/?.lua
 
@@ -49,7 +53,7 @@ all :           checkstring
 checkstring :   $(SOURCES)
 
 clean :
-		-rm *_sm.lua
+		-$(RM_F) *_sm.lua
 
 test:
 		-lua checkstring.lua ""

@@ -24,6 +24,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2007/10/12 08:54:03  fperrad
+# - refactor: Makefile with variables
+#
 # Revision 1.2  2007/01/03 14:37:39  fperrad
 # + Added -reflect option for Perl, Python and Ruby code generation
 #
@@ -40,6 +43,7 @@ SOURCES=        $(SM_SOURCES:%.sm=%_sm.pm)
 
 SMC=            java -jar ../../../bin/Smc.jar
 SMC_FLAGS=      -perl -g $(REFLECT)
+RM_F=           rm -f
 
 all :           telephone
 
@@ -49,5 +53,4 @@ all :           telephone
 telephone :   $(SOURCES)
 
 clean :
-		-rm *_sm.pm
-
+		-$(RM_F) *_sm.pm

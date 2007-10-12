@@ -38,6 +38,7 @@ SOURCES=        $(SM_SOURCES:%.sm=%_sm.rb)
 
 SMC=            java -jar ../../../bin/Smc.jar
 SMC_FLAGS=      -ruby -g $(REFLECT)
+RM_F=           rm -f
 
 #################################################################
 # Rules.
@@ -51,7 +52,7 @@ all :           checkstring test
 checkstring :   $(SOURCES)
 
 clean :
-		-rm *_sm.rb
+		-$(RM_F) *_sm.rb
 
 test:
 		-ruby -I ../../../lib/Ruby -w checkstring.rb ""
@@ -64,6 +65,9 @@ test:
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.5  2007/10/12 08:55:03  fperrad
+# - refactor: Makefile with variables
+#
 # Revision 1.4  2007/01/15 16:58:57  cwrapp
 # Release 4.4.0 second commit.
 #

@@ -24,6 +24,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2007/10/12 08:55:00  fperrad
+# - refactor: Makefile with variables
+#
 # Revision 1.2  2007/08/05 13:39:13  cwrapp
 # Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more information.
 #
@@ -38,6 +41,7 @@ CXX       = gcc
 CPPFLAGS  = -g -I../../../lib/C
 SMC       = java -jar ../../../bin/Smc.jar
 SMCFLAGS  = -c -g
+RM_F      = rm -f
 
 FSMS      = AppClass.sm
 SOURCES   = $(FSMS:.sm=_sm.c) AppClass.c main.c
@@ -63,7 +67,7 @@ test :		$(TARGET)
 		-checkstring 00011a1b10c0
 
 clean :
-		-rm $(TARGET)
-		-rm $(OBJECTS)
-		-rm *_sm.h
-		-rm *_sm.c
+		-$(RM_F) $(TARGET)
+		-$(RM_F) $(OBJECTS)
+		-$(RM_F) *_sm.h
+		-$(RM_F) *_sm.c

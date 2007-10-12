@@ -42,6 +42,7 @@ SOURCES=	$(SM_SOURCES:%.sm=%_sm.rb)
 
 SMC=		java -jar ../../../bin/Smc.jar
 SMC_FLAGS=	-ruby -g $(REFLECT)
+RM_F=		rm -f
 
 #################################################################
 # Rules.
@@ -55,11 +56,14 @@ all :		$(TARGET)
 $(TARGET) :	$(SOURCES)
 
 clean :
-		-rm *_sm.rb
+		-$(RM_F) *_sm.rb
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.4  2007/10/12 08:55:04  fperrad
+# - refactor: Makefile with variables
+#
 # Revision 1.3  2007/01/15 16:58:58  cwrapp
 # Release 4.4.0 second commit.
 #
