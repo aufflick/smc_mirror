@@ -100,6 +100,12 @@ TAGS=		jtags
 TAG_FILE=	TAGS
 TAG_FLAGS=	-a -o $(TAG_FILE) --members
 
+CP=			cp
+MKDIR=		mkdir -p
+MV=		mv
+RM_F=		rm -f
+RM_RF=		rm -rf
+
 #################################################################
 # Rules
 #
@@ -116,32 +122,35 @@ $(JAR_FILE) :	$(APP_SOURCES) $(STATEMAP_LIB_DIR)/statemap/FSMContext.class $(STA
 		$(JAR) $(JAR_UPDATE_FLAGS) $(JAR_FILE) -C $(STATEMAP_LIB_DIR) statemap
 
 install :	$(INSTALL_DIR) $(JAR_FILE)
-		-rm -f $(BIN_DIR)/$(JAR_FILE).FBK
-		-mv $(BIN_DIR)/$(JAR_FILE) $(BIN_DIR)/$(JAR_FILE).FBK
-		cp $(JAR_FILE) $(BIN_DIR)
-		-rm -f $(INSTALL_DIR)/$(JAR_FILE)
-		cp $(JAR_FILE) $(INSTALL_DIR)
+		-$(RM) -f $(BIN_DIR)/$(JAR_FILE).FBK
+		-$(MV) $(BIN_DIR)/$(JAR_FILE) $(BIN_DIR)/$(JAR_FILE).FBK
+		$(CP) $(JAR_FILE) $(BIN_DIR)
+		-$(RM_F) $(INSTALL_DIR)/$(JAR_FILE)
+		$(CP) $(JAR_FILE) $(INSTALL_DIR)
 
 $(INSTALL_DIR) :
-		mkdir -p $(INSTALL_DIR)
+		$(MKDIR) $(INSTALL_DIR)
 
 tags :
 		$(TAGS) $(TAG_FLAGS)
 
 uninstall :
-		-rm $(INSTALL_DIR)/$(JAR_FILE)
+		-$(RM_F) $(INSTALL_DIR)/$(JAR_FILE)
 
 clean :
-		-rm -f $(PACKAGE_DIR)/*.class \
+		-$(RM_F) $(PACKAGE_DIR)/*.class \
 			*Context.java \
 			$(JAR_FILE)
 
 realclean :	clean
-		-rm -fr ./net $(TAG_FILE) *.flc *~
+		-$(RM_RF) ./net $(TAG_FILE) *.flc *~
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.15  2007/10/16 10:22:10  fperrad
+# - refactor: Makefile with variables
+#
 # Revision 1.14  2007/10/10 12:19:32  fperrad
 # - fix Makefile (mkdir)
 #
