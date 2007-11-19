@@ -236,33 +236,33 @@ public final class SmcCGenerator
                             "Default") == false)
                     {
                         _source.print("#define ");
-                        _source.print(mapName); 
-                        _source.print("_"); 
-                        _source.print(state.getInstanceName()); 
-                        _source.print("_"); 
-                        _source.print(trans.getName()); 
-                        _source.print(" "); 
-                        _source.print(context); 
+                        _source.print(mapName);
+                        _source.print("_");
+                        _source.print(state.getInstanceName());
+                        _source.print("_");
+                        _source.print(trans.getName());
+                        _source.print(" ");
+                        _source.print(context);
                         _source.print("State_");
                         _source.println(trans.getName());
                     }
                 }
 
                 _source.print("#define ");
-                _source.print(mapName); 
-                _source.print("_"); 
-                _source.print(state.getInstanceName()); 
-                _source.print("_Default "); 
+                _source.print(mapName);
+                _source.print("_");
+                _source.print(state.getInstanceName());
+                _source.print("_Default ");
                 _source.print(context);
                 _source.println("State_Default");
                 _source.print("#define ");
-                _source.print(mapName); 
-                _source.print("_"); 
+                _source.print(mapName);
+                _source.print("_");
                 _source.print(state.getInstanceName());
                 _source.println("_Entry NULL");
                 _source.print("#define ");
-                _source.print(mapName); 
-                _source.print("_"); 
+                _source.print(mapName);
+                _source.print("_");
                 _source.print(state.getInstanceName());
                 _source.println("_Exit NULL");
             }
@@ -273,7 +273,7 @@ public final class SmcCGenerator
                 {
                     _source.print("#define ");
                     _source.print(mapName);
-                    _source.print("_Default_");
+                    _source.print("_DefaultState_");
                     _source.print(trans.getName());
                     _source.print(" ");
                     _source.print(context);
@@ -422,13 +422,13 @@ public final class SmcCGenerator
                     _source.print(transName);
                     _source.print(" ");
                     _source.print(mapName);
-                    _source.print("_Default_");
+                    _source.print("_DefaultState_");
                     _source.println(transName);
                 }
 
                 _source.print("#undef ");
                 _source.print(mapName);
-                _source.print("_Default_");
+                _source.print("_DefaultState_");
                 _source.println(transName);
 
                 trans.accept(this);
@@ -594,7 +594,7 @@ public final class SmcCGenerator
 
         // Set a flag to denote if this is a Default state
         // transition.
-        if (stateName.equals("Default") == true)
+        if (stateName.equals("DefaultState") == true)
         {
             defaultFlag = true;
         }
@@ -778,7 +778,7 @@ public final class SmcCGenerator
         String stateName = state.getInstanceName();
         int transType = guard.getTransType();
         boolean defaultFlag =
-            stateName.equalsIgnoreCase("Default");
+            stateName.equalsIgnoreCase("DefaultState");
         boolean loopbackFlag = false;
         String indent2;
         String indent3;
@@ -1246,6 +1246,10 @@ public final class SmcCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2007/11/19 18:48:54  fperrad
+// fix C generation :
+// default state must be always 'DefaultState' (previously 'Default')
+//
 // Revision 1.10  2007/08/05 14:50:54  cwrapp
 // Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more information.
 //
