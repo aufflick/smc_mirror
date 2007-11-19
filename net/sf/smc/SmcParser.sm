@@ -39,6 +39,11 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.18  2007/11/19 18:53:21  fperrad
+ * + add : jump syntax
+ *   jump uses the same syntax as push,
+ *   allows transition between states of different maps but without stacking a return context.
+ *
  * Revision 1.17  2007/07/16 06:28:06  fperrad
  * + Added Groovy generator.
  *
@@ -816,6 +821,16 @@ TransStart
             setTransType(Smc.TRANS_POP);
         }
 
+    JUMP(token : SmcLexer.Token)
+        JumpStart
+        {
+            createTransition(token.getLineNumber());
+            createGuard(ctxt.getTransitionName(),
+                        "",
+                        token.getLineNumber());
+            setTransType(Smc.TRANS_SET);
+        }
+
     // This word is the end state. Now get the actions.
     WORD(token : SmcLexer.Token)
         SimpleTrans
@@ -831,7 +846,7 @@ TransStart
     Default
         TransStartError
         {
-            error("Expecting either a guard, push, pop or end state.",
+            error("Expecting either a guard, \"push\", \"pop\", \"jump\" or end state.",
                   ctxt.getLineNumber());
 
             // Need to create a dummy transition so that error
@@ -883,6 +898,16 @@ TransStartError
                         "",
                         token.getLineNumber());
             setTransType(Smc.TRANS_POP);
+        }
+
+    JUMP(token : SmcLexer.Token)
+        JumpStart
+        {
+            createGuard(ctxt.getTransitionName(),
+                        "",
+                        token.getLineNumber());
+            setTransType(Smc.TRANS_SET);
+            setEndState("nil");
         }
 
     // One way or another this transition is now kaput.
@@ -958,6 +983,16 @@ TransNext
             setTransType(Smc.TRANS_POP);
         }
 
+    JUMP(token : SmcLexer.Token)
+        JumpStart
+        {
+            createGuard(ctxt.getTransitionName(),
+                        "",
+                        token.getLineNumber());
+            setTransType(Smc.TRANS_SET);
+            setEndState("nil");
+        }
+
     // This word is the end state. Now get the actions.
     WORD(token : SmcLexer.Token)
         SimpleTrans
@@ -972,7 +1007,7 @@ TransNext
     Default
         TransNextError
         {
-            error("Expecting either a guard, \"push\", \"pop\" or end state.",
+            error("Expecting either a guard, \"push\", \"pop\", \"jump\" or end state.",
                   ctxt.getLineNumber());
         }
 }
@@ -1006,6 +1041,16 @@ TransNextError
                         "",
                         token.getLineNumber());
             setTransType(Smc.TRANS_POP);
+        }
+
+    JUMP(token : SmcLexer.Token)
+        JumpStart
+        {
+            createGuard(ctxt.getTransitionName(),
+                        "",
+                        token.getLineNumber());
+            setTransType(Smc.TRANS_SET);
+            setEndState("nil");
         }
 
     WORD(token : SmcLexer.Token)
@@ -1064,6 +1109,13 @@ EndState
             setTransType(Smc.TRANS_POP);
         }
 
+    JUMP(token : SmcLexer.Token)
+        JumpStart
+        {
+            setTransType(Smc.TRANS_SET);
+            setEndState("nil");
+        }
+
     WORD(token : SmcLexer.Token)
         SimpleTrans
         {
@@ -1074,7 +1126,7 @@ EndState
     Default
         EndStateError
         {
-            error("Expecting either \"push\", \"pop\" or end state.",
+            error("Expecting either \"push\", \"pop\", \"jump\" or end state.",
                   ctxt.getLineNumber());
         }
 }
@@ -1189,6 +1241,67 @@ PushEnd
         PushError
         {
             error("push transition missing closing paren.",
+                  ctxt.getLineNumber());
+        }
+}
+
+JumpStart
+{
+    LEFT_PAREN(token : SmcLexer.Token)
+        JumpMap
+        {}
+
+    Default
+        JumpError
+        {
+            error("\"jump\" must be followed by a '/'.",
+                  ctxt.getLineNumber());
+        }
+}
+
+JumpError
+{
+    RIGHT_PAREN(token : SmcLexer.Token)
+        ActionStart
+        {}
+
+    LEFT_BRACE(token : SmcLexer.Token)
+        ActionEnd/push(ActionMap::Start)
+        {
+			createActionList();
+		}
+
+    Default
+        nil
+        {}
+}
+
+JumpMap
+{
+    WORD(token : SmcLexer.Token)
+        JumpEnd
+        {
+            setEndState(token.getValue());
+        }
+
+    Default
+        JumpError
+        {
+            error("Expecting a state name.",
+                  ctxt.getLineNumber());
+        }
+}
+
+JumpEnd
+{
+    RIGHT_PAREN(token : SmcLexer.Token)
+        ActionStart
+        {}
+
+    Default
+        JumpError
+        {
+            error("jump transition missing closing paren.",
                   ctxt.getLineNumber());
         }
 }

@@ -3,19 +3,19 @@
 // License Version 1.1 (the "License"); you may not use this file
 // except in compliance with the License. You may obtain a copy
 // of the License at http://www.mozilla.org/MPL/
-// 
+//
 // Software distributed under the License is distributed on an
 // "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
-// 
+//
 // The Original Code is State Machine Compiler (SMC).
-// 
+//
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
 // Copyright (C) 2000 - 2005. Charles W. Rapp.
 // All Rights Reserved.
-// 
+//
 // Contributor(s):
 //   Eitan Suez contributed examples/Ant.
 //   (Name withheld) contributed the C# code generation and
@@ -135,7 +135,7 @@ public final class SmcParser
             {
                 _quitFlag = true;
             }
-            else 
+            else
             {
                 // Issue a transition for this token.
                 params[0] = token;
@@ -1286,6 +1286,10 @@ public final class SmcParser
             _TransMethod[SmcLexer.EXIT] =
                 fsmClass.getDeclaredMethod("EXIT",
                                            paramTypes);
+            transName = "JUMP";
+            _TransMethod[SmcLexer.JUMP] =
+                fsmClass.getDeclaredMethod("JUMP",
+                                           paramTypes);
             transName = "POP";
             _TransMethod[SmcLexer.POP] =
                 fsmClass.getDeclaredMethod("POP",
@@ -1410,6 +1414,11 @@ public final class SmcParser
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.16  2007/11/19 18:53:21  fperrad
+// + add : jump syntax
+//   jump uses the same syntax as push,
+//   allows transition between states of different maps but without stacking a return context.
+//
 // Revision 1.15  2007/02/21 13:56:09  cwrapp
 // Moved Java code to release 1.5.0
 //

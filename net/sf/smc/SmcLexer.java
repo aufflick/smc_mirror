@@ -3,20 +3,20 @@
 // License Version 1.1 (the "License"); you may not use this file
 // except in compliance with the License. You may obtain a copy
 // of the License at http://www.mozilla.org/MPL/
-// 
+//
 // Software distributed under the License is distributed on an
 // "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
-// 
+//
 // The Original Code is State Machine Compiler (SMC).
-// 
+//
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
 // Copyright (C) 2000 - 2006. Charles W. Rapp.
 // All Rights Reserved.
-// 
-// Contributor(s): 
+//
+// Contributor(s):
 //   Eitan Suez contributed examples/Ant.
 //   (Name withheld) contributed the C# code generation and
 //   examples/C#.
@@ -752,7 +752,8 @@ import java.util.Map;
     /* package */ static final int EQUAL = 27;
     /* package */ static final int ACCESS = 28;
     /* package */ static final int DOLLAR = 29;
-    /* package */ static final int TOKEN_COUNT = DOLLAR + 1;
+    /* package */ static final int JUMP = 30;
+    /* package */ static final int TOKEN_COUNT = JUMP + 1;
 
     // There are four SMC keywords: entry, exit, push and pop.
     private static final int KEYWORD_COUNT = 4;
@@ -803,12 +804,14 @@ import java.util.Map;
         _TypeName[SmcLexer.EQUAL] = "EQUAL";
         _TypeName[SmcLexer.ACCESS] = "ACCESS";
         _TypeName[SmcLexer.DOLLAR] = "DOLLAR";
+        _TypeName[SmcLexer.JUMP] = "JUMP";
 
         // Set up the keyword |-> token value map.
         _KeywordMap =
             new HashMap<String, Integer>(KEYWORD_COUNT);
         _KeywordMap.put("Entry", SmcLexer.ENTRY);
         _KeywordMap.put("Exit", SmcLexer.EXIT);
+        _KeywordMap.put("jump", SmcLexer.JUMP);
         _KeywordMap.put("pop", SmcLexer.POP);
         _KeywordMap.put("push", SmcLexer.PUSH);
 
@@ -1067,6 +1070,11 @@ import java.util.Map;
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.12  2007/11/19 18:53:21  fperrad
+// + add : jump syntax
+//   jump uses the same syntax as push,
+//   allows transition between states of different maps but without stacking a return context.
+//
 // Revision 1.11  2007/02/21 13:55:38  cwrapp
 // Moved Java code to release 1.5.0
 //
