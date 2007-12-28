@@ -1,11 +1,11 @@
 //
 // The contents of this file are subject to the Mozilla Public
 // License Version 1.1 (the "License"); you may not use this file
-// except in compliance with the License. You may obtain a copy of
-// the License at http://www.mozilla.org/MPL/
+// except in compliance with the License. You may obtain a copy
+// of the License at http://www.mozilla.org/MPL/
 // 
-// Software distributed under the License is distributed on an "AS
-// IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+// Software distributed under the License is distributed on an
+// "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
@@ -13,7 +13,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 - 2003 Charles W. Rapp.
+// Copyright (C) 2000 - 2007. Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2007/12/28 12:34:40  cwrapp
+// Version 5.0.1 check-in.
+//
 // Revision 1.5  2005/06/08 11:09:12  cwrapp
 // + Updated Python code generator to place "pass" in methods with empty
 //   bodies.
@@ -72,7 +75,7 @@ const static int STDIN_FD = 0;
 //
 int main(int argc, char *argv[])
 {
-    long longPort;
+    int longPort;
     int retcode;
 #if defined(WIN32)
     WORD winsockVersion;
@@ -152,7 +155,7 @@ int main(int argc, char *argv[])
 
         // 2. Open server port.
         Sserver_socket = new AppServer();
-        port = (unsigned short) longPort;
+        port = static_cast<unsigned short>(longPort);
         Sserver_socket->open(htons(port));
         
         // 3. Wait for accept messages.

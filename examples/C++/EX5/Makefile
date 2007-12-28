@@ -23,6 +23,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.6  2007/12/28 12:34:40  cwrapp
+# Version 5.0.1 check-in.
+#
 # Revision 1.5  2007/01/15 16:58:56  cwrapp
 # Release 4.4.0 second commit.
 #
@@ -36,7 +39,7 @@
 TARGET    = sleeper
 
 CXX       = c++
-CPPFLAGS  = -g -I../../../lib
+CPPFLAGS  = -g -Wall -Wextra -I../../../lib
 SMC       = java -jar ../../../bin/Smc.jar
 SMCFLAGS  = -c++ -g
 

@@ -37,6 +37,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.9  2007/12/28 12:34:41  cwrapp
+ * Version 5.0.1 check-in.
+ *
  * Revision 1.8  2007/01/15 00:23:51  cwrapp
  * Release 4.4.0 initial commit.
  *
@@ -127,9 +130,10 @@ Start
 	whitespace      nil					{}
 	EOL             nil					{}
 
-	unicode  		nil					{startToken();
-                                         addToToken();
-									     badToken("Unknown character");}
+	unicode         nil					{startToken();
+                                                 addToToken();
+                                                 outputChar();
+									      badToken("Unknown character");}
 }
 
 CommentStart

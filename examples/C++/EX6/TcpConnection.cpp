@@ -1,11 +1,11 @@
 //
 // The contents of this file are subject to the Mozilla Public
 // License Version 1.1 (the "License"); you may not use this file
-// except in compliance with the License. You may obtain a copy of
-// the License at http://www.mozilla.org/MPL/
+// except in compliance with the License. You may obtain a copy
+// of the License at http://www.mozilla.org/MPL/
 // 
-// Software distributed under the License is distributed on an "AS
-// IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+// Software distributed under the License is distributed on an
+// "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
@@ -13,7 +13,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 - 2003 Charles W. Rapp.
+// Copyright (C) 2000 - 2007. Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2007/12/28 12:34:40  cwrapp
+// Version 5.0.1 check-in.
+//
 // Revision 1.6  2005/06/08 11:09:12  cwrapp
 // + Updated Python code generator to place "pass" in methods with empty
 //   bodies.
@@ -230,7 +233,10 @@ void TcpConnection::handleReceive(int)
                                  totalBytesRead);
 
 #if defined(SMC_DEBUG)
-        cout << "**** Received segment:\n" << *segment << endl;
+        cout << "**** Received segment:"
+             << endl
+             << *segment
+             << endl;
 #endif
 
         // Generate the appropriate transition based on the header
@@ -698,7 +704,8 @@ void TcpConnection::accept(const TcpSegment& segment)
     else
     {
         // Set the socket to non-blocking.
-        (void) ioctlsocket((int) newHandle, FIONBIO, &blockingFlag);
+        (void) ioctlsocket(
+            (unsigned int) newHandle, FIONBIO, &blockingFlag);
 
         // Have the new client socket use this server
         // socket's near address for now.
@@ -785,13 +792,13 @@ void TcpConnection::sendSynAck(const TcpSegment& segment)
     // Tell the far end client socket with what port it should
     // now communicate.
 #if defined(WIN32)
-    port = htons(_actualPort);
+    port = _actualPort;
 #else
     port = getLocalPort(_udp_socket);
 #endif
 
-    port_bytes[0] = (char) ((port & 0xff00) >> 8);
-    port_bytes[1] = (char) (port & 0x00ff);
+    port_bytes[0] = (char) (port & 0x00ff);
+    port_bytes[1] = (char) ((port & 0xff00) >> 8);
 
     doSend(TcpSegment::SYN_ACK, port_bytes, 0, 2, &segment);
 
@@ -981,14 +988,14 @@ void TcpConnection::setNearAddress()
 void TcpConnection::setFarAddress(const TcpSegment& segment)
 {
     const char *data = segment.getData();
-    const int data_size = segment.getDataSize();
     unsigned short port;
 
     _farAddress.sin_family = AF_INET;
-    port = ((((unsigned short) data[0]) & 0x00ff) << 8) |
-            (((unsigned short) data[1]) & 0x00ff);
-    _farAddress.sin_port = ntohs(port);
-    _farAddress.sin_addr.s_addr = segment.getSource().sin_addr.s_addr;
+    port = ((((unsigned short) data[0]) & 0x00ff) |
+            ((((unsigned short) data[1]) & 0x00ff) << 8));
+    _farAddress.sin_port = port;
+    _farAddress.sin_addr.s_addr =
+        segment.getSource().sin_addr.s_addr;
 
     return;
 } // end of TcpConnection::setFarAddress(const TcpSegment&)
@@ -1009,11 +1016,15 @@ void TcpConnection::deleteSegment(const TcpSegment& segment)
 //
 TcpConnection::TcpConnection(TcpConnectionListener& listener)
 : _listener(&listener),
-  _sequence_number(ISN),
+#if defined(WIN32)
+  _actualPort(0),
+  _udp_win_socket(NULL),
+#endif
   _udp_socket(-1),
-  _server(NULL),
+  _sequence_number(ISN),
   _buffer(NULL),
   _bufferSize(0),
+  _server(NULL),
   _errorMessage(NULL),
   _fsm(*this)
 {
@@ -1049,14 +1060,14 @@ TcpConnection::TcpConnection(const sockaddr_in& far_address,
 #if defined(WIN32)
   _actualPort(actual_port),
   _udp_win_socket(udp_socket),
-  _udp_socket((int) udp_handle),
+  _udp_socket((unsigned int) udp_handle),
 #else
   _udp_socket(udp_socket),
 #endif
   _sequence_number(sequence_number),
-  _server(&server),
   _buffer(NULL),
   _bufferSize(0),
+  _server(&server),
   _errorMessage(NULL),
   _fsm(*this)
 {

@@ -161,7 +161,8 @@ public final class SmcTransition
         {
             guard = guardIt.next();
             retcode =
-                !guard.getEndState().equals(SmcGuard.NIL_STATE);
+                !guard.getEndState().equals(
+                    SmcCodeGenerator.NIL_STATE);
         }
 
         return (retcode);
@@ -253,6 +254,9 @@ public final class SmcTransition
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2007/12/28 12:34:41  cwrapp
+// Version 5.0.1 check-in.
+//
 // Revision 1.9  2007/02/21 13:56:58  cwrapp
 // Moved Java code to release 1.5.0
 //

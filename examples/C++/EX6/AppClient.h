@@ -16,7 +16,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 - 2003 Charles W. Rapp.
+// Copyright (C) 2000 - 2007. Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
@@ -32,6 +32,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2007/12/28 12:34:40  cwrapp
+// Version 5.0.1 check-in.
+//
 // Revision 1.4  2005/05/28 13:31:18  cwrapp
 // Updated C++ examples.
 //
@@ -42,6 +45,7 @@
 #include "TcpClient.h"
 #include "TcpServer.h"
 #include "TcpConnectionListener.h"
+#include <string>
 
 // Foward declarations.
 class AppServer;
@@ -57,17 +61,17 @@ public:
     AppClient();
 
     // Create a client around an accepted connection.
-    AppClient(const char *host,
+    AppClient(const std::string& host,
               TcpClient& client,
               AppServer& owner);
 
-    ~AppClient();
+    virtual ~AppClient();
 
-    const char* getHost() const;
+    const std::string& getHost() const;
 
     // Create a TCP client object and open a connection to the
     // specified service.
-    void open(const char *host,
+    void open(const std::string& host,
               const sockaddr_in& address);
 
     // Close the TCP service.
@@ -112,7 +116,7 @@ private:
     AppServer *_owner;
 
     // The host to which we are connected.
-    char *_host;
+    std::string _host;
 
     // Every time a message is sent, increment this counter.
     int _messageCount;

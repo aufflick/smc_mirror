@@ -267,31 +267,37 @@ public final class SmcGraphGenerator
 
     public void visit(SmcTransition transition)
     {
-        List<SmcParameter> parameters =
-            transition.getParameters();
-        Iterator<SmcParameter> pit;
-
         // Graph level 2: add parameters to transition name.
         // Generate the parameters once and pass the string to
         // the guards in the "package" argument.
-        if (Smc.graphLevel() == Smc.GRAPH_LEVEL_2 &&
-            parameters.isEmpty() == false)
+        if (Smc.graphLevel() == Smc.GRAPH_LEVEL_2)
         {
-            ByteArrayOutputStream baos =
-                new ByteArrayOutputStream();
-            PrintStream pstream = _source;
-            String sep;
+            List<SmcParameter> parameters =
+                transition.getParameters();
+            Iterator<SmcParameter> pit;
 
-            _source = new PrintStream(baos);
-            for (pit = parameters.iterator(), sep = "";
-                 pit.hasNext() == true;
-                 sep = ", ")
+            if (parameters.isEmpty() == true)
             {
-                (pit.next()).accept(this);
+                _parameters = null;
             }
+            else
+            {
+                ByteArrayOutputStream baos =
+                    new ByteArrayOutputStream();
+                PrintStream pstream = _source;
+                String sep;
 
-            _parameters = baos.toString();
-            _source = pstream;
+                _source = new PrintStream(baos);
+                for (pit = parameters.iterator(), sep = "";
+                     pit.hasNext() == true;
+                     sep = ", ")
+                {
+                    (pit.next()).accept(this);
+                }
+
+                _parameters = baos.toString();
+                _source = pstream;
+            }
         }
 
         for (SmcGuard guard: transition.getGuards())
@@ -491,6 +497,9 @@ public final class SmcGraphGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2007/12/28 12:34:41  cwrapp
+// Version 5.0.1 check-in.
+//
 // Revision 1.6  2007/02/21 13:54:51  cwrapp
 // Moved Java code to release 1.5.0
 //

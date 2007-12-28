@@ -90,7 +90,7 @@ namespace statemap
         }
 
         return (retval);
-    };
+    }
 
 //---------------------------------------------------------------
 // Exception Classes.
@@ -803,11 +803,14 @@ namespace statemap
 #endif // SMC_USES_IOSTREAMS
 
     }; // end of class FSMContext
-};
+}
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.12  2007/12/28 12:34:40  cwrapp
+// Version 5.0.1 check-in.
+//
 // Revision 1.11  2007/08/05 12:58:54  cwrapp
 // Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more information.
 //

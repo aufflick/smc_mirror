@@ -23,6 +23,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.7  2007/12/28 12:34:40  cwrapp
+# Version 5.0.1 check-in.
+#
 # Revision 1.6  2006/09/17 16:26:06  cwrapp
 # Initial v. 4.3.3 check-in.
 #
@@ -36,7 +39,7 @@
 TARGET    = checkstring
 
 CXX       = c++
-CPPFLAGS  = -g -I../../../lib
+CPPFLAGS  = -g -Wall -Wextra -I../../../lib
 SMC       = java -jar ../../../bin/Smc.jar
 SMCFLAGS  = -c++ -g
 

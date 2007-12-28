@@ -4,11 +4,11 @@
 //
 // The contents of this file are subject to the Mozilla Public
 // License Version 1.1 (the "License"); you may not use this file
-// except in compliance with the License. You may obtain a copy of
-// the License at http://www.mozilla.org/MPL/
+// except in compliance with the License. You may obtain a copy
+// of the License at http://www.mozilla.org/MPL/
 // 
-// Software distributed under the License is distributed on an "AS
-// IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+// Software distributed under the License is distributed on an
+// "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
@@ -32,6 +32,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2007/12/28 12:34:40  cwrapp
+// Version 5.0.1 check-in.
+//
 // Revision 1.6  2005/11/07 19:34:54  cwrapp
 // Changes in release 4.3.0:
 // New features:
@@ -621,6 +624,7 @@ Default
                  0,
                  0,
                  segment);
+            closeSocket();
             closed("connection reset");
         }
 
@@ -634,6 +638,7 @@ Default
                  0,
                  0,
                  segment);
+            closeSocket();
             closed("connection reset");
         }
 
@@ -647,6 +652,7 @@ Default
                  0,
                  0,
                  segment);
+            closeSocket();
             closed("connection reset");
         }
 
@@ -660,6 +666,7 @@ Default
                  0,
                  0,
                  segment);
+            closeSocket();
             closed("connection reset");
         }
 
@@ -673,6 +680,7 @@ Default
                  0,
                  0,
                  segment);
+            closeSocket();
             closed("connection reset");
         }
 
@@ -686,6 +694,7 @@ Default
                  0,
                  0,
                  segment);
+            closeSocket();
             closed("connection reset");
         }
 
@@ -699,6 +708,7 @@ Default
                  0,
                  0,
                  segment);
+            closeSocket();
             closed("connection reset");
         }
 
@@ -712,6 +722,7 @@ Default
                  0,
                  0,
                  segment);
+            closeSocket();
             closed("connection reset");
         }
 
@@ -725,6 +736,7 @@ Default
                  0,
                  0,
                  segment);
+            closeSocket();
             closed("connection reset");
         }
 
@@ -732,12 +744,14 @@ Default
     RST(segment: TcpSegment)
         CLOSED
         {
+            closeSocket();
             closed("connection reset by peer");
         }
 
     RST_ACK(segment: TcpSegment)
         CLOSED
         {
+            closeSocket();
             closed("connection reset by peer");
         }
 
@@ -752,6 +766,7 @@ Default
                  0,
                  0,
                  segment);
+            closeSocket();
             closed("connection reset");
         }
 
@@ -774,6 +789,7 @@ Default
                  0,
                  0,
                  segment);
+            closeSocket();
             closed("connection reset");
         }
 
@@ -785,6 +801,7 @@ Default
                  0,
                  0,
                  segment);
+            closeSocket();
             closed("connection reset");
         }
 
@@ -796,6 +813,7 @@ Default
                  0,
                  0,
                  segment);
+            closeSocket();
             closed("connection reset");
         }
 
@@ -807,6 +825,7 @@ Default
                  0,
                  0,
                  segment);
+            closeSocket();
             closed("connection reset");
         }
 
@@ -818,6 +837,7 @@ Default
                  0,
                  0,
                  segment);
+            closeSocket();
             closed("connection reset");
         }
 
@@ -829,6 +849,7 @@ Default
                  0,
                  0,
                  segment);
+            closeSocket();
             closed("connection reset");}
 
     UNDEF(segment: TcpSegment)
@@ -839,6 +860,7 @@ Default
                  0,
                  0,
                  segment);
+            closeSocket();
             closed("connection reset");
         }
 

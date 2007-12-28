@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2007/12/28 12:34:40  cwrapp
+// Version 5.0.1 check-in.
+//
 // Revision 1.5  2005/06/08 11:09:12  cwrapp
 // + Updated Python code generator to place "pass" in methods with empty
 //   bodies.
@@ -59,7 +62,7 @@ const static char _rcs_id[] = "$Id$";
 // Global variable declarations.
 AppClass appObject;
 
-int main(int argc, char *argv[])
+int main(int, char**)
 {
 	// External routine declarations.
 	void SigintHandler(int);

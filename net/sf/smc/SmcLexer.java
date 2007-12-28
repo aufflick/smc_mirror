@@ -13,7 +13,7 @@
 //
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 - 2006. Charles W. Rapp.
+// Copyright © 2000 - 2006. Charles W. Rapp.
 // All Rights Reserved.
 //
 // Contributor(s):
@@ -52,9 +52,9 @@ import java.util.Map;
     {
         _stream = stream;
         _token = new Token();
-        _tokenBuffer = new StringBuffer(50);
+        _tokenBuffer = new StringBuilder(50);
         _lineNumber = 1;
-        _readBuffer = new byte[READ_BUFFER_LEN];
+        _readBuffer = new char[READ_BUFFER_LEN];
         _bufferSize = 0;
         _readIndex = 0;
 
@@ -158,6 +158,17 @@ import java.util.Map;
     /* package */ void addToToken()
     {
         _tokenBuffer.append(_currentChar);
+        return;
+    }
+
+    // DEBUG
+    /* package */ void outputChar()
+    {
+        System.out.println();
+        System.out.print("Unknown character: 0x");
+        System.out.println(
+            Integer.toHexString((int) _currentChar));
+
         return;
     }
 
@@ -377,7 +388,7 @@ import java.util.Map;
         }
         catch (EOFException e)
         {
-            StringBuffer msg = new StringBuffer(80);
+            StringBuilder msg = new StringBuilder(80);
 
             msg.append(
                 "User source code contains an unbalanced ");
@@ -507,7 +518,7 @@ import java.util.Map;
         }
         catch (EOFException e)
         {
-            StringBuffer msg = new StringBuffer(80);
+            StringBuilder msg = new StringBuilder(80);
 
             msg.append(
                 "User source code contains an unbalanced ");
@@ -538,15 +549,19 @@ import java.util.Map;
         throws IOException,
                EOFException
     {
-        int size;
-        int offset = 0;
         char retval;
 
         // If we are at the end of the buffer, read the
         // next buffer-full.
         if (_readIndex == _bufferSize)
         {
+            int index;
+            int size;
+            int offset = 0;
+            int c = 0;
+
             // Copy the last two bytes to the first two bytes.
+            // Why? Because the lexer can back up to two bytes.
             if (_bufferSize > 2)
             {
                 offset = 2;
@@ -561,13 +576,23 @@ import java.util.Map;
                 _readBuffer[0] = _readBuffer[_bufferSize - 1];
             }
 
-            size =
-                _stream.read(_readBuffer,
-                             offset,
-                             MAX_BUFFER_LEN);
+            for (index = offset, size = 0;
+                 size <  MAX_BUFFER_LEN;
+                 ++index, ++size)
+            {
+                c = _stream.read();
+                if (c < 0)
+                {
+                    break;
+                }
+                else
+                {
+                    _readBuffer[index] = (char) c;
+                }
+            }
 
             // End of file has been reached.
-            if (size < 0)
+            if (size == 0 && c < 0)
             {
                 _bufferSize = 0;
                 throw (new EOFException("end-of-file reached"));
@@ -581,39 +606,8 @@ import java.util.Map;
             }
         }
 
-        // End of file has been reached.
-        if (_bufferSize < 0)
-        {
-            _bufferSize = 0;
-            throw (new EOFException("end-of-file reached"));
-        }
-        else
-        {
-            retval = (char) _readBuffer[_readIndex];
-            ++_readIndex;
-        }
-
-        return(retval);
-    }
-
-    // Returns true if the entire source file has been read and
-    // false otherwise.
-    private boolean endOfFile()
-    {
-        boolean retval;
-
-        // We are at the end-of-file if 1) the buffer's actual
-        // size is less than the buffer's total size and the
-        // buffer index is at the end of the actual size.
-        if (_bufferSize < _readBuffer.length &&
-            _readIndex == _bufferSize)
-        {
-            retval = true;
-        }
-        else
-        {
-            retval = false;
-        }
+        retval = _readBuffer[_readIndex];
+        ++_readIndex;
 
         return(retval);
     }
@@ -644,7 +638,7 @@ import java.util.Map;
 
     // Collect the token in a string buffer before making a
     // string out of it.
-    private StringBuffer _tokenBuffer;
+    private StringBuilder _tokenBuffer;
 
     // Keep track of the source line being parsed. This is needed
     // for error messages.
@@ -652,7 +646,7 @@ import java.util.Map;
 
     // Read in a buffer-full of data rather than one character
     // at a time.
-    private byte[] _readBuffer;
+    private char[] _readBuffer;
 
     // The actual number of read characters in the buffer.
     // May be less than the buffer's size.
@@ -1070,6 +1064,9 @@ import java.util.Map;
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.13  2007/12/28 12:34:41  cwrapp
+// Version 5.0.1 check-in.
+//
 // Revision 1.12  2007/11/19 18:53:21  fperrad
 // + add : jump syntax
 //   jump uses the same syntax as push,

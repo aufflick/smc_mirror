@@ -514,7 +514,7 @@ public final class SmcCppGenerator
             _source.print(_indent);
             _source.print("    ");
             _source.print(context);
-            _source.println("& ctxt = context.getOwner();");
+            _source.println("& ctxt(context.getOwner());");
             _source.println();
 
             // Generate the actions associated with this code.
@@ -552,7 +552,7 @@ public final class SmcCppGenerator
             _source.print(_indent);
             _source.print("    ");
             _source.print(context);
-            _source.println("& ctxt = context.getOwner();");
+            _source.println("& ctxt(context.getOwner());");
             _source.println();
 
             // Generate the actions associated with this code.
@@ -645,7 +645,7 @@ public final class SmcCppGenerator
             _source.print(_indent);
             _source.print("    ");
             _source.print(context);
-            _source.println("& ctxt = context.getOwner();");
+            _source.println("& ctxt(context.getOwner());");
         }
 
         // The loopbackFlag local variable is needed if there
@@ -1343,6 +1343,9 @@ public final class SmcCppGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2007/12/28 12:34:41  cwrapp
+// Version 5.0.1 check-in.
+//
 // Revision 1.8  2007/08/05 14:36:11  cwrapp
 // Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more informaiton.
 //

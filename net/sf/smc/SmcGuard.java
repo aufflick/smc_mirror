@@ -192,8 +192,7 @@ public final class SmcGuard
         if ((_condition != null &&
              (_condition.indexOf("ctxt.") >= 0 ||
               _condition.indexOf("ctxt->") >= 0)) ||
-            (_actions != null &&
-             _actions.isEmpty() == false) ||
+            _hasActions() == true ||
             (_transType == Smc.TRANS_POP &&
              _popArgs != null &&
              (_popArgs.indexOf("ctxt.") >= 0 ||
@@ -244,6 +243,33 @@ public final class SmcGuard
         return (retval.toString());
     }
 
+    // The ctxt local variable is created if:
+    // 1. The action list is not null.
+    // 2. The action list has 1 or more items of which
+    //    one is *not* emptyStateStack.
+    private boolean _hasActions()
+    {
+        boolean retcode = false;
+
+        if (_actions != null && _actions.isEmpty() == false)
+        {
+            Iterator<SmcAction> ait;
+            SmcAction action;
+
+            for (ait = _actions.iterator();
+                 ait.hasNext() == true && retcode == false;
+                )
+            {
+                action = ait.next();
+                retcode =
+                    !(EMPTY_STATE_STACK.equalsIgnoreCase(
+                          action.getName()));
+            }
+        }
+
+        return (retcode);
+    } // end of hasActions(List<SmcAction>)
+
 //---------------------------------------------------------------
 // Member data.
 //
@@ -259,12 +285,16 @@ public final class SmcGuard
     //-----------------------------------------------------------
     // Constants.
     //
-    /* package */ static final String NIL_STATE = "nil";
+    private static final String EMPTY_STATE_STACK =
+        "emptystatestack";
 }
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.12  2007/12/28 12:34:41  cwrapp
+// Version 5.0.1 check-in.
+//
 // Revision 1.11  2007/02/21 13:54:54  cwrapp
 // Moved Java code to release 1.5.0
 //

@@ -148,12 +148,15 @@ public abstract class SmcCodeGenerator
     //-----------------------------------------------------------
     // Constants.
     //
-    protected static final String NIL_STATE = "nil";
+    /* package */ static final String NIL_STATE = "nil";
 }
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2007/12/28 12:34:41  cwrapp
+// Version 5.0.1 check-in.
+//
 // Revision 1.4  2007/02/21 13:54:20  cwrapp
 // Moved Java code to release 1.5.0
 //

@@ -48,6 +48,18 @@
     unguarded, push transition was compiled without the
     -g option.
 
+(Compilter)
+    Reading in files as Java chars rather than bytes.
+    Java char type is UTF-16 code unit and correctly
+    handles 16-bit characters.
+    (SF bug 1773868)
+
+(GraphViz)
+    When using -glevel 2, a parameterless transition will
+    appear to have parameters if the previous transition
+    has parameters.
+    (SF bug 1823635)
+
 
 
                               SMC -

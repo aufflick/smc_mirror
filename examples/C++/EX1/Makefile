@@ -28,7 +28,7 @@
 TARGET    = checkstring
 
 CXX       = c++
-CPPFLAGS  = -g -I../../../lib
+CPPFLAGS  = -g -Wall -Wextra -I../../../lib
 SMC       = java -jar ../../../bin/Smc.jar
 SMCFLAGS  = -c++ -g
 
@@ -61,6 +61,9 @@ clean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.8  2007/12/28 12:34:39  cwrapp
+# Version 5.0.1 check-in.
+#
 # Revision 1.7  2007/01/15 00:23:48  cwrapp
 # Release 4.4.0 initial commit.
 #

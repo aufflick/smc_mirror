@@ -58,6 +58,7 @@ $(PYTHON_LIB_STAGING_DIR) :
 		$(MKDIR) $(PYTHON_LIB_STAGING_DIR)
 
 install :	$(PYTHON_LIB_STAGING_DIR) $(SOURCES)
+		$(CP) README.py $(PYTHON_LIB_STAGING_DIR)/README.py
 		$(CP) statemap.py $(PYTHON_LIB_STAGING_DIR)/statemap.py
 		$(CP) setup.py $(PYTHON_LIB_STAGING_DIR)/setup.py
 
@@ -71,6 +72,9 @@ realclean :	clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.8  2007/12/28 12:34:40  cwrapp
+# Version 5.0.1 check-in.
+#
 # Revision 1.7  2007/10/11 12:48:35  fperrad
 # - refactor: Makefile with variables
 #

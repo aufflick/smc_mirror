@@ -408,12 +408,17 @@ public final class SmcCGenerator
                 {
                     stateName = state.getInstanceName();
 
+                    // Firstly, make sure the transition name
+                    // is not defined.
                     _source.print("#undef ");
                     _source.print(mapName);
                     _source.print("_");
                     _source.print(stateName);
                     _source.print("_");
                     _source.println(transName);
+
+                    // Secondly, define the transition name
+                    // to be a default transition alias.
                     _source.print("#define ");
                     _source.print(mapName);
                     _source.print("_");
@@ -596,6 +601,7 @@ public final class SmcCGenerator
         // transition.
         if (stateName.equals("DefaultState") == true)
         {
+            // stateName = state.getClassName();
             defaultFlag = true;
         }
 
@@ -744,7 +750,7 @@ public final class SmcCGenerator
             _source.println(" else {");
             _source.print("        ");
             _source.print(mapName);
-            _source.print("_Default_");
+            _source.print("_DefaultState_");
             _source.print(transName);
             _source.print("(fsm");
 
@@ -1246,6 +1252,9 @@ public final class SmcCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.12  2007/12/28 12:34:41  cwrapp
+// Version 5.0.1 check-in.
+//
 // Revision 1.11  2007/11/19 18:48:54  fperrad
 // fix C generation :
 // default state must be always 'DefaultState' (previously 'Default')

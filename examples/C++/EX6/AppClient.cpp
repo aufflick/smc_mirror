@@ -1,11 +1,11 @@
 //
 // The contents of this file are subject to the Mozilla Public
 // License Version 1.1 (the "License"); you may not use this file
-// except in compliance with the License. You may obtain a copy of
-// the License at http://www.mozilla.org/MPL/
+// except in compliance with the License. You may obtain a copy
+// of the License at http://www.mozilla.org/MPL/
 // 
-// Software distributed under the License is distributed on an "AS
-// IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+// Software distributed under the License is distributed on an
+// "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
@@ -13,7 +13,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 - 2003 Charles W. Rapp.
+// Copyright (C) 2000 - 2007. Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2007/12/28 12:34:40  cwrapp
+// Version 5.0.1 check-in.
+//
 // Revision 1.5  2005/05/28 13:31:18  cwrapp
 // Updated C++ examples.
 //
@@ -66,26 +69,22 @@ const long AppClient::MAX_SLEEP_TIME = 30000;
 AppClient::AppClient()
 : _client_socket(NULL),
   _owner(NULL),
-  _messageCount(0),
-  _host(NULL)
+  _host(),
+  _messageCount(0)
 {}
 
 //---------------------------------------------------------------
 // AppClient(const char*, TcpClient&, AppServer&) (Public)
 // An "accept" construct.
 //
-AppClient::AppClient(const char *host,
+AppClient::AppClient(const string& host,
                      TcpClient& tcp_client,
                      AppServer& owner)
 : _client_socket(&tcp_client),
   _owner(&owner),
-  _messageCount(0),
-  _host(NULL)
+  _host(host),
+  _messageCount(0)
 {
-    // Store away the host name.
-    _host = new char[strlen(host) + 1];
-    (void) strcpy(_host, host);
-
     // Tell the client that this object is now listening to it.
     tcp_client.setListener(*this);
 
@@ -107,12 +106,6 @@ AppClient::~AppClient()
         _client_socket = NULL;
     }
 
-    if (_host != NULL)
-    {
-        delete[] _host;
-        _host = NULL;
-    }
-
     return;
 } // end of AppClient::~AppClient()
 
@@ -120,22 +113,22 @@ AppClient::~AppClient()
 // getHost() const (Public)
 // Return the host name.
 //
-const char* AppClient::getHost() const
+const string& AppClient::getHost() const
 {
     return(_host);
 } // end of AppClient::getHost() const
 
 //---------------------------------------------------------------
-// open(const char*, const sockaddr_in&) (Public)
+// open(const string&, const sockaddr_in&) (Public)
 // Open a connection to the named TCP service.
 //
-void AppClient::open(const char *host, const sockaddr_in& address)
+void AppClient::open(const string& host,
+                     const sockaddr_in& address)
 {
     if (_client_socket == NULL)
     {
         // Store away the host name.
-        _host = new char[strlen(host) + 1];
-        (void) strcpy(_host, host);
+        _host = host;
 
         cout << "Opening connection to "
              << host
@@ -149,7 +142,7 @@ void AppClient::open(const char *host, const sockaddr_in& address)
     }
 
     return;
-} // end of AppClient::open(const char*, const sockaddr_in&)
+} // end of AppClient::open(const string&, const sockaddr_in&)
 
 //---------------------------------------------------------------
 // close() (Public)
@@ -177,8 +170,6 @@ void AppClient::close()
 //
 void AppClient::opened(TcpConnection&)
 {
-    const sockaddr_in& address = _client_socket->getServerAddress();
-
     cout << "open successful." << endl;
 
     // Set the transmit timer.
@@ -193,8 +184,6 @@ void AppClient::opened(TcpConnection&)
 //
 void AppClient::openFailed(const char *reason, TcpConnection&)
 {
-    const sockaddr_in& address = _client_socket->getServerAddress();
-
     void socketClosed();
 
     cout << "open failed";
@@ -279,7 +268,9 @@ void AppClient::halfClosed(TcpConnection&)
          << _host
          << ":"
          << address.sin_port
-         << " has closed its side.\nClosing connection to "
+         << " has closed its side."
+         << endl
+         << "Closing connection to "
          << _host
          << ":"
          << ntohs(address.sin_port)
@@ -299,11 +290,8 @@ void AppClient::halfClosed(TcpConnection&)
 // closed(const char*, TcpConnection&) (Public)
 // This client connection is closed.
 //
-void AppClient::closed(const char *reason, TcpConnection&)
+void AppClient::closed(const char*, TcpConnection&)
 {
-    const sockaddr_in& address =
-        _client_socket->getServerAddress();
-
     void socketClosed();
 
     cout << "closed." << endl;

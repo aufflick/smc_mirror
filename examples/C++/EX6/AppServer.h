@@ -32,6 +32,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2007/12/28 12:34:40  cwrapp
+// Version 5.0.1 check-in.
+//
 // Revision 1.4  2005/05/28 13:31:18  cwrapp
 // Updated C++ examples.
 //
@@ -58,7 +61,7 @@ public:
     AppServer();
 
     // Destructor.
-    ~AppServer();
+    virtual ~AppServer();
 
     // Create a TCP server object and open it.
     void open(unsigned short port);
@@ -73,7 +76,8 @@ public:
     void opened(TcpConnection& connection);
     void openFailed(const char *reason,
                     TcpConnection& connection);
-    void halfClosed(TcpConnection& connection) {};
+    inline void halfClosed(TcpConnection&)
+    {};
     void closed(const char *reason,
                 TcpConnection& connection);
     void accepted(TcpClient& client, TcpServer& server);
