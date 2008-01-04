@@ -48,7 +48,7 @@
     unguarded, push transition was compiled without the
     -g option.
 
-(Compilter)
+(Compiler)
     Reading in files as Java chars rather than bytes.
     Java char type is UTF-16 code unit and correctly
     handles 16-bit characters.

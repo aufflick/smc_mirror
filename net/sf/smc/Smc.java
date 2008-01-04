@@ -1130,7 +1130,7 @@ public final class Smc
         stream.println("\t-c++      Generate C++ code");
         stream.println("\t-csharp   Generate C# code");
         stream.println("\t-graph    Generate GraphViz DOT file");
-        stream.println("\t-grooyv   Generate Groovy code");
+        stream.println("\t-groovy   Generate Groovy code");
         stream.println("\t-java     Generate Java code");
         stream.println("\t-lua      Generate Lua code");
         stream.println("\t-objc     Generate Objective-C code");
@@ -1849,6 +1849,9 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.24  2008/01/04 20:40:40  cwrapp
+// Corrected minor misspellings and incorrect information.
+//
 // Revision 1.23  2007/08/05 13:53:09  cwrapp
 // Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more information.
 //

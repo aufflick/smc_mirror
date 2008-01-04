@@ -31,6 +31,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2008/01/04 20:40:39  cwrapp
+// Corrected minor misspellings and incorrect information.
+//
 // Revision 1.2  2006/06/03 19:39:25  cwrapp
 // Final v. 4.3.1 check in.
 //
@@ -49,7 +52,7 @@ using System.Runtime.CompilerServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 //
-[assembly: AssemblyTitle("SMC satemap C# Library")]
+[assembly: AssemblyTitle("SMC statemap C# Library")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]

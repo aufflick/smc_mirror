@@ -26,7 +26,7 @@ Major changes:
 
 + (Programmer's Manual)
     Added section 12: Event Notification which explains how state
-    change notification can be used in Java, C# and VB.Net.
+    change notification can be used in Java.
 
 Minor changes:
 
@@ -61,7 +61,7 @@ Bug Fixes:
     unguarded, push transition was compiled without the
     -g option.
 
-+ (Compilter)
++ (Compiler)
     Reading in files as Java chars rather than bytes.
     Java char type is UTF-16 code unit and correctly
     handles 16-bit characters.
