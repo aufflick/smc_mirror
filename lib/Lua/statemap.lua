@@ -122,7 +122,7 @@ function FSMContext:isInTransition ()
     return self._state == nil
 end
 
-function FSMContext:getTranstion ()
+function FSMContext:getTransition ()
     -- Returns the current transition's name.
     --
     -- Used only for debugging purposes.
