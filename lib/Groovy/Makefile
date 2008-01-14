@@ -40,7 +40,7 @@ LIB_SOURCES=	statemap.groovy
 
 PACKAGE_NAME=	statemap
 
-GROOVYC=	groovyc
+GROOVYC=		groovyc
 JAR=		jar
 JAR_FLAGS=	cvf
 JAR_FILE=	$(PACKAGE_NAME).jar
@@ -84,6 +84,9 @@ realclean :	clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2008/01/14 19:59:23  cwrapp
+# Release 5.0.2 check-in.
+#
 # Revision 1.2  2007/10/10 12:29:06  fperrad
 # - fix Makefile (mkdir)
 #

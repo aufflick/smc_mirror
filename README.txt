@@ -2,7 +2,7 @@
 
                                SMC
                      The State Machine Compiler
-                         (Version: 5.0.1)
+                         (Version: 5.0.2)
 
                      http://smc.sourceforge.net
 
@@ -11,67 +11,33 @@
 0. What's New?
 --------------
 
-New Features:
-
-+ (Groovy)
-    Added support for Groovy programming language (-groovy).
-    Examples not yet available.
-
-
 Major changes:
-
-+ (Java)
-    Added state change notification to FSMContext.
-    (SF feature request 1570050)
-
-+ (Programmer's Manual)
-    Added section 12: Event Notification which explains how state
-    change notification can be used in Java.
-
-Minor changes:
 
 None.
 
 
+Minor changes:
+
++ (Java)
+    Added state change notification to C# and VB.Net.
+    (SF feature request 1570050)
+
++ (Programmer's Manual)
+    Added section 12: Event Notification which explains how state
+    change notification can be used in C# and VB.Net.
+
+
 Bug Fixes:
 
-+ (C++)
-    Changed <string> include to <cstring> and fully qualified
-    strncpy to std::strncpy.
-    (SF bug 1708488)
++ (Java)
+    When a push transition is taken, the resulting state change
+    is not reported via the property change event.
+    (SF bug 1871371)
 
-+ (C, C++)
-    Corrected C and C++ FSM header file include.
-    (SF bug 1699854)
-
-+ (C)
-    Corrected error which generated incorrect C code when state
-    names began with a lower case letter (state "connected"
-    would generate uncompilable C code while "Connected" did
-    not).
-    (SF bug 1751740)
-
-+ (Programmer's Manul)
-    Corrected C# example code in section 7.
-    (SF bug 1711484)
-
-+ (Python)
-    Corrected error where a "pass" clause was incorrectly
-    inserted in a non-empty method body of an actionless,
-    unguarded, push transition was compiled without the
-    -g option.
-
-+ (Compiler)
-    Reading in files as Java chars rather than bytes.
-    Java char type is UTF-16 code unit and correctly
-    handles 16-bit characters.
-    (SF bug 1773868)
-
-+ (GraphViz)
-    When using -glevel 2, a parameterless transition will
-    appear to have parameters if the previous transition
-    has parameters.
-    (SF bug 1823635)
++ (Groovy)
+    The necessary Groovy library and examples are missing from
+    release 5.0.1 package.
+    (SF bug 1869984)
 
 
 

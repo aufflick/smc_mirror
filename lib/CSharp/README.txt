@@ -8,6 +8,9 @@
 + Building & Installing statemap.dll
 ------------------------------------
 
+NOTE: This code only should be used to generate statemap.dll.
+This dll should be used for both CSharp and VB.net applications.
+
 1. If you have built statemap.dll previously and want to perform
    a complete build, then do
 

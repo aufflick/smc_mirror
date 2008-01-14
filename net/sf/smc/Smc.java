@@ -484,7 +484,7 @@ public final class Smc
         int i;
         int argsConsumed;
         boolean helpFlag = false;
-        boolean retcode= true;
+        boolean retcode = true;
 
         // Look for either -help or -verson first. If specified,
         // then output the necessary info and return.
@@ -1581,7 +1581,7 @@ public final class Smc
     /* package */ static final int TRANS_POP = 3;
 
     private static final String APP_NAME = "smc";
-    private static final String VERSION = "v. 5.0.1";
+    private static final String VERSION = "v. 5.0.2";
 
     // Command line option flags.
     private static final String CAST_FLAG = "-cast";
@@ -1604,7 +1604,7 @@ public final class Smc
 
     static
     {
-        // Find in the static languages array.
+        // Fill in the static languages array.
         _languages = new Language[LANGUAGE_COUNT];
         _languages[LANG_NOT_SET] =
             new Language(LANG_NOT_SET,
@@ -1806,12 +1806,14 @@ public final class Smc
         _optionMap.put(NO_EXCEPTIONS_FLAG, languages);
         _optionMap.put(NO_STREAMS_FLAG, languages);
 
+        // Languages using a header file.
         languages = new ArrayList<Language>();
         languages.add(_languages[C_PLUS_PLUS]);
         languages.add(_languages[C]);
         languages.add(_languages[OBJECTIVE_C]);
         _optionMap.put(HEADER_FLAG, languages);
 
+        // Languages supporting thread synchronization.
         languages = new ArrayList<Language>();
         languages.add(_languages[C_SHARP]);
         languages.add(_languages[JAVA]);
@@ -1819,6 +1821,7 @@ public final class Smc
         languages.add(_languages[GROOVY]);
         _optionMap.put(SYNC_FLAG, languages);
 
+        // Languages supporting reflection.
         languages = new ArrayList<Language>();
         languages.add(_languages[C_SHARP]);
         languages.add(_languages[JAVA]);
@@ -1831,6 +1834,7 @@ public final class Smc
         languages.add(_languages[GROOVY]);
         _optionMap.put(REFLECT_FLAG, languages);
 
+        // Languages supporting serialization.
         languages = new ArrayList<Language>();
         languages.add(_languages[C_SHARP]);
         languages.add(_languages[JAVA]);
@@ -1840,6 +1844,7 @@ public final class Smc
         languages.add(_languages[GROOVY]);
         _optionMap.put(SERIAL_FLAG, languages);
 
+        // The -glevel option.
         languages = new ArrayList<Language>();
         languages.add(_languages[GRAPH]);
         _optionMap.put(GLEVEL_FLAG, languages);
@@ -1849,6 +1854,9 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.25  2008/01/14 19:59:23  cwrapp
+// Release 5.0.2 check-in.
+//
 // Revision 1.24  2008/01/04 20:40:40  cwrapp
 // Corrected minor misspellings and incorrect information.
 //

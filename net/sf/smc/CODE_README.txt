@@ -1,5 +1,42 @@
                               SMC -
                   The State Machine Compiler
+                        Version 5.0.2
+
+
++ Minor changes
+---------------
+
+(C#, VB.Net)
+    Added state change event support using .Net events and
+    delegates. There was already some support for this in
+    the generated C# code but it worked only for vanilla
+    transitions. The state change event is now raised by
+    statemap.FSMContext class for all transition types.
+
+    Strangely, the C# generated code did not call
+    statemap.FSMContext.SetState but access _state
+    directly. This is now corrected.
+    (SF feature request 1570050)
+
+
++ Bug fixes
+-----------
+
+(Java)
+    When a push transition is taken, the resulting state change
+    is not reported via the property change event.
+    (SF bug 1871371)
+
+(Groovy)
+    The necessary Groovy library and examples are missing from
+    release 5.0.1 package.
+    (SF bug 1869984)
+
+
+
+
+                              SMC -
+                  The State Machine Compiler
                         Version 5.0.1
 
 

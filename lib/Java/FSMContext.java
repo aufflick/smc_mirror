@@ -63,6 +63,7 @@ public abstract class FSMContext
     {
         // There is no state until the application explicitly
         // sets the initial state.
+        _name = "FSMContext";
         _state = null;
         _transition = "";
         _previousState = null;
@@ -79,6 +80,12 @@ public abstract class FSMContext
     //-----------------------------------------------------------
     // Get methods.
     //
+
+    // Returns the FSM name.
+    public String getName()
+    {
+        return (_name);
+    } // end of getName()
 
     // When debug is set to true, the state machine
     // will print messages to the console.
@@ -131,6 +138,19 @@ public abstract class FSMContext
     // Set methods.
     //
 
+    // Sets the FSM name.
+    public void setName(String name)
+    {
+        if (name != null &&
+            name.length() > 0 &&
+            name.equals(_name) == false)
+        {
+            _name = name;
+        }
+
+        return;
+    } // end of setName(String)
+
     public void setDebugFlag(boolean flag)
     {
         _debugFlag = flag;
@@ -173,6 +193,8 @@ public abstract class FSMContext
 
     public void pushState(State state)
     {
+        State previousState = _state;
+
         if (_state == null)
         {
             throw (new NullPointerException());
@@ -191,6 +213,11 @@ public abstract class FSMContext
 
         _stateStack.push(_state);
         _state = state;
+
+        // Inform any and all listeners about this state
+        // change.
+        _listeners.firePropertyChange(
+            "State", previousState, _state);
 
         return;
     } // end of pushState(State)
@@ -274,6 +301,9 @@ public abstract class FSMContext
 // Member data
 //
 
+    // The FSM name.
+    transient protected String _name;
+
     // The current state.
     transient protected State _state;
 
@@ -297,12 +327,15 @@ public abstract class FSMContext
     transient protected PrintStream _debugStream;
 
     // Store the property change listeners here.
-    private PropertyChangeSupport _listeners;
+    transient private PropertyChangeSupport _listeners;
 } // end of class FSMContext
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2008/01/14 19:59:23  cwrapp
+// Release 5.0.2 check-in.
+//
 // Revision 1.9  2007/08/05 13:00:34  cwrapp
 // Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more information.
 //

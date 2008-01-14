@@ -175,12 +175,6 @@ public final class SmcCSharpGenerator
         _source.println("//");
         _source.println();
 
-		// State Changed event.
-		_source.print(_indent);
-		_source.println(
-            "    public event EventHandler StateChanged;");
-		_source.println();
-
         // State property.
         _source.print(_indent);
         _source.print("    public ");
@@ -260,18 +254,7 @@ public final class SmcCSharpGenerator
         }
 
         _source.print(indent2);
-        _source.println("_state = value;");
-
-		// Notifies listener
-		_source.print(indent2);
-		_source.println("if (StateChanged != null)");
-		_source.print(indent2);
-		_source.println("{");
-		_source.print(indent2);
-		_source.println(
-            "    StateChanged(this, EventArgs.Empty);");
-		_source.print(indent2);
-		_source.println("}");
+        _source.println("SetState(value);");
 
         // If we are in a lock block, close it.
         if (Smc.isSynchronized() == true)
@@ -2029,6 +2012,9 @@ public final class SmcCSharpGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2008/01/14 19:59:23  cwrapp
+// Release 5.0.2 check-in.
+//
 // Revision 1.10  2007/02/21 13:54:15  cwrapp
 // Moved Java code to release 1.5.0
 //

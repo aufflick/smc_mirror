@@ -39,6 +39,60 @@ using System.Diagnostics;
 
 namespace statemap
 {
+    // State change event. Contains the previous and new state.
+    public class StateChangeEventArgs :
+        EventArgs
+    {
+    //-----------------------------------------------------------
+    // Member functions.
+    //
+
+        // Constructor.
+        public StateChangeEventArgs(string fsmName,
+                                    string transitionType,
+                                    State previousState,
+                                    State newState)
+        {
+            _fsmName = fsmName;
+            _transitionType = transitionType;
+            _previousState = previousState;
+            _newState = newState;
+        } // end of StateChangeEventArgs(string, State, State)
+
+        public string FSMName()
+        {
+            return (_fsmName);
+        } // end of FSMName()
+
+        public string TransitionType()
+        {
+            return (_transitionType);
+        } // end of TransitionType()
+
+        public State PreviousState()
+        {
+            return (_previousState);
+        } // end of PreviousState()
+
+        public State NewState()
+        {
+            return (_newState);
+        } // end of NewState()
+
+    //-----------------------------------------------------------
+    // Member data.
+    //
+
+        private readonly string _fsmName;
+        private readonly string _transitionType;
+        private readonly State _previousState;
+        private readonly State _newState;
+    } // end of class StateChangeEventArgs
+
+    // Delegate declaration.
+    public delegate void StateChangeEventHandler(
+         object sender, StateChangeEventArgs args);
+
     // statemap.FSMContext --
     //
     //  Base class for the smc-generated application FSM
@@ -55,13 +109,30 @@ namespace statemap
         {
             // There is no state until the application explicitly
             // sets the initial state.
+            _name = "FSMContext";
             _state = null;
             _transition = "";
             _previousState = null;
             _stateStack = null;
             _debugFlag = false;
             _debugStream = null;
-        }
+        } // end of FSMContext()
+
+        // The state change event.
+        public event StateChangeEventHandler StateChange;
+
+        // The finite state machine name property.
+        public string Name
+        {
+            get
+            {
+                return (_name);
+            }
+            set
+            {
+                _name = value;
+            }
+        } // end of Name()
 
         // DEPRECATED
         // As of v. 4.3.3, System.Diagnostics.Trace is
@@ -110,11 +181,18 @@ namespace statemap
 
         public void SetState(State state)
         {
+            StateChangeEventArgs e =
+                new StateChangeEventArgs(
+                    _name, "SET", _state, state);
+
 #if TRACE
             Trace.WriteLine("NEW STATE    : " +    state.Name);
 #endif
 
             _state = state;
+
+            OnStateChange(e);
+
             return;
         }
 
@@ -143,6 +221,10 @@ namespace statemap
 
         public void PushState(State state)
         {
+            StateChangeEventArgs e =
+                new StateChangeEventArgs(
+                    _name, "PUSH", _state, state);
+
 #if TRACE
             Trace.WriteLine("PUSH TO STATE: " +    state.Name);
 #endif
@@ -158,6 +240,8 @@ namespace statemap
             }
 
             _state = state;
+
+            OnStateChange(e);
 
             return;
         }
@@ -176,13 +260,20 @@ namespace statemap
             }
             else
             {
+                State nextState = (State) _stateStack.Pop();
+                StateChangeEventArgs e =
+                    new StateChangeEventArgs(
+                        _name, "POP", _state, nextState);
+
                 // The pop method removes the top element
                 // from the stack and returns it.
-                _state = (State) _stateStack.Pop();
+                _state = nextState;
 
 #if TRACE
                 Trace.WriteLine("POP TO STATE : " + _state.Name);
 #endif
+
+                OnStateChange(e);
             }
 
             return;
@@ -201,15 +292,30 @@ namespace statemap
         // Release all acquired resources.
         ~FSMContext()  //TODO: Add disposable
         {
+            _name = null;
             _state = null;
             _transition = null;
             _previousState = null;
             _stateStack = null;
         }
 
+        protected virtual void OnStateChange(StateChangeEventArgs e)
+        {
+            if (StateChange != null)
+            {
+                StateChange(this, e);
+            }
+
+            return;;
+        } // end of OnStateChange(StateChangeEventArgs)
+
     //-----------------------------------------------------------
     // Member data
     //
+
+        // The finite state machine's unique name.
+        [NonSerialized]
+        protected string _name;
 
         // The current state.
         [NonSerialized]
@@ -248,6 +354,9 @@ namespace statemap
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2008/01/14 19:59:23  cwrapp
+// Release 5.0.2 check-in.
+//
 // Revision 1.4  2006/09/16 15:04:28  cwrapp
 // Initial v. 4.3.3 check-in.
 //

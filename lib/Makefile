@@ -55,6 +55,7 @@ install : 	$(LIB_STAGING_DIR)
 		$(MAKE) -C C install
 		$(MAKE) -C C++ install
 		$(MAKE) -C CSharp install
+		$(MAKE) -C Groovy install
 		$(MAKE) -C Java install
 		$(MAKE) -C Lua install
 		$(MAKE) -C ObjC install
@@ -67,6 +68,7 @@ uninstall :
 		$(MAKE) -C C uninstall
 		$(MAKE) -C C++ uninstall
 		$(MAKE) -C CSharp uninstall
+		$(MAKE) -C Groovy uninstall
 		$(MAKE) -C Java uninstall
 		$(MAKE) -C Lua uninstall
 		$(MAKE) -C ObjC uninstall
@@ -79,6 +81,7 @@ clean :
 		$(MAKE) -C C clean
 		$(MAKE) -C C++ clean
 		$(MAKE) -C CSharp clean
+		$(MAKE) -C Groovy clean
 		$(MAKE) -C Java clean
 		$(MAKE) -C Lua clean
 		$(MAKE) -C ObjC clean
@@ -91,6 +94,7 @@ realclean :
 		$(MAKE) -C C realclean
 		$(MAKE) -C C++ realclean
 		$(MAKE) -C CSharp realclean
+		$(MAKE) -C Groovy realclean
 		$(MAKE) -C Java realclean
 		$(MAKE) -C Lua realclean
 		$(MAKE) -C ObjC realclean
@@ -102,6 +106,9 @@ realclean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.11  2008/01/14 19:59:23  cwrapp
+# Release 5.0.2 check-in.
+#
 # Revision 1.10  2007/01/15 17:19:11  cwrapp
 # Release 4.4.0 third commit.
 #

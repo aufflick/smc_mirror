@@ -13,7 +13,7 @@
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
-# Copyright (C) 2000 - 2005. Charles W. Rapp.
+# Copyright (C) 2000 - 2008. Charles W. Rapp.
 # All Rights Reserved.
 #
 # Port to Python by Francois Perrad, francois.perrad@gadz.org
@@ -40,7 +40,7 @@
 # Macros.
 #
 
-VERSION=	5_0_1
+VERSION=	5_0_2
 
 STAGING_DIR=	../staging
 SMC_STAGING_DIR=$(STAGING_DIR)/smc
@@ -62,6 +62,9 @@ $(SMC_STAGING_DIR) :	$(STAGING_DIR)
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.15  2008/01/14 19:59:18  cwrapp
+# Release 5.0.2 check-in.
+#
 # Revision 1.14  2007/08/05 12:57:18  cwrapp
 # Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more information.
 #

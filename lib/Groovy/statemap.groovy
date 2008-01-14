@@ -35,7 +35,7 @@ class State implements Serializable {
     String name
     int id
 
-    def toString () {
+    def String toString () {
         return name
     }
 }
@@ -112,6 +112,9 @@ class FSMContext implements Serializable {
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2008/01/14 19:59:23  cwrapp
+// Release 5.0.2 check-in.
+//
 // Revision 1.1  2007/07/16 06:29:37  fperrad
 // + Added Groovy.
 //
