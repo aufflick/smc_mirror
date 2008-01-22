@@ -24,6 +24,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2008/01/22 08:46:03  fperrad
+# - add a target 'graph'
+#
 # Revision 1.2  2007/10/12 08:55:00  fperrad
 # - refactor: Makefile with variables
 #
@@ -31,6 +34,10 @@
 # + Added Lua examples 1 - 3.
 #
 #
+#
+
+#################################################################
+# Macros.
 #
 
 SM_SOURCES=     AppClass.sm
@@ -45,15 +52,19 @@ RM_F=           rm -f
 
 export LUA_PATH=./?.lua;../../../lib/Lua/?.lua
 
-all :           checkstring
+#################################################################
+# Rules.
+#
 
 %_sm.lua : %.sm
 		$(SMC) $(SMC_FLAGS) $<
 
-checkstring :   $(SOURCES)
+%_sm.dot : %.sm
+		$(SMC) -graph -glevel 1 $<
 
-clean :
-		-$(RM_F) *_sm.lua
+all :           checkstring test
+
+checkstring :   $(SOURCES)
 
 test:
 		-lua checkstring.lua ""
@@ -62,3 +73,9 @@ test:
 		-lua checkstring.lua 111
 		-lua checkstring.lua 000111100
 		-lua checkstring.lua 00011a1b10c0
+
+graph :		$(SM_SOURCES:%.sm=%_sm.dot)
+
+clean :
+		-$(RM_F) *_sm.lua
+		-$(RM_F) *_sm.dot

@@ -24,6 +24,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.4  2008/01/22 08:45:03  fperrad
+# - add a target 'graph'
+#
 # Revision 1.3  2007/10/12 08:55:00  fperrad
 # - refactor: Makefile with variables
 #
@@ -35,7 +38,11 @@
 #
 #
 
-TARGET    = traffic
+#################################################################
+# Macros.
+#
+
+TARGET    = ./traffic
 
 CXX       = gcc
 CPPFLAGS  = -g -I../../../lib/C
@@ -43,15 +50,23 @@ SMC       = java -jar ../../../bin/Smc.jar
 SMCFLAGS  = -c -g
 RM_F      = rm -f
 
-FSMS      = stoplight.sm
-SOURCES   = $(FSMS:.sm=_sm.c) stoplight.c main.c
-HEADERS   = $(FSMS:.sm=_sm.h) stoplight.h
+SM_SOURCES= stoplight.sm
+SOURCES   = $(SM_SOURCES:.sm=_sm.c) \
+            stoplight.c \
+            main.c
+HEADERS   = $(SM_SOURCES:.sm=_sm.h) \
+            stoplight.h
 OBJECTS   = $(SOURCES:.c=.o)
 
-##############
+#################################################################
+# Rules.
+#
 
 %_sm.h %_sm.c : %.sm
 		$(SMC) $(SMCFLAGS) $<
+
+%_sm.dot : %.sm
+		$(SMC) -graph -glevel 1 $<
 
 all :		$(TARGET) test
 
@@ -61,8 +76,11 @@ $(TARGET) :	$(HEADERS) $(SOURCES)
 test :		$(TARGET)
 		$(TARGET)
 
+graph :		$(SM_SOURCES:%.sm=%_sm.dot)
+
 clean :
 		-$(RM_F) $(TARGET)
 		-$(RM_F) $(OBJECTS)
 		-$(RM_F) *_sm.h
 		-$(RM_F) *_sm.c
+		-$(RM_F) *_sm.dot

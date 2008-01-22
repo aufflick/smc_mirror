@@ -24,6 +24,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.4  2008/01/22 08:46:22  fperrad
+# - add a target 'graph'
+#
 # Revision 1.3  2007/10/12 08:54:03  fperrad
 # - refactor: Makefile with variables
 #
@@ -33,6 +36,10 @@
 # Revision 1.1  2005/06/16 18:04:15  fperrad
 # Added Perl examples 1 - 4 and 7.
 #
+#
+
+#################################################################
+# Macros.
 #
 
 SM_SOURCES=     Telephone.sm
@@ -45,12 +52,22 @@ SMC=            java -jar ../../../bin/Smc.jar
 SMC_FLAGS=      -perl -g $(REFLECT)
 RM_F=           rm -f
 
-all :           telephone
+#################################################################
+# Rules.
+#
 
 %_sm.pm : %.sm
 		$(SMC) $(SMC_FLAGS) $<
 
+%_sm.dot : %.sm
+		$(SMC) -graph -glevel 1 $<
+
+all :           telephone
+
 telephone :   $(SOURCES)
+
+graph :		$(SM_SOURCES:%.sm=%_sm.dot)
 
 clean :
 		-$(RM_F) *_sm.pm
+		-$(RM_F) *_sm.dot

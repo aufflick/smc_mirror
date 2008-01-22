@@ -24,6 +24,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.4  2008/01/22 08:45:03  fperrad
+# - add a target 'graph'
+#
 # Revision 1.3  2007/10/12 08:55:00  fperrad
 # - refactor: Makefile with variables
 #
@@ -35,7 +38,11 @@
 #
 #
 
-TARGET    = checkstring
+#################################################################
+# Macros.
+#
+
+TARGET    = ./checkstring
 
 CXX       = gcc
 CPPFLAGS  = -g -I../../../lib/C
@@ -43,15 +50,22 @@ SMC       = java -jar ../../../bin/Smc.jar
 SMCFLAGS  = -c -g
 RM_F      = rm -f
 
-FSMS      = AppClass.sm
-SOURCES   = $(FSMS:.sm=_sm.c) AppClass.c main.c
-HEADERS   = $(FSMS:.sm=_sm.h) AppClass.h
+SM_SOURCES= AppClass.sm
+SOURCES   = $(SM_SOURCES:.sm=_sm.c) \
+            AppClass.c main.c
+HEADERS   = $(SM_SOURCES:.sm=_sm.h) \
+            AppClass.h
 OBJECTS   = $(SOURCES:.c=.o)
 
-##############
+#################################################################
+# Rules.
+#
 
 %_sm.h %_sm.c : %.sm
 		$(SMC) $(SMCFLAGS) $<
+
+%_sm.dot : %.sm
+		$(SMC) -graph -glevel 1 $<
 
 all :		$(TARGET) test
 
@@ -59,15 +73,18 @@ $(TARGET) :	$(HEADERS) $(SOURCES)
 		$(CXX) $(CPPFLAGS) -o $@ $(SOURCES)
 
 test :		$(TARGET)
-		-checkstring ""
-		-checkstring 000
-		-checkstring 00011
-		-checkstring 111
-		-checkstring 000111100
-		-checkstring 00011a1b10c0
+		-$(TARGET) ""
+		-$(TARGET) 000
+		-$(TARGET) 00011
+		-$(TARGET) 111
+		-$(TARGET) 000111100
+		-$(TARGET) 00011a1b10c0
+
+graph :		$(SM_SOURCES:%.sm=%_sm.dot)
 
 clean :
 		-$(RM_F) $(TARGET)
 		-$(RM_F) $(OBJECTS)
 		-$(RM_F) *_sm.h
 		-$(RM_F) *_sm.c
+		-$(RM_F) *_sm.dot

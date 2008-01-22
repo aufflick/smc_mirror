@@ -34,7 +34,7 @@ SM_SOURCES=     AppClass.sm
 SOURCES=	$(SM_SOURCES:%.sm=%Context.groovy)
 
 # Uncomment to turn on reflection.
-REFLECT = 	-reflect
+# REFLECT = 	-reflect
 
 SMC=            java -jar ../../../bin/Smc.jar
 SMC_FLAGS=	-groovy -g $(REFLECT)
@@ -53,6 +53,9 @@ all :		checkstring test
 %Context.groovy : %.sm
 		$(SMC) $(SMC_FLAGS) $<
 
+%_sm.dot : %.sm
+		$(SMC) -graph -glevel 1 $<
+
 checkstring :   $(SOURCES)
 
 test :		$(OBJECTS)
@@ -64,12 +67,18 @@ test :		$(OBJECTS)
 		-$(GROOVY) $(GROOVY_FLAGS) checkstring 110010c010011
 		-$(GROOVY) $(GROOVY_FLAGS) checkstring 110010c110010
 
+graph :		$(SM_SOURCES:%.sm=%_sm.dot)
+
 clean :
-		-$(RM_F) ./*Context.groovy
+		-$(RM_F) *Context.groovy
+		-$(RM_F) *_sm.dot
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2008/01/22 08:45:34  fperrad
+# - add a target 'graph'
+#
 # Revision 1.1  2007/07/16 06:31:31  fperrad
 # + Added Groovy examples 1 - 3.
 #

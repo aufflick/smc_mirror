@@ -51,16 +51,25 @@ RM_F=		rm -f
 %_sm.rb : %.sm
 		$(SMC) $(SMC_FLAGS) $<
 
+%_sm.dot : %.sm
+		$(SMC) -graph -glevel 1 $<
+
 all :		$(TARGET)
 
 $(TARGET) :	$(SOURCES)
 
+graph :		$(SM_SOURCES:%.sm=%_sm.dot)
+
 clean :
 		-$(RM_F) *_sm.rb
+		-$(RM_F) *_sm.dot
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.5  2008/01/22 08:47:04  fperrad
+# - add a target 'graph'
+#
 # Revision 1.4  2007/10/12 08:55:04  fperrad
 # - refactor: Makefile with variables
 #

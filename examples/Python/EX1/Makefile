@@ -24,6 +24,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.4  2008/01/22 08:46:38  fperrad
+# - add a target 'graph'
+#
 # Revision 1.3  2007/10/12 08:55:01  fperrad
 # - refactor: Makefile with variables
 #
@@ -33,6 +36,10 @@
 # Revision 1.1  2005/05/28 17:48:29  cwrapp
 # Added Python examples 1 - 4 and 7.
 #
+#
+
+#################################################################
+# Macros.
 #
 
 SM_SOURCES=     AppClass.sm
@@ -45,16 +52,19 @@ SMC=            java -jar ../../../bin/Smc.jar
 SMC_FLAGS=      -python -g $(REFLECT)
 RM_F=           rm -f
 
-all :           checkstring
+#################################################################
+# Rules.
+#
 
 %_sm.py : %.sm
 		$(SMC) $(SMC_FLAGS) $<
 
-checkstring :   $(SOURCES)
+%_sm.dot : %.sm
+		$(SMC) -graph -glevel 1 $<
 
-clean :
-		-$(RM_F) *_sm.py
-		-$(RM_F) *.pyc
+all :           checkstring test
+
+checkstring :   $(SOURCES)
 
 test:
 		-python checkstring.py ""
@@ -63,3 +73,10 @@ test:
 		-python checkstring.py 111
 		-python checkstring.py 000111100
 		-python checkstring.py 00011a1b10c0
+
+graph :		$(SM_SOURCES:%.sm=%_sm.dot)
+
+clean :
+		-$(RM_F) *_sm.py
+		-$(RM_F) *.pyc
+		-$(RM_F) *_sm.dot

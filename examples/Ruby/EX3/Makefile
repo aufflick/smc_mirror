@@ -47,12 +47,12 @@ RM_F=           rm -f
 %_sm.rb : %.sm
 		$(SMC) $(SMC_FLAGS) $<
 
+%_sm.dot : %.sm
+		$(SMC) -graph -glevel 1 $<
+
 all :           checkstring test
 
 checkstring :   $(SOURCES)
-
-clean :
-		-$(RM_F) *_sm.rb
 
 test:
 		-ruby -I ../../../lib/Ruby -w checkstring.rb ""
@@ -63,9 +63,18 @@ test:
 		-ruby -I ../../../lib/Ruby -w checkstring.rb 110010c010011
 		-ruby -I ../../../lib/Ruby -w checkstring.rb 110010c110010
 
+graph :		$(SM_SOURCES:%.sm=%_sm.dot)
+
+clean :
+		-$(RM_F) *_sm.rb
+		-$(RM_F) *_sm.dot
+
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.6  2008/01/22 08:47:03  fperrad
+# - add a target 'graph'
+#
 # Revision 1.5  2007/10/12 08:55:04  fperrad
 # - refactor: Makefile with variables
 #
