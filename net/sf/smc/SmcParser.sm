@@ -39,6 +39,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.19  2008/01/22 08:56:55  fperrad
+ * - fix : allows Perl parameter with graph generation
+ *
  * Revision 1.18  2007/11/19 18:53:21  fperrad
  * + add : jump syntax
  *   jump uses the same syntax as push,
@@ -1475,7 +1478,9 @@ Start
 
     // Perl parameter
     DOLLAR(token: SmcLexer.Token)
-      [ctxt.getTargetLanguage() == Smc.PERL]
+      [ctxt.getTargetLanguage() == Smc.PERL ||
+       ctxt.getTargetLanguage() == Smc.GRAPH ||
+       ctxt.getTargetLanguage() == Smc.TABLE]
         Dollar
         {}
 
