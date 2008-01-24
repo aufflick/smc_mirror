@@ -24,6 +24,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.5  2008/01/24 07:50:17  fperrad
+# - add a target 'table'
+#
 # Revision 1.4  2008/01/22 08:45:03  fperrad
 # - add a target 'graph'
 #
@@ -68,6 +71,9 @@ OBJECTS   = $(SOURCES:.c=.o)
 %_sm.dot : %.sm
 		$(SMC) -graph -glevel 1 $<
 
+%_sm.html : %.sm
+		$(SMC) -table $<
+
 all :		$(TARGET) test
 
 $(TARGET) :	$(HEADERS) $(SOURCES)
@@ -78,9 +84,12 @@ test :		$(TARGET)
 
 graph :		$(SM_SOURCES:%.sm=%_sm.dot)
 
+table :		$(SM_SOURCES:%.sm=%_sm.html)
+
 clean :
 		-$(RM_F) $(TARGET)
 		-$(RM_F) $(OBJECTS)
 		-$(RM_F) *_sm.h
 		-$(RM_F) *_sm.c
 		-$(RM_F) *_sm.dot
+		-$(RM_F) *_sm.html

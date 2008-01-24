@@ -50,19 +50,28 @@ RM_F=           rm -f
 %_sm.dot : %.sm
 		$(SMC) -graph -glevel 1 $<
 
+%_sm.html : %.sm
+		$(SMC) -table $<
+
 all :           telephone
 
 telephone :   $(SOURCES)
 
 graph :		$(SM_SOURCES:%.sm=%_sm.dot)
 
+table :		$(SM_SOURCES:%.sm=%_sm.html)
+
 clean :
 		-$(RM_F) *_sm.rb
 		-$(RM_F) *_sm.dot
+		-$(RM_F) *_sm.html
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.6  2008/01/24 07:50:24  fperrad
+# - add a target 'table'
+#
 # Revision 1.5  2008/01/22 08:47:04  fperrad
 # - add a target 'graph'
 #

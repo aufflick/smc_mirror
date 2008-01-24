@@ -56,6 +56,9 @@ all :		checkstring test
 %_sm.dot : %.sm
 		$(SMC) -graph -glevel 1 $<
 
+%_sm.html : %.sm
+		$(SMC) -table $<
+
 checkstring :   $(SOURCES)
 
 test :		$(OBJECTS)
@@ -69,13 +72,19 @@ test :		$(OBJECTS)
 
 graph :		$(SM_SOURCES:%.sm=%_sm.dot)
 
+table :		$(SM_SOURCES:%.sm=%_sm.html)
+
 clean :
 		-$(RM_F) *Context.groovy
 		-$(RM_F) *_sm.dot
+		-$(RM_F) *_sm.html
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2008/01/24 07:50:18  fperrad
+# - add a target 'table'
+#
 # Revision 1.2  2008/01/22 08:45:34  fperrad
 # - add a target 'graph'
 #
