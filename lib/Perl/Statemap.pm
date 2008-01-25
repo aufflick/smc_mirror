@@ -4,17 +4,22 @@
 #
 
 use strict;
+use warnings;
 
 package StateMachine::Statemap;
 
 use vars qw($VERSION);
-$VERSION = '0.01';
+$VERSION = '0.02';
 
 =head1 NAME
 
 StateMachine::Statemap
 
 =head1 DESCRIPTION
+
+This is the SMC (State Machine Compiler) runtime for target language Perl.
+
+See L<http://smc.sourceforge.net/>.
 
 This namespace contains two class :
 
@@ -43,14 +48,14 @@ Constructor.
 =cut
 
 sub new {
-	my $proto = shift;
-	my $class = ref($proto) || $proto;
-	my ($name, $id) = @_;
-	my $self = {};
-	bless($self, $class);
-	$self->{_name} = $name;
-	$self->{_id} = $id;
-	return $self
+    my $proto = shift;
+    my $class = ref($proto) || $proto;
+    my ($name, $id) = @_;
+    my $self = {};
+    bless($self, $class);
+    $self->{_name} = $name;
+    $self->{_id} = $id;
+    return $self
 }
 
 =head2 getName
@@ -60,8 +65,8 @@ Returns the state's printable name.
 =cut
 
 sub getName {
-	my $self = shift;
-	return $self->{_name};
+    my $self = shift;
+    return $self->{_name};
 }
 
 =head2 getId
@@ -71,8 +76,8 @@ Returns the state's unique identifier.
 =cut
 
 sub getId {
-	my $self = shift;
-	return $self->{_id};
+    my $self = shift;
+    return $self->{_id};
 }
 
 package StateMachine::Statemap::FSMContext;
@@ -95,17 +100,17 @@ Default constructor.
 =cut
 
 sub new {
-	my $proto = shift;
-	my $class = ref($proto) || $proto;
-	my $self = {};
-	bless($self, $class);
-	$self->{_state} = undef;
-	$self->{_previous_state} = undef;
-	$self->{_state_stack} = [];
-	$self->{_transition} = undef;
-	$self->{_debug_flag} = undef;
-	$self->{_debug_stream} = \*STDERR;
-	return $self
+    my $proto = shift;
+    my $class = ref($proto) || $proto;
+    my $self = {};
+    bless($self, $class);
+    $self->{_state} = undef;
+    $self->{_previous_state} = undef;
+    $self->{_state_stack} = [];
+    $self->{_transition} = undef;
+    $self->{_debug_flag} = undef;
+    $self->{_debug_stream} = \*STDERR;
+    return $self
 }
 
 =head2 getDebugFlag
@@ -115,8 +120,8 @@ Returns the debug flag's current setting.
 =cut
 
 sub getDebugFlag {
-	my $self = shift;
-	return $self->{_debug_flag};
+    my $self = shift;
+    return $self->{_debug_flag};
 }
 
 =head2 setDebugFlag
@@ -127,9 +132,9 @@ A true value means debugging is on and false means off.
 =cut
 
 sub setDebugFlag {
-	my $self = shift;
-	my ($flag) = @_;
-	$self->{_debug_flag} = $flag;
+    my $self = shift;
+    my ($flag) = @_;
+    $self->{_debug_flag} = $flag;
 }
 
 =head2 getDebugStream
@@ -139,8 +144,8 @@ Returns the stream to which debug output is written.
 =cut
 
 sub getDebugStream {
-	my $self = shift;
-	return $self->{_debug_stream};
+    my $self = shift;
+    return $self->{_debug_stream};
 }
 
 =head2 setDebugStream
@@ -150,9 +155,9 @@ Sets the debug output stream.
 =cut
 
 sub setDebugStream {
-	my $self = shift;
-	my ($stream) = @_;
-	$self->{_debug_stream} = $stream;
+    my $self = shift;
+    my ($stream) = @_;
+    $self->{_debug_stream} = $stream;
 }
 
 =head2 isInTransition
@@ -164,8 +169,8 @@ True if state is undefined.
 =cut
 
 sub isInTransition {
-	my $self = shift;
-	return !defined($self->{_state});
+    my $self = shift;
+    return !defined($self->{_state});
 }
 
 =head2 getTransition
@@ -177,8 +182,8 @@ Used only for debugging purposes.
 =cut
 
 sub getTransition {
-	my $self = shift;
-	return $self->{_transition};
+    my $self = shift;
+    return $self->{_transition};
 }
 
 =head2 clearState
@@ -188,9 +193,9 @@ Clears the current state.
 =cut
 
 sub clearState {
-	my $self = shift;
-	$self->{_previous_state} = $self->{_state};
-	$self->{_state} = undef;
+    my $self = shift;
+    $self->{_previous_state} = $self->{_state};
+    $self->{_state} = undef;
 }
 
 =head2 getPreviousState
@@ -202,8 +207,8 @@ May be B<undef>.
 =cut
 
 sub getPreviousState {
-	my $self = shift;
-	return $self->{_previous_state};
+    my $self = shift;
+    return $self->{_previous_state};
 }
 
 =head2 setState
@@ -213,24 +218,25 @@ Sets the current state to the specified state.
 =cut
 
 sub setState {
-	my $self = shift;
-	my ($state) = @_;
-	if ($self->{_debug_flag}) {
-		confess "undefined state.\n"
-				unless (defined $state);
-		confess "$state is not a Statemap::State.\n"
-				unless (ref $state and $state->isa("StateMachine::Statemap::State"));
-	} else {
-		croak "undefined state.\n"
-				unless (defined $state);
-		croak "$state is not a Statemap::State.\n"
-				unless (ref $state and $state->isa("StateMachine::Statemap::State"));
-	}
-	$self->{_state} = $state;
-	if ($self->{_debug_flag}) {
-		my $fh = $self->{_debug_stream};
-		print $fh "NEW STATE    : ", $self->{_state}->getName(), "\n";
-	}
+    my $self = shift;
+    my ($state) = @_;
+    if ($self->{_debug_flag}) {
+        confess "undefined state.\n"
+                unless (defined $state);
+        confess "$state is not a Statemap::State.\n"
+                unless (ref $state and $state->isa('StateMachine::Statemap::State'));
+    }
+    else {
+        croak "undefined state.\n"
+                unless (defined $state);
+        croak "$state is not a Statemap::State.\n"
+                unless (ref $state and $state->isa('StateMachine::Statemap::State'));
+    }
+    $self->{_state} = $state;
+    if ($self->{_debug_flag}) {
+        my $fh = $self->{_debug_stream};
+        print $fh "NEW STATE    : ", $self->{_state}->getName(), "\n";
+    }
 }
 
 =head2 isStateStackEmpty
@@ -240,8 +246,8 @@ Returns true if the state stack is empty and false otherwise.
 =cut
 
 sub isStateStackEmpty {
-	my $self = shift;
-	return scalar(@{$self->{_state_stack}}) == 0;
+    my $self = shift;
+    return scalar(@{$self->{_state_stack}}) == 0;
 }
 
 =head2 getStateStackDepth
@@ -251,8 +257,8 @@ Returns the state stack's depth.
 =cut
 
 sub getStateStackDepth {
-	my $self = shift;
-	return scalar(@{$self->{_state_stack}});
+    my $self = shift;
+    return scalar(@{$self->{_state_stack}});
 }
 
 =head2 pushState
@@ -263,27 +269,28 @@ and make the specified state the current state.
 =cut
 
 sub pushState {
-	my $self = shift;
-	my ($state) = @_;
-	if ($self->{_debug_flag}) {
-		confess "undefined state\n"
-				unless (defined $state);
-		confess "$state is not a State\n"
-				unless (ref $state and $state->isa("StateMachine::Statemap::State"));
-	} else {
-		croak "undefined state\n"
-				unless (defined $state);
-		croak "$state is not a State\n"
-				unless (ref $state and $state->isa("StateMachine::Statemap::State"));
-	}
-	if (defined $self->{_state}) {
-		push @{$self->{_state_stack}}, $self->{_state};
-	}
-	$self->{_state} = $state;
-	if ($self->{_debug_flag}) {
-		my $fh = $self->{_debug_stream};
-		print $fh "PUSH TO STATE: ", $self->{_state}->getName(), "\n";
-	}
+    my $self = shift;
+    my ($state) = @_;
+    if ($self->{_debug_flag}) {
+        confess "undefined state\n"
+                unless (defined $state);
+        confess "$state is not a State\n"
+                unless (ref $state and $state->isa('StateMachine::Statemap::State'));
+    }
+    else {
+        croak "undefined state\n"
+                unless (defined $state);
+        croak "$state is not a State\n"
+                unless (ref $state and $state->isa('StateMachine::Statemap::State'));
+    }
+    if (defined $self->{_state}) {
+        push @{$self->{_state_stack}}, $self->{_state};
+    }
+    $self->{_state} = $state;
+    if ($self->{_debug_flag}) {
+        my $fh = $self->{_debug_stream};
+        print $fh "PUSH TO STATE: ", $self->{_state}->getName(), "\n";
+    }
 }
 
 =head2 popState
@@ -293,22 +300,24 @@ Make the state on top of the state stack the current state.
 =cut
 
 sub popState {
-	my $self = shift;
-	if (scalar(@{$self->{_state_stack}}) == 0) {
-		if ($self->{_debug_flag}) {
-			my $fh = $self->{_debug_stream};
-			print $fh "POPPING ON EMPTY STATE STACK.\n";
-			confess "empty state stack.\n"
-		} else {
-			croak "empty state stack.\n"
-		}
-	} else {
-		$self->{_state} = pop @{$self->{_state_stack}};
-		if ($self->{_debug_flag}) {
-			my $fh = $self->{_debug_stream};
-			print $fh "POP TO STATE : ", $self->{_state}->getName(), "\n";
-		}
-	}
+    my $self = shift;
+    if (scalar(@{$self->{_state_stack}}) == 0) {
+        if ($self->{_debug_flag}) {
+            my $fh = $self->{_debug_stream};
+            print $fh "POPPING ON EMPTY STATE STACK.\n";
+            confess "empty state stack.\n"
+        }
+        else {
+            croak "empty state stack.\n"
+        }
+    }
+    else {
+        $self->{_state} = pop @{$self->{_state_stack}};
+        if ($self->{_debug_flag}) {
+            my $fh = $self->{_debug_stream};
+            print $fh "POP TO STATE : ", $self->{_state}->getName(), "\n";
+        }
+    }
 }
 
 =head2 emptyStateStack
@@ -318,8 +327,8 @@ Remove all states from the state stack.
 =cut
 
 sub emptyStateStack {
-	my $self = shift;
-	$self->{_state_stack} = [];
+    my $self = shift;
+    $self->{_state_stack} = [];
 }
 
 =head1 LICENSE
@@ -342,13 +351,13 @@ The Initial Developer of the Original Code is Charles W. Rapp.
 
 Port to Perl by Francois Perrad, francois.perrad@gadz.org
 
-Copyright 2004, Francois Perrad.
+Copyright 2004-2008, Francois Perrad.
 All Rights Reserved.
 
 Contributor(s):
 
 =head1 SEE ALSO
 
-http://smc.sourceforge.net/
+L<http://smc.sourceforge.net/>
 
 =cut
