@@ -31,6 +31,9 @@
 
 package statemap
 
+import java.beans.PropertyChangeListener
+import java.beans.PropertyChangeSupport
+
 class State implements Serializable {
     String name
     int id
@@ -53,6 +56,7 @@ class FSMContext implements Serializable {
     String transition = ''
     boolean debugFlag = false
     def debugStream = System.err
+    private _listeners = new PropertyChangeSupport(this)
 
     // Is this state machine in a transition? If state is null,
     // then true; otherwise, false.
@@ -61,11 +65,14 @@ class FSMContext implements Serializable {
     }
 
     def setState (state) {
+        def previousState = _state
         if (! (state instanceof State))
             throw new IllegalArgumentException('state should be a statemap.State')
         if (debugFlag)
             debugStream.println('NEW STATE    : ' + state.name)
         _state = state
+        // Inform all listeners about this state change
+        _listeners.firePropertyChange('State', previousState, _state)
     }
 
     def getState () {
@@ -80,6 +87,7 @@ class FSMContext implements Serializable {
     }
 
     def pushState (state) {
+        def previousState = _state
         if (! (state instanceof State))
             throw new IllegalArgumentException('state should be a statemap.State')
         if (_state == null)
@@ -88,6 +96,8 @@ class FSMContext implements Serializable {
             debugStream.println('PUSH TO STATE: ' + state.name)
         _stateStack << _state   // push
         _state = state
+        // Inform all listeners about this state change
+        _listeners.firePropertyChange('State', previousState, _state)
     }
 
     def popState () {
@@ -97,9 +107,12 @@ class FSMContext implements Serializable {
             throw new EmptyStackException('empty state stack')
         }
         else {
+            def previousState = _state
             _state = _stateStack.pop()
             if (debugFlag)
                 debugStream.println('POP TO STATE : ' + _state.name)
+            // Inform all listeners about this state change
+            _listeners.firePropertyChange('State', previousState, _state)
         }
     }
 
@@ -107,11 +120,22 @@ class FSMContext implements Serializable {
         _stateStack = []
     }
 
+    def addStateChangeListener(listener) {
+        _listeners.addPropertyChangeListener('State', listener)
+    }
+
+    def removeStateChangeListener(listener) {
+        _listeners.removePropertyChangeListener('State', listener)
+    }
+
 }
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2008/02/04 10:54:01  fperrad
+// + Added Event Notification
+//
 // Revision 1.2  2008/01/14 19:59:23  cwrapp
 // Release 5.0.2 check-in.
 //
