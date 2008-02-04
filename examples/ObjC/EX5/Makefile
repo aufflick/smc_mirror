@@ -26,37 +26,71 @@
 # (See the bottom of this file.)
 #
 
-TARGET    = sleeper
+#################################################################
+# Macros.
+#
 
-GCC       = gcc
-CPPFLAGS  = -g -I../../../lib/ObjC -framework Foundation
-SMC       = java -jar ../../../bin/Smc.jar
-SMCFLAGS  = -objc -g
+SM_SOURCES=     AppClass.sm
+SOURCES=        $(SM_SOURCES:.sm=_sm.m) \
+                AppClass.m \
+                main.m \
+                ../../../lib/ObjC/statemap.m
+HEADERS=        $(SM_SOURCES:.sm=_sm.h) \
+                AppClass.h
+OBJECTS=        $(SOURCES:.m=.o)
+TARGET=         ./sleeper
 
-FSMS      = AppClass.sm
-SOURCES   = $(FSMS:.sm=_sm.m) AppClass.m main.m ../../../lib/ObjC/statemap.m
-HEADERS   = $(FSMS:.sm=_sm.h) AppClass.h
-OBJECTS   = $(SOURCES:.m=.o)
+# Uncomment to turn on debug message generation.
+TRACE=          -g
 
-##############
+SMC=            java -jar ../../../bin/Smc.jar
+SMC_FLAGS=      -objc $(TRACE)
+
+GCC=            gcc
+CPPFLAGS=       -g -I../../../lib/ObjC/ -framework Foundation
+
+RM_F=           rm -f
+
+#################################################################
+# Rules.
+#
 
 %_sm.h %_sm.m : %.sm
-	$(SMC) $(SMCFLAGS) $<
+		$(SMC) $(SMC_FLAGS) $<
 
-all	: $(TARGET) test
+%_sm.dot :      %.sm
+		$(SMC) -graph -glevel 1 $<
 
-$(TARGET) : $(HEADERS) $(SOURCES)
+%_sm.html :     %.sm
+		$(SMC) -table $<
+
+all :           $(TARGET) test
+
+$(TARGET) :     $(HEADERS) $(SOURCES)
 	$(GCC) $(CPPFLAGS) -o $@ $(SOURCES)
 
-test	: $(TARGET)
+test :          $(TARGET)
 	$(TARGET)
 
+graph :         $(SM_SOURCES:%.sm=%_sm.dot)
+
+table :         $(SM_SOURCES:%.sm=%_sm.html)
+
 clean :
-	rm -f $(TARGET) $(OBJECTS) *_sm.h *_sm.m
+		-$(RM_F) $(TARGET) $(OBJECTS)
+		-$(RM_F) *_sm.h
+		-$(RM_F) *_sm.m
+		-$(RM_F) *_sm.dot
+		-$(RM_F) *_sm.html
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2008/02/04 11:15:09  fperrad
+# + Exhibit options
+# + add a target 'table'
+# + add a target 'graph'
+#
 # Revision 1.2  2007/01/15 16:58:57  cwrapp
 # Release 4.4.0 second commit.
 #

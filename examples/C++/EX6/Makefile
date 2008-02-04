@@ -23,6 +23,11 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.7  2008/02/04 11:12:16  fperrad
+# + Exhibit options
+# + add a target 'table'
+# + add a target 'graph'
+#
 # Revision 1.6  2007/12/28 12:34:40  cwrapp
 # Version 5.0.1 check-in.
 #
@@ -33,57 +38,82 @@
 # Initial revision
 #
 
-CXX       = c++
-# CPPFLAGS  = -D_DEBUG -g -I. -I../../../lib/C++
-CPPFLAGS  = -g -Wall -Wextra -I. -I../../../lib
-SMC       = java -jar ../../../bin/Smc.jar
-SMCFLAGS  = -c++ -g
+#################################################################
+# Macros.
+#
 
-FSMS           = 	TcpConnection.sm
+SM_SOURCES=     TcpConnection.sm
+COMMON_SOURCES= $(SM_SOURCES:.sm=_sm.cpp) \
+                Eventloop.cpp \
+                TcpSegment.cpp \
+                TcpConnection.cpp \
+                TcpClient.cpp \
+                TcpServer.cpp
+SERVER_SOURCES= AppServer.cpp \
+                AppClient.cpp \
+                server.cpp
+CLIENT_SOURCES= AppClient.cpp \
+                AppServer.cpp \
+                client.cpp
+COMMON_OBJECTS= $(COMMON_SOURCES:.cpp=.o)
+SERVER_OBJECTS= $(SERVER_SOURCES:.cpp=.o)
+CLIENT_OBJECTS= $(CLIENT_SOURCES:.cpp=.o)
 
-COMMON_SOURCES = 	TcpConnection_sm.cpp \
-			Eventloop.cpp \
-			TcpSegment.cpp \
-			TcpConnection.cpp \
-			TcpClient.cpp \
-			TcpServer.cpp
+# Uncomment to turn off IOStreams for debug.
+# NO_STREAMS=     -nostreams
 
-SERVER_SOURCES = 	AppServer.cpp \
-			AppClient.cpp \
-			server.cpp
+# Uncomment to turn on debug message generation.
+TRACE=          -g $(NO_STREAMS)
 
-CLIENT_SOURCES =	AppClient.cpp \
-			AppServer.cpp \
-			client.cpp
+# Uncomment to turn on serialization.
+# SERIAL=         -serial
 
-COMMON_OBJECTS =	$(COMMON_SOURCES:.cpp=.o)
-SERVER_OBJECTS =	$(SERVER_SOURCES:.cpp=.o)
-CLIENT_OBJECTS =	$(CLIENT_SOURCES:.cpp=.o)
+# Uncomment to turn off try/catch/rethrow generation.
+# NO_CATCH=       -nocatch
 
-##############
+# Uncomment to turn off exception throws.
+# NO_EXCEPT=      -noex
+
+SMC=            java -jar ../../../bin/Smc.jar
+SMC_FLAGS=      -c++ $(TRACE) $(SERIAL) $(NO_CATCH) $(NO_EXCEPT)
+
+CXX=            c++
+CPPFLAGS=       -g -Wall -Wextra -I../../../lib
+# CPPFLAGS=       -D_DEBUG -g -I. -I../../../lib
+
+RM_F=           rm -f
+
+#################################################################
+# Rules.
+#
 
 %_sm.h %_sm.cpp : %.sm
-	$(SMC) $(SMCFLAGS) $<
+		$(SMC) $(SMC_FLAGS) $<
 
-%.o :	%.cpp
-	$(CXX) $(CPPFLAGS) -c $<
+%_sm.dot :      %.sm
+		$(SMC) -graph -glevel 1 $<
 
-all : server client
+%_sm.html :     %.sm
+		$(SMC) -table $<
 
-common : $(COMMON_OBJECTS)
+all :           server client
 
-server : common $(SERVER_OBJECTS)
-	$(CXX) -g -o $@ $(COMMON_OBJECTS) $(SERVER_OBJECTS)
+common :        $(COMMON_OBJECTS)
 
-client : common $(CLIENT_OBJECTS)
-	$(CXX) -g -o $@ $(COMMON_OBJECTS) $(CLIENT_OBJECTS)
+server :        common $(SERVER_OBJECTS)
+		$(CXX) -g -o $@ $(COMMON_OBJECTS) $(SERVER_OBJECTS)
+
+client :        common $(CLIENT_OBJECTS)
+		$(CXX) -g -o $@ $(COMMON_OBJECTS) $(CLIENT_OBJECTS)
+
+graph :         $(SM_SOURCES:%.sm=%_sm.dot)
+
+table :         $(SM_SOURCES:%.sm=%_sm.html)
 
 clean :
-	-rm -f server \
-                client \
-		$(COMMON_OBJECTS) \
-		$(SERVER_OBJECTS) \
-                $(CLIENT_OBJECTS) \
-		*_sm.h \
-		*_sm.cpp \
-		core
+		-$(RM_F) server client
+		-$(RM_F) $(COMMON_OBJECTS) $(SERVER_OBJECTS) $(CLIENT_OBJECTS)
+		-$(RM_F) *_sm.h
+		-$(RM_F) *_sm.cpp
+		-$(RM_F) *_sm.dot
+		-$(RM_F) *_sm.html

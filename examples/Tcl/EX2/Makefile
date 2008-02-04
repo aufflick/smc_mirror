@@ -31,38 +31,64 @@
 
 SM_SOURCES=     AppClass.sm
 SOURCES=        $(SM_SOURCES:%.sm=%_sm.tcl)
+CHECKSTRING=    tclsh checkstring.tcl
+
+# Uncomment to turn on debug message generation.
+TRACE=          -g
+
+# Uncomment to turn on serialization.
+# SERIAL=         -serial
 
 # Uncomment to turn on reflection.
-# REFLECT = 	-reflect
+# REFLECT=        -reflect
 
 SMC=            java -jar ../../../bin/Smc.jar
-SMC_FLAGS=      -tcl -g $(REFLECT)
+SMC_FLAGS=      -tcl $(TRACE) $(SERIAL) $(REFLECT)
+
+RM_F=           rm -f
 
 #################################################################
 # Rules.
 #
 
-%_sm.tcl : %.sm
+%_sm.tcl :      %.sm
 		$(SMC) $(SMC_FLAGS) $<
+
+%_sm.dot :      %.sm
+		$(SMC) -graph -glevel 1 $<
+
+%_sm.html :     %.sm
+		$(SMC) -table $<
 
 all :           checkstring test
 
 checkstring :   $(SOURCES)
 
-clean :
-		-rm *_sm.tcl
-
 test:
-		-tclsh checkstring.tcl ""
-		-tclsh checkstring.tcl 000
-		-tclsh checkstring.tcl 00011
-		-tclsh checkstring.tcl 111
-		-tclsh checkstring.tcl 000111100
-		-tclsh checkstring.tcl 00011a1b10c0
+		-$(CHECKSTRING) ""
+		-$(CHECKSTRING) 000
+		-$(CHECKSTRING) 00011
+		-$(CHECKSTRING) 111
+		-$(CHECKSTRING) 000111100
+		-$(CHECKSTRING) 00011a1b10c0
+
+graph :         $(SM_SOURCES:%.sm=%_sm.dot)
+
+table :         $(SM_SOURCES:%.sm=%_sm.html)
+
+clean :
+		-$(RM_F) *_sm.tcl
+		-$(RM_F) *_sm.dot
+		-$(RM_F) *_sm.html
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2008/02/04 11:16:26  fperrad
+# + Exhibit options
+# + add a target 'table'
+# + add a target 'graph'
+#
 # Revision 1.1  2007/01/15 16:58:59  cwrapp
 # Release 4.4.0 second commit.
 #

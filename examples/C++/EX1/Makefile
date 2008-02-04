@@ -25,42 +25,89 @@
 # (See the bottom of this file.)
 #
 
-TARGET    = checkstring
+#################################################################
+# Macros.
+#
 
-CXX       = c++
-CPPFLAGS  = -g -Wall -Wextra -I../../../lib
-SMC       = java -jar ../../../bin/Smc.jar
-SMCFLAGS  = -c++ -g
+SM_SOURCES=     AppClass.sm
+SOURCES=        $(SM_SOURCES:.sm=_sm.cpp) \
+                AppClass.cpp \
+                Main.cpp
+HEADERS=        $(SM_SOURCES:.sm=_sm.h) \
+                AppClass.h
+OBJECTS=        $(SOURCES:.cpp=.o)
+TARGET=         checkstring
+CHECKSTRING=    ./$(TARGET)
 
-FSMS      = AppClass.sm
-SOURCES   = $(FSMS:.sm=_sm.cpp) AppClass.cpp Main.cpp
-HEADERS   = $(FSMS:.sm=_sm.h) AppClass.h
-OBJECTS   = $(SOURCES:.cpp=.o)
+# Uncomment to turn off IOStreams for debug.
+# NO_STREAMS=     -nostreams
 
-##############
+# Uncomment to turn on debug message generation.
+TRACE=          -g $(NO_STREAMS)
+
+# Uncomment to turn on serialization.
+# SERIAL=         -serial
+
+# Uncomment to turn off try/catch/rethrow generation.
+# NO_CATCH=       -nocatch
+
+# Uncomment to turn off exception throws.
+# NO_EXCEPT=      -noex
+
+SMC=            java -jar ../../../bin/Smc.jar
+SMC_FLAGS=      -c++ $(TRACE) $(SERIAL) $(NO_CATCH) $(NO_EXCEPT)
+
+CXX=            c++
+CPPFLAGS=       -g -Wall -Wextra -I../../../lib
+
+RM_F=           rm -f
+
+#################################################################
+# Rules.
+#
 
 %_sm.h %_sm.cpp : %.sm
-		$(SMC) $(SMCFLAGS) $<
+		$(SMC) $(SMC_FLAGS) $<
 
-all :		$(TARGET) test
+%_sm.dot :      %.sm
+		$(SMC) -graph -glevel 1 $<
 
-$(TARGET) :	$(HEADERS) $(SOURCES)
+%_sm.html :     %.sm
+		$(SMC) -table $<
+
+all :           $(TARGET) test
+
+$(TARGET) :     $(HEADERS) $(SOURCES)
 		$(CXX) $(CPPFLAGS) -o $@ $(SOURCES)
 
-test :		$(TARGET)
-		-checkstring ""
-		-checkstring 000
-		-checkstring 00011
-		-checkstring 111
-		-checkstring 000111100
-		-checkstring 00011a1b10c0
+test :          $(TARGET)
+		-$(CHECKSTRING) ""
+		-$(CHECKSTRING) 000
+		-$(CHECKSTRING) 00011
+		-$(CHECKSTRING) 111
+		-$(CHECKSTRING) 000111100
+		-$(CHECKSTRING) 00011a1b10c0
+
+graph :         $(SM_SOURCES:%.sm=%_sm.dot)
+
+table :         $(SM_SOURCES:%.sm=%_sm.html)
 
 clean :
-		-rm -f $(TARGET) $(OBJECTS) *_sm.h *_sm.cpp
+		-$(RM_F) $(TARGET)
+		-$(RM_F) $(OBJECTS)
+		-$(RM_F) *_sm.h
+		-$(RM_F) *_sm.cpp
+		-$(RM_F) *_sm.dot
+		-$(RM_F) *_sm.html
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.9  2008/02/04 11:09:08  fperrad
+# + Exhibit options
+# + add a target 'table'
+# + add a target 'graph'
+#
 # Revision 1.8  2007/12/28 12:34:39  cwrapp
 # Version 5.0.1 check-in.
 #

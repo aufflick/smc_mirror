@@ -29,43 +29,72 @@
 # Macros.
 #
 
-TARGET=		Traffic
+SM_SOURCES=     VEHICLE.SM \
+                stoplight.sm
+SOURCES=        $(SM_SOURCES:%.sm=%_sm.tcl) \
+                $(SM_SOURCES:%.SM=%_sm.tcl)
+TARGET=         Traffic
 
-SM_SOURCES=	VEHICLE.SM \
-		stoplight.sm
+# Uncomment to turn on debug message generation.
+TRACE=          -g
 
-SOURCES=	$(SM_SOURCES:%.sm=%_sm.tcl) \
-		$(SM_SOURCES:%.SM=%_sm.tcl)
+# Uncomment to turn on serialization.
+# SERIAL=         -serial
 
 # Uncomment to turn on reflection.
-# REFLECT = 	-reflect
+# REFLECT=        -reflect
 
-SMC=		java -jar ../../../bin/Smc.jar
-SMC_FLAGS=	-tcl -g $(REFLECT)
+SMC=            java -jar ../../../bin/Smc.jar
+SMC_FLAGS=      -tcl $(TRACE) $(SERIAL) $(REFLECT)
+
+RM_F=           rm -f
 
 #################################################################
 # Rules.
 #
 
-%_sm.tcl : %.sm
+%_sm.tcl :      %.sm
 		$(SMC) $(SMC_FLAGS) $<
 
-%_sm.tcl : %.SM
+%_sm.tcl :      %.SM
 		$(SMC) $(SMC_FLAGS) $<
 
-all :		$(TARGET) test
+%_sm.dot :      %.sm
+		$(SMC) -graph -glevel 1 $<
 
-$(TARGET) :	$(SOURCES)
+%_sm.dot :      %.SM
+		$(SMC) -graph -glevel 1 $<
 
-test :		$(SOURCES)
+%_sm.html :     %.sm
+		$(SMC) -table $<
+
+%_sm.html :     %.SM
+		$(SMC) -table $<
+
+all :           $(TARGET) test
+
+$(TARGET) :     $(SOURCES)
+
+test :          $(SOURCES)
 		wish TRAFFIC.TCL
 
+graph :         $(SM_SOURCES:%.sm=%_sm.dot) $(SM_SOURCES:%.SM=%_sm.dot)
+
+table :         $(SM_SOURCES:%.sm=%_sm.html) $(SM_SOURCES:%.SM=%_sm.html)
+
 clean :
-		-rm *_sm.tcl
+		-$(RM_F) *_sm.tcl
+		-$(RM_F) *_sm.dot
+		-$(RM_F) *_sm.html
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2008/02/04 11:17:29  fperrad
+# + Exhibit options
+# + add a target 'table'
+# + add a target 'graph'
+#
 # Revision 1.1  2007/01/15 16:58:59  cwrapp
 # Release 4.4.0 second commit.
 #
