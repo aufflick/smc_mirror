@@ -48,10 +48,10 @@ LIB_STAGING_DIR=../$(SMC_STAGING_DIR)/lib
 #
 
 $(LIB_STAGING_DIR) :
-		mkdir $(LIB_STAGING_DIR)
+		$(MKDIR) $(LIB_STAGING_DIR)
 
 # Copy all products to the staging directory.
-install : 	$(LIB_STAGING_DIR)
+install :       $(LIB_STAGING_DIR)
 		$(MAKE) -C C install
 		$(MAKE) -C C++ install
 		$(MAKE) -C CSharp install
@@ -62,7 +62,9 @@ install : 	$(LIB_STAGING_DIR)
 		$(MAKE) -C Perl install
 		$(MAKE) -C Python install
 		$(MAKE) -C Ruby install
+		$(MAKE) -C Scala install
 		$(MAKE) -C Tcl install
+		-$(MAKE) -C VB install
 
 uninstall :
 		$(MAKE) -C C uninstall
@@ -75,7 +77,9 @@ uninstall :
 		$(MAKE) -C Perl uninstall
 		$(MAKE) -C Python uninstall
 		$(MAKE) -C Ruby uninstall
+		$(MAKE) -C Scala uninstall
 		$(MAKE) -C Tcl uninstall
+		$(MAKE) -C VB uninstall
 
 clean :
 		$(MAKE) -C C clean
@@ -88,7 +92,9 @@ clean :
 		$(MAKE) -C Perl clean
 		$(MAKE) -C Python clean
 		$(MAKE) -C Ruby clean
+		$(MAKE) -C Scala clean
 		$(MAKE) -C Tcl clean
+		$(MAKE) -C VB clean
 
 realclean :
 		$(MAKE) -C C realclean
@@ -101,11 +107,16 @@ realclean :
 		$(MAKE) -C Perl realclean
 		$(MAKE) -C Python realclean
 		$(MAKE) -C Ruby realclean
+		$(MAKE) -C Scala realclean
 		$(MAKE) -C Tcl realclean
+		$(MAKE) -C VB realclean
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.12  2008/02/04 10:50:56  fperrad
+# + Added Scala library
+#
 # Revision 1.11  2008/01/14 19:59:23  cwrapp
 # Release 5.0.2 check-in.
 #
