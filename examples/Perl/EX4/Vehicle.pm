@@ -29,12 +29,16 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2008/02/04 12:40:28  fperrad
+# some Perl Best Practices
+#
 # Revision 1.1  2005/06/16 18:04:15  fperrad
 # Added Perl examples 1 - 4 and 7.
 #
 #
 
 use strict;
+use warnings;
 
 use Vehicle_sm;
 
@@ -43,90 +47,93 @@ package Vehicle;
 our $_speed;
 
 sub BEGIN {
-	$_speed = 2;
+    $_speed = 2;
 }
 
 sub new {
-	my $proto = shift;
-	my $class = ref($proto) || $proto;
-	my ($stoplight, $direction, $canvas) = @_;
-	my $self = {};
-	bless($self, $class);
-	$self->{_fsm} = new smc_ex4::Vehicle_sm($self);
+    my $proto = shift;
+    my $class = ref($proto) || $proto;
+    my ($stoplight, $direction, $canvas) = @_;
+    my $self = {};
+    bless($self, $class);
+    $self->{_fsm} = new smc_ex4::Vehicle_sm($self);
 
-	# The canvas to draw on and the direction this vehicle is
-	# moving.
-	$self->{_canvas} = $canvas;
-	$self->{_direction} = $direction;
+    # The canvas to draw on and the direction this vehicle is
+    # moving.
+    $self->{_canvas} = $canvas;
+    $self->{_direction} = $direction;
 
-	# The stoplight object is responsible knowing the road
-	# layout. Ask it for all relevant information.
-	$self->{_stoplight} = $stoplight;
+    # The stoplight object is responsible knowing the road
+    # layout. Ask it for all relevant information.
+    $self->{_stoplight} = $stoplight;
 
-	# This vehicle is initially at the road's outside edge.
-	# Figure out the road's length.
-	my $XLength = $stoplight->getRoadLengthX();
-	my $YLength = $stoplight->getRoadLengthY();
-	my $LaneWidth = $stoplight->getRoadWidth() / 2;
+    # This vehicle is initially at the road's outside edge.
+    # Figure out the road's length.
+    my $XLength = $stoplight->getRoadLengthX();
+    my $YLength = $stoplight->getRoadLengthY();
+    my $LaneWidth = $stoplight->getRoadWidth() / 2;
 
-	# The vehicle is 12 pixels x 12 pixels.
-	$self->{_vehicleSize} = 6;
+    # The vehicle is 12 pixels x 12 pixels.
+    $self->{_vehicleSize} = 6;
 
-	# A 3 pixel separation is to be maintained between vehicles.
-	$self->{_vehicleSeparation} = 3;
+    # A 3 pixel separation is to be maintained between vehicles.
+    $self->{_vehicleSeparation} = 3;
 
-	# How far away the vehicle is from the curb.
-	my $CurbOffset = ($LaneWidth - $self->{_vehicleSize}) / 2;
+    # How far away the vehicle is from the curb.
+    my $CurbOffset = ($LaneWidth - $self->{_vehicleSize}) / 2;
 
-	# The vehicle's current canvas location. This is the
-	# square's upper left hand corner.
-	if      ($direction eq 'north') {
-		$self->{_xpos} = ($XLength / 2) + $CurbOffset;
-		$self->{_ypos} = $YLength - $self->{_vehicleSize};
-	} elsif ($direction eq 'south') {
-		$self->{_xpos} = ($XLength / 2) - $LaneWidth + $CurbOffset;
-		$self->{_ypos} = 0;
-	} elsif ($direction eq 'east') {
-		$self->{_xpos} = 0;
-		$self->{_ypos} = ($YLength / 2) + $CurbOffset;
-	} elsif ($direction eq 'west') {
-		$self->{_xpos} = $XLength - $self->{_vehicleSize};
-		$self->{_ypos} = ($YLength / 2) - $LaneWidth + $CurbOffset;
-	}
+    # The vehicle's current canvas location. This is the
+    # square's upper left hand corner.
+    if      ($direction eq 'north') {
+        $self->{_xpos} = ($XLength / 2) + $CurbOffset;
+        $self->{_ypos} = $YLength - $self->{_vehicleSize};
+    }
+    elsif ($direction eq 'south') {
+        $self->{_xpos} = ($XLength / 2) - $LaneWidth + $CurbOffset;
+        $self->{_ypos} = 0;
+    }
+    elsif ($direction eq 'east') {
+        $self->{_xpos} = 0;
+        $self->{_ypos} = ($YLength / 2) + $CurbOffset;
+    }
+    elsif ($direction eq 'west') {
+        $self->{_xpos} = $XLength - $self->{_vehicleSize};
+        $self->{_ypos} = ($YLength / 2) - $LaneWidth + $CurbOffset;
+    }
 
-	# Put the vehicle on display.
-	$self->{_canvasID} = $canvas->createRectangle(
-			$self->{_xpos},
-			$self->{_ypos},
-			$self->{_xpos} + $self->{_vehicleSize},
-			$self->{_ypos} + $self->{_vehicleSize},
-			-fill => 'black',
-			-outline => 'white',
-	);
+    # Put the vehicle on display.
+    $self->{_canvasID} = $canvas->createRectangle(
+            $self->{_xpos},
+            $self->{_ypos},
+            $self->{_xpos} + $self->{_vehicleSize},
+            $self->{_ypos} + $self->{_vehicleSize},
+            -fill => 'black',
+            -outline => 'white',
+    );
 
-	# Move this vehicle along at near movie-refresh rate.
-	$self->{_redrawRate} = 1000 / 60;
+    # Move this vehicle along at near movie-refresh rate.
+    $self->{_redrawRate} = 1000 / 60;
 
-	# Store the after's timer ID here.
-	$self->{_timerID} = -1;
+    # Store the after's timer ID here.
+    $self->{_timerID} = -1;
 
-	# Set this flag to true when the vehicle has
-	# completed its trip.
-	$self->{_isDoneFlag} = undef;
+    # Set this flag to true when the vehicle has
+    # completed its trip.
+    $self->{_isDoneFlag} = undef;
 
-	# Uncomment to see debug output.
-	#$self->{_fsm}->setDebugFlag(1);
+    # Uncomment to see debug output.
+    #$self->{_fsm}->setDebugFlag(1);
 
-	return $self;
+    return $self;
 }
 
 sub Delete {
-	my $self = shift;
-	if ($self->{_timerID} >= 0) {
-		$self->{_canvas}->after('cancel', $self->{_timerID});
-		$self->{_timerID} = -1;
-	}
-	$self->{_canvas}->delete($self->{_canvasID});
+    my $self = shift;
+    if ($self->{_timerID} >= 0) {
+        $self->{_canvas}->after('cancel', $self->{_timerID});
+        $self->{_timerID} = -1;
+    }
+    $self->{_canvas}->delete($self->{_canvasID});
 }
 
 # timeout --
@@ -142,20 +149,22 @@ sub Delete {
 #   None.
 
 sub timeout {
-	my $self = shift;
-	$self->{_timerID} = -1;
-	if ($self->OffCanvas()) {
-		$self->{_fsm}->TripDone();
-	} elsif ($self->AtIntersection() and $self->getLight() ne 'green') {
-		$self->{_fsm}->LightRed();
-	} else {
-		$self->{_fsm}->KeepGoing();
-	}
+    my $self = shift;
+    $self->{_timerID} = -1;
+    if ($self->OffCanvas()) {
+        $self->{_fsm}->TripDone();
+    }
+    elsif ($self->AtIntersection() and $self->getLight() ne 'green') {
+        $self->{_fsm}->LightRed();
+    }
+    else {
+        $self->{_fsm}->KeepGoing();
+    }
 }
 
 sub getLight {
-	my $self = shift;
-	return $self->{_stoplight}->getLight($self->{_direction});
+    my $self = shift;
+    return $self->{_stoplight}->getLight($self->{_direction});
 }
 
 # lightGreen --
@@ -166,8 +175,8 @@ sub getLight {
 #   None
 
 sub lightGreen {
-	my $self = shift;
-	$self->{_fsm}->LightGreen();
+    my $self = shift;
+    $self->{_fsm}->LightGreen();
 }
 
 # setSpeed --
@@ -178,12 +187,13 @@ sub lightGreen {
 #   speed   In pixels.
 
 sub setSpeed {
-	my ($speed) = @_;
-	if ($speed < 1 || $speed > 10) {
-		warn "Invalid speed ($speed).\n";
-	} else {
-		$_speed = $speed;
-	}
+    my ($speed) = @_;
+    if ($speed < 1 || $speed > 10) {
+        warn "Invalid speed ($speed).\n";
+    }
+    else {
+        $_speed = $speed;
+    }
 }
 
 # isDone --
@@ -198,8 +208,8 @@ sub setSpeed {
 #   otherwise.
 
 sub isDone {
-	my $self = shift;
-	return $self->{_isDoneFlag};
+    my $self = shift;
+    return $self->{_isDoneFlag};
 }
 
 # start --
@@ -210,8 +220,8 @@ sub isDone {
 #   None.
 
 sub Start {
-	my $self = shift;
-	$self->{_fsm}->Start();
+    my $self = shift;
+    $self->{_fsm}->Start();
 }
 
 # pause --
@@ -222,8 +232,8 @@ sub Start {
 #   None.
 
 sub Pause {
-	my $self = shift;
-	$self->{_fsm}->Pause();
+    my $self = shift;
+    $self->{_fsm}->Pause();
 }
 
 # continue --
@@ -234,8 +244,8 @@ sub Pause {
 #   None.
 
 sub Continue {
-	my $self = shift;
-	$self->{_fsm}->Continue();
+    my $self = shift;
+    $self->{_fsm}->Continue();
 }
 
 # stop --
@@ -247,9 +257,9 @@ sub Continue {
 #
 
 sub Stop {
-	my $self = shift;
-	$self->{_fsm}->Stop();
-	$self->Delete();
+    my $self = shift;
+    $self->{_fsm}->Stop();
+    $self->Delete();
 }
 
 # State Machine Actions
@@ -264,10 +274,10 @@ sub Stop {
 #   None.
 
 sub SetTimer {
-	my $self = shift;
-	$self->{_timerID} = $self->{_canvas}->after($self->{_redrawRate},
-		sub { $self->timeout(); }
-	);
+    my $self = shift;
+    $self->{_timerID} = $self->{_canvas}->after($self->{_redrawRate},
+        sub { $self->timeout(); }
+    );
 }
 
 # StopTimer --
@@ -278,11 +288,11 @@ sub SetTimer {
 #   None.
 
 sub StopTimer {
-	my $self = shift;
-	if ($self->{_timerID} >= 0) {
-		$self->{_canvas}->after('cancel', $self->{_timerID});
-		$self->{_timerID} = -1;
-	}
+    my $self = shift;
+    if ($self->{_timerID} >= 0) {
+        $self->{_canvas}->after('cancel', $self->{_timerID});
+        $self->{_timerID} = -1;
+    }
 }
 
 # Move --
@@ -298,27 +308,30 @@ sub StopTimer {
 #   None returned. Side affect of redrawing vehicle.
 
 sub Move {
-	my $self = shift;
+    my $self = shift;
 
-	my ($Xmove, $Ymove);
-	if      ($self->{_direction} eq 'north') {
-		$Xmove = 0;
-		$Ymove = - $_speed;
-	} elsif ($self->{_direction} eq 'south') {
-		$Xmove = 0;
-		$Ymove = $_speed;
-	} elsif ($self->{_direction} eq 'east') {
-		$Xmove = $_speed;
-		$Ymove = 0;
-	} elsif ($self->{_direction} eq 'west') {
-		$Xmove = - $_speed;
-		$Ymove = 0;
-	}
+    my ($Xmove, $Ymove);
+    if    ($self->{_direction} eq 'north') {
+        $Xmove = 0;
+        $Ymove = - $_speed;
+    }
+    elsif ($self->{_direction} eq 'south') {
+        $Xmove = 0;
+        $Ymove = $_speed;
+    }
+    elsif ($self->{_direction} eq 'east') {
+        $Xmove = $_speed;
+        $Ymove = 0;
+    }
+    elsif ($self->{_direction} eq 'west') {
+        $Xmove = - $_speed;
+        $Ymove = 0;
+    }
 
-	$self->{_canvas}->move($self->{_canvasID}, $Xmove, $Ymove);
+    $self->{_canvas}->move($self->{_canvasID}, $Xmove, $Ymove);
 
-	$self->{_xpos} += $Xmove;
-	$self->{_ypos} += $Ymove;
+    $self->{_xpos} += $Xmove;
+    $self->{_ypos} += $Ymove;
 }
 
 # RegisterWithLight --
@@ -329,8 +342,8 @@ sub Move {
 #   None.
 
 sub RegisterWithLight {
-	my $self = shift;
-	$self->{_stoplight}->registerVehicle($self, $self->{_direction});
+    my $self = shift;
+    $self->{_stoplight}->registerVehicle($self, $self->{_direction});
 }
 
 # SelfDestruct --
@@ -341,10 +354,10 @@ sub RegisterWithLight {
 #   None.
 
 sub SelfDestruct {
-	my $self = shift;
-	$self->{_canvas}->delete($self->{_canvasID});
-	$self->{_canvasID} = -1;
-	$self->{_isDoneFlag} = 1;
+    my $self = shift;
+    $self->{_canvas}->delete($self->{_canvasID});
+    $self->{_canvasID} = -1;
+    $self->{_isDoneFlag} = 1;
 }
 
 # OffCanvas --
@@ -359,19 +372,22 @@ sub SelfDestruct {
 #   false.
 
 sub OffCanvas {
-	my $self = shift;
+    my $self = shift;
 
-	if      ($self->{_direction} eq 'north') {
-		return ($self->{_ypos} - $_speed) <= 0;
-	} elsif ($self->{_direction} eq 'south') {
-		my $YLength = $self->{_stoplight}->getRoadLengthY();
-		return ($self->{_ypos} + $_speed) >= $YLength;
-	} elsif ($self->{_direction} eq 'east') {
-		my $XLength = $self->{_stoplight}->getRoadLengthX();
-		return ($self->{_xpos} + $_speed) >= $XLength;
-	} elsif ($self->{_direction} eq 'west') {
-		return ($self->{_xpos} - $_speed) <= 0;
-	}
+    if    ($self->{_direction} eq 'north') {
+        return ($self->{_ypos} - $_speed) <= 0;
+    }
+    elsif ($self->{_direction} eq 'south') {
+        my $YLength = $self->{_stoplight}->getRoadLengthY();
+        return ($self->{_ypos} + $_speed) >= $YLength;
+    }
+    elsif ($self->{_direction} eq 'east') {
+        my $XLength = $self->{_stoplight}->getRoadLengthX();
+        return ($self->{_xpos} + $_speed) >= $XLength;
+    }
+    elsif ($self->{_direction} eq 'west') {
+        return ($self->{_xpos} - $_speed) <= 0;
+    }
 }
 
 # AtIntersection --
@@ -387,50 +403,53 @@ sub OffCanvas {
 #   otherwise, false.
 
 sub AtIntersection {
-	my $self = shift;
-	# The vehicle is not at the intersection until proven
-	# otherwise.
-	my $Retval = undef;
+    my $self = shift;
+    # The vehicle is not at the intersection until proven
+    # otherwise.
+    my $Retval = undef;
 
-	my $XLength = $self->{_stoplight}->getRoadLengthX();
-	my $YLength = $self->{_stoplight}->getRoadLengthY();
-	my $LaneWidth = $self->{_stoplight}->getRoadWidth() / 2;
+    my $XLength = $self->{_stoplight}->getRoadLengthX();
+    my $YLength = $self->{_stoplight}->getRoadLengthY();
+    my $LaneWidth = $self->{_stoplight}->getRoadWidth() / 2;
 
-	# Calculate the intersections coordinates based on
-	# the vehicle's direction. Then calculate where the
-	# vehicle will end up this move. If the vehicle will
-	# move beyond the intersection stop line, then the
-	# vehicle is at the intersection.
-	#
-	# Also take into account the vehicles already waiting
-	# at the intersection.
-	#
-	# By the way, once the vehicle moves past the intersection,
-	# ignore the light.
-	my $NumVehicles = $self->{_stoplight}->getQueueSize($self->{_direction});
-	my $LenVehicles = ($self->{_vehicleSize} + $self->{_vehicleSeparation}) * $NumVehicles;
-	if      ($self->{_direction} eq 'north') {
-		my $YIntersection = ($YLength / 2) + $LaneWidth
-		 + ($self->{_vehicleSize} / 2) + $LenVehicles;
-		$Retval = ($self->{_ypos} > $YIntersection)
-		 && ($self->{_ypos} - $_speed <= $YIntersection);
-	} elsif ($self->{_direction} eq 'south') {
-		my $YIntersection = ($YLength / 2) - $LaneWidth
-		 - ($self->{_vehicleSize} / 2) - $LenVehicles;
-		$Retval = ($self->{_ypos} < $YIntersection)
-		 && ($self->{_ypos} + $_speed >= $YIntersection);
-	} elsif ($self->{_direction} eq 'east') {
-		my $XIntersection = ($XLength / 2) - $LaneWidth
-		 - ($self->{_vehicleSize} / 2) - $LenVehicles;
-		$Retval = ($self->{_xpos} < $XIntersection)
-		 && ($self->{_xpos} + $_speed >= $XIntersection);
-	} elsif ($self->{_direction} eq 'west') {
-		my $XIntersection = ($XLength / 2) + $LaneWidth
-		 + ($self->{_vehicleSize} / 2) + $LenVehicles;
-		$Retval = ($self->{_xpos} > $XIntersection)
-		 && ($self->{_xpos} - $_speed <= $XIntersection);
-	}
-	return $Retval;
+    # Calculate the intersections coordinates based on
+    # the vehicle's direction. Then calculate where the
+    # vehicle will end up this move. If the vehicle will
+    # move beyond the intersection stop line, then the
+    # vehicle is at the intersection.
+    #
+    # Also take into account the vehicles already waiting
+    # at the intersection.
+    #
+    # By the way, once the vehicle moves past the intersection,
+    # ignore the light.
+    my $NumVehicles = $self->{_stoplight}->getQueueSize($self->{_direction});
+    my $LenVehicles = ($self->{_vehicleSize} + $self->{_vehicleSeparation}) * $NumVehicles;
+    if    ($self->{_direction} eq 'north') {
+        my $YIntersection = ($YLength / 2) + $LaneWidth
+         + ($self->{_vehicleSize} / 2) + $LenVehicles;
+        $Retval = ($self->{_ypos} > $YIntersection)
+         && ($self->{_ypos} - $_speed <= $YIntersection);
+    }
+    elsif ($self->{_direction} eq 'south') {
+        my $YIntersection = ($YLength / 2) - $LaneWidth
+         - ($self->{_vehicleSize} / 2) - $LenVehicles;
+        $Retval = ($self->{_ypos} < $YIntersection)
+         && ($self->{_ypos} + $_speed >= $YIntersection);
+    }
+    elsif ($self->{_direction} eq 'east') {
+        my $XIntersection = ($XLength / 2) - $LaneWidth
+         - ($self->{_vehicleSize} / 2) - $LenVehicles;
+        $Retval = ($self->{_xpos} < $XIntersection)
+         && ($self->{_xpos} + $_speed >= $XIntersection);
+    }
+    elsif ($self->{_direction} eq 'west') {
+        my $XIntersection = ($XLength / 2) + $LaneWidth
+         + ($self->{_vehicleSize} / 2) + $LenVehicles;
+        $Retval = ($self->{_xpos} > $XIntersection)
+         && ($self->{_xpos} - $_speed <= $XIntersection);
+    }
+    return $Retval;
 }
 
 1;

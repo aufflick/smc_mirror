@@ -30,55 +30,61 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2008/02/04 12:39:51  fperrad
+# some Perl Best Practices
+#
 # Revision 1.1  2005/06/16 18:04:14  fperrad
 # Added Perl examples 1 - 4 and 7.
 #
 #
 
 use strict;
+use warnings;
 
 use AppClass_sm;
 
 package AppClass;
 
 sub new {
-	my $proto = shift;
-	my $class = ref($proto) || $proto;
-	my $self = {};
-	bless($self, $class);
-	$self->{_fsm} = new AppClass_sm($self);
-	$self->{_is_acceptable} = undef;
+    my $proto = shift;
+    my $class = ref($proto) || $proto;
+    my $self = {};
+    bless($self, $class);
+    $self->{_fsm} = new AppClass_sm($self);
+    $self->{_is_acceptable} = undef;
 
-	# Uncomment to see debug output.
-	#$self->{_fsm}->setDebugFlag(1);
+    # Uncomment to see debug output.
+    #$self->{_fsm}->setDebugFlag(1);
 
-	return $self;
+    return $self;
 }
 
 sub CheckString {
-	my $self = shift;
-	my ($string) = @_;
-	foreach (split //, $string) {
-		if (/0/) {
-			$self->{_fsm}->Zero();
-		} elsif (/1/) {
-			$self->{_fsm}->One();
-		} else {
-			$self->{_fsm}->Unknown();
-		}
-	}
-	$self->{_fsm}->EOS();
-	return $self->{_is_acceptable};
+    my $self = shift;
+    my ($string) = @_;
+    foreach (split //, $string) {
+        if (/0/) {
+            $self->{_fsm}->Zero();
+        }
+        elsif (/1/) {
+            $self->{_fsm}->One();
+        }
+        else {
+            $self->{_fsm}->Unknown();
+        }
+    }
+    $self->{_fsm}->EOS();
+    return $self->{_is_acceptable};
 }
 
 sub Acceptable {
-	my $self = shift;
-	$self->{_is_acceptable} = 1;
+    my $self = shift;
+    $self->{_is_acceptable} = 1;
 }
 
 sub Unacceptable {
-	my $self = shift;
-	$self->{_is_acceptable} = undef;
+    my $self = shift;
+    $self->{_is_acceptable} = undef;
 }
 
 1;
