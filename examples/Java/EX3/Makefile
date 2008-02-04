@@ -33,19 +33,31 @@ SM_SOURCES=     AppClass.sm
 SOURCES=        $(SM_SOURCES:%.sm=%Context.java) \
                 AppClass.java \
                 checkstring.java
-OBJECTS=	$(SOURCES:%.java=%.class)
+OBJECTS=        $(SOURCES:%.java=%.class)
+CHECKSTRING=    $(JAVA) $(JAVA_FLAGS) checkstring
+
+# Uncomment to turn on debug message generation.
+TRACE=          -g
+
+# Uncomment to turn on serialization.
+# SERIAL=         -serial
+
+# Uncomment to turn on synchronized.
+# SYNC=           -sync
+
+# Uncomment to turn on reflection.
+# REFLECT=        -reflect
+
+SMC=            java -jar ../../../bin/Smc.jar
+SMC_FLAGS=      -java $(TRACE) $(SERIAL) $(SYNC) $(REFLECT)
 
 JAVAC=          javac
 JAVAC_FLAGS=    -g -classpath ../../../lib/statemap.jar
 
-# Uncomment to turn on reflection.
-# REFLECT = 	-reflect
+JAVA=           java
+JAVA_FLAGS=     -classpath .:../../../lib/statemap.jar
 
-SMC=            java -jar ../../../bin/Smc.jar
-SMC_FLAGS=      -java -g $(REFLECT)
-
-JAVA=		java
-JAVA_FLAGS=	-classpath .:../../../lib/statemap.jar
+RM_F=           rm -f
 
 #################################################################
 # Rules.
@@ -54,31 +66,43 @@ JAVA_FLAGS=	-classpath .:../../../lib/statemap.jar
 %Context.java : %.sm
 		$(SMC) $(SMC_FLAGS) $<
 
-%_sm.dot :	%.sm
+%_sm.dot :      %.sm
 		$(SMC) -graph -glevel 1 $<
+
+%_sm.html :     %.sm
+		$(SMC) -table $<
 
 all :           checkstring test
 
 checkstring :   $(SOURCES)
 		$(JAVAC) $(JAVAC_FLAGS) $(SOURCES)
 
-test :		$(OBJECTS)
-		-$(JAVA) $(JAVA_FLAGS) checkstring ""
-		-$(JAVA) $(JAVA_FLAGS) checkstring 00
-		-$(JAVA) $(JAVA_FLAGS) checkstring 1c
-		-$(JAVA) $(JAVA_FLAGS) checkstring 0c
-		-$(JAVA) $(JAVA_FLAGS) checkstring abcba
-		-$(JAVA) $(JAVA_FLAGS) checkstring 110010c010011
-		-$(JAVA) $(JAVA_FLAGS) checkstring 110010c110010
+test :          $(OBJECTS)
+		-$(CHECKSTRING) ""
+		-$(CHECKSTRING) 00
+		-$(CHECKSTRING) 1c
+		-$(CHECKSTRING) 0c
+		-$(CHECKSTRING) abcba
+		-$(CHECKSTRING) 110010c010011
+		-$(CHECKSTRING) 110010c110010
 
-graph :		$(SM_SOURCES:%.sm=%_sm.dot)
+graph :         $(SM_SOURCES:%.sm=%_sm.dot)
+
+table :         $(SM_SOURCES:%.sm=%_sm.html)
 
 clean :
-		-rm -f *.class *Context.java *_sm.dot
+		-$(RM_F) *.class
+		-$(RM_F) *Context.java
+		-$(RM_F) *_sm.dot
+		-$(RM_F) *_sm.html
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.7  2008/02/04 12:36:28  fperrad
+# + Exhibit options
+# + add a target 'table'
+#
 # Revision 1.6  2006/09/17 16:26:06  cwrapp
 # Initial v. 4.3.3 check-in.
 #

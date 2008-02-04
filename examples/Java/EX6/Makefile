@@ -29,79 +29,101 @@
 # Macros.
 #
 
-TARGET=		tcpdemo
-SM_SOURCES=	TcpConnection.sm
+TARGET=         tcpdemo
+SM_SOURCES=     TcpConnection.sm
 
-SOURCES=	$(SM_SOURCES:%.sm=%Context.java) \
-		AsyncTimer.java \
-		TimerListener.java \
-		AsyncDatagramSocket.java \
-		DatagramSocketListener.java \
-		TcpSegment.java \
-		TcpConnection.java \
-		TcpConnectionListener.java \
-		TcpClient.java \
-		TcpServer.java \
-		client.java \
-		server.java
+SOURCES=        $(SM_SOURCES:%.sm=%Context.java) \
+                AsyncTimer.java \
+                TimerListener.java \
+                AsyncDatagramSocket.java \
+                DatagramSocketListener.java \
+                TcpSegment.java \
+                TcpConnection.java \
+                TcpConnectionListener.java \
+                TcpClient.java \
+                TcpServer.java \
+                client.java \
+                server.java
 
-CLIENT_JAR=	client.jar
-SERVER_JAR=	server.jar
+CLIENT_JAR=     client.jar
+SERVER_JAR=     server.jar
 
-PACKAGE_DIR=	smc_ex6
+PACKAGE_DIR=    smc_ex6
 
-FSM_LIB_DIR=	../../../lib
+# Uncomment to turn on debug message generation.
+TRACE=          -g
 
-JAVAC=		javac
-JAVAC_FLAGS=	-d . -g -classpath $(FSM_LIB_DIR)
+# Uncomment to turn on serialization.
+# SERIAL=         -serial
 
-# REFLECTION
-# Uncomment following line to test reflection
-# REFLECT=	-reflect
+# Uncomment to turn on synchronized.
+SYNC=           -sync
 
-SMC=		java -jar ../../../bin/Smc.jar
-SMC_FLAGS=	-java -g -sync $(REFLECT)
+# Uncomment to turn on reflection.
+# REFLECT=        -reflect
 
-JAR=		jar
-JAR_CREATE_FLAGS=	cmf
-JAR_UPDATE_FLAGS=	uf
+SMC=            java -jar ../../../bin/Smc.jar
+SMC_FLAGS=      -java $(TRACE) $(SERIAL) $(SYNC) $(REFLECT)
+
+FSM_LIB_DIR=    ../../../lib
+
+JAVAC=          javac
+JAVAC_FLAGS=    -d . -g -classpath $(FSM_LIB_DIR)/statemap.jar
+
+JAR=                    jar
+JAR_CREATE_FLAGS=       cmf
+JAR_UPDATE_FLAGS=       uf
+
+JAVA=           java
+
+RM_F=           rm -f
+RM_RF=          rm -rf
 
 #################################################################
 # Rules.
 #
 
-all :		$(TARGET)
+all :           $(TARGET)
 
 %Context.java : %.sm
 		$(SMC) $(SMC_FLAGS) $<
 
-%_sm.dot :	%.sm
+%_sm.dot :      %.sm
 		$(SMC) -graph -glevel 1 $<
 
-$(TARGET)     :	$(SOURCES)
+%_sm.html :     %.sm
+		$(SMC) -table $<
+
+$(TARGET) :     $(SOURCES)
 		$(JAVAC) $(JAVAC_FLAGS) $(SOURCES)
 		$(JAR) $(JAR_CREATE_FLAGS) client_manifest.txt \
 			$(CLIENT_JAR) $(PACKAGE_DIR)/*.class
 		$(JAR) $(JAR_UPDATE_FLAGS) $(CLIENT_JAR) \
-			-C $(FSM_LIB_DIR) statemap
+			-C $(FSM_LIB_DIR) statemap.jar
 		$(JAR) $(JAR_CREATE_FLAGS) server_manifest.txt \
 			$(SERVER_JAR) $(PACKAGE_DIR)/*.class
 		$(JAR) $(JAR_UPDATE_FLAGS) $(SERVER_JAR) \
-			-C $(FSM_LIB_DIR) statemap
+			-C $(FSM_LIB_DIR) statemap.jar
 
-graph :		$(SM_SOURCES:%.sm=%_sm.dot)
+graph :         $(SM_SOURCES:%.sm=%_sm.dot)
+
+table :         $(SM_SOURCES:%.sm=%_sm.html)
 
 clean :
-		-rm -f ./*Context.java \
-			./$(PACKAGE_DIR)/*.class \
-			./$(CLIENT_JAR) \
-			./$(SERVER_JAR) \
-			./*_sm.dot
-		-rm -fr ./$(PACKAGE_DIR)
+		-$(RM_F) $(CLIENT_JAR) $(SERVER_JAR)
+		-$(RM_F) *Context.java
+		-$(RM_F) *_sm.dot
+		-$(RM_F) *_sm.html
+		-$(RM_RF) $(PACKAGE_DIR)
+
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.10  2008/02/04 12:37:23  fperrad
+# + Exhibit options
+# + add a target 'table'
+#
 # Revision 1.9  2007/12/28 12:34:40  cwrapp
 # Version 5.0.1 check-in.
 #

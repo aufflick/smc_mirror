@@ -29,68 +29,91 @@
 # Macros.
 #
 
-TARGET=		telephone.jar
+TARGET=         telephone.jar
 
-SM_SOURCES=	Telephone.sm
+SM_SOURCES=     Telephone.sm
 
-SOURCES=	$(SM_SOURCES:%.sm=%Context.java) \
-		Telephone.java
+SOURCES=        $(SM_SOURCES:%.sm=%Context.java) \
+                Telephone.java
 
-OBJECTS=	$(SOURCES:%.java=%.class)
+OBJECTS=        $(SOURCES:%.java=%.class)
 
-PACKAGE_DIR=	smc_ex7
-SOUND_DIR=	./sounds
-FSM_LIB_DIR=	../../../lib
+PACKAGE_DIR=    smc_ex7
 
-JAVAC=		javac
-JAVAC_FLAGS=	-d . -g -classpath $(FSM_LIB_DIR)/statemap.jar
+SOUND_DIR=      ./sounds
+
+# Uncomment to turn on debug message generation.
+TRACE=          -g
+
+# Uncomment to turn on serialization.
+# SERIAL=         -serial
+
+# Uncomment to turn on synchronized.
+# SYNC=           -sync
 
 # Uncomment to turn on reflection.
-# REFLECT = 	-reflect
+# REFLECT=        -reflect
 
-SMC=		java -jar ../../../bin/Smc.jar
-SMC_FLAGS=	-java -g $(REFLECT)
+SMC=            java -jar ../../../bin/Smc.jar
+SMC_FLAGS=      -java $(TRACE) $(SERIAL) $(SYNC) $(REFLECT)
 
-JAR=		jar
-JAR_CREATE_FLAGS=	cmf manifest.txt
-JAR_UPDATE_FLAGS=	uf
+FSM_LIB_DIR=    ../../../lib
 
-JAVA=		java
+JAVAC=          javac
+JAVAC_FLAGS=    -d . -g -classpath $(FSM_LIB_DIR)/statemap.jar
+
+JAR=                    jar
+JAR_CREATE_FLAGS=       cmf manifest.txt
+JAR_UPDATE_FLAGS=       uf
+
+JAVA=           java
+
+RM_F=           rm -f
+RM_RF=          rm -rf
 
 #################################################################
 # Rules.
 #
 
-all :		$(TARGET) test
+all :           $(TARGET) test
 
 %Context.java : %.sm
 		$(SMC) $(SMC_FLAGS) $<
 
-%_sm.dot :	%.sm
+%_sm.dot :      %.sm
 		$(SMC) -graph -glevel 1 $<
 
-$(TARGET) :	$(SOURCES)
+%_sm.html :     %.sm
+		$(SMC) -table $<
+
+$(TARGET) :     $(SOURCES)
 		$(JAVAC) $(JAVAC_FLAGS) $(SOURCES)
 		$(JAR) $(JAR_CREATE_FLAGS) $(TARGET) \
 			$(PACKAGE_DIR)/*.class $(SOUND_DIR)/*.au
 		$(JAR) $(JAR_UPDATE_FLAGS) $(TARGET) \
-			-C $(FSM_LIB_DIR) statemap
+			-C $(FSM_LIB_DIR) statemap.jar
 
-test :		$(TRAGET)
+test :          $(TRAGET)
 		$(JAVA) -jar $(TARGET)
 
-graph :		$(SM_SOURCES:%.sm=%_sm.dot)
+graph :         $(SM_SOURCES:%.sm=%_sm.dot)
+
+table :         $(SM_SOURCES:%.sm=%_sm.html)
 
 clean :
-		-rm -f ./*Context.java \
-			./$(PACKAGE_DIR)/*.class \
-			./$(TARGET) \
-			./*_sm.dot
-		-rm -fr ./$(PACKAGE_DIR)
+		-$(RM_F) $(TARGET)
+		-$(RM_F) *Context.java
+		-$(RM_F) *_sm.dot
+		-$(RM_F) *_sm.html
+		-$(RM_RF) $(PACKAGE_DIR)
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.9  2008/02/04 12:37:39  fperrad
+# + Exhibit options
+# + add a target 'table'
+#
 # Revision 1.8  2006/09/17 16:26:06  cwrapp
 # Initial v. 4.3.3 check-in.
 #

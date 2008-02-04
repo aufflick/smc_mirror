@@ -1,1 +1,5 @@
-*.class
+smc_ex6
+*Context.java
+*.jar
+*_sm.dot
+*_sm.html

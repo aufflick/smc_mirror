@@ -1,4 +1,5 @@
 smc_ex4
 *Context.java
-*.class
 *.jar
+*_sm.dot
+*_sm.html

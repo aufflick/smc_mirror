@@ -29,77 +29,98 @@
 # Macros.
 #
 
-TARGET=		taskdemo.jar
+TARGET=         taskdemo.jar
 
-SM_SOURCES=	Task.sm \
-		TaskManager.sm
+SM_SOURCES=     Task.sm \
+                TaskManager.sm
 
-SOURCES=	$(SM_SOURCES:%.sm=%Context.java) \
-		Task.java \
-		TaskManager.java \
-		TaskController.java \
-		TaskEventListener.java \
-		TaskDialog.java \
-		TaskPopupMenu.java \
-		TaskTable.java \
-		TaskMessages.java \
-		taskdemo.java
+SOURCES=        $(SM_SOURCES:%.sm=%Context.java) \
+                Task.java \
+                TaskManager.java \
+                TaskController.java \
+                TaskEventListener.java \
+                TaskDialog.java \
+                TaskPopupMenu.java \
+                TaskTable.java \
+                TaskMessages.java \
+                taskdemo.java
 
-OBJECTS=	$(SOURCES:%.java=%.class)
+OBJECTS=        $(SOURCES:%.java=%.class)
 
-PACKAGE_DIR=	smc_ex5
+PACKAGE_DIR=    smc_ex5
 
-FSM_LIB_DIR=	../../../lib
+# Uncomment to turn on debug message generation.
+TRACE=          -g
 
-JAVAC=		javac
-JAVAC_FLAGS=	-d . -g -classpath $(FSM_LIB_DIR)
+# Uncomment to turn on serialization.
+# SERIAL=         -serial
+
+# Uncomment to turn on synchronized.
+SYNC=           -sync
 
 # Uncomment to turn on reflection.
-# REFLECT = 	-reflect
+# REFLECT=        -reflect
 
-SMC=		java -jar ../../../bin/Smc.jar
-SMC_FLAGS=	-java -g -sync $(REFLECT)
+SMC=            java -jar ../../../bin/Smc.jar
+SMC_FLAGS=      -java $(TRACE) $(SERIAL) $(SYNC) $(REFLECT)
 
-JAR=		jar
-JAR_CREATE_FLAGS=	cmf manifest.txt
-JAR_UPDATE_FLAGS=	uf
+FSM_LIB_DIR=    ../../../lib
 
-JAVA=		java
+JAVAC=          javac
+JAVAC_FLAGS=    -d . -g -classpath $(FSM_LIB_DIR)/statemap.jar
 
-#################################################################
+JAR=                    jar
+JAR_CREATE_FLAGS=       cmf manifest.txt
+JAR_UPDATE_FLAGS=       uf
+
+JAVA=           java
+
+RM_F=           rm -f
+RM_RF=          rm -rf
+
+########################################
 # Rules.
 #
 
-all :		$(TARGET) test
+all :           $(TARGET) test
 
 $(SM_SOURCES:%.sm=%Context.java) : $(SM_SOURCES)
 		$(SMC) $(SMC_FLAGS) $(SM_SOURCES)
 
-%_sm.dot :	%.sm
+%_sm.dot :      %.sm
 		$(SMC) -graph -glevel 1 $<
 
-$(TARGET) :	$(SOURCES)
+%_sm.html :     %.sm
+		$(SMC) -table $<
+
+$(TARGET) :     $(SOURCES)
 		$(JAVAC) $(JAVAC_FLAGS) $(SOURCES)
 		$(JAR) $(JAR_CREATE_FLAGS) $(TARGET) \
 			$(PACKAGE_DIR)/*.class
 		$(JAR) $(JAR_UPDATE_FLAGS) $(TARGET) \
-			-C $(FSM_LIB_DIR) statemap
+			-C $(FSM_LIB_DIR) statemap.jar
 
-test :		$(TARGET)
+test :          $(TARGET)
 		$(JAVA) -jar $(TARGET)
 
-graph :		$(SM_SOURCES:%.sm=%_sm.dot)
+graph :         $(SM_SOURCES:%.sm=%_sm.dot)
+
+table :         $(SM_SOURCES:%.sm=%_sm.html)
 
 clean :
-		-rm -f ./*Context.java \
-			./$(PACKAGE_DIR)/*.class \
-			./$(TARGET) \
-			./*_sm.dot
-		-rm -fr ./$(PACKAGE_DIR)
+		-$(RM_F) $(TARGET)
+		-$(RM_F) *Context.java
+		-$(RM_F) *_sm.dot
+		-$(RM_F) *_sm.html
+		-$(RM_RF) $(PACKAGE_DIR)
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.10  2008/02/04 12:37:01  fperrad
+# + Exhibit options
+# + add a target 'table'
+#
 # Revision 1.9  2006/09/17 16:26:06  cwrapp
 # Initial v. 4.3.3 check-in.
 #
