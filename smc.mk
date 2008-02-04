@@ -40,28 +40,46 @@
 # Macros.
 #
 
-VERSION=	5_0_2
+VERSION=        5_0_2
 
-STAGING_DIR=	../staging
+STAGING_DIR=    ../staging
 SMC_STAGING_DIR=$(STAGING_DIR)/smc
 SMC_RELEASE_DIR=$(STAGING_DIR)/smc_$(VERSION)
-RELEASE_DIR=	$(STAGING_DIR)/releases
+RELEASE_DIR=    $(STAGING_DIR)/releases
+
+PACKAGE_NAME=   statemap
+
+CP=             cp -f
+CHMOD=          chmod
+MKDIR=          mkdir -p
+RM_F=           rm -f
+RM_RF=          rm -rf
+# Alternate version based on Perl (compatible Windows / *nix)
+#CP=             perl -MExtUtils::Command -e cp
+#CHMOD=          perl -MExtUtils::Command -e ExtUtils::Command::chmod
+#MKDIR=          perl -MExtUtils::Command -e mkpath
+#RM_F=           perl -MExtUtils::Command -e rm_f
+#RM_RF=          perl -MExtUtils::Command -e rm_rf
+
 
 #################################################################
 # Rules.
 #
 
-# Create the staging directories if needed.
+# Create the staging directories if needed
 $(STAGING_DIR) :
-		mkdir $(STAGING_DIR)
+		$(MKDIR) $(STAGING_DIR)
 
-$(SMC_STAGING_DIR) :	$(STAGING_DIR)
-		-rm -fr $(SMC_STAGING_DIR)
-		mkdir $(SMC_STAGING_DIR)
+$(SMC_STAGING_DIR) :    $(STAGING_DIR)
+		-$(RM_RF) $(SMC_STAGING_DIR)
+		$(MKDIR) $(SMC_STAGING_DIR)
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.16  2008/02/04 10:39:48  fperrad
+# + common variables
+#
 # Revision 1.15  2008/01/14 19:59:18  cwrapp
 # Release 5.0.2 check-in.
 #
