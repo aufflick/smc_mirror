@@ -24,6 +24,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.6  2008/02/04 11:02:08  fperrad
+# + Exhibit options
+#
 # Revision 1.5  2008/01/24 07:50:19  fperrad
 # - add a target 'table'
 #
@@ -47,25 +50,30 @@
 
 SM_SOURCES=     AppClass.sm
 SOURCES=        $(SM_SOURCES:%.sm=%_sm.pm)
+CHECKSTRING=    perl -I ../../../lib/Perl checkstring.pl
+
+# Uncomment to turn on debug message generation.
+TRACE=          -g
 
 # Uncomment to turn on reflection.
-# REFLECT = 	-reflect
+# REFLECT=        -reflect
 
 SMC=            java -jar ../../../bin/Smc.jar
-SMC_FLAGS=      -perl -g $(REFLECT)
+SMC_FLAGS=      -perl $(TRACE) $(REFLECT)
+
 RM_F=           rm -f
 
 #################################################################
 # Rules.
 #
 
-%_sm.pm : %.sm
+%_sm.pm :       %.sm
 		$(SMC) $(SMC_FLAGS) $<
 
-%_sm.dot : %.sm
+%_sm.dot :      %.sm
 		$(SMC) -graph -glevel 1 $<
 
-%_sm.html : %.sm
+%_sm.html :     %.sm
 		$(SMC) -table $<
 
 all :           checkstring test
@@ -73,16 +81,16 @@ all :           checkstring test
 checkstring :   $(SOURCES)
 
 test:
-		-perl -w checkstring.pl ""
-		-perl -w checkstring.pl 000
-		-perl -w checkstring.pl 00011
-		-perl -w checkstring.pl 111
-		-perl -w checkstring.pl 000111100
-		-perl -w checkstring.pl 00011a1b10c0
+		-$(CHECKSTRING) ""
+		-$(CHECKSTRING) 000
+		-$(CHECKSTRING) 00011
+		-$(CHECKSTRING) 111
+		-$(CHECKSTRING) 000111100
+		-$(CHECKSTRING) 00011a1b10c0
 
-graph :		$(SM_SOURCES:%.sm=%_sm.dot)
+graph :         $(SM_SOURCES:%.sm=%_sm.dot)
 
-table :		$(SM_SOURCES:%.sm=%_sm.html)
+table :         $(SM_SOURCES:%.sm=%_sm.html)
 
 clean :
 		-$(RM_F) *_sm.pm

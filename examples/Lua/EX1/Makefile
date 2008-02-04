@@ -24,6 +24,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.5  2008/02/04 11:00:48  fperrad
+# + Exhibit options
+#
 # Revision 1.4  2008/01/24 07:50:18  fperrad
 # - add a target 'table'
 #
@@ -45,27 +48,32 @@
 
 SM_SOURCES=     AppClass.sm
 SOURCES=        $(SM_SOURCES:%.sm=%_sm.lua)
-
-# Uncomment to turn on reflection.
-# REFLECT = 	-reflect
-
-SMC=            java -jar ../../../bin/Smc.jar
-SMC_FLAGS=      -lua -g $(REFLECT)
-RM_F=           rm -f
+CHECKSTRING=    lua checkstring.lua
 
 export LUA_PATH=./?.lua;../../../lib/Lua/?.lua
+
+# Uncomment to turn on debug message generation.
+TRACE=          -g
+
+# Uncomment to turn on reflection.
+# REFLECT=        -reflect
+
+SMC=            java -jar ../../../bin/Smc.jar
+SMC_FLAGS=      -lua $(TRACE) $(REFLECT)
+
+RM_F=           rm -f
 
 #################################################################
 # Rules.
 #
 
-%_sm.lua : %.sm
+%_sm.lua :      %.sm
 		$(SMC) $(SMC_FLAGS) $<
 
-%_sm.dot : %.sm
+%_sm.dot :      %.sm
 		$(SMC) -graph -glevel 1 $<
 
-%_sm.html : %.sm
+%_sm.html :     %.sm
 		$(SMC) -table $<
 
 all :           checkstring test
@@ -73,16 +81,16 @@ all :           checkstring test
 checkstring :   $(SOURCES)
 
 test:
-		-lua checkstring.lua ""
-		-lua checkstring.lua 000
-		-lua checkstring.lua 00011
-		-lua checkstring.lua 111
-		-lua checkstring.lua 000111100
-		-lua checkstring.lua 00011a1b10c0
+		-$(CHECKSTRING) ""
+		-$(CHECKSTRING) 000
+		-$(CHECKSTRING) 00011
+		-$(CHECKSTRING) 111
+		-$(CHECKSTRING) 000111100
+		-$(CHECKSTRING) 00011a1b10c0
 
-graph :		$(SM_SOURCES:%.sm=%_sm.dot)
+graph :         $(SM_SOURCES:%.sm=%_sm.dot)
 
-table :		$(SM_SOURCES:%.sm=%_sm.html)
+table :         $(SM_SOURCES:%.sm=%_sm.html)
 
 clean :
 		-$(RM_F) *_sm.lua

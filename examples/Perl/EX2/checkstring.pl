@@ -1,4 +1,4 @@
-#!/usr/bin/env perl -w
+#!/usr/bin/env perl
 
 #
 # The contents of this file are subject to the Mozilla Public
@@ -32,32 +32,39 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2008/02/04 11:02:25  fperrad
+# + Exhibit options
+#
 # Revision 1.1  2005/06/16 18:04:14  fperrad
 # Added Perl examples 1 - 4 and 7.
 #
 #
 
 use strict;
+use warnings;
 
 use AppClass;
 
 my $retcode = 0;
 if (scalar(@ARGV) < 1) {
-	warn "No string to check.\n";
-	$retcode = 2;
-} elsif (scalar(@ARGV) > 1) {
-	warn "Only one argument is accepted.\n";
-	$retcode = 3;
-} else {
-	my $appobject = new AppClass();
-	my $str = $ARGV[0];
-	my $result;
-	unless ($appobject->CheckString($str)) {
-		$result = "not acceptable";
-		$retcode = 1;
-	} else {
-		$result = "acceptable";
-	}
-	print "The string \"",$str,"\" is ",$result,".\n";
+    warn "No string to check.\n";
+    $retcode = 2;
+}
+elsif (scalar(@ARGV) > 1) {
+    warn "Only one argument is accepted.\n";
+    $retcode = 3;
+}
+else {
+    my $appobject = new AppClass();
+    my $str = $ARGV[0];
+    my $result;
+    unless ($appobject->CheckString($str)) {
+        $result = 'not acceptable';
+        $retcode = 1;
+    }
+    else {
+        $result = 'acceptable';
+    }
+    print "The string \"",$str,"\" is ",$result,".\n";
 }
 exit($retcode);

@@ -31,48 +31,58 @@
 #
 
 SM_SOURCES=     AppClass.sm
-SOURCES=	$(SM_SOURCES:%.sm=%Context.groovy)
+SOURCES=        $(SM_SOURCES:%.sm=%Context.groovy)
+CHECKSTRING=    $(GROOVY) $(GROOVY_FLAGS) checkstring
+
+# Uncomment to turn on debug message generation.
+TRACE=          -g
+
+# Uncomment to turn on serialization.
+# SERIAL=         -serial
+
+# Uncomment to turn on synchronized.
+# SYNC=           -sync
 
 # Uncomment to turn on reflection.
-# REFLECT = 	-reflect
+# REFLECT=        -reflect
 
 SMC=            java -jar ../../../bin/Smc.jar
-SMC_FLAGS=	-groovy -g $(REFLECT)
+SMC_FLAGS=      -groovy $(TRACE) $(SERIAL) $(SYNC) $(REFLECT)
 
-GROOVY=		groovy
-GROOVY_FLAGS=	-classpath ../../../lib/Groovy/statemap.jar
+GROOVY=         groovy
+GROOVY_FLAGS=   -classpath ../../../lib/Groovy/statemap.jar
 
-RM_F=		rm -f
+RM_F=           rm -f
 
 #################################################################
 # Rules.
 #
 
-all :		checkstring test
-
 %Context.groovy : %.sm
 		$(SMC) $(SMC_FLAGS) $<
 
-%_sm.dot : %.sm
+%_sm.dot :      %.sm
 		$(SMC) -graph -glevel 1 $<
 
-%_sm.html : %.sm
+%_sm.html :     %.sm
 		$(SMC) -table $<
+
+all :           checkstring test
 
 checkstring :   $(SOURCES)
 
-test :		$(OBJECTS)
-		-$(GROOVY) $(GROOVY_FLAGS) checkstring ""
-		-$(GROOVY) $(GROOVY_FLAGS) checkstring 00
-		-$(GROOVY) $(GROOVY_FLAGS) checkstring 1c
-		-$(GROOVY) $(GROOVY_FLAGS) checkstring 0c
-		-$(GROOVY) $(GROOVY_FLAGS) checkstring abcba
-		-$(GROOVY) $(GROOVY_FLAGS) checkstring 110010c010011
-		-$(GROOVY) $(GROOVY_FLAGS) checkstring 110010c110010
+test :          $(OBJECTS)
+		-$(CHECKSTRING) ""
+		-$(CHECKSTRING) 00
+		-$(CHECKSTRING) 1c
+		-$(CHECKSTRING) 0c
+		-$(CHECKSTRING) abcba
+		-$(CHECKSTRING) 110010c010011
+		-$(CHECKSTRING) 110010c110010
 
-graph :		$(SM_SOURCES:%.sm=%_sm.dot)
+graph :         $(SM_SOURCES:%.sm=%_sm.dot)
 
-table :		$(SM_SOURCES:%.sm=%_sm.html)
+table :         $(SM_SOURCES:%.sm=%_sm.html)
 
 clean :
 		-$(RM_F) *Context.groovy
@@ -82,6 +92,9 @@ clean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.4  2008/02/04 11:00:26  fperrad
+# + Exhibit options
+#
 # Revision 1.3  2008/01/24 07:50:18  fperrad
 # - add a target 'table'
 #

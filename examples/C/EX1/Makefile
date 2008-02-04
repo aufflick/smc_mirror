@@ -24,6 +24,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.6  2008/02/04 10:58:36  fperrad
+# + Exhibit options
+#
 # Revision 1.5  2008/01/24 07:50:17  fperrad
 # - add a target 'table'
 #
@@ -45,50 +48,55 @@
 # Macros.
 #
 
-TARGET    = ./checkstring
+SM_SOURCES=     AppClass.sm
+SOURCES=        $(SM_SOURCES:.sm=_sm.c) \
+                AppClass.c main.c
+HEADERS=        $(SM_SOURCES:.sm=_sm.h) \
+                AppClass.h
+OBJECTS=        $(SOURCES:.c=.o)
+TARGET=         checkstring
+CHECKSTRING=    ./$(TARGET)
 
-CXX       = gcc
-CPPFLAGS  = -g -I../../../lib/C
-SMC       = java -jar ../../../bin/Smc.jar
-SMCFLAGS  = -c -g
-RM_F      = rm -f
+# Uncomment to turn on debug message generation.
+TRACE=          -g
 
-SM_SOURCES= AppClass.sm
-SOURCES   = $(SM_SOURCES:.sm=_sm.c) \
-            AppClass.c main.c
-HEADERS   = $(SM_SOURCES:.sm=_sm.h) \
-            AppClass.h
-OBJECTS   = $(SOURCES:.c=.o)
+SMC=            java -jar ../../../bin/Smc.jar
+SMC_FLAGS=      -c $(TRACE)
+
+CC=             gcc
+CFLAGS=         -g -I../../../lib/C
+
+RM_F=           rm -f
 
 #################################################################
 # Rules.
 #
 
 %_sm.h %_sm.c : %.sm
-		$(SMC) $(SMCFLAGS) $<
+		$(SMC) $(SMC_FLAGS) $<
 
-%_sm.dot : %.sm
+%_sm.dot :      %.sm
 		$(SMC) -graph -glevel 1 $<
 
-%_sm.html : %.sm
+%_sm.html :     %.sm
 		$(SMC) -table $<
 
-all :		$(TARGET) test
+all :           $(TARGET) test
 
-$(TARGET) :	$(HEADERS) $(SOURCES)
-		$(CXX) $(CPPFLAGS) -o $@ $(SOURCES)
+$(TARGET) :     $(HEADERS) $(SOURCES)
+		$(CC) $(CFLAGS) -o $@ $(SOURCES)
 
-test :		$(TARGET)
-		-$(TARGET) ""
-		-$(TARGET) 000
-		-$(TARGET) 00011
-		-$(TARGET) 111
-		-$(TARGET) 000111100
-		-$(TARGET) 00011a1b10c0
+test :          $(TARGET)
+		-$(CHECKSTRING) ""
+		-$(CHECKSTRING) 000
+		-$(CHECKSTRING) 00011
+		-$(CHECKSTRING) 111
+		-$(CHECKSTRING) 000111100
+		-$(CHECKSTRING) 00011a1b10c0
 
-graph :		$(SM_SOURCES:%.sm=%_sm.dot)
+graph :         $(SM_SOURCES:%.sm=%_sm.dot)
 
-table :		$(SM_SOURCES:%.sm=%_sm.html)
+table :         $(SM_SOURCES:%.sm=%_sm.html)
 
 clean :
 		-$(RM_F) $(TARGET)

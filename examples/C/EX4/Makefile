@@ -24,6 +24,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.6  2008/02/04 10:59:19  fperrad
+# + Exhibit options
+#
 # Revision 1.5  2008/01/24 07:50:17  fperrad
 # - add a target 'table'
 #
@@ -45,46 +48,50 @@
 # Macros.
 #
 
-TARGET    = ./traffic
+SM_SOURCES=     stoplight.sm
+SOURCES=        $(SM_SOURCES:.sm=_sm.c) \
+                stoplight.c \
+                main.c
+HEADERS=        $(SM_SOURCES:.sm=_sm.h) \
+                stoplight.h
+OBJECTS=        $(SOURCES:.c=.o)
+TARGET=         ./traffic
 
-CXX       = gcc
-CPPFLAGS  = -g -I../../../lib/C
-SMC       = java -jar ../../../bin/Smc.jar
-SMCFLAGS  = -c -g
-RM_F      = rm -f
+# Uncomment to turn on debug message generation.
+TRACE=          -g
 
-SM_SOURCES= stoplight.sm
-SOURCES   = $(SM_SOURCES:.sm=_sm.c) \
-            stoplight.c \
-            main.c
-HEADERS   = $(SM_SOURCES:.sm=_sm.h) \
-            stoplight.h
-OBJECTS   = $(SOURCES:.c=.o)
+SMC=            java -jar ../../../bin/Smc.jar
+SMC_FLAGS=      -c $(TRACE)
+
+CC=             gcc
+CFLAGS=         -g -I../../../lib/C
+
+RM_F=           rm -f
 
 #################################################################
 # Rules.
 #
 
 %_sm.h %_sm.c : %.sm
-		$(SMC) $(SMCFLAGS) $<
+		$(SMC) $(SMC_FLAGS) $<
 
-%_sm.dot : %.sm
+%_sm.dot :      %.sm
 		$(SMC) -graph -glevel 1 $<
 
-%_sm.html : %.sm
+%_sm.html :     %.sm
 		$(SMC) -table $<
 
-all :		$(TARGET) test
+all :           $(TARGET) test
 
-$(TARGET) :	$(HEADERS) $(SOURCES)
-		$(CXX) $(CPPFLAGS) -o $@ $(SOURCES)
+$(TARGET) :     $(HEADERS) $(SOURCES)
+		$(CC) $(CFLAGS) -o $@ $(SOURCES)
 
-test :		$(TARGET)
+test :          $(TARGET)
 		$(TARGET)
 
-graph :		$(SM_SOURCES:%.sm=%_sm.dot)
+graph :         $(SM_SOURCES:%.sm=%_sm.dot)
 
-table :		$(SM_SOURCES:%.sm=%_sm.html)
+table :         $(SM_SOURCES:%.sm=%_sm.html)
 
 clean :
 		-$(RM_F) $(TARGET)

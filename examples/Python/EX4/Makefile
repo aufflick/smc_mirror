@@ -24,6 +24,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.6  2008/02/04 11:05:34  fperrad
+# + Exhibit options
+#
 # Revision 1.5  2008/01/24 07:50:23  fperrad
 # - add a target 'table'
 #
@@ -45,40 +48,44 @@
 # Macros.
 #
 
-TARGET=		Traffic
+SM_SOURCES=     Vehicle.sm \
+                Stoplight.sm
+SOURCES=        $(SM_SOURCES:%.sm=%_sm.py)
+TARGET=         Traffic
 
-SM_SOURCES=	Vehicle.sm \
-		Stoplight.sm
+export PYTHONPATH=../../../lib/Python
 
-SOURCES=	$(SM_SOURCES:%.sm=%_sm.py)
+# Uncomment to turn on debug message generation.
+TRACE=          -g
 
 # Uncomment to turn on reflection.
-# REFLECT = 	-reflect
+# REFLECT=        -reflect
 
-SMC=		java -jar ../../../bin/Smc.jar
-SMC_FLAGS=	-python -g $(REFLECT)
-RM_F=		rm -f
+SMC=            java -jar ../../../bin/Smc.jar
+SMC_FLAGS=      -python $(TRACE) $(REFLECT)
+
+RM_F=           rm -f
 
 #################################################################
 # Rules.
 #
 
-%_sm.py : %.sm
+%_sm.py :       %.sm
 		$(SMC) $(SMC_FLAGS) $<
 
-%_sm.dot : %.sm
+%_sm.dot :      %.sm
 		$(SMC) -graph -glevel 1 $<
 
-%_sm.html : %.sm
+%_sm.html :     %.sm
 		$(SMC) -table $<
 
-all :		$(TARGET)
+all :           $(TARGET)
 
-$(TARGET) :	$(SOURCES)
+$(TARGET) :     $(SOURCES)
 
-graph :		$(SM_SOURCES:%.sm=%_sm.dot)
+graph :         $(SM_SOURCES:%.sm=%_sm.dot)
 
-table :		$(SM_SOURCES:%.sm=%_sm.html)
+table :         $(SM_SOURCES:%.sm=%_sm.html)
 
 clean :
 		-$(RM_F) *_sm.py
