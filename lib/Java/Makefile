@@ -32,44 +32,37 @@
 # Include the official macros.
 include ../../smc.mk
 
-LIB_SOURCES=	FSMContext.java \
-		State.java \
-		TransitionUndefinedException.java \
-		StateUndefinedException.java
+LIB_SOURCES=    FSMContext.java \
+                State.java \
+                TransitionUndefinedException.java \
+                StateUndefinedException.java
 
-PACKAGE_NAME=	statemap
-
-JAVAC=		javac
-JAVAC_FLAGS=	-d . -g
-JAR=		jar
-JAR_FLAGS=	cvf
-JAR_FILE=	$(PACKAGE_NAME).jar
-CP=		cp -f
-CHMOD=		chmod 444
-MKDIR=		mkdir -p
-RM_F=		rm -f
-RM_RF=		rm -rf
+JAVAC=          javac
+JAVAC_FLAGS=    -d . -g
+JAR=            jar
+JAR_FLAGS=      cvf
+JAR_FILE=       $(PACKAGE_NAME).jar
 
 LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib
-CLASS_DIR=	$(LIB_STAGING_DIR)/$(PACKAGE_NAME)
+CLASS_DIR=      $(LIB_STAGING_DIR)/$(PACKAGE_NAME)
 
 #################################################################
 # Rules.
 #
 
-all:		$(JAR_FILE)
+all :           $(JAR_FILE)
 
-$(JAR_FILE) :	$(LIB_SOURCES)
+$(JAR_FILE) :   $(LIB_SOURCES)
 		$(JAVAC) $(JAVAC_FLAGS) $(LIB_SOURCES)
 		$(JAR) $(JAR_FLAGS) $(JAR_FILE) $(PACKAGE_NAME)
 
 $(CLASS_DIR) :
-		$(MKDIR) $(CLASS_DIR)
+		$(MKDIR) $@
 
-install :	$(JAR_FILE) $(CLASS_DIR)
+install :       $(JAR_FILE) $(CLASS_DIR)
 		$(CP) $(JAR_FILE) ..
 		$(CP) $(JAR_FILE) $(LIB_STAGING_DIR)
-		-$(CHMOD) $(LIB_STAGING_DIR)/$(JAR_FILE)
+		-$(CHMOD) 444 $(LIB_STAGING_DIR)/$(JAR_FILE)
 		$(CP) $(PACKAGE_NAME)/*.class $(CLASS_DIR)
 
 uninstall :
@@ -77,14 +70,17 @@ uninstall :
 		-$(RM_F) $(LIB_STAGING_DIR)/$(JAR_FILE)
 
 clean :
-		-$(RM_F) ./$(JAR_FILE) ./$(PACKAGE_NAME)/*
+		-$(RM_F) $(JAR_FILE) $(PACKAGE_NAME)/*
 
-realclean :	clean
-		-$(RM_RF) ./statemap
+realclean :     clean
+		-$(RM_RF) $(PACKAGE_NAME)
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.14  2008/02/04 10:45:22  fperrad
+# + use common variables
+#
 # Revision 1.13  2007/10/11 12:48:35  fperrad
 # - refactor: Makefile with variables
 #

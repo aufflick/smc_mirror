@@ -32,6 +32,8 @@
 # Include the official macros.
 include ../../smc.mk
 
+SOURCES=        statemap.tcl pkgIndex.tcl
+
 LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib/statemap1.0
 
 #################################################################
@@ -39,23 +41,26 @@ LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib/statemap1.0
 #
 
 $(LIB_STAGING_DIR) :
-		mkdir $(LIB_STAGING_DIR)
+		$(MKDIR) $@
 
-install :	$(LIB_STAGING_DIR) statemap.tcl pkgIndex.tcl
-		cp -f statemap.tcl $(LIB_STAGING_DIR)
-		cp -f pkgIndex.tcl $(LIB_STAGING_DIR)
+install :       $(LIB_STAGING_DIR) $(SOURCES)
+		$(CP) statemap.tcl $(LIB_STAGING_DIR)/statemap.tcl
+		$(CP) pkgIndex.tcl $(LIB_STAGING_DIR)/pkgIndex.tcl
 
 uninstall :
-		-rm $(LIB_STAGING_DIR)/statemap.tcl
-		-rm $(LIB_STAGING_DIR)/pkgIndex.tcl
+		-$(RM_F) $(LIB_STAGING_DIR)/statemap.tcl
+		-$(RM_F) $(LIB_STAGING_DIR)/pkgIndex.tcl
 
 clean :
 
-realclean :
+realclean :     clean
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.8  2008/02/04 10:46:51  fperrad
+# + use common variables
+#
 # Revision 1.7  2005/06/08 11:09:15  cwrapp
 # + Updated Python code generator to place "pass" in methods with empty
 #   bodies.

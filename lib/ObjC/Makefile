@@ -32,33 +32,37 @@
 # Include the official macros.
 include ../../smc.mk
 
-LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib
-OBJC_LIB_STAGING_DIR=$(LIB_STAGING_DIR)/ObjC
+SOURCES=        statemap.h statemap.m
+
+LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib/ObjC
 
 #################################################################
 # Rules.
 #
 
-$(OBJC_LIB_STAGING_DIR) : $(LIB_STAGING_DIR)
-		mkdir $(OBJC_LIB_STAGING_DIR)
+$(LIB_STAGING_DIR) :
+		$(MKDIR) $@
 
-install :	statemap.h statemap.m $(OBJC_LIB_STAGING_DIR)
-		cp -f statemap.h $(OBJC_LIB_STAGING_DIR)/README.txt
-		cp -f statemap.h $(OBJC_LIB_STAGING_DIR)/statemap.h
-		cp -f statemap.m $(OBJC_LIB_STAGING_DIR)/statemap.m
+install :       $(LIB_STAGING_DIR) $(SOURCES)
+		$(CP) README.txt $(LIB_STAGING_DIR)/README.txt
+		$(CP) statemap.h $(LIB_STAGING_DIR)/statemap.h
+		$(CP) statemap.m $(LIB_STAGING_DIR)/statemap.m
 
 uninstall :
-		-rm $(OBJC_LIB_STAGING_DIR)/README.txt \
-		    $(OBJC_LIB_STAGING_DIR)/statemap.h \
-		    $(OBJC_LIB_STAGING_DIR)/statemap.m
+		-$(RM_F) $(LIB_STAGING_DIR)/README.txt
+		-$(RM_F) $(LIB_STAGING_DIR)/statemap.h
+		-$(RM_F) $(LIB_STAGING_DIR)/statemap.m
 
 clean :
 
-realclean :
+realclean :     clean
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2008/02/04 10:45:49  fperrad
+# + use common variables
+#
 # Revision 1.1  2007/01/15 00:23:50  cwrapp
 # Release 4.4.0 initial commit.
 #

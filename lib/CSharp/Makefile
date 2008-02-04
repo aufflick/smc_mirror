@@ -35,21 +35,13 @@
 # Include the official macros.
 include ../../smc.mk
 
-LIB_SOURCES=	FSMContext.cs \
-		State.cs \
-		TransitionUndefinedException.cs \
-		StateUndefinedException.cs
+LIB_SOURCES=    FSMContext.cs \
+                State.cs \
+                TransitionUndefinedException.cs \
+                StateUndefinedException.cs
 
-PACKAGE_NAME=	statemap
-
-JAVAC=		javac
-JAVAC_FLAGS=	-d . -g
-
-JAR=		jar
-JAR_FLAGS=	cvf
-
-DLL_FILE=	$(PACKAGE_NAME).dll
-PDB_FILE=	$(PACKAGE_NAME).pdb
+DLL_FILE=       $(PACKAGE_NAME).dll
+PDB_FILE=       $(PACKAGE_NAME).pdb
 
 LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib/DotNet
 
@@ -57,69 +49,72 @@ LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib/DotNet
 # Rules.
 #
 
-all:		$(DLL_FILE)
+all :           $(DLL_FILE)
 
 # .dll can only be built withing Dev Studio.
 
 $(LIB_STAGING_DIR) :
-		mkdir $(LIB_STAGING_DIR)
+		$(MKDIR) $@
 
 $(LIB_STAGING_DIR)/Debug : $(LIB_STAGING_DIR)
-		mkdir $(LIB_STAGING_DIR)/Debug
+		$(MKDIR) $@
 
 $(LIB_STAGING_DIR)/Debug/Trace : $(LIB_STAGING_DIR)/Debug
-		mkdir $(LIB_STAGING_DIR)/Debug/Trace
+		$(MKDIR) $@
 
 $(LIB_STAGING_DIR)/Debug/NoTrace : $(LIB_STAGING_DIR)/Debug
-		mkdir $(LIB_STAGING_DIR)/Debug/NoTrace
+		$(MKDIR) $@
 
 $(LIB_STAGING_DIR)/Release : $(LIB_STAGING_DIR)
-		mkdir $(LIB_STAGING_DIR)/Release
+		$(MKDIR) $@
 
 $(LIB_STAGING_DIR)/Release/Trace : $(LIB_STAGING_DIR)/Release
-		mkdir $(LIB_STAGING_DIR)/Release/Trace
+		$(MKDIR) $@
 
 $(LIB_STAGING_DIR)/Release/NoTrace : $(LIB_STAGING_DIR)/Release
-		mkdir $(LIB_STAGING_DIR)/Release/NoTrace
+		$(MKDIR) $@
 
-install :	install_debug install_release
+install :       install_debug install_release
 
 install_debug : install_debug_w_trace install_debug_wo_trace
 
 install_debug_w_trace : Debug/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug/Trace
-		cp -f Debug/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug/Trace
-		cp -f Debug/$(PDB_FILE) $(LIB_STAGING_DIR)/Debug/Trace
+		$(CP) Debug/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug/Trace
+		$(CP) Debug/$(PDB_FILE) $(LIB_STAGING_DIR)/Debug/Trace
 
 install_debug_wo_trace : Debug/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug/NoTrace
-		cp -f DebugNoTrace/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug/NoTrace
-		cp -f DebugNoTrace/$(PDB_FILE) $(LIB_STAGING_DIR)/Debug/NoTrace
+		$(CP) DebugNoTrace/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug/NoTrace
+		$(CP) DebugNoTrace/$(PDB_FILE) $(LIB_STAGING_DIR)/Debug/NoTrace
 
 install_release : install_release_w_trace install_release_wo_trace
 
 install_release_w_trace : Release/$(DLL_FILE) $(LIB_STAGING_DIR)/Release/Trace
-		cp Release/$(DLL_FILE) $(LIB_STAGING_DIR)/Release/Trace
+		$(CP) Release/$(DLL_FILE) $(LIB_STAGING_DIR)/Release/Trace
 
 install_release_wo_trace : Release/$(DLL_FILE) $(LIB_STAGING_DIR)/Release/NoTrace
-		cp ReleaseNoTrace/$(DLL_FILE) $(LIB_STAGING_DIR)/Release/NoTrace
+		$(CP) ReleaseNoTrace/$(DLL_FILE) $(LIB_STAGING_DIR)/Release/NoTrace
 
 uninstall :
-		-rm -f $(LIB_STAGING_DIR)/Debug/Trace/$(DLL_FILE)
-		-rm -f $(LIB_STAGING_DIR)/Debug/Trace/$(PDB_FILE)
-		-rm -f $(LIB_STAGING_DIR)/Debug/NoTrace/$(DLL_FILE)
-		-rm -f $(LIB_STAGING_DIR)/Debug/NoTrace/$(PDB_FILE)
-		-rm -f $(LIB_STAGING_DIR)/Release/Trace/$(DLL_FILE)
-		-rm -f $(LIB_STAGING_DIR)/Release/NoTrace/$(DLL_FILE)
+		-$(RM_F) $(LIB_STAGING_DIR)/Debug/Trace/$(DLL_FILE)
+		-$(RM_F) $(LIB_STAGING_DIR)/Debug/Trace/$(PDB_FILE)
+		-$(RM_F) $(LIB_STAGING_DIR)/Debug/NoTrace/$(DLL_FILE)
+		-$(RM_F) $(LIB_STAGING_DIR)/Debug/NoTrace/$(PDB_FILE)
+		-$(RM_F) $(LIB_STAGING_DIR)/Release/Trace/$(DLL_FILE)
+		-$(RM_F) $(LIB_STAGING_DIR)/Release/NoTrace/$(DLL_FILE)
 
 clean :
 
-realclean :	clean
-		-rm -f ./Debug/$(DLL_FILE) \
-			./Debug/$(PDB_FILE) \
-			./Release/$(DLL_FILE)
+realclean :     clean
+		-$(RM_F) ./Debug/$(DLL_FILE)
+		-$(RM_F) ./Debug/$(PDB_FILE)
+		-$(RM_F) ./Release/$(DLL_FILE)
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.4  2008/02/04 10:44:03  fperrad
+# + use common variables
+#
 # Revision 1.3  2006/09/16 15:04:28  cwrapp
 # Initial v. 4.3.3 check-in.
 #
@@ -132,13 +127,4 @@ realclean :	clean
 #
 # Revision 1.1  2005/05/28 18:44:13  cwrapp
 # Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
-#
-# Revision 1.2  2005/02/21 19:02:37  charlesr
-# Including standard SMC makefile macros.
-#
-# Revision 1.1  2004/10/30 15:55:01  charlesr
-# Added -f option to install copy.
-#
-# Revision 1.0  2004/09/06 16:32:18  charlesr
-# Initial revision
 #

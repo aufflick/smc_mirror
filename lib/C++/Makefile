@@ -32,25 +32,31 @@
 # Include the official macros.
 include ../../smc.mk
 
+SOURCES=        statemap.h
+
 LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib
 
 #################################################################
 # Rules.
 #
 
-install :	statemap.h
-		cp -f statemap.h $(LIB_STAGING_DIR)
+install :       $(SOURCES)
+		$(CP) statemap.h ..
+		$(CP) statemap.h $(LIB_STAGING_DIR)/statemap.h
 
 uninstall :
-		-rm $(LIB_STAGING_DIR)/statemap.h
+		-$(RM_F) $(LIB_STAGING_DIR)/statemap.h
 
 clean :
 
-realclean :
+realclean :     clean
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.8  2008/02/04 10:41:23  fperrad
+# + use common variables
+#
 # Revision 1.7  2005/06/08 11:09:14  cwrapp
 # + Updated Python code generator to place "pass" in methods with empty
 #   bodies.

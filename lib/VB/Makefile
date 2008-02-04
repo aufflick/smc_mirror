@@ -32,21 +32,13 @@
 # Include the official macros.
 include ../../smc.mk
 
-LIB_SOURCES=	FSMContext.vb \
-		State.vb \
-		TransitionUndefinedException.vb \
-		StateUndefinedException.vb
+LIB_SOURCES=    FSMContext.vb \
+                State.vb \
+                TransitionUndefinedException.vb \
+                StateUndefinedException.vb
 
-PACKAGE_NAME=	statemap
-
-JAVAC=		javac
-JAVAC_FLAGS=	-d . -g
-
-JAR=		jar
-JAR_FLAGS=	cvf
-
-DLL_FILE=	$(PACKAGE_NAME).dll
-PDB_FILE=	$(PACKAGE_NAME).pdb
+DLL_FILE=       $(PACKAGE_NAME).dll
+PDB_FILE=       $(PACKAGE_NAME).pdb
 
 LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib/VB
 
@@ -54,43 +46,46 @@ LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib/VB
 # Rules.
 #
 
-all:		$(DLL_FILE)
+all :           $(DLL_FILE)
 
 # .dll can only be built withing Dev Studio.
 
 $(LIB_STAGING_DIR) :
-		mkdir $(LIB_STAGING_DIR)
+		$(MKDIR) $@
 
 $(LIB_STAGING_DIR)/Debug : $(LIB_STAGING_DIR)
-		mkdir $(LIB_STAGING_DIR)/Debug
+		$(MKDIR) $@
 
 $(LIB_STAGING_DIR)/Release : $(LIB_STAGING_DIR)
-		mkdir $(LIB_STAGING_DIR)/Release
+		$(MKDIR) $@
 
-install :	install_debug install_release
+install :       install_debug install_release
 
-install_debug :	Debug/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug
-		cp -f Debug/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug
-		cp -f Debug/$(PDB_FILE) $(LIB_STAGING_DIR)/Debug
+install_debug : Debug/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug
+		$(CP) Debug/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug
+		$(CP) Debug/$(PDB_FILE) $(LIB_STAGING_DIR)/Debug
 
 install_release : Release/$(DLL_FILE) $(LIB_STAGING_DIR)/Release
-		cp -f Release/$(DLL_FILE) $(LIB_STAGING_DIR)/Release
+		$(CP) Release/$(DLL_FILE) $(LIB_STAGING_DIR)/Release
 
 uninstall :
-		-rm -f $(LIB_STAGING_DIR)/Debug/$(DLL_FILE)
-		-rm -f $(LIB_STAGING_DIR)/Debug/$(PDB_FILE)
-		-rm -f $(LIB_STAGING_DIR)/Release/$(DLL_FILE)
+		-$(RM_F) $(LIB_STAGING_DIR)/Debug/$(DLL_FILE)
+		-$(RM_F) $(LIB_STAGING_DIR)/Debug/$(PDB_FILE)
+		-$(RM_F) $(LIB_STAGING_DIR)/Release/$(DLL_FILE)
 
 clean :
 
-realclean :	clean
-		-rm -f ./Debug/$(DLL_FILE) \
-			./Debug/$(PDB_FILE) \
-			./Release/$(DLL_FILE)
+realclean :     clean
+		-$(RM_F) ./Debug/$(DLL_FILE)
+		-$(RM_F) ./Debug/$(PDB_FILE)
+		-$(RM_F) ./Release/$(DLL_FILE)
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2008/02/04 10:47:07  fperrad
+# + use common variables
+#
 # Revision 1.2  2005/06/08 11:09:15  cwrapp
 # + Updated Python code generator to place "pass" in methods with empty
 #   bodies.
@@ -100,16 +95,4 @@ realclean :	clean
 #
 # Revision 1.1  2005/05/28 18:47:13  cwrapp
 # Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
-#
-# Revision 1.3  2005/02/21 19:06:40  charlesr
-# Including standard SMC macros.
-#
-# Revision 1.2  2004/10/30 15:57:07  charlesr
-# Added -f option to the install copy.
-#
-# Revision 1.1  2004/09/06 16:35:55  charlesr
-# Updated for SMC v. 3.1.0.
-#
-# Revision 1.0  2004/05/31 13:46:35  charlesr
-# Initial revision
 #

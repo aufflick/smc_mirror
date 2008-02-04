@@ -32,35 +32,35 @@
 # Include the official macros.
 include ../../smc.mk
 
-CP=		cp -f
-MKDIR=		mkdir -p
-RM_F=		rm -f
+SOURCES=        statemap.rb
 
-LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib
-RUBY_LIB_STAGING_DIR=$(LIB_STAGING_DIR)/Ruby
+LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib/Ruby
 
 #################################################################
 # Rules.
 #
 
-$(RUBY_LIB_STAGING_DIR) :
-		$(MKDIR) $(RUBY_LIB_STAGING_DIR)
+$(LIB_STAGING_DIR) :
+		$(MKDIR) $@
 
-install :	$(RUBY_LIB_STAGING_DIR) statemap.rb
-		$(CP) statemap.rb $(RUBY_LIB_STAGING_DIR)/statemap.rb
-		$(CP) README $(RUBY_LIB_STAGING_DIR)/README
+install :       $(LIB_STAGING_DIR) $(SOURCES)
+		$(CP) statemap.rb $(LIB_STAGING_DIR)/statemap.rb
+		$(CP) README $(LIB_STAGING_DIR)/README
 
 uninstall :
-		-$(RM_F) $(RUBY_LIB_STAGING_DIR)/statemap.rb
-		-$(RM_F) $(RUBY_LIB_STAGING_DIR)/README
+		-$(RM_F) $(LIB_STAGING_DIR)/statemap.rb
+		-$(RM_F) $(LIB_STAGING_DIR)/README
 
 clean :
 
-realclean :
+realclean :     clean
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.4  2008/02/04 10:46:38  fperrad
+# + use common variables
+#
 # Revision 1.3  2007/10/11 12:48:35  fperrad
 # - refactor: Makefile with variables
 #

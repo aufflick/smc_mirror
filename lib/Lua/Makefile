@@ -32,37 +32,35 @@
 # Include the official macros.
 include ../../smc.mk
 
-CP=		cp -f
-CHMOD=		chmod 444
-MKDIR=		mkdir -p
-RM_F=		rm -f
-RM_RF=		rm -rf
+SOURCES=        statemap.lua
 
-LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib
-LUA_LIB_STAGING_DIR=$(LIB_STAGING_DIR)/Lua
+LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib/Lua
 
 #################################################################
 # Rules.
 #
 
-$(LUA_LIB_STAGING_DIR) : $(LIB_STAGING_DIR)
-		$(MKDIR) $(LUA_LIB_STAGING_DIR)
+$(LIB_STAGING_DIR) :
+		$(MKDIR) $@
 
-install :	$(LUA_LIB_STAGING_DIR) statemap.lua
-		$(CP) statemap.lua $(LUA_LIB_STAGING_DIR)/statemap.lua
-		$(CP) README $(LUA_LIB_STAGING_DIR)/README
+install :       $(LIB_STAGING_DIR) $(SOURCES)
+		$(CP) statemap.lua $(LIB_STAGING_DIR)/statemap.lua
+		$(CP) README $(LIB_STAGING_DIR)/README
 
 uninstall :
-		-$(RM_F) $(LUA_LIB_STAGING_DIR)/statemap.lua
-		-$(RM_F) $(LUA_LIB_STAGING_DIR)/README
+		-$(RM_F) $(LIB_STAGING_DIR)/statemap.lua
+		-$(RM_F) $(LIB_STAGING_DIR)/README
 
 clean :
 
-realclean :
+realclean :     clean
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2008/02/04 10:45:36  fperrad
+# + use common variables
+#
 # Revision 1.2  2007/10/11 12:48:35  fperrad
 # - refactor: Makefile with variables
 #

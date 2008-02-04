@@ -32,44 +32,42 @@
 # Include the official macros.
 include ../../smc.mk
 
-SOURCES	= Makefile.PL MANIFEST README Changes Statemap.pm test.pl
+SOURCES=        Makefile.PL MANIFEST README Changes Statemap.pm test.pl
 
-CP=		cp -f
-MKDIR=		mkdir -p
-RM_F=		rm -f
-
-LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib
-PERL_LIB_STAGING_DIR=$(LIB_STAGING_DIR)/Perl
+LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib/Perl
 
 #################################################################
 # Rules.
 #
 
-$(PERL_LIB_STAGING_DIR) :
-		$(MKDIR) $(PERL_LIB_STAGING_DIR)
+$(LIB_STAGING_DIR) :
+		$(MKDIR) $@
 
-install :	$(PERL_LIB_STAGING_DIR) $(SOURCES)
-		$(CP) Makefile.PL $(PERL_LIB_STAGING_DIR)/Makefile.PL
-		$(CP) MANIFEST $(PERL_LIB_STAGING_DIR)/MANIFEST
-		$(CP) README $(PERL_LIB_STAGING_DIR)/README
-		$(CP) Changes $(PERL_LIB_STAGING_DIR)/Changes
-		$(CP) Statemap.pm $(PERL_LIB_STAGING_DIR)/Statemap.pm
-		$(CP) test.pl $(PERL_LIB_STAGING_DIR)/test.pl
+install :       $(LIB_STAGING_DIR) $(SOURCES)
+		$(CP) Makefile.PL $(LIB_STAGING_DIR)/Makefile.PL
+		$(CP) MANIFEST $(LIB_STAGING_DIR)/MANIFEST
+		$(CP) README $(LIB_STAGING_DIR)/README
+		$(CP) Changes $(LIB_STAGING_DIR)/Changes
+		$(CP) Statemap.pm $(LIB_STAGING_DIR)/Statemap.pm
+		$(CP) test.pl $(LIB_STAGING_DIR)/test.pl
 
-uninstall :	$(PERL_LIB_STAGING_DIR)
-		-$(RM_F) $(PERL_LIB_STAGING_DIR)/Makefile.PL
-		-$(RM_F) $(PERL_LIB_STAGING_DIR)/MANIFEST
-		-$(RM_F) $(PERL_LIB_STAGING_DIR)/README
-		-$(RM_F) $(PERL_LIB_STAGING_DIR)/Statemap.pm
-		-$(RM_F) $(PERL_LIB_STAGING_DIR)/test.pl
+uninstall :     $(LIB_STAGING_DIR)
+		-$(RM_F) $(LIB_STAGING_DIR)/Makefile.PL
+		-$(RM_F) $(LIB_STAGING_DIR)/MANIFEST
+		-$(RM_F) $(LIB_STAGING_DIR)/README
+		-$(RM_F) $(LIB_STAGING_DIR)/Statemap.pm
+		-$(RM_F) $(LIB_STAGING_DIR)/test.pl
 
 clean :
 
-realclean :
+realclean :     clean
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.5  2008/02/04 10:46:03  fperrad
+# + use common variables
+#
 # Revision 1.4  2007/10/11 12:48:35  fperrad
 # - refactor: Makefile with variables
 #

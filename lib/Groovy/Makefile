@@ -36,54 +36,48 @@
 # Include the official macros.
 include ../../smc.mk
 
-LIB_SOURCES=	statemap.groovy
+LIB_SOURCES=    $(PACKAGE_NAME).groovy
 
-PACKAGE_NAME=	statemap
+GROOVYC=        groovyc
+JAR=            jar
+JAR_FLAGS=      cvf
+JAR_FILE=       $(PACKAGE_NAME).jar
 
-GROOVYC=		groovyc
-JAR=		jar
-JAR_FLAGS=	cvf
-JAR_FILE=	$(PACKAGE_NAME).jar
-CP=		cp -f
-CHMOD=		chmod 444
-MKDIR=		mkdir -p
-RM_F=		rm -f
-RM_RF=		rm -rf
-
-LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib
-GROOVY_LIB_STAGING_DIR=$(LIB_STAGING_DIR)/Groovy
+LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib/Groovy
 
 #################################################################
 # Rules.
 #
 
-all:		$(JAR_FILE)
+all :           $(JAR_FILE)
 
-$(JAR_FILE) :	$(LIB_SOURCES)
+$(JAR_FILE) :   $(LIB_SOURCES)
 		$(GROOVYC) $(LIB_SOURCES)
 		$(JAR) $(JAR_FLAGS) $(JAR_FILE) $(PACKAGE_NAME)
 
-$(GROOVY_LIB_STAGING_DIR) :
-		$(MKDIR) $(GROOVY_LIB_STAGING_DIR)
+$(LIB_STAGING_DIR) :
+		$(MKDIR) $@
 
-install :	$(GROOVY_LIB_STAGING_DIR) $(JAR_FILE)
-		$(CP) $(JAR_FILE) ..
-		$(CP) $(JAR_FILE) $(GROOVY_LIB_STAGING_DIR)
-		-$(CHMOD) $(GROOVY_LIB_STAGING_DIR)/$(JAR_FILE)
+install :       $(LIB_STAGING_DIR) $(JAR_FILE)
+		$(CP) $(JAR_FILE) $(LIB_STAGING_DIR)
+		-$(CHMOD) 444 $(LIB_STAGING_DIR)/$(JAR_FILE)
 
 uninstall :
 		-$(RM_F) ../$(JAR_FILE)
-		-$(RM_F) $(GROOVY_LIB_STAGING_DIR)/$(JAR_FILE)
+		-$(RM_F) $(LIB_STAGING_DIR)/$(JAR_FILE)
 
 clean :
-		-$(RM_F) ./$(JAR_FILE) ./$(PACKAGE_NAME)/*
+		-$(RM_F) $(JAR_FILE) $(PACKAGE_NAME)/*
 
-realclean :	clean
-		-$(RM_RF) ./statemap
+realclean :     clean
+		-$(RM_RF) $(PACKAGE_NAME)
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.4  2008/02/04 10:45:01  fperrad
+# + use common variables
+#
 # Revision 1.3  2008/01/14 19:59:23  cwrapp
 # Release 5.0.2 check-in.
 #

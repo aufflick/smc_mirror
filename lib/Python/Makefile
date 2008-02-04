@@ -41,37 +41,35 @@
 # Include the official macros.
 include ../../smc.mk
 
-SOURCES	= setup.py statemap.py
+SOURCES=        setup.py statemap.py
 
-CP=		cp -f
-MKDIR=		mkdir -p
-RM_F=		rm -f
-
-LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib
-PYTHON_LIB_STAGING_DIR=$(LIB_STAGING_DIR)/Python
+LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib/Python
 
 #################################################################
 # Rules.
 #
 
-$(PYTHON_LIB_STAGING_DIR) :
-		$(MKDIR) $(PYTHON_LIB_STAGING_DIR)
+$(LIB_STAGING_DIR) :
+		$(MKDIR) $@
 
-install :	$(PYTHON_LIB_STAGING_DIR) $(SOURCES)
-		$(CP) README.py $(PYTHON_LIB_STAGING_DIR)/README.py
-		$(CP) statemap.py $(PYTHON_LIB_STAGING_DIR)/statemap.py
-		$(CP) setup.py $(PYTHON_LIB_STAGING_DIR)/setup.py
+install :       $(LIB_STAGING_DIR) $(SOURCES)
+		$(CP) README.py $(LIB_STAGING_DIR)/README.py
+		$(CP) statemap.py $(LIB_STAGING_DIR)/statemap.py
+		$(CP) setup.py $(LIB_STAGING_DIR)/setup.py
 
 uninstall :
-		-$(RM_F) $(PYTHON_LIB_STAGING_DIR)/*.py
+		-$(RM_F) $(LIB_STAGING_DIR)/*.py
 
 clean :
 
-realclean :	clean
+realclean :     clean
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.9  2008/02/04 10:46:22  fperrad
+# + use common variables
+#
 # Revision 1.8  2007/12/28 12:34:40  cwrapp
 # Version 5.0.1 check-in.
 #

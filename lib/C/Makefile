@@ -32,33 +32,33 @@
 # Include the official macros.
 include ../../smc.mk
 
-CP=		cp -f
-MKDIR=		mkdir -p
-RM_F=		rm -f
+SOURCES=        statemap.h
 
-LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib
-C_LIB_STAGING_DIR=$(LIB_STAGING_DIR)/C
+LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib/C
 
 #################################################################
 # Rules.
 #
 
-$(C_LIB_STAGING_DIR) :
-		$(MKDIR) $(C_LIB_STAGING_DIR)
+$(LIB_STAGING_DIR) :
+		$(MKDIR) $@
 
-install :	$(C_LIB_STAGING_DIR) statemap.h
-		$(CP) statemap.h $(C_LIB_STAGING_DIR)/statemap.h
+install :       $(LIB_STAGING_DIR) $(SOURCES)
+		$(CP) statemap.h $(LIB_STAGING_DIR)/statemap.h
 
 uninstall :
-		-$(RM_F) $(C_LIB_STAGING_DIR)/statemap.h
+		-$(RM_F) $(LIB_STAGING_DIR)/statemap.h
 
 clean :
 
-realclean :
+realclean :     clean
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.4  2008/02/04 10:40:48  fperrad
+# + use common variables
+#
 # Revision 1.3  2007/10/11 12:48:35  fperrad
 # - refactor: Makefile with variables
 #
