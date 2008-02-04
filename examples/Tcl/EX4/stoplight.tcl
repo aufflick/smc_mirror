@@ -28,6 +28,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.7  2008/02/04 12:38:37  fperrad
+# fix filename case on linux
+#
 # Revision 1.6  2005/05/28 18:02:56  cwrapp
 # Updated Tcl examples, removed EX6.
 #
@@ -37,7 +40,7 @@
 
 package require statemap;
 
-source ./Stoplight_sm.tcl;
+source ./stoplight_sm.tcl;
 
 namespace eval tcl_ex4 {
     class Stoplight {

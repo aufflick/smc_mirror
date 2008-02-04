@@ -28,6 +28,9 @@ exec wish -f "$0" "$@"
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.7  2008/02/04 12:39:02  fperrad
+# fix filename case on linux
+#
 # Revision 1.6  2005/06/08 11:09:14  cwrapp
 # + Updated Python code generator to place "pass" in methods with empty
 #   bodies.
@@ -90,7 +93,7 @@ proc init {argc argv} {
     namespace import ::statemap::*;
 
     # Load in the class definitions.
-    source ./task.tcl;
+    source ./TASK.TCL;
     source ./taskManager.tcl;
     source ./taskGUI.tcl;
     source ./messageGUI.tcl;

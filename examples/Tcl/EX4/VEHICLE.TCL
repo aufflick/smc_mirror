@@ -28,6 +28,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.6  2008/02/04 12:38:37  fperrad
+# fix filename case on linux
+#
 # Revision 1.5  2005/05/28 18:02:55  cwrapp
 # Updated Tcl examples, removed EX6.
 #
@@ -37,7 +40,7 @@
 
 package require statemap;
 
-source ./Vehicle_sm.tcl;
+source ./VEHICLE_sm.tcl;
 
 namespace eval ::tcl_ex4 {
     class Vehicle {

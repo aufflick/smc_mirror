@@ -32,6 +32,9 @@ exec wish -f "$0" "$@"
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.6  2008/02/04 12:38:37  fperrad
+# fix filename case on linux
+#
 # Revision 1.5  2005/05/28 18:02:55  cwrapp
 # Updated Tcl examples, removed EX6.
 #
@@ -51,8 +54,8 @@ namespace import ::itcl::*;
 namespace import ::statemap::*;
 
 # Load in the stoplight and vehicles classes.
-source ./Stoplight.tcl;
-source ./Vehicle.tcl;
+source ./stoplight.tcl;
+source ./VEHICLE.TCL;
 namespace import ::tcl_ex4::*;
 
 # DEBUG

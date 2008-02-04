@@ -27,6 +27,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.5  2008/02/04 12:39:02  fperrad
+# fix filename case on linux
+#
 # Revision 1.4  2005/05/28 18:02:56  cwrapp
 # Updated Tcl examples, removed EX6.
 #
@@ -35,7 +38,7 @@
 #
 
 package require statemap;
-source ./task_sm.tcl;
+source ./TASK_sm.tcl;
 
 class Task {
 # Member data.
