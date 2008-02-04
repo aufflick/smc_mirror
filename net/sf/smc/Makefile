@@ -21,9 +21,10 @@
 #   (Name withheld) contributed the C# code generation and
 #   examples/C#.
 #   Francois Perrad contributed the Python code generation and
-#   examples/Python, Perl code generation adn examples, Ruby
-#   code generation and examples, Lua code generation and
-#   examples.
+#   examples/Python, Perl code generation and examples/Perl,
+#   Ruby code generation and examples/Ruby, Lua code generation
+#   and examples/Lua, Groovy code generation and examples/Groovy,
+#   Scala code generation and examples/Scala.
 #   Chris Liscio contributed the Objective-C code generation
 #   and examples/ObjC.
 #
@@ -38,11 +39,12 @@
 # Macros
 #
 
-SM_SOURCES=	SmcLexer.sm \
+SM_SOURCES= \
+		SmcLexer.sm \
 		SmcParser.sm
 
-APP_SOURCES=	SmcLexerContext.java \
-		SmcParserContext.java \
+CORE_SOURCES= \
+		$(SM_SOURCES:%.sm=%Context.java) \
 		SmcMessage.java \
 		SmcElement.java \
 		SmcParameter.java \
@@ -57,9 +59,12 @@ APP_SOURCES=	SmcLexerContext.java \
 		SmcVisitor.java \
 		SmcSyntaxChecker.java \
 		SmcCodeGenerator.java \
+		Smc.java
+
+LANG_SOURCES= \
+		SmcJavaGenerator.java \
 		SmcHeaderGenerator.java \
 		SmcCppGenerator.java \
-		SmcJavaGenerator.java \
 		SmcTclGenerator.java \
 		SmcVBGenerator.java \
 		SmcCSharpGenerator.java \
@@ -74,7 +79,7 @@ APP_SOURCES=	SmcLexerContext.java \
 		SmcHeaderObjCGenerator.java \
 		SmcObjCGenerator.java \
 		SmcGroovyGenerator.java \
-		Smc.java
+		SmcScalaGenerator.java
 
 PACKAGE_NAME=	net.sf.smc
 PACKAGE_DIR=	net/sf/smc
@@ -105,6 +110,12 @@ MKDIR=		mkdir -p
 MV=		mv
 RM_F=		rm -f
 RM_RF=		rm -rf
+# Alternate version based on Perl (compatible Windows / *nix)
+#CP=		perl -MExtUtils::Command -e cp
+#MKDIR=		perl -MExtUtils::Command -e mkpath
+#MV=		perl -MExtUtils::Command -e mv
+#RM_F=		perl -MExtUtils::Command -e rm_f
+#RM_RF=		perl -MExtUtils::Command -e rm_rf
 
 #################################################################
 # Rules
@@ -115,8 +126,8 @@ all :		$(JAR_FILE) tags
 %Context.java :	%.sm
 		$(SMC) $(SMC_FLAGS) $<
 
-$(JAR_FILE) :	$(APP_SOURCES) $(STATEMAP_LIB_DIR)/statemap/FSMContext.class $(STATEMAP_LIB_DIR)/statemap/State.class
-		$(JAVAC) $(JAVAC_FLAGS) $(APP_SOURCES)
+$(JAR_FILE) :	$(CORE_SOURCES) $(LANG_SOURCES) $(STATEMAP_LIB_DIR)/statemap/FSMContext.class $(STATEMAP_LIB_DIR)/statemap/State.class
+		$(JAVAC) $(JAVAC_FLAGS) $(CORE_SOURCES) $(LANG_SOURCES)
 		$(JAR) $(JAR_CREATE_FLAGS) $(JAR_FILE) \
 			$(PACKAGE_DIR)/*.class
 		$(JAR) $(JAR_UPDATE_FLAGS) $(JAR_FILE) -C $(STATEMAP_LIB_DIR) statemap
@@ -138,16 +149,21 @@ uninstall :
 		-$(RM_F) $(INSTALL_DIR)/$(JAR_FILE)
 
 clean :
-		-$(RM_F) $(PACKAGE_DIR)/*.class \
-			*Context.java \
-			$(JAR_FILE)
+		-$(RM_F) $(JAR_FILE)
+		-$(RM_F) *Context.java
+		-$(RM_F) $(PACKAGE_DIR)/*.class
 
 realclean :	clean
-		-$(RM_RF) ./net $(TAG_FILE) *.flc *~
+		-$(RM_F) $(TAG_FILE)
+		-$(RM_F) *.flc *~
+		-$(RM_RF) ./net
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.16  2008/02/04 10:32:49  fperrad
+# + Added Scala language generation.
+#
 # Revision 1.15  2007/10/16 10:22:10  fperrad
 # - refactor: Makefile with variables
 #

@@ -23,7 +23,8 @@
 //   Francois Perrad contributed the Python code generation and
 //   examples/Python, Perl code generation and examples/Perl,
 //   Ruby code generation and examples/Ruby, Lua code generation
-//   and examples/Lua, Groovy code generation and examples/Groovy.
+//   and examples/Lua, Groovy code generation and examples/Groovy,
+//   Scala code generation and examples/Scala.
 //   Chris Liscio contributed the Objective-C code generation
 //   and examples/ObjC.
 //
@@ -1073,8 +1074,8 @@ public final class Smc
         stream.print(
             " {-c | -c++ | -csharp | -graph | -groovy | -java | ");
         stream.print(
-            "-lua | -objc | -perl | -python | -ruby | -table | ");
-        stream.print("-tcl | -vb}");
+            "-lua | -objc | -perl | -python | -ruby | -scala | ");
+        stream.print("-table |-tcl | -vb}");
         stream.println(" statemap_file");
         stream.println("    where:");
         stream.println(
@@ -1093,7 +1094,7 @@ public final class Smc
         stream.println(
             "\t-sync     Synchronize generated Java code ");
         stream.print("\t          ");
-        stream.println("(use with -java, -groovy, -vb and -csharp only)");
+        stream.println("(use with -java, -groovy, -scala, -vb and -csharp only)");
         stream.println(
             "\t-noex     Do not generate C++ exception throws ");
         stream.print("\t          ");
@@ -1110,7 +1111,7 @@ public final class Smc
         stream.println("\t-reflect  Generate reflection code");
         stream.print("\t          ");
         stream.print("(use with -java, -tcl, -vb, -csharp, ");
-        stream.println("-groovy, -lua, -perl, -python and -ruby only)");
+        stream.println("-groovy, -lua, -perl, -python, -ruby and -scala only)");
         stream.println("\t-cast     Use this C++ cast type ");
         stream.print("\t          ");
         stream.println("(use with -c++ only)");
@@ -1137,6 +1138,7 @@ public final class Smc
         stream.println("\t-perl     Generate Perl code");
         stream.println("\t-python   Generate Python code");
         stream.println("\t-ruby     Generate Ruby code");
+        stream.println("\t-scala    Generate Scala code");
         stream.println("\t-table    Generate HTML table code");
         stream.println("\t-tcl      Generate [incr Tcl] code");
         stream.println("\t-vb       Generate VB.Net code");
@@ -1147,7 +1149,7 @@ public final class Smc
             "    Note: must select one of -c, -c++, -csharp, ");
         stream.print("-graph, -groovy, -java, -lua, -objc, -perl, ");
         stream.println(
-            "-python, -ruby, -table, -tcl or -vb.");
+            "-python, -ruby, -scala, -table, -tcl or -vb.");
 
         return;
     }
@@ -1566,7 +1568,8 @@ public final class Smc
     /* package */ static final int OBJECTIVE_C = 12;
     /* package */ static final int LUA = 13;
     /* package */ static final int GROOVY = 14;
-    /* package */ static final int LANGUAGE_COUNT = 15;
+    /* package */ static final int SCALA = 15;
+    /* package */ static final int LANGUAGE_COUNT = 16;
 
     // GraphViz detail level.
     /* package */ static final int NO_GRAPH_LEVEL = -1;
@@ -1725,6 +1728,16 @@ public final class Smc
                 SmcRubyGenerator.class,
                 false,
                 null);
+        _languages[SCALA] =
+            new Language(
+                SCALA,
+                "-scala",
+                "Scala",
+                "scala",
+                "{0}{1}Context.{2}",
+                SmcScalaGenerator.class,
+                false,
+                null);
         _languages[TABLE] =
             new Language(
                 TABLE,
@@ -1772,11 +1785,11 @@ public final class Smc
         // +      -noex: C++
         // + -nostreams: C++
         // +   -reflect: C#, Java, TCL, VB, Lua, Perl, Python,
-        //               Ruby, Groovy
+        //               Ruby, Groovy, Scala
         // +    -return: all
-        // +    -serial: C#, C++, Java, Tcl, VB, Groovy
+        // +    -serial: C#, C++, Java, Tcl, VB, Groovy, Scala
         // +    -suffix: all
-        // +      -sync: C#, Java, VB, Groovy
+        // +      -sync: C#, Java, VB, Groovy, Scala
         // +   -verbose: all
         // +   -version: all
         // +  -vverbose: all
@@ -1819,6 +1832,7 @@ public final class Smc
         languages.add(_languages[JAVA]);
         languages.add(_languages[VB]);
         languages.add(_languages[GROOVY]);
+        languages.add(_languages[SCALA]);
         _optionMap.put(SYNC_FLAG, languages);
 
         // Languages supporting reflection.
@@ -1832,6 +1846,7 @@ public final class Smc
         languages.add(_languages[PYTHON]);
         languages.add(_languages[RUBY]);
         languages.add(_languages[GROOVY]);
+        languages.add(_languages[SCALA]);
         _optionMap.put(REFLECT_FLAG, languages);
 
         // Languages supporting serialization.
@@ -1842,6 +1857,7 @@ public final class Smc
         languages.add(_languages[TCL]);
         languages.add(_languages[C_PLUS_PLUS]);
         languages.add(_languages[GROOVY]);
+        languages.add(_languages[SCALA]);
         _optionMap.put(SERIAL_FLAG, languages);
 
         // The -glevel option.
@@ -1854,6 +1870,9 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.26  2008/02/04 10:32:49  fperrad
+// + Added Scala language generation.
+//
 // Revision 1.25  2008/01/14 19:59:23  cwrapp
 // Release 5.0.2 check-in.
 //
