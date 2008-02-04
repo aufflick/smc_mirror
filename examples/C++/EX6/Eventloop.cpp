@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2008/02/04 12:45:07  fperrad
+// fix build on linux (gcc 4.1.3)
+//
 // Revision 1.5  2007/12/28 12:34:40  cwrapp
 // Version 5.0.1 check-in.
 //
@@ -42,11 +45,11 @@
 #include "Eventloop.h"
 #include <errno.h>
 #if !defined(WIN32)
+#include <string.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/time.h>
-#include <unistd.h>
 #include <sys/resource.h>
-#include <strings.h>
 #endif
 
 const static long USECS_PER_SEC = 1000000;
