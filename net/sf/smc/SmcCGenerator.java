@@ -204,8 +204,7 @@ public final class SmcCGenerator
         // Print the transition out to the verbose log.
         if (Smc.isDebug() == true)
         {
-            _source.println("    if (getDebugFlag(fsm) != 0)");
-            _source.println("    {");
+            _source.println("    if (getDebugFlag(fsm) != 0) {");
 
             // The TRACE macro.
             _source.print("        TRACE(");
@@ -677,8 +676,7 @@ public final class SmcCGenerator
                            stateName,
                            guard.getEndState()) == true)
             {
-                _source.print(_indent);
-                _source.print("const struct ");
+                _source.print("    const struct ");
                 _source.print(context);
                 _source.println(
                     "State* EndStateName = getState(fsm);");
@@ -694,8 +692,7 @@ public final class SmcCGenerator
             SmcParameter param;
             String sep;
 
-            _source.println("    if (getDebugFlag(fsm) != 0)");
-            _source.println("    {");
+            _source.println("    if (getDebugFlag(fsm) != 0) {");
             _source.print("        TRACE(\"TRANSITION   : ");
             _source.print(mapName);
             _source.print("_");
@@ -747,7 +744,7 @@ public final class SmcCGenerator
                 _source.println("    }");
             }
 
-            _source.println(" else {");
+            _source.println("    else {");
             _source.print("        ");
             _source.print(mapName);
             _source.print("_DefaultState_");
@@ -856,7 +853,9 @@ public final class SmcCGenerator
                 // No, this is not the first transition but it
                 // does have a condition. Use an "else if" for
                 // the condition.
-                _source.print(" else if (");
+                _source.println();
+                _source.print(_indent);
+                _source.print("    else if (");
                 _source.print(condition);
                 _source.println(") {");
             }
@@ -864,7 +863,9 @@ public final class SmcCGenerator
             {
                 // This is not the first transition and it has
                 // no condition.
-                _source.println(" else {");
+                _source.println();
+                _source.print(_indent);
+                _source.println("    else {");
             }
         }
         else
@@ -1252,6 +1253,9 @@ public final class SmcCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.13  2008/02/04 10:26:51  fperrad
+// Don't generate cuddled else
+//
 // Revision 1.12  2007/12/28 12:34:41  cwrapp
 // Version 5.0.1 check-in.
 //

@@ -704,10 +704,10 @@ public final class SmcPerlGenerator
         {
             if (_guardCount == 1)
             {
-                _source.print("        }");
+                _source.println("        }");
             }
 
-            _source.println(" else {");
+            _source.println("        else {");
 
             // Call the super class' transition method using
             // the "super" keyword and not the class name.
@@ -828,7 +828,9 @@ public final class SmcPerlGenerator
             {
                 // No, this is not the first transition but it
                 // does have a condition. Use an "else if".
-                _source.print(" elsif (");
+                _source.println();
+                _source.print(_indent);
+                _source.print("    elsif (");
                 _source.print(condition);
                 _source.println(") {");
             }
@@ -836,7 +838,9 @@ public final class SmcPerlGenerator
             {
                 // This is not the first transition and it has
                 // no condition.
-                _source.println(" else {");
+                _source.println();
+                _source.print(_indent);
+                _source.println("    else {");
             }
         }
         // There is only one guard. Does this guard have
@@ -1171,6 +1175,9 @@ public final class SmcPerlGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2008/02/04 10:26:51  fperrad
+// Don't generate cuddled else
+//
 // Revision 1.6  2007/02/21 13:56:21  cwrapp
 // Moved Java code to release 1.5.0
 //
