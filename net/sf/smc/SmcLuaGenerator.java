@@ -88,16 +88,16 @@ public final class SmcLuaGenerator
         _source.println(".sm");
         _source.println();
 
+        _source.println("module(..., package.seeall)");
+        _source.println();
+        _source.println("require 'statemap'");
+
         // Dump out the raw source code, if any.
         if (rawSource != null && rawSource.length () > 0)
         {
             _source.println(rawSource);
             _source.println();
         }
-
-        _source.println("module(..., package.seeall)");
-        _source.println();
-        _source.println("require 'statemap'");
 
         // Do user-specified imports now.
         for (String imp: fsm.getImports())
@@ -1090,6 +1090,9 @@ public final class SmcLuaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2008/02/05 09:12:35  fperrad
+// Lua : fix Bug 1884108
+//
 // Revision 1.3  2007/02/21 13:55:41  cwrapp
 // Moved Java code to release 1.5.0
 //
