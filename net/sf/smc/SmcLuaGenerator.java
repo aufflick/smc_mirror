@@ -659,7 +659,7 @@ public final class SmcLuaGenerator
             _source.print(_indent);
             _source.print("        ");
             _source.print(mapName);
-            _source.print(".Default.");
+            _source.print(".Default:");
             _source.print(transName);
             _source.print("(fsm");
 
@@ -1090,8 +1090,11 @@ public final class SmcLuaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2008/02/05 12:41:26  fperrad
+// fix Bug 1883981 : wrong Lua generation
+//
 // Revision 1.4  2008/02/05 09:12:35  fperrad
-// Lua : fix Bug 1884108
+// fix Bug 1884108 : Lua - Generate verbatim section after module
 //
 // Revision 1.3  2007/02/21 13:55:41  cwrapp
 // Moved Java code to release 1.5.0
