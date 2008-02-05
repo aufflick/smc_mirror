@@ -3,14 +3,14 @@
 // License Version 1.1 (the "License"); you may not use this file
 // except in compliance with the License. You may obtain a copy of
 // the License at http://www.mozilla.org/MPL/
-// 
+//
 // Software distributed under the License is distributed on an "AS
 // IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
-// 
+//
 // The Original Code is State Machine Compiler (SMC).
-// 
+//
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
 // Copyright (C) 2005. Charles W. Rapp.
@@ -184,7 +184,7 @@ public final class SmcLuaGenerator
         // Generate the getTransitions() method.
         if (Smc.isReflection() == true)
         {
-            _source.println();           
+            _source.println();
             _source.print("function ");
             _source.print(context);
             _source.println("State:getTransitions ()");
@@ -262,10 +262,10 @@ public final class SmcLuaGenerator
                 _source.print(context);
                 _source.print("Context:");
                 _source.print(transName);
-                _source.print(" (");    
+                _source.print(" (");
                 if (params.size() != 0)
                 {
-                    _source.print("...");    
+                    _source.print("...");
                 }
                 _source.println(")");
 
@@ -280,7 +280,7 @@ public final class SmcLuaGenerator
                 _source.print("(self");
                 if (params.size() != 0)
                 {
-                    _source.print(", ...");    
+                    _source.print(", ...");
                 }
                 _source.println(")");
 
@@ -324,7 +324,7 @@ public final class SmcLuaGenerator
         }
 
         // Declare the map default state class.
-        _source.println();           
+        _source.println();
         _source.print(mapName);
         _source.print(".Default = ");
         _source.print(context);
@@ -608,7 +608,7 @@ public final class SmcLuaGenerator
             _source.print(mapName);
             _source.print(".");
             _source.print(stateName);
-            _source.print(".");
+            _source.print(":");
             _source.print(transName);
 
             _source.print("(");
@@ -616,8 +616,12 @@ public final class SmcLuaGenerator
                  pit.hasNext() == true;
                  sep = ", ")
             {
+                String trArgName =(pit.next()).getName();
                 _source.print(sep);
-                _source.print((pit.next()).getName());
+                _source.print(trArgName);
+                _source.print("=\" .. tostring(");
+                _source.print(trArgName);
+                _source.print(") .. \"");
             }
             _source.print(")");
 
@@ -1038,7 +1042,7 @@ public final class SmcLuaGenerator
                 _source.print(indent2);
                 _source.println(")");
             }
-            else 
+            else
             {
                 _source.println(")");
             }
@@ -1090,6 +1094,9 @@ public final class SmcLuaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2008/02/05 12:54:36  fperrad
+// fix Bug 1884100 : Lua - Printing actual parameters of transition
+//
 // Revision 1.5  2008/02/05 12:41:26  fperrad
 // fix Bug 1883981 : wrong Lua generation
 //
