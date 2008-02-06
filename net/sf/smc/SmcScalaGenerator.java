@@ -122,7 +122,7 @@ public final class SmcScalaGenerator
 
         if (Smc.isSerial() == true)
         {
-            _source.println("[ serializable ] // deprecated since 2.4 in favor of Java's convention @serializable");
+            _source.println("@serializable");
         }
 
         // The context clas contains all the state classes as
@@ -234,7 +234,7 @@ public final class SmcScalaGenerator
 
         if (Smc.isSerial() == true)
         {
-            _source.println("[ serializable ] // deprecated since 2.4 in favor of Java's convention @serializable");
+            _source.println("@serializable");
         }
 
         // Declare the base state class.
@@ -561,7 +561,7 @@ public final class SmcScalaGenerator
             // Now output the transition collection's
             // initialization.
             _source.println();
-            _source.print("    def getTransitions(): Map[String, Int] = Map(");
+            _source.print("    override def getTransitions(): Map[String, Int] = Map(");
 
             // Now place all transition names and states into the
             // map.
@@ -1173,6 +1173,9 @@ public final class SmcScalaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2008/02/06 09:07:03  fperrad
+// Scala 2.3 -> 2.6
+//
 // Revision 1.1  2008/02/04 10:32:49  fperrad
 // + Added Scala language generation.
 //
