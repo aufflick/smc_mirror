@@ -244,6 +244,8 @@ public final class SmcScalaGenerator
         _source.println("    private val _name = name");
         _source.println("    private val _id = id");
         _source.println();
+        _source.println("    def getName(): String = _name");
+        _source.println();
         _source.println("    override def toString(): String = _name");
         _source.println();
 
@@ -882,9 +884,9 @@ public final class SmcScalaGenerator
         {
             _source.print(indent2);
             _source.print("val loopbackFlag: Boolean = ");
-            _source.print("context.getState().name == ");
+            _source.print("context.getState().getName() == ");
             _source.print(fqEndStateName);
-            _source.println(".name");
+            _source.println(".getName()");
         }
 
         _source.println();
@@ -1173,6 +1175,9 @@ public final class SmcScalaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2008/02/06 09:34:24  fperrad
+// add getName()
+//
 // Revision 1.2  2008/02/06 09:07:03  fperrad
 // Scala 2.3 -> 2.6
 //
