@@ -42,11 +42,12 @@ class StateUndefinedException() extends RuntimeException() {
 class TransitionUndefinedException(reason: String) extends RuntimeException(reason) {
 }
 
-[ serializable ] // deprecated since 2.4 in favor of Java's convention @serializable
+@serializable
 abstract class FSMContext[State] {
-    private var _state: State = null
+    private var _null_state: State = _
+    private var _state: State = _
     private var _stateStack: Stack[State] = new Stack[State]
-    private var _previousState: State = null
+    private var _previousState: State = _
     protected var _transition: String = ""
     private var _debugFlag: Boolean = false
     private var _debugStream: PrintStream = System.err
@@ -72,8 +73,6 @@ abstract class FSMContext[State] {
 
     def setState(state: State): Unit = {
         val previousState = _state
-        if (! state.isInstanceOf[State])
-            throw new IllegalArgumentException("state should be a statemap.State")
         if (_debugFlag)
             _debugStream.println("NEW STATE    : " + state)
         _state = state
@@ -89,13 +88,11 @@ abstract class FSMContext[State] {
 
     def clearState(): Unit = {
         _previousState = _state
-        _state = null
+        _state = _null_state
     }
 
     def pushState(state: State): Unit = {
         val previousState = _state
-        if (! state.isInstanceOf[State])
-            throw new IllegalArgumentException("state should be a statemap.State")
         if (_state == null)
             throw new NullPointerException("uninitialized state")
         if (_debugFlag)
@@ -136,6 +133,9 @@ abstract class FSMContext[State] {
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2008/02/06 09:35:23  fperrad
+// Scala 2.3 -> 2.6
+//
 // Revision 1.1  2008/02/04 10:48:47  fperrad
 // + Added Scala library
 //
