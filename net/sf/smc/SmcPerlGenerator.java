@@ -104,7 +104,7 @@ public final class SmcPerlGenerator
         _source.println("use strict;");
         _source.println("use warnings;");
         _source.println();
-        _source.println("use StateMachine::Statemap;");
+        _source.println("use DFA::Statemap;");
 
         // Do user-specified imports now.
         for (String imp: fsm.getImports())
@@ -119,7 +119,7 @@ public final class SmcPerlGenerator
         _source.print("package ");
         _source.print(context);
         _source.println("State;");
-        _source.println("    use base qw(StateMachine::Statemap::State);");
+        _source.println("    use base qw(DFA::Statemap::State);");
         _source.println();
         _source.println("    use Carp;");
         _source.println();
@@ -202,7 +202,7 @@ public final class SmcPerlGenerator
         _source.print(context);
         _source.println("_sm;");
         _source.println(
-            "    use base qw(StateMachine::Statemap::FSMContext);");
+            "    use base qw(DFA::Statemap::FSMContext);");
         _source.println();
         _source.println("    use Carp;");
         _source.println();
@@ -264,25 +264,6 @@ public final class SmcPerlGenerator
                 _source.println();
             }
         }
-
-        // getState() method.
-        _source.println("    sub getState {");
-        _source.println("        my $self = shift;");
-        if (Smc.isDebug() == true)
-        {
-            _source.println(
-                "        confess \"StateUndefinedException\\n\"");
-        }
-        else
-        {
-            _source.println(
-                "        croak \"StateUndefinedException\\n\"");
-        }
-        _source.println(
-            "                unless (defined $self->{_state});");
-        _source.println("        return $self->{_state};");
-        _source.println("    }");
-        _source.println();
 
         // getOwner() method.
         _source.println("    sub getOwner {");
@@ -1175,6 +1156,9 @@ public final class SmcPerlGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2008/02/07 16:55:47  fperrad
+// Perl : StateMachine::Statemap -> DFA::Statemap
+//
 // Revision 1.7  2008/02/04 10:26:51  fperrad
 // Don't generate cuddled else
 //

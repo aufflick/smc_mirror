@@ -6,14 +6,14 @@
 use strict;
 use warnings;
 
-package StateMachine::Statemap;
+package DFA::Statemap;
 
 use vars qw($VERSION);
-$VERSION = '0.02';
+$VERSION = '1.00';
 
 =head1 NAME
 
-StateMachine::Statemap
+DFA::Statemap
 
 =head1 DESCRIPTION
 
@@ -37,9 +37,9 @@ the Finite State Machine Context class
 
 =cut
 
-package StateMachine::Statemap::State;
+package DFA::Statemap::State;
 
-=head1 StateMachine::Statemap::State
+=head1 DFA::Statemap::State
 
 =head2 new
 
@@ -80,11 +80,11 @@ sub getId {
     return $self->{_id};
 }
 
-package StateMachine::Statemap::FSMContext;
+package DFA::Statemap::FSMContext;
 
 use Carp;
 
-=head1 StateMachine::Statemap::FSMContext
+=head1 DFA::Statemap::FSMContext
 
 The user can derive FSM contexts from this class and interface
 to them with the methods of this class.
@@ -160,6 +160,19 @@ sub setDebugStream {
     $self->{_debug_stream} = $stream;
 }
 
+=head2 getState
+
+Returns the current state.
+
+=cut
+
+sub getState {
+    my $self = shift;
+    confess "StateUndefinedException\n"
+            unless (defined $self->{_state});
+    return $self->{_state};
+}
+
 =head2 isInTransition
 
 Is this state machine already inside a transition?
@@ -224,13 +237,13 @@ sub setState {
         confess "undefined state.\n"
                 unless (defined $state);
         confess "$state is not a Statemap::State.\n"
-                unless (ref $state and $state->isa('StateMachine::Statemap::State'));
+                unless (ref $state and $state->isa('DFA::Statemap::State'));
     }
     else {
         croak "undefined state.\n"
                 unless (defined $state);
         croak "$state is not a Statemap::State.\n"
-                unless (ref $state and $state->isa('StateMachine::Statemap::State'));
+                unless (ref $state and $state->isa('DFA::Statemap::State'));
     }
     $self->{_state} = $state;
     if ($self->{_debug_flag}) {
@@ -275,13 +288,13 @@ sub pushState {
         confess "undefined state\n"
                 unless (defined $state);
         confess "$state is not a State\n"
-                unless (ref $state and $state->isa('StateMachine::Statemap::State'));
+                unless (ref $state and $state->isa('DFA::Statemap::State'));
     }
     else {
         croak "undefined state\n"
                 unless (defined $state);
         croak "$state is not a State\n"
-                unless (ref $state and $state->isa('StateMachine::Statemap::State'));
+                unless (ref $state and $state->isa('DFA::Statemap::State'));
     }
     if (defined $self->{_state}) {
         push @{$self->{_state_stack}}, $self->{_state};
@@ -355,6 +368,10 @@ Copyright 2004-2008, Francois Perrad.
 All Rights Reserved.
 
 Contributor(s):
+
+=head1 HISTORY
+
+This module was previously named StateMachine::Statemap.
 
 =head1 SEE ALSO
 

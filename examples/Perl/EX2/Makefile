@@ -24,6 +24,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.7  2008/02/07 16:56:59  fperrad
+# Perl : StateMachine::Statemap -> DFA::Statemap
+#
 # Revision 1.6  2008/02/04 11:02:24  fperrad
 # + Exhibit options
 #
@@ -50,7 +53,7 @@
 
 SM_SOURCES=     AppClass.sm
 SOURCES=        $(SM_SOURCES:%.sm=%_sm.pm)
-CHECKSTRING=    perl -I ../../../lib/Perl checkstring.pl
+CHECKSTRING=    perl -I ../../../lib/Perl/lib checkstring.pl
 
 # Uncomment to turn on debug message generation.
 TRACE=          -g

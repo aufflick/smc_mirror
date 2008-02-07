@@ -2,5 +2,5 @@ Changes
 Makefile.PL
 MANIFEST
 README
-Statemap.pm
+lib/DFA/Statemap.pm
 test.pl

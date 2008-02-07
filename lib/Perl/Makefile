@@ -43,19 +43,25 @@ LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib/Perl
 $(LIB_STAGING_DIR) :
 		$(MKDIR) $@
 
-install :       $(LIB_STAGING_DIR) $(SOURCES)
+$(LIB_STAGING_DIR)/lib : $(LIB_STAGING_DIR)
+		$(MKDIR) $@
+
+$(LIB_STAGING_DIR)/lib/DFA : $(LIB_STAGING_DIR)/lib
+		$(MKDIR) $@
+
+install :       $(LIB_STAGING_DIR)/lib/DFA $(SOURCES)
 		$(CP) Makefile.PL $(LIB_STAGING_DIR)/Makefile.PL
 		$(CP) MANIFEST $(LIB_STAGING_DIR)/MANIFEST
 		$(CP) README $(LIB_STAGING_DIR)/README
 		$(CP) Changes $(LIB_STAGING_DIR)/Changes
-		$(CP) Statemap.pm $(LIB_STAGING_DIR)/Statemap.pm
+		$(CP) Statemap.pm $(LIB_STAGING_DIR)/lib/DFA/Statemap.pm
 		$(CP) test.pl $(LIB_STAGING_DIR)/test.pl
 
 uninstall :     $(LIB_STAGING_DIR)
 		-$(RM_F) $(LIB_STAGING_DIR)/Makefile.PL
 		-$(RM_F) $(LIB_STAGING_DIR)/MANIFEST
 		-$(RM_F) $(LIB_STAGING_DIR)/README
-		-$(RM_F) $(LIB_STAGING_DIR)/Statemap.pm
+		-$(RM_F) $(LIB_STAGING_DIR)/lib/DFA/Statemap.pm
 		-$(RM_F) $(LIB_STAGING_DIR)/test.pl
 
 clean :
@@ -65,6 +71,9 @@ realclean :     clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.6  2008/02/07 16:54:51  fperrad
+# Perl : StateMachine::Statemap -> DFA::Statemap
+#
 # Revision 1.5  2008/02/04 10:46:03  fperrad
 # + use common variables
 #

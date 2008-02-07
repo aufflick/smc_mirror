@@ -7,7 +7,7 @@
 
 use Test;
 BEGIN { plan tests => 1 };
-use StateMachine::Statemap;
+use DFA::Statemap;
 ok(1); # If we made it this far, we're ok.
 
 #########################
