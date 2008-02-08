@@ -143,12 +143,18 @@ public final class SmcHeaderCGenerator
         _source.println("{");
 
         // Add the default Entry() and Exit() definitions.
-        _source.print("    void(*Entry)(struct ");
-        _source.print(context);
-        _source.println("Context*);");
-        _source.print("    void(*Exit)(struct ");
-        _source.print(context);
-        _source.println("Context*);");
+        if (fsm.hasEntryActions() == true)
+        {
+            _source.print("    void(*Entry)(struct ");
+            _source.print(context);
+            _source.println("Context*);");
+        }
+        if (fsm.hasExitActions() == true)
+        {
+            _source.print("    void(*Exit)(struct ");
+            _source.print(context);
+            _source.println("Context*);");
+        }
         _source.println();
 
         // Print out the default definitions for all the
@@ -293,6 +299,9 @@ public final class SmcHeaderCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2008/02/08 08:46:02  fperrad
+// C : optimize footprint when no Entry action or no Exit action
+//
 // Revision 1.9  2007/08/05 14:50:54  cwrapp
 // Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more information.
 //

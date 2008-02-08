@@ -274,6 +274,30 @@ public final class SmcFSM
         return (retval);
     }
 
+    public boolean hasEntryActions()
+    {
+        for (SmcMap map: _maps)
+        {
+            if (map.hasEntryActions() == true)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasExitActions()
+    {
+        for (SmcMap map: _maps)
+        {
+            if (map.hasExitActions() == true)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     //-----------------------------------------------------------
     // SmcElement Abstract Methods.
     //
@@ -369,6 +393,9 @@ public final class SmcFSM
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2008/02/08 08:46:02  fperrad
+// C : optimize footprint when no Entry action or no Exit action
+//
 // Revision 1.6  2007/02/21 13:54:45  cwrapp
 // Moved Java code to release 1.5.0
 //

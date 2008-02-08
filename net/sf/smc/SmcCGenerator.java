@@ -151,8 +151,14 @@ public final class SmcCGenerator
         _source.println();
 
         _source.println("#define POPULATE_STATE(state) \\");
-        _source.println("    state##_Entry, \\");
-        _source.println("    state##_Exit, \\");
+        if (fsm.hasEntryActions() == true)
+        {
+            _source.println("    state##_Entry, \\");
+        }
+        if (fsm.hasExitActions() == true)
+        {
+            _source.println("    state##_Exit, \\");
+        }
         for (SmcTransition trans: transList)
         {
             if (trans.getName().equals("Default") == false)
@@ -163,6 +169,32 @@ public final class SmcCGenerator
             }
         }
         _source.println("    state##_Default");
+
+
+        _source.println();
+        if (fsm.hasEntryActions() == true)
+        {
+            _source.println("#define ENTRY_STATE(state) \\");
+            _source.println("    if ((state)->Entry != NULL) { \\");
+            _source.println("        (state)->Entry(fsm); \\");
+            _source.println("    }");
+        }
+        else
+        {
+            _source.println("#define ENTRY_STATE(state)");
+        }
+        _source.println();
+        if (fsm.hasExitActions() == true)
+        {
+            _source.println("#define EXIT_STATE(state) \\");
+            _source.println("    if ((state)->Exit != NULL) { \\");
+            _source.println("        (state)->Exit(fsm); \\");
+            _source.println("    }");
+        }
+        else
+        {
+            _source.println("#define EXIT_STATE(state)");
+        }
 
         // Output the default transition definitions.
         for (SmcTransition trans: transList)
@@ -313,13 +345,9 @@ public final class SmcCGenerator
         _source.print("    setState(fsm, &");
         _source.print(cState);
         _source.println(");");
-        _source.print("    if (");
+        _source.print("    ENTRY_STATE(&");
         _source.print(cState);
-        _source.println(".Entry != NULL) {");
-        _source.print("        ");
-        _source.print(cState);
-        _source.println(".Entry(fsm);");
-        _source.println("    }");
+        _source.println(");");
         _source.println("}");
 
         // Generate the context class.
@@ -981,12 +1009,7 @@ public final class SmcCGenerator
 
             _source.print(indent4);
             _source.println(
-                "if (getState(fsm)->Exit != NULL) {");
-            _source.print(indent4);
-            _source.println(
-                "    getState(fsm)->Exit(fsm);");
-            _source.print(indent4);
-            _source.println("}");
+                "EXIT_STATE(getState(fsm));");
 
             if (transType == Smc.TRANS_SET &&
                 defaultFlag == true)
@@ -1071,12 +1094,7 @@ public final class SmcCGenerator
 
                 _source.print(indent4);
                 _source.println(
-                    "if (getState(fsm)->Entry != NULL) {");
-                _source.print(indent4);
-                _source.println(
-                    "    getState(fsm)->Entry(fsm);");
-                _source.print(indent4);
-                _source.println("}");
+                    "ENTRY_STATE(getState(fsm));");
 
                 if (defaultFlag == true)
                 {
@@ -1121,12 +1139,7 @@ public final class SmcCGenerator
 
             _source.print(indent4);
             _source.println(
-                "if (getState(fsm)->Entry != NULL) {");
-            _source.print(indent4);
-            _source.println(
-                "    getState(fsm)->Entry(fsm);");
-            _source.print(indent4);
-            _source.println("}");
+                "ENTRY_STATE(getState(fsm));");
 
             if (transType == Smc.TRANS_SET &&
                 defaultFlag == true)
@@ -1253,6 +1266,9 @@ public final class SmcCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.14  2008/02/08 08:46:02  fperrad
+// C : optimize footprint when no Entry action or no Exit action
+//
 // Revision 1.13  2008/02/04 10:26:51  fperrad
 // Don't generate cuddled else
 //

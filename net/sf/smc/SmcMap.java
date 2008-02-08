@@ -256,6 +256,36 @@ public final class SmcMap
         return (_StateId++);
     }
 
+    public boolean hasEntryActions()
+    {
+        List<SmcAction> actions;
+
+        for (SmcState state: _states)
+        {
+            actions = state.getEntryActions();
+            if (actions != null && actions.isEmpty() == false)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasExitActions()
+    {
+        List<SmcAction> actions;
+
+        for (SmcState state: _states)
+        {
+            actions = state.getExitActions();
+            if (actions != null && actions.isEmpty() == false)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     //-----------------------------------------------------------
     // SmcElement Abstract Methods.
     //
@@ -289,6 +319,9 @@ public final class SmcMap
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2008/02/08 08:46:02  fperrad
+// C : optimize footprint when no Entry action or no Exit action
+//
 // Revision 1.9  2007/02/21 13:55:52  cwrapp
 // Moved Java code to release 1.5.0
 //
