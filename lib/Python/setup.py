@@ -1,7 +1,7 @@
 from distutils.core import setup
 
 setup(name="statemap",
-           version="0.01",
+           version="0.02",
            description="SM runtime",
            author="Francois Perrad",
            author_email="francois.perrad@gadz.org",

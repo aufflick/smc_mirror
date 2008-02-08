@@ -98,6 +98,12 @@ class FSMContext:
 		"""Sets the debug output stream."""
 		self._debug_stream = stream
 
+	def getState(self):
+		"""Returns the current state."""
+		if self._state == None:
+			raise statemap.StateUndefinedException
+		return self._state
+
 	def isInTransition(self):
 		"""Is this state machine already inside a transition?
 		True if state is undefined."""

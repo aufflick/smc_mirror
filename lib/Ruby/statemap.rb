@@ -108,6 +108,15 @@ module Statemap
 			@_debug_stream = stream
 		end
 
+		# Returns the current state.
+		def getState()
+			if @_state.nil? then
+				raise Statemap::StateUndefinedException
+			end
+			return @_state
+		end
+
+
 		# Is this state machine already inside a transition?
 		#
 		# True if state is undefined.
