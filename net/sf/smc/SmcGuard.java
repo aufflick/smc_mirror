@@ -191,12 +191,14 @@ public final class SmcGuard
         // actions or in the pop arguments.
         if ((_condition != null &&
              (_condition.indexOf("ctxt.") >= 0 ||
-              _condition.indexOf("ctxt->") >= 0)) ||
+              _condition.indexOf("ctxt->") >= 0 ||
+              _condition.indexOf("ctxt:") >= 0)) ||
             _hasActions() == true ||
             (_transType == Smc.TRANS_POP &&
              _popArgs != null &&
              (_popArgs.indexOf("ctxt.") >= 0 ||
-              _popArgs.indexOf("ctxt->") >= 0)))
+              _popArgs.indexOf("ctxt->") >= 0 ||
+              _popArgs.indexOf("ctxt:") >= 0)))
         {
             retcode = true;
         }
@@ -292,6 +294,9 @@ public final class SmcGuard
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.13  2008/02/08 08:41:58  fperrad
+// fix Bug 1883822 : Lua - missing ctxt
+//
 // Revision 1.12  2007/12/28 12:34:41  cwrapp
 // Version 5.0.1 check-in.
 //
