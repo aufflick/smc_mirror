@@ -44,14 +44,13 @@ class TransitionUndefinedException(reason: String) extends RuntimeException(reas
 
 @serializable
 abstract class FSMContext[State] {
-    private var _null_state: State = _
     private var _state: State = _
     private var _stateStack: Stack[State] = new Stack[State]
-    private var _previousState: State = _
     protected var _transition: String = ""
     private var _debugFlag: Boolean = false
     private var _debugStream: PrintStream = System.err
     private var _listeners: PropertyChangeSupport = new PropertyChangeSupport(this)
+    private var _isInTransaction: Boolean = true
 
     def getDebugFlag(): Boolean = _debugFlag
 
@@ -69,32 +68,34 @@ abstract class FSMContext[State] {
 
     // Is this state machine in a transition? If state is null,
     // then true; otherwise, false.
-    def isInTransition(): Boolean = (_state == null)
+    def isInTransition(): Boolean = _isInTransaction
 
     def setState(state: State): Unit = {
         val previousState = _state
         if (_debugFlag)
             _debugStream.println("NEW STATE    : " + state)
         _state = state
+        _isInTransaction = false
         // Inform all listeners about this state change
         _listeners.firePropertyChange("State", previousState, _state)
     }
 
     def getState(): State = {
-        if (_state == null)
+        if (_isInTransaction)
             throw new StateUndefinedException()
         return _state
     }
 
     def clearState(): Unit = {
-        _previousState = _state
-        _state = _null_state
+        _isInTransaction = true
     }
 
     def pushState(state: State): Unit = {
         val previousState = _state
         if (_state == null)
             throw new NullPointerException("uninitialized state")
+        if (_isInTransaction)
+            throw new StateUndefinedException()
         if (_debugFlag)
             _debugStream.println("PUSH TO STATE: " + state)
         _stateStack.push(_state)
@@ -110,7 +111,7 @@ abstract class FSMContext[State] {
             throw new NoSuchElementException("empty state stack")
         }
         val previousState = _state
-        _state = _stateStack.pop
+        _state = _stateStack.pop()
         if (_debugFlag)
             _debugStream.println("POP TO STATE : " + _state)
         // Inform all listeners about this state change
@@ -133,6 +134,9 @@ abstract class FSMContext[State] {
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2008/02/11 07:23:42  fperrad
+// Scala : refactor
+//
 // Revision 1.2  2008/02/06 09:35:23  fperrad
 // Scala 2.3 -> 2.6
 //
