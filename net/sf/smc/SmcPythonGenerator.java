@@ -3,14 +3,14 @@
 // License Version 1.1 (the "License"); you may not use this file
 // except in compliance with the License. You may obtain a copy
 // of the License at http://www.mozilla.org/MPL/
-// 
+//
 // Software distributed under the License is distributed on an
 // "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
-// 
+//
 // The Original Code is State Machine Compiler (SMC).
-// 
+//
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
 // Copyright (C) 2005 - 2007. Charles W. Rapp.
@@ -59,11 +59,10 @@ public final class SmcPythonGenerator
 // Member methods
 //
 
-    public SmcPythonGenerator(PrintStream source,
-                              String srcfileBase)
+    public SmcPythonGenerator(String srcfileBase)
     {
-        super (source, srcfileBase);
-    } // end of SmcPythonGenerator(PrintStream, String)
+        super (srcfileBase, "{0}{1}_sm.{2}", "py");
+    } // end of SmcPythonGenerator(String)
 
     public void visit(SmcFSM fsm)
     {
@@ -232,7 +231,7 @@ public final class SmcPythonGenerator
                 _source.print("(self");
                 if (params.size() != 0)
                 {
-                    _source.print(", *arglist");    
+                    _source.print(", *arglist");
                 }
                 _source.println("):");
 
@@ -248,7 +247,7 @@ public final class SmcPythonGenerator
 
                 if (params.size() != 0)
                 {
-                    _source.print(", *arglist");    
+                    _source.print(", *arglist");
                 }
                 _source.println(")");
                 _source.println(
@@ -311,11 +310,11 @@ public final class SmcPythonGenerator
             transition.accept(this);
         }
 
-        if (needPass == true && Smc.isReflection() == false) 
+        if (needPass == true && Smc.isReflection() == false)
         {
             _source.println("    pass");
         }
-        
+
         // If -reflect was specified, then generate the
         // _transitions map.
         if (Smc.isReflection() == true)
@@ -365,7 +364,7 @@ public final class SmcPythonGenerator
             state.accept(this);
         }
 
-        // Declare and initialize the map class. 
+        // Declare and initialize the map class.
         _source.println();
         _source.print("class ");
         _source.print(mapName);
@@ -1016,7 +1015,7 @@ public final class SmcPythonGenerator
                 _source.print(indent2);
                 _source.println(")");
             }
-            else 
+            else
             {
                 _source.println(")");
             }
@@ -1074,6 +1073,11 @@ public final class SmcPythonGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2008/03/21 14:03:17  fperrad
+// refactor : move from the main file Smc.java to each language generator the following data :
+//  - the default file name suffix,
+//  - the file name format for the generated SMC files
+//
 // Revision 1.10  2007/08/05 14:36:12  cwrapp
 // Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more informaiton.
 //

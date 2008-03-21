@@ -3,19 +3,19 @@
 // License Version 1.1 (the "License"); you may not use this file
 // except in compliance with the License. You may obtain a copy
 // of the License at http://www.mozilla.org/MPL/
-// 
+//
 // Software distributed under the License is distributed on an
 // "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
-// 
+//
 // The Original Code is State Machine Compiler (SMC).
-// 
+//
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
 // Copyright (C) 2005. Charles W. Rapp.
 // All Rights Reserved.
-// 
+//
 // Contributor(s):
 //   Eitan Suez contributed examples/Ant.
 //   (Name withheld) contributed the C# code generation and
@@ -55,13 +55,10 @@ public final class SmcHeaderGenerator
 // Member methods
 //
 
-    public SmcHeaderGenerator(PrintStream source,
-                              String srcfileBase)
+    public SmcHeaderGenerator(String srcfileBase)
     {
-        super (source, srcfileBase);
-
-        _indent = "";
-    } // end of SmcHeaderGenerator(PrintStream, String)
+        super (srcfileBase, "{0}{1}_sm.{2}", "h");
+    } // end of SmcHeaderGenerator(String)
 
     public void visit(SmcFSM fsm)
     {
@@ -308,7 +305,7 @@ public final class SmcHeaderGenerator
         // {
         // public:
         //     FOOContext(FOO& owner)
-        //     
+        //
         _source.print(_indent);
         _source.print("class ");
         _source.print(context);
@@ -775,6 +772,11 @@ public final class SmcHeaderGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2008/03/21 14:03:16  fperrad
+// refactor : move from the main file Smc.java to each language generator the following data :
+//  - the default file name suffix,
+//  - the file name format for the generated SMC files
+//
 // Revision 1.8  2007/02/21 13:55:20  cwrapp
 // Moved Java code to release 1.5.0
 //

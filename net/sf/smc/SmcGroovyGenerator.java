@@ -61,11 +61,10 @@ public final class SmcGroovyGenerator
 // Member methods
 //
 
-    public SmcGroovyGenerator(PrintStream source,
-                              String srcfileBase)
+    public SmcGroovyGenerator(String srcfileBase)
     {
-        super (source, srcfileBase);
-    } // end of SmcGroovyGenerator(PrintStream, String)
+        super (srcfileBase, "{0}{1}Context.{2}", "groovy");
+    } // end of SmcGroovyGenerator(String)
 
     public void visit(SmcFSM fsm)
     {
@@ -1168,6 +1167,11 @@ public final class SmcGroovyGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2008/03/21 14:03:16  fperrad
+// refactor : move from the main file Smc.java to each language generator the following data :
+//  - the default file name suffix,
+//  - the file name format for the generated SMC files
+//
 // Revision 1.1  2007/07/16 06:28:06  fperrad
 // + Added Groovy generator.
 //

@@ -54,11 +54,10 @@ public final class SmcHeaderCGenerator
 // Member methods
 //
 
-    public SmcHeaderCGenerator(PrintStream source,
-                              String srcfileBase)
+    public SmcHeaderCGenerator(String srcfileBase)
     {
-        super (source, srcfileBase);
-    } // end of SmcHeaderCGenerator(PrintStream, String)
+        super (srcfileBase, "{0}{1}_sm.{2}", "h");
+    } // end of SmcHeaderCGenerator(String)
 
     public void visit(SmcFSM fsm)
     {
@@ -299,6 +298,11 @@ public final class SmcHeaderCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2008/03/21 14:03:16  fperrad
+// refactor : move from the main file Smc.java to each language generator the following data :
+//  - the default file name suffix,
+//  - the file name format for the generated SMC files
+//
 // Revision 1.10  2008/02/08 08:46:02  fperrad
 // C : optimize footprint when no Entry action or no Exit action
 //

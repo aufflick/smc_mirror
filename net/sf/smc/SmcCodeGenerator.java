@@ -3,19 +3,19 @@
 // License Version 1.1 (the "License"); you may not use this file
 // except in compliance with the License. You may obtain a copy
 // of the License at http://www.mozilla.org/MPL/
-// 
+//
 // Software distributed under the License is distributed on an
 // "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
-// 
+//
 // The Original Code is State Machine Compiler (SMC).
-// 
+//
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
 // Copyright (C) 2005. Charles W. Rapp.
 // All Rights Reserved.
-// 
+//
 // Contributor(s):
 //   Eitan Suez contributed examples/Ant.
 //   (Name withheld) contributed the C# code generation and
@@ -38,6 +38,7 @@ import java.io.PrintStream;
 import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.List;
+import java.text.MessageFormat;
 
 /**
  * Base class for all target language code generators.
@@ -55,16 +56,25 @@ public abstract class SmcCodeGenerator
 //
 
     // Constructs the target code generator.
-    protected SmcCodeGenerator(PrintStream source,
-                               String srcfileBase)
+    protected SmcCodeGenerator(String srcfileBase,
+                               String sourceNameFormat,
+                               String suffix)
     {
         super ();
 
-        _source = source;
         _srcfileBase = srcfileBase;
+        _sourceNameFormat = sourceNameFormat;
+        _suffix = suffix;
+        _source = null;
         _indent = "";
         _guardCount = 0;
         _guardIndex = 0;
+    }
+
+    public void setSource(PrintStream source)
+    {
+        _source = source;
+        return;
     }
 
     // Scope the state name. If the state is unscoped, then
@@ -127,9 +137,33 @@ public abstract class SmcCodeGenerator
         return (retcode);
     }
 
+    public String sourceFile(String path,
+                             String basename,
+                             String suffix)
+    {
+        if (suffix == null)
+        {
+            suffix = _suffix;
+        }
+
+        MessageFormat formatter =
+            new MessageFormat(_sourceNameFormat);
+        Object[] args = new Object[3];
+
+        args[0] = path;
+        args[1] = basename;
+        args[2] = suffix;
+
+        return (formatter.format(args));
+    }
+
 //---------------------------------------------------------------
 // Member data
 //
+    private final String _sourceNameFormat;
+
+    // Append this suffix to the end of the output file.
+    private static String _suffix;
 
     // Emit the target source code to this file.
     protected PrintStream _source;
@@ -154,6 +188,11 @@ public abstract class SmcCodeGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2008/03/21 14:03:16  fperrad
+// refactor : move from the main file Smc.java to each language generator the following data :
+//  - the default file name suffix,
+//  - the file name format for the generated SMC files
+//
 // Revision 1.5  2007/12/28 12:34:41  cwrapp
 // Version 5.0.1 check-in.
 //

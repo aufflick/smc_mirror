@@ -3,14 +3,14 @@
 // License Version 1.1 (the "License"); you may not use this file
 // except in compliance with the License. You may obtain a copy
 // of the License at http://www.mozilla.org/MPL/
-// 
+//
 // Software distributed under the License is distributed on an
 // "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
-// 
+//
 // The Original Code is State Machine Compiler (SMC).
-// 
+//
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
 // Copyright (C) 2006, 2007. Charles W. Rapp.
@@ -55,13 +55,10 @@ public final class SmcHeaderObjCGenerator
 // Member methods
 //
 
-    public SmcHeaderObjCGenerator(PrintStream source,
-                                  String srcfileBase)
+    public SmcHeaderObjCGenerator(String srcfileBase)
     {
-        super (source, srcfileBase);
-
-        _indent = "";
-    } // end of SmcHeaderObjCGenerator(PrintStream, String)
+        super (srcfileBase, "{0}{1}_sm.{2}", "h");
+    } // end of SmcHeaderObjCGenerator(String)
 
     public void visit(SmcFSM fsm)
     {
@@ -163,7 +160,7 @@ public final class SmcHeaderObjCGenerator
         _source.print("- (void)Exit:(");
         _source.print(context);
         _source.println("Context*)context;");
-        
+
         _source.println();
 
         // Print out the default definitions for all the
@@ -175,7 +172,7 @@ public final class SmcHeaderObjCGenerator
         {
             // Don't output the default state here.
             if (trans.getName().equals("Default") == false)
-            {                
+            {
                 _source.print(_indent);
                 _source.print("- (void)");
                 _source.print(trans.getName());
@@ -219,7 +216,7 @@ public final class SmcHeaderObjCGenerator
         // {
         // public:
         //     FOOContext(FOO& owner)
-        //     
+        //
         _source.print(_indent);
         _source.print("@interface ");
         _source.print(context);
@@ -231,10 +228,10 @@ public final class SmcHeaderObjCGenerator
         _source.print("    ");
         _source.print(context);
         _source.println(" *_owner;");
-        
+
         _source.print(_indent);
         _source.println("}");
-        
+
         _source.print(_indent);
         _source.print("- (id)initWithOwner:(");
         _source.print(context);
@@ -252,7 +249,7 @@ public final class SmcHeaderObjCGenerator
         _source.println("State*)state;");
 
         _source.println();
-        
+
         // Generate a method for every transition in every map
         // *except* the default transition.
         for (SmcTransition trans: transList)
@@ -310,7 +307,7 @@ public final class SmcHeaderObjCGenerator
         _source.print(_indent);
         _source.println("{");
         _source.println("}");
-        
+
         // Define class methods to access the state instances
         for (SmcState state: map.getStates())
         {
@@ -324,7 +321,7 @@ public final class SmcHeaderObjCGenerator
             _source.print("*)");
             _source.print(stateName);
             _source.println(";");
-        }        
+        }
 
         // The map class is now defined.
         _source.print(_indent);
@@ -404,7 +401,7 @@ public final class SmcHeaderObjCGenerator
         _source.print(_indent);
         _source.println("{");
         _source.println("}");
-        
+
         // Add the Entry() and Exit() methods if this state
         // defines them.
         actions = state.getEntryActions();
@@ -485,6 +482,11 @@ public final class SmcHeaderObjCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2008/03/21 14:03:16  fperrad
+// refactor : move from the main file Smc.java to each language generator the following data :
+//  - the default file name suffix,
+//  - the file name format for the generated SMC files
+//
 // Revision 1.2  2007/02/21 13:55:27  cwrapp
 // Moved Java code to release 1.5.0
 //

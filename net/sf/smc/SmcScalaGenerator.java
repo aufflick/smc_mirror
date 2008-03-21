@@ -61,11 +61,10 @@ public final class SmcScalaGenerator
 // Member methods
 //
 
-    public SmcScalaGenerator(PrintStream source,
-                              String srcfileBase)
+    public SmcScalaGenerator(String srcfileBase)
     {
-        super (source, srcfileBase);
-    } // end of SmcScalaGenerator(PrintStream, String)
+        super (srcfileBase, "{0}{1}Context.{2}", "scala");
+    } // end of SmcScalaGenerator(String)
 
     public void visit(SmcFSM fsm)
     {
@@ -1175,6 +1174,11 @@ public final class SmcScalaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2008/03/21 14:03:17  fperrad
+// refactor : move from the main file Smc.java to each language generator the following data :
+//  - the default file name suffix,
+//  - the file name format for the generated SMC files
+//
 // Revision 1.3  2008/02/06 09:34:24  fperrad
 // add getName()
 //

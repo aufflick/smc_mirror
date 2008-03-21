@@ -3,14 +3,14 @@
 // License Version 1.1 (the "License"); you may not use this file
 // except in compliance with the License. You may obtain a copy
 // of the License at http://www.mozilla.org/MPL/
-// 
+//
 // Software distributed under the License is distributed on an
 // "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
-// 
+//
 // The Original Code is State Machine Compiler (SMC).
-// 
+//
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
 // Copyright (C) 2005 - 2007. Charles W. Rapp.
@@ -59,13 +59,10 @@ public final class SmcPerlGenerator
 // Member methods
 //
 
-    public SmcPerlGenerator(PrintStream source,
-                            String srcfileBase)
+    public SmcPerlGenerator(String srcfileBase)
     {
-        super (source, srcfileBase);
-
-        _indent = "";
-    } // end of SmcPerlGenerator(PrintStream, String)
+        super (srcfileBase, "{0}{1}_sm.{2}", "pm");
+    } // end of SmcPerlGenerator(String)
 
     public void visit(SmcFSM fsm)
     {
@@ -94,7 +91,7 @@ public final class SmcPerlGenerator
             _source.println();
         }
 
-        // If a package has been specified, 
+        // If a package has been specified,
         if (packageName != null && packageName.length() > 0)
         {
               context = packageName + "::" + context;
@@ -254,7 +251,7 @@ public final class SmcPerlGenerator
 
                 if (params.size() != 0)
                 {
-                    _source.print(", @_");    
+                    _source.print(", @_");
                 }
                 _source.println(");");
                 _source.println(
@@ -286,7 +283,7 @@ public final class SmcPerlGenerator
         String mapName = map.getName();
         List<SmcState> states = map.getStates();
 
-        // If a package has been specified, 
+        // If a package has been specified,
         if (packageName != null && packageName.length() > 0)
         {
               mapName = packageName + "::" + mapName;
@@ -433,7 +430,7 @@ public final class SmcPerlGenerator
         List<SmcAction> actions;
         String indent2;
 
-        // If a package has been specified, 
+        // If a package has been specified,
         if (packageName != null && packageName.length() > 0)
         {
               mapName = packageName + "::" + mapName;
@@ -596,7 +593,7 @@ public final class SmcPerlGenerator
         Iterator<SmcGuard> git;
         SmcGuard guard;
 
-        // If a package has been specified, 
+        // If a package has been specified,
         if (packageName != null && packageName.length() > 0)
         {
               mapName = packageName + "::" + mapName;
@@ -604,7 +601,7 @@ public final class SmcPerlGenerator
 
         _source.println();
         _source.print("    sub ");
-        _source.print(transName); 
+        _source.print(transName);
         _source.println(" {");
         _source.println("        my $self = shift;");
         _source.print("        my ($fsm");
@@ -739,7 +736,7 @@ public final class SmcPerlGenerator
         String condition = guard.getCondition();
         List<SmcAction> actions = guard.getActions();
 
-        // If a package has been specified, 
+        // If a package has been specified,
         if (packageName != null && packageName.length() > 0)
         {
               mapName = packageName + "::" + mapName;
@@ -771,7 +768,7 @@ public final class SmcPerlGenerator
         if (pushStateName != null &&
             pushStateName.length() > 0)
         {
-            if (pushStateName.indexOf("::") < 0) 
+            if (pushStateName.indexOf("::") < 0)
             {
                 pushStateName = mapName + "::" + pushStateName;
             }
@@ -1093,7 +1090,7 @@ public final class SmcPerlGenerator
                 _source.print(indent2);
                 _source.println(");");
             }
-            else 
+            else
             {
                 _source.println(");");
             }
@@ -1156,6 +1153,11 @@ public final class SmcPerlGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2008/03/21 14:03:16  fperrad
+// refactor : move from the main file Smc.java to each language generator the following data :
+//  - the default file name suffix,
+//  - the file name format for the generated SMC files
+//
 // Revision 1.8  2008/02/07 16:55:47  fperrad
 // Perl : StateMachine::Statemap -> DFA::Statemap
 //

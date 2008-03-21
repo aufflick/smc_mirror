@@ -3,14 +3,14 @@
 // License Version 1.1 (the "License"); you may not use this file
 // except in compliance with the License. You may obtain a copy
 // of the License at http://www.mozilla.org/MPL/
-// 
+//
 // Software distributed under the License is distributed on an
 // "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
-// 
+//
 // The Original Code is State Machine Compiler (SMC).
-// 
+//
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
 // Copyright (C) 2006, 2007. Charles W. Rapp.
@@ -55,13 +55,10 @@ public final class SmcObjCGenerator
 // Member methods
 //
 
-    public SmcObjCGenerator(PrintStream source,
-                            String srcfileBase)
+    public SmcObjCGenerator(String srcfileBase)
     {
-        super (source, srcfileBase);
-
-        _indent = "";
-    } // end of SmcObjCGenerator(PrintStream, String)
+        super (srcfileBase, "{0}{1}_sm.{2}", "m");
+    } // end of SmcObjCGenerator(String)
 
     // This method generates the following code:
     //
@@ -116,11 +113,11 @@ public final class SmcObjCGenerator
         {
             map = mapIt.next();
             mapName = map.getName();
-            
+
             _source.print(_indent);
             _source.print("@implementation ");
             _source.println(mapName);
-            
+
             for (stateIt = map.getStates().iterator();
                  stateIt.hasNext() == true;
                  ++index)
@@ -134,10 +131,10 @@ public final class SmcObjCGenerator
                 _source.print("*)");
                 _source.print(state.getInstanceName());
                 _source.println(";");
-                
+
                 _source.print(_indent);
                 _source.println("{");
-                
+
                 _source.print(_indent);
                 _source.print("    ");
                 _source.print("static ");
@@ -149,9 +146,9 @@ public final class SmcObjCGenerator
                 _source.print("_");
                 _source.print(state.getClassName());
                 _source.println(" = nil;");
-                
+
                 _source.print(_indent);
-                _source.print("    if (!g");                
+                _source.print("    if (!g");
                 _source.print(mapName);
                 _source.print("_");
                 _source.print(state.getClassName());
@@ -178,7 +175,7 @@ public final class SmcObjCGenerator
 
                 _source.print(_indent);
                 _source.println("    }");
-                
+
                 _source.print(_indent);
                 _source.print("    ");
                 _source.print("return g");
@@ -187,23 +184,23 @@ public final class SmcObjCGenerator
                 _source.print(state.getClassName());
                 _source.println(";");
 
-                _source.print(_indent);                
+                _source.print(_indent);
                 _source.println("}");
             }
-            
+
             _source.println("@end");
         }
 
         // Print out the default definitions for all the
         // transitions. First, get the transitions list.
         transList = fsm.getTransitions();
-        
+
         _source.println();
         _source.print(_indent);
         _source.print("@implementation ");
         _source.print(context);
         _source.println("State");
-        
+
         // TODO: Need to fill in Entry/Exit code if they're
         // defined
         _source.print(_indent);
@@ -214,7 +211,7 @@ public final class SmcObjCGenerator
         _source.println("{");
         _source.print(_indent);
         _source.println("}");
-        
+
         _source.print(_indent);
         _source.print("- (void)Exit:(");
         _source.print(context);
@@ -223,7 +220,7 @@ public final class SmcObjCGenerator
         _source.println("{");
         _source.print(_indent);
         _source.println("}");
-        
+
         // Output the default transition definitions.
         for (SmcTransition trans: transList)
         {
@@ -290,11 +287,11 @@ public final class SmcObjCGenerator
             "    NSAssert( NO, @\"Default transition\" );");
         _source.print(_indent);
         _source.println("}");
-        
+
         // End the state class
         _source.println("@end");
         _source.println();
-        
+
         // Have each map print out its source code now.
         for (mapIt = fsm.getMaps().iterator();
              mapIt.hasNext() == true;
@@ -302,12 +299,12 @@ public final class SmcObjCGenerator
         {
             (mapIt.next()).accept(this);
         }
-        
+
         // Dump the context class
         // @implementation FooContext
         // - (id)initWithOwner:(FOO*)owner;
         // ...
-        //     
+        //
         _source.print(_indent);
         _source.print("@implementation ");
         _source.print(context);
@@ -323,7 +320,7 @@ public final class SmcObjCGenerator
         // - (id)initWithOwner:(Foo*)owner;
         // {
         //     [self setOwner:owner];
-        //     [self setState:startState]   
+        //     [self setState:startState]
         // }
         _source.print(_indent);
         _source.print("- (id)initWithOwner:(");
@@ -353,19 +350,19 @@ public final class SmcObjCGenerator
         _source.print("[self setState:");
         _source.print(fqStateName);
         _source.println("];");
-        
+
         _source.print(_indent);
         _source.print("    [");
         _source.print(fqStateName);
         _source.println(" Entry:self];");
-        
+
         _source.print(_indent);
         _source.print("    ");
         _source.println("return self;");
         _source.print(_indent);
         _source.println("}");
-        
-        
+
+
         _source.print(_indent);
         _source.print("- (" );
         _source.print(context);
@@ -375,11 +372,11 @@ public final class SmcObjCGenerator
         _source.print(_indent);
         _source.print("    ");
         _source.print("return (");
-        _source.print(context);        
+        _source.print(context);
         _source.println("State*)_state;");
         _source.print(_indent);
         _source.println("}");
-                        
+
         _source.print(_indent);
         _source.print("- (");
         _source.print(context);
@@ -413,7 +410,7 @@ public final class SmcObjCGenerator
                     (pit.next()).accept(this);
                 }
                 _source.println(";");
-                
+
                 _source.print(_indent);
                 _source.println("{");
 
@@ -479,7 +476,7 @@ public final class SmcObjCGenerator
                 transition.accept(this);
             }
         }
-        
+
         _source.println("@end");
 
         // Have each state now generate its code.
@@ -679,7 +676,7 @@ public final class SmcObjCGenerator
             }
 
             _source.println(")\\n\\r\");");
-            
+
             _source.print(_indent);
             _source.println("    }");
         }
@@ -808,7 +805,7 @@ public final class SmcObjCGenerator
             pushStateName =
                 "[" + mapName + " " + pushStateName + "]";
         }
-        
+
         if (pushStateName.indexOf("::") >= 0)
         {
             pushStateName = convertScope(pushStateName);
@@ -1191,7 +1188,7 @@ public final class SmcObjCGenerator
             if (arg.trim().length() > 0)
             {
                 _source.print(sep);
-                _source.print(arg);                
+                _source.print(arg);
             }
         }
 
@@ -1230,6 +1227,11 @@ public final class SmcObjCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2008/03/21 14:03:16  fperrad
+// refactor : move from the main file Smc.java to each language generator the following data :
+//  - the default file name suffix,
+//  - the file name format for the generated SMC files
+//
 // Revision 1.3  2007/08/05 14:36:12  cwrapp
 // Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more informaiton.
 //

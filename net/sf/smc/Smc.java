@@ -52,7 +52,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Constructor;
-import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -92,6 +91,7 @@ public final class Smc
         _reflection = false;
         _outputDirectory = null;
         _headerDirectory = null;
+        _suffix = null;
 
         // Process the command line.
         if (parseArgs(args) == false)
@@ -971,7 +971,6 @@ public final class Smc
                 else
                 {
                     retval = lang;
-                    _suffix = lang.suffix();
                 }
             }
         }
@@ -1229,28 +1228,29 @@ public final class Smc
                 headerPath = _headerDirectory;
             }
 
+            headerGenerator =
+                _targetLanguage.headerGenerator(srcFileBase);
             headerFileName =
-                _targetLanguage.sourceFile(
-                    headerPath, srcFileBase, "h");
+                headerGenerator.sourceFile(
+                    headerPath, srcFileBase, null);
             headerFileStream =
                 new FileOutputStream(headerFileName);
             headerStream =
                 new PrintStream(headerFileStream);
-            headerGenerator =
-                _targetLanguage.headerGenerator(
-                    headerStream, srcFileBase);
+            headerGenerator.setSource(headerStream);
         }
 
         // Create the language-specific source code generator.
+        generator =
+            _targetLanguage.generator(srcFileBase);
         srcFileName =
-            _targetLanguage.sourceFile(
+            generator.sourceFile(
                 srcFilePath, srcFileBase, _suffix);
         sourceFileStream =
             new FileOutputStream(srcFileName);
         sourceStream =
             new PrintStream(sourceFileStream);
-        generator =
-            _targetLanguage.generator(sourceStream, srcFileBase);
+        generator.setSource(sourceStream);
 
         // Generate the header file first.
         if (headerGenerator != null)
@@ -1293,8 +1293,6 @@ public final class Smc
     // language's properties:
     // + The *start* of the command line option.
     // + The language's full name.
-    // + The default file name suffix.
-    // + The file name format for the generated SMC files.
     // + The language's SmcCodeGenerator subclass.
     // + Whether the language also generates a header file and
     //   that header file SmcCodeGenerator subclass.
@@ -1309,25 +1307,18 @@ public final class Smc
         public Language(int index,
                         String optionFlag,
                         String name,
-                        String suffix,
-                        String sourceNameFormat,
                         Class generator,
-                        boolean headerFlag,
                         Class headerGenerator)
         {
-            Class[] params = new Class[2];
+            Class[] params = new Class[1];
             Constructor sourceCtor = null;
             Constructor headerCtor = null;
 
             _index = index;
             _optionFlag = optionFlag;
             _name = name;
-            _suffix = suffix;
-            _sourceNameFormat = sourceNameFormat;
-            _headerFlag = headerFlag;
 
-            params[0] = PrintStream.class;
-            params[1] = String.class;
+            params[0] = String.class;
             if (generator != null)
             {
                 try
@@ -1374,37 +1365,15 @@ public final class Smc
             return (_name);
         }
 
-        public String suffix()
-        {
-            return (_suffix);
-        }
-
-        public String sourceFile(String path,
-                                 String basename,
-                                 String suffix)
-        {
-            MessageFormat formatter =
-                new MessageFormat(_sourceNameFormat);
-            Object[] args = new Object[3];
-
-            args[0] = path;
-            args[1] = basename;
-            args[2] = suffix;
-
-            return (formatter.format(args));
-        }
-
-        public SmcCodeGenerator generator(PrintStream stream,
-                                          String basename)
+        public SmcCodeGenerator generator(String basename)
         {
             SmcCodeGenerator retval = null;
 
             try
             {
-                Object[] args = new Object[2];
+                Object[] args = new Object[1];
 
-                args[0] = stream;
-                args[1] = basename;
+                args[0] = basename;
 
                 retval =
                     (SmcCodeGenerator)
@@ -1420,21 +1389,19 @@ public final class Smc
 
         public boolean hasHeaderFile()
         {
-            return (_headerFlag);
+            return (_headerGenerator != null);
         }
 
         public SmcCodeGenerator
-            headerGenerator(PrintStream stream,
-                            String basename)
+            headerGenerator(String basename)
         {
             SmcCodeGenerator retval = null;
 
             try
             {
-                Object[] args = new Object[2];
+                Object[] args = new Object[1];
 
-                args[0] = stream;
-                args[1] = basename;
+                args[0] = basename;
 
                 retval =
                     (SmcCodeGenerator)
@@ -1464,10 +1431,7 @@ public final class Smc
         private final int _index;
         private final String _optionFlag;
         private final String _name;
-        private final String _suffix;
-        private final String _sourceNameFormat;
         private final Constructor _generator;
-        private final boolean _headerFlag;
         private final Constructor _headerGenerator;
     }
 
@@ -1612,161 +1576,113 @@ public final class Smc
         _languages[LANG_NOT_SET] =
             new Language(LANG_NOT_SET,
                          "",
-                         "(not set)",
-                         "",
                          null,
                          null,
-                         false,
                          null);
         _languages[C] =
             new Language(
                 C,
                 "-c",
                 "C",
-                "c",
-                "{0}{1}_sm.{2}",
                 SmcCGenerator.class,
-                true,
                 SmcHeaderCGenerator.class);
         _languages[C_PLUS_PLUS] =
             new Language(
                 C_PLUS_PLUS,
                 "-c++",
                 "C++",
-                "cpp",
-                "{0}{1}_sm.{2}",
                 SmcCppGenerator.class,
-                true,
                 SmcHeaderGenerator.class);
         _languages[C_SHARP] =
             new Language(
                 C_SHARP,
                 "-csharp",
                 "C#",
-                "cs",
-                "{0}{1}_sm.{2}",
                 SmcCSharpGenerator.class,
-                false,
                 null);
         _languages[JAVA] =
             new Language(
                 JAVA,
                 "-java",
                 "Java",
-                "java",
-                "{0}{1}Context.{2}",
                 SmcJavaGenerator.class,
-                false,
                 null);
         _languages[GRAPH] =
             new Language(
                 GRAPH,
                 "-graph",
                 "-graph",
-                "dot",
-                "{0}{1}_sm.{2}",
                 SmcGraphGenerator.class,
-                false,
                 null);
         _languages[GROOVY] =
             new Language(
                 GROOVY,
                 "-groovy",
                 "Groovy",
-                "groovy",
-                "{0}{1}Context.{2}",
                 SmcGroovyGenerator.class,
-                false,
                 null);
         _languages[LUA] =
             new Language(
                 LUA,
                 "-lua",
                 "Lua",
-                "lua",
-                "{0}{1}_sm.{2}",
                 SmcLuaGenerator.class,
-                false,
                 null);
         _languages[OBJECTIVE_C] =
             new Language(
                 OBJECTIVE_C,
                 "-objc",
                 "Objective-C",
-                "m",
-                "{0}{1}_sm.{2}",
                 SmcObjCGenerator.class,
-                true,
                 SmcHeaderObjCGenerator.class);
         _languages[PERL] =
             new Language(
                 PERL,
                 "-perl",
                 "Perl",
-                "pm",
-                "{0}{1}_sm.{2}",
                 SmcPerlGenerator.class,
-                false,
                 null);
         _languages[PYTHON] =
             new Language(
                 PYTHON,
                 "-python",
                 "Python",
-                "py",
-                "{0}{1}_sm.{2}",
                 SmcPythonGenerator.class,
-                false,
                 null);
         _languages[RUBY] =
             new Language(
                 RUBY,
                 "-ruby",
                 "Ruby",
-                "rb",
-                "{0}{1}_sm.{2}",
                 SmcRubyGenerator.class,
-                false,
                 null);
         _languages[SCALA] =
             new Language(
                 SCALA,
                 "-scala",
                 "Scala",
-                "scala",
-                "{0}{1}Context.{2}",
                 SmcScalaGenerator.class,
-                false,
                 null);
         _languages[TABLE] =
             new Language(
                 TABLE,
                 "-table",
                 "-table",
-                "html",
-                "{0}{1}_sm.{2}",
                 SmcTableGenerator.class,
-                false,
                 null);
         _languages[TCL] =
             new Language(
                 TCL,
                 "-tcl",
                 "[incr Tcl]",
-                "tcl",
-                "{0}{1}_sm.{2}",
                 SmcTclGenerator.class,
-                false,
                 null);
         _languages[VB] =
             new Language(
                 VB,
                 "-vb",
                 "VB.net",
-                "vb",
-                "{0}{1}_sm.{2}",
                 SmcVBGenerator.class,
-                false,
                 null);
 
         List<Language> languages = new ArrayList<Language>();
@@ -1870,6 +1786,11 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.27  2008/03/21 14:03:16  fperrad
+// refactor : move from the main file Smc.java to each language generator the following data :
+//  - the default file name suffix,
+//  - the file name format for the generated SMC files
+//
 // Revision 1.26  2008/02/04 10:32:49  fperrad
 // + Added Scala language generation.
 //

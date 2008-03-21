@@ -3,14 +3,14 @@
 // License Version 1.1 (the "License"); you may not use this file
 // except in compliance with the License. You may obtain a copy
 // of the License at http://www.mozilla.org/MPL/
-// 
+//
 // Software distributed under the License is distributed on an
 // "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
-// 
+//
 // The Original Code is State Machine Compiler (SMC).
-// 
+//
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
 // Copyright (C) 2005. Charles W. Rapp.
@@ -60,13 +60,10 @@ public final class SmcRubyGenerator
 // Member methods
 //
 
-    public SmcRubyGenerator(PrintStream source,
-                            String srcfileBase)
+    public SmcRubyGenerator(String srcfileBase)
     {
-        super (source, srcfileBase);
-
-        _indent = "";
-    } // end of SmcRubyGenerator(PrintStream, String)
+        super (srcfileBase, "{0}{1}_sm.{2}", "rb");
+    } // end of SmcRubyGenerator(String)
 
     public void visit(SmcFSM fsm)
     {
@@ -99,8 +96,8 @@ public final class SmcRubyGenerator
         // If a package has been specified, then output that
         // module now. If the package name is "a::b::c", then
         // this must be converted to:
-        // module a 
-        //   module b 
+        // module a
+        //   module b
         //     module c
         //       ...
         //     end
@@ -273,11 +270,11 @@ public final class SmcRubyGenerator
                 _source.print(transName);
                 if (params.size() != 0)
                 {
-                    _source.println("(*arglist)");    
+                    _source.println("(*arglist)");
                 }
                 else
                 {
-                    _source.println("()");    
+                    _source.println("()");
                 }
 
                 // Save away the transition name in case it is
@@ -294,7 +291,7 @@ public final class SmcRubyGenerator
 
                 if (params.size() != 0)
                 {
-                    _source.print(", *arglist");    
+                    _source.print(", *arglist");
                 }
                 _source.println(")");
                 _source.print(_indent);
@@ -379,7 +376,7 @@ public final class SmcRubyGenerator
         }
 
         // Declare the map default state class.
-        _source.println();           
+        _source.println();
         _source.print(_indent);
         _source.print("class ");
         _source.print(mapName);
@@ -833,7 +830,7 @@ public final class SmcRubyGenerator
         if (pushStateName != null &&
             pushStateName.length() > 0)
         {
-            if (pushStateName.indexOf("::") < 0) 
+            if (pushStateName.indexOf("::") < 0)
             {
                 pushStateName = mapName + "::" + pushStateName;
             }
@@ -1217,6 +1214,11 @@ public final class SmcRubyGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2008/03/21 14:03:17  fperrad
+// refactor : move from the main file Smc.java to each language generator the following data :
+//  - the default file name suffix,
+//  - the file name format for the generated SMC files
+//
 // Revision 1.6  2007/02/21 13:56:32  cwrapp
 // Moved Java code to release 1.5.0
 //

@@ -55,12 +55,10 @@ public final class SmcCGenerator
 // Member methods
 //
 
-    public SmcCGenerator(PrintStream source, String srcfileBase)
+    public SmcCGenerator(String srcfileBase)
     {
-        super (source, srcfileBase);
-
-        _indent = "";
-    } // end of SmcCGenerator(PrintStream, String)
+        super (srcfileBase, "{0}{1}_sm.{2}", "c");
+    } // end of SmcCGenerator(String)
 
     // This method generates the following code:
     //
@@ -1266,6 +1264,11 @@ public final class SmcCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.15  2008/03/21 14:03:16  fperrad
+// refactor : move from the main file Smc.java to each language generator the following data :
+//  - the default file name suffix,
+//  - the file name format for the generated SMC files
+//
 // Revision 1.14  2008/02/08 08:46:02  fperrad
 // C : optimize footprint when no Entry action or no Exit action
 //

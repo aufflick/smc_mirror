@@ -3,19 +3,19 @@
 // License Version 1.1 (the "License"); you may not use this file
 // except in compliance with the License. You may obtain a copy
 // of the License at http://www.mozilla.org/MPL/
-// 
+//
 // Software distributed under the License is distributed on an
 // "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
-// 
+//
 // The Original Code is State Machine Compiler (SMC).
-// 
+//
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
 // Copyright (C) 2005. Charles W. Rapp.
 // All Rights Reserved.
-// 
+//
 // Contributor(s):
 //   Eitan Suez contributed examples/Ant.
 //   (Name withheld) contributed the C# code generation and
@@ -54,11 +54,10 @@ public final class SmcTableGenerator
 // Member methods
 //
 
-    public SmcTableGenerator(PrintStream source,
-                             String srcfileBase)
+    public SmcTableGenerator(String srcfileBase)
     {
-        super (source, srcfileBase);
-    } // end of SmcTableGenerator(PrintStream, String)
+        super (srcfileBase, "{0}{1}_sm.{2}", "html");
+    } // end of SmcTableGenerator(String)
 
     public void visit(SmcFSM fsm)
     {
@@ -457,6 +456,11 @@ public final class SmcTableGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2008/03/21 14:03:17  fperrad
+// refactor : move from the main file Smc.java to each language generator the following data :
+//  - the default file name suffix,
+//  - the file name format for the generated SMC files
+//
 // Revision 1.5  2007/02/21 13:56:51  cwrapp
 // Moved Java code to release 1.5.0
 //

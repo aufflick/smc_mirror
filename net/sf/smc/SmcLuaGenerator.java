@@ -58,13 +58,10 @@ public final class SmcLuaGenerator
 // Member methods
 //
 
-    public SmcLuaGenerator(PrintStream source,
-                           String srcfileBase)
+    public SmcLuaGenerator(String srcfileBase)
     {
-        super (source, srcfileBase);
-
-        _indent = "";
-    } // end of SmcLuaGenerator(PrintStream, String)
+        super (srcfileBase, "{0}{1}_sm.{2}", "lua");
+    } // end of SmcLuaGenerator(String)
 
     public void visit(SmcFSM fsm)
     {
@@ -1094,6 +1091,11 @@ public final class SmcLuaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2008/03/21 14:03:16  fperrad
+// refactor : move from the main file Smc.java to each language generator the following data :
+//  - the default file name suffix,
+//  - the file name format for the generated SMC files
+//
 // Revision 1.6  2008/02/05 12:54:36  fperrad
 // fix Bug 1884100 : Lua - Printing actual parameters of transition
 //
