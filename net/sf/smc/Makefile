@@ -79,7 +79,8 @@ LANG_SOURCES= \
 		SmcHeaderObjCGenerator.java \
 		SmcObjCGenerator.java \
 		SmcGroovyGenerator.java \
-		SmcScalaGenerator.java
+		SmcScalaGenerator.java \
+		SmcPhpGenerator.java
 
 PACKAGE_NAME=	net.sf.smc
 PACKAGE_DIR=	net/sf/smc
@@ -161,6 +162,9 @@ realclean :	clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.17  2008/04/22 16:05:24  fperrad
+# - add PHP language (patch from Toni Arnold)
+#
 # Revision 1.16  2008/02/04 10:32:49  fperrad
 # + Added Scala language generation.
 #

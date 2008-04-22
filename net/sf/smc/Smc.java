@@ -27,6 +27,8 @@
 //   Scala code generation and examples/Scala.
 //   Chris Liscio contributed the Objective-C code generation
 //   and examples/ObjC.
+//   Toni Arnold contributed the PHP code generation and
+//   examples/PHP.
 //
 // SMC --
 //
@@ -1073,8 +1075,8 @@ public final class Smc
         stream.print(
             " {-c | -c++ | -csharp | -graph | -groovy | -java | ");
         stream.print(
-            "-lua | -objc | -perl | -python | -ruby | -scala | ");
-        stream.print("-table |-tcl | -vb}");
+            "-lua | -objc | -perl | -php | -python | -ruby | ");
+        stream.print("-scala | -table |-tcl | -vb}");
         stream.println(" statemap_file");
         stream.println("    where:");
         stream.println(
@@ -1110,7 +1112,7 @@ public final class Smc
         stream.println("\t-reflect  Generate reflection code");
         stream.print("\t          ");
         stream.print("(use with -java, -tcl, -vb, -csharp, ");
-        stream.println("-groovy, -lua, -perl, -python, -ruby and -scala only)");
+        stream.println("-groovy, -lua, -perl, -php, -python, -ruby and -scala only)");
         stream.println("\t-cast     Use this C++ cast type ");
         stream.print("\t          ");
         stream.println("(use with -c++ only)");
@@ -1135,6 +1137,7 @@ public final class Smc
         stream.println("\t-lua      Generate Lua code");
         stream.println("\t-objc     Generate Objective-C code");
         stream.println("\t-perl     Generate Perl code");
+        stream.println("\t-php      Generate PHP code");
         stream.println("\t-python   Generate Python code");
         stream.println("\t-ruby     Generate Ruby code");
         stream.println("\t-scala    Generate Scala code");
@@ -1148,7 +1151,7 @@ public final class Smc
             "    Note: must select one of -c, -c++, -csharp, ");
         stream.print("-graph, -groovy, -java, -lua, -objc, -perl, ");
         stream.println(
-            "-python, -ruby, -scala, -table, -tcl or -vb.");
+            "-php, -python, -ruby, -scala, -table, -tcl or -vb.");
 
         return;
     }
@@ -1533,7 +1536,8 @@ public final class Smc
     /* package */ static final int LUA = 13;
     /* package */ static final int GROOVY = 14;
     /* package */ static final int SCALA = 15;
-    /* package */ static final int LANGUAGE_COUNT = 16;
+    /* package */ static final int PHP = 16;
+    /* package */ static final int LANGUAGE_COUNT = 17;
 
     // GraphViz detail level.
     /* package */ static final int NO_GRAPH_LEVEL = -1;
@@ -1642,6 +1646,13 @@ public final class Smc
                 "Perl",
                 SmcPerlGenerator.class,
                 null);
+        _languages[PHP] =
+            new Language(
+                PERL,
+                "-php",
+                "PHP",
+                SmcPhpGenerator.class,
+                null);
         _languages[PYTHON] =
             new Language(
                 PYTHON,
@@ -1700,8 +1711,8 @@ public final class Smc
         // +   -nocatch: all
         // +      -noex: C++
         // + -nostreams: C++
-        // +   -reflect: C#, Java, TCL, VB, Lua, Perl, Python,
-        //               Ruby, Groovy, Scala
+        // +   -reflect: C#, Java, TCL, VB, Lua, Perl, PHP,
+        //                Python, Ruby, Groovy, Scala
         // +    -return: all
         // +    -serial: C#, C++, Java, Tcl, VB, Groovy, Scala
         // +    -suffix: all
@@ -1759,6 +1770,7 @@ public final class Smc
         languages.add(_languages[TCL]);
         languages.add(_languages[LUA]);
         languages.add(_languages[PERL]);
+        languages.add(_languages[PHP]);
         languages.add(_languages[PYTHON]);
         languages.add(_languages[RUBY]);
         languages.add(_languages[GROOVY]);
@@ -1786,6 +1798,9 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.28  2008/04/22 16:05:24  fperrad
+// - add PHP language (patch from Toni Arnold)
+//
 // Revision 1.27  2008/03/21 14:03:16  fperrad
 // refactor : move from the main file Smc.java to each language generator the following data :
 //  - the default file name suffix,

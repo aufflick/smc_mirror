@@ -26,6 +26,8 @@
 #   examples/C#.
 #   Francois Perrord contributed the Python code generator and
 #   examples/Python.
+#   Toni Arnold contributed the PHP code generation and
+#   examples/PHP.
 #
 # RCS ID
 # $Id$
@@ -60,6 +62,7 @@ install :       $(LIB_STAGING_DIR)
 		$(MAKE) -C Lua install
 		$(MAKE) -C ObjC install
 		$(MAKE) -C Perl install
+		$(MAKE) -C Php install
 		$(MAKE) -C Python install
 		$(MAKE) -C Ruby install
 		$(MAKE) -C Scala install
@@ -75,6 +78,7 @@ uninstall :
 		$(MAKE) -C Lua uninstall
 		$(MAKE) -C ObjC uninstall
 		$(MAKE) -C Perl uninstall
+		$(MAKE) -C Php uninstall
 		$(MAKE) -C Python uninstall
 		$(MAKE) -C Ruby uninstall
 		$(MAKE) -C Scala uninstall
@@ -90,6 +94,7 @@ clean :
 		$(MAKE) -C Lua clean
 		$(MAKE) -C ObjC clean
 		$(MAKE) -C Perl clean
+		$(MAKE) -C Php clean
 		$(MAKE) -C Python clean
 		$(MAKE) -C Ruby clean
 		$(MAKE) -C Scala clean
@@ -105,6 +110,7 @@ realclean :
 		$(MAKE) -C Lua realclean
 		$(MAKE) -C ObjC realclean
 		$(MAKE) -C Perl realclean
+		$(MAKE) -C Php realclean
 		$(MAKE) -C Python realclean
 		$(MAKE) -C Ruby realclean
 		$(MAKE) -C Scala realclean
@@ -114,6 +120,9 @@ realclean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.13  2008/04/22 16:01:21  fperrad
+# - add PHP language (patch from Toni Arnold)
+#
 # Revision 1.12  2008/02/04 10:50:56  fperrad
 # + Added Scala library
 #

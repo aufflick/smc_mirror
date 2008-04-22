@@ -39,6 +39,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.20  2008/04/22 16:05:24  fperrad
+ * - add PHP language (patch from Toni Arnold)
+ *
  * Revision 1.19  2008/01/22 08:56:55  fperrad
  * - fix : allows Perl parameter with graph generation
  *
@@ -1476,9 +1479,10 @@ Start
             token.getLineNumber())
         {}
 
-    // Perl parameter
+    // Perl/PHP parameter
     DOLLAR(token: SmcLexer.Token)
       [ctxt.getTargetLanguage() == Smc.PERL ||
+       ctxt.getTargetLanguage() == Smc.PHP ||
        ctxt.getTargetLanguage() == Smc.GRAPH ||
        ctxt.getTargetLanguage() == Smc.TABLE]
         Dollar
@@ -1530,6 +1534,7 @@ ParamSeparator
        ctxt.getTargetLanguage() == Smc.GROOVY ||
        ctxt.getTargetLanguage() == Smc.LUA ||
        ctxt.getTargetLanguage() == Smc.PERL ||
+       ctxt.getTargetLanguage() == Smc.PHP ||
        ctxt.getTargetLanguage() == Smc.PYTHON ||
        ctxt.getTargetLanguage() == Smc.RUBY ||
        ctxt.getTargetLanguage() == Smc.GRAPH ||
@@ -1544,6 +1549,7 @@ ParamSeparator
        ctxt.getTargetLanguage() == Smc.GROOVY ||
        ctxt.getTargetLanguage() == Smc.LUA ||
        ctxt.getTargetLanguage() == Smc.PERL ||
+       ctxt.getTargetLanguage() == Smc.PHP ||
        ctxt.getTargetLanguage() == Smc.PYTHON ||
        ctxt.getTargetLanguage() == Smc.RUBY ||
        ctxt.getTargetLanguage() == Smc.GRAPH ||
