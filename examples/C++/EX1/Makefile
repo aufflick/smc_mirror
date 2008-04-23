@@ -58,7 +58,7 @@ SMC=            java -jar ../../../bin/Smc.jar
 SMC_FLAGS=      -c++ $(TRACE) $(SERIAL) $(NO_CATCH) $(NO_EXCEPT)
 
 CXX=            c++
-CPPFLAGS=       -g -Wall -Wextra -I../../../lib
+CPPFLAGS=       -g -Wall -Wextra -I../../../lib/C++
 
 RM_F=           rm -f
 
@@ -103,6 +103,9 @@ clean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.10  2008/04/23 16:20:25  fperrad
+# + fix #1934474 : wrong include path in C++ examples
+#
 # Revision 1.9  2008/02/04 11:09:08  fperrad
 # + Exhibit options
 # + add a target 'table'

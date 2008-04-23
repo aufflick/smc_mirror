@@ -34,13 +34,16 @@ include ../../smc.mk
 
 SOURCES=        statemap.h
 
-LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib
+LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib/C++
 
 #################################################################
 # Rules.
 #
 
-install :       $(SOURCES)
+$(LIB_STAGING_DIR) :
+		$(MKDIR) $@
+
+install :       $(LIB_STAGING_DIR) $(SOURCES)
 		$(CP) statemap.h ..
 		$(CP) statemap.h $(LIB_STAGING_DIR)/statemap.h
 
@@ -54,6 +57,9 @@ realclean :     clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.9  2008/04/23 16:21:21  fperrad
+# + fix #1934474 : wrong include path in C++ examples
+#
 # Revision 1.8  2008/02/04 10:41:23  fperrad
 # + use common variables
 #
