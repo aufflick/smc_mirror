@@ -25,7 +25,7 @@ http://smc.sourceforge.net/</description>
  <notes>initial release</notes>
  <contents>
   <dir baseinstalldir="StateMachine" name="/">
-   <file baseinstalldir="StateMachine" md5sum="15ab0377869cd801d84bbb662b4cfe26" name="statemap.php" role="php" />
+   <file baseinstalldir="StateMachine" md5sum="3743438ff40ca2cf8c223b5e218af84c" name="statemap.php" role="php" />
   </dir>
  </contents>
  <dependencies>
