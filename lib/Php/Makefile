@@ -45,27 +45,22 @@ include ../../smc.mk
 
 SOURCES	= package.xml statemap.php
 
-CP=		cp -f
-MKDIR=		mkdir -p
-RM_F=		rm -f
-
-LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib
-PHP_LIB_STAGING_DIR=$(LIB_STAGING_DIR)/Php
+LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib/Php
 
 #################################################################
 # Rules.
 #
 
-$(PHP_LIB_STAGING_DIR) :
-		$(MKDIR) $(PHP_LIB_STAGING_DIR)
+$(LIB_STAGING_DIR) :
+		$(MKDIR) $@
 
-install :	$(PHP_LIB_STAGING_DIR) $(SOURCES)
-		$(CP) README.txt $(PHP_LIB_STAGING_DIR)/README.txt
-		$(CP) statemap.php $(PHP_LIB_STAGING_DIR)/statemap.php
-		$(CP) package.xml $(PHP_LIB_STAGING_DIR)/package.xml
+install :       $(LIB_STAGING_DIR) $(SOURCES)
+		$(CP) README.txt $(LIB_STAGING_DIR)/README.txt
+		$(CP) statemap.php $(LIB_STAGING_DIR)/statemap.php
+		$(CP) package.xml $(LIB_STAGING_DIR)/package.xml
 
 uninstall :
-		-$(RM_F) $(PHP_LIB_STAGING_DIR)/*.php
+		-$(RM_F) $(LIB_STAGING_DIR)/*.php
 
 clean :
 
@@ -74,6 +69,9 @@ realclean :	clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2008/04/23 07:14:53  fperrad
+# + use common variables
+#
 # Revision 1.1  2008/04/22 16:00:39  fperrad
 # - add PHP language (patch from Toni Arnold)
 #
