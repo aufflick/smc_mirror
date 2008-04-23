@@ -24,36 +24,64 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2008/04/23 07:10:08  fperrad
+# + exhibit options
+# + add a target 'table'
+# + add a target 'graph'
+#
 # Revision 1.1  2008/04/22 15:58:41  fperrad
 # - add PHP language (patch from Toni Arnold)
 #
 #
+
+#################################################################
+# Macros.
 #
 
 SM_SOURCES=     AppClass.sm
 SOURCES=        $(SM_SOURCES:%.sm=%_sm.php)
+CHECKSTRING=    php -q checkstring.php
+
+# Uncomment to turn on debug message generation.
+TRACE=          -g
 
 # Uncomment to turn on reflection.
-# REFLECT = 	-reflect
+# REFLECT=        -reflect
 
 SMC=            java -jar ../../../bin/Smc.jar
-SMC_FLAGS=      -php -g $(REFLECT)
+SMC_FLAGS=      -php $(TRACE) $(REFLECT)
 RM_F=           rm -f
 
-all :           checkstring
+#################################################################
+# Rules.
+#
 
 %_sm.php : %.sm
 		$(SMC) $(SMC_FLAGS) $<
 
+%_sm.dot :      %.sm
+		$(SMC) -graph -glevel 1 $<
+
+%_sm.html :     %.sm
+		$(SMC) -table $<
+
+all :           checkstring
+
 checkstring :   $(SOURCES)
+
+test:
+		-$(CHECKSTRING) ""
+		-$(CHECKSTRING) 000
+		-$(CHECKSTRING) 00011
+		-$(CHECKSTRING) 111
+		-$(CHECKSTRING) 000111100
+		-$(CHECKSTRING) 00011a1b10c0
+
+graph :         $(SM_SOURCES:%.sm=%_sm.dot)
+
+table :         $(SM_SOURCES:%.sm=%_sm.html)
 
 clean :
 		-$(RM_F) *_sm.php
-
-test:
-		-php -q checkstring.php ""
-		-php -q checkstring.php 000
-		-php -q checkstring.php 00011
-		-php -q checkstring.php 111
-		-php -q checkstring.php 000111100
-		-php -q checkstring.php 00011a1b10c0
+		-$(RM_F) *_sm.dot
+		-$(RM_F) *_sm.html

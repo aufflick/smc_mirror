@@ -26,38 +26,61 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2008/04/23 07:10:09  fperrad
+# + exhibit options
+# + add a target 'table'
+# + add a target 'graph'
+#
 # Revision 1.1  2008/04/22 15:58:41  fperrad
 # - add PHP language (patch from Toni Arnold)
 #
 #
+
+#################################################################
+# Macros.
 #
 
 SM_SOURCES=     Calculator.sm
 SOURCES=        $(SM_SOURCES:%.sm=%_sm.php)
 GRAPHS=         $(SM_SOURCES:%.sm=%_sm.png)
 
+# Uncomment to turn on debug message generation.
+TRACE=          -g
+
 # Uncomment to turn on reflection.
-# REFLECT = 	-reflect
+# REFLECT=        -reflect
 
 SMC=            java -jar ../../../bin/Smc.jar
-SMC_FLAGS=      -php -g $(REFLECT)
+SMC_FLAGS=      -php $(TRACE) $(REFLECT)
 RM_F=           rm -f
 DOT=            dot -Tpng
 
-all :           statemachine graph
+#################################################################
+# Rules.
+#
 
 %_sm.php : %.sm
 		$(SMC) $(SMC_FLAGS) $<
 
-%_sm.dot : %.sm
-		$(SMC) -graph -glevel 2 $<
+%_sm.dot :      %.sm
+		$(SMC) -graph -glevel 1 $<
 
-%.png : %.dot
+%.png :         %.dot
 		$(DOT) $< -o $@
 
-statemachine :   $(SOURCES)
+%_sm.html :     %.sm
+		$(SMC) -table $<
 
-graph :    $(GRAPHS)
+all :           calculator graph
+
+calculator :    $(SOURCES)
+
+graph :         $(GRAPHS)
+
+table :         $(SM_SOURCES:%.sm=%_sm.html)
 
 clean :
-		-$(RM_F) *_sm.php *.png
+		-$(RM_F) *_sm.php
+		-$(RM_F) *_sm.dot
+		-$(RM_F) *_sm.png
+		-$(RM_F) *_sm.html
