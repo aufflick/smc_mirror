@@ -1,4 +1,4 @@
-#!/usr/bin/env python -w
+#!/usr/bin/env python
 # -*- tab-width: 4; -*-
 
 #
@@ -31,6 +31,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2008/04/23 12:54:03  fperrad
+# + fix #1934497 : remove -w in shebang
+#
 # Revision 1.1  2005/05/28 17:48:30  cwrapp
 # Added Python examples 1 - 4 and 7.
 #

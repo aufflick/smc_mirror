@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby -w
+#!/usr/bin/env ruby
 
 #
 # The contents of this file are subject to the Mozilla Public
@@ -32,6 +32,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2008/04/23 12:53:28  fperrad
+# + fix #1934497 : remove -w in shebang
+#
 # Revision 1.1  2005/06/16 17:52:03  fperrad
 # Added Ruby examples 1 - 4 and 7.
 #
