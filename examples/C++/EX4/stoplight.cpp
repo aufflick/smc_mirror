@@ -33,6 +33,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2008/04/23 12:08:33  fperrad
+// + fix #1934479 (tested on Ubuntu 7.10, gcc 4.1.3)
+//
 // Revision 1.6  2005/05/28 13:31:18  cwrapp
 // Updated C++ examples.
 //
@@ -44,11 +47,7 @@
 #pragma warning(disable: 4355)
 #endif
 
-#if (__GNUC__ >= 3 && __GNUC_MINOR__ >= 1)
-#include <iostream>
-#include <cassert>
-#include <cstdio>
-#elif defined(WIN32)
+#ifdef WIN32
 #include <windows.h>
 #include <winbase.h>
 #else
