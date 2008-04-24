@@ -112,8 +112,7 @@ public abstract class SmcCodeGenerator
     {
         return ((transType == Smc.TRANS_SET ||
                  transType == Smc.TRANS_PUSH) &&
-                (endState.equals(NIL_STATE) == true ||
-                 endState.equals(currentState) == true));
+                 endState.equals(NIL_STATE) == true);
     }
 
     // Returns true if each of the transition guards uses
@@ -188,6 +187,9 @@ public abstract class SmcCodeGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2008/04/24 15:41:12  fperrad
+// + new feature #1876271 : SMC Loopback
+//
 // Revision 1.6  2008/03/21 14:03:16  fperrad
 // refactor : move from the main file Smc.java to each language generator the following data :
 //  - the default file name suffix,
