@@ -60,7 +60,7 @@ RM_F=           rm -f
 %_sm.html :     %.sm
 		$(SMC) -table $<
 
-all :           checkstring test
+all :           checkstring
 
 checkstring :   $(SOURCES)
 
@@ -84,6 +84,9 @@ clean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2008/04/24 09:29:55  fperrad
+# + fix #1934494 : remove 'test' from 'all' target
+#
 # Revision 1.2  2008/02/04 11:16:26  fperrad
 # + Exhibit options
 # + add a target 'table'

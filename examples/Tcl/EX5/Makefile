@@ -71,7 +71,7 @@ RM_F=           rm -f
 %_sm.html :     %.SM
 		$(SMC) -table $<
 
-all :           $(TARGET) test
+all :           $(TARGET)
 
 $(TARGET) :     $(SOURCES)
 
@@ -90,6 +90,9 @@ clean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2008/04/24 09:29:55  fperrad
+# + fix #1934494 : remove 'test' from 'all' target
+#
 # Revision 1.2  2008/02/04 11:17:58  fperrad
 # + Exhibit options
 # + add a target 'table'

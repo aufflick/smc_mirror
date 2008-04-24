@@ -72,7 +72,7 @@ RM_F=           rm -f
 %_sm.html :     %.sm
 		$(SMC) -table $<
 
-all :           checkstring test
+all :           checkstring
 
 checkstring :   $(SOURCES)
 		$(JAVAC) $(JAVAC_FLAGS) $(SOURCES)
@@ -99,6 +99,9 @@ clean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.8  2008/04/24 09:29:53  fperrad
+# + fix #1934494 : remove 'test' from 'all' target
+#
 # Revision 1.7  2008/02/04 12:36:28  fperrad
 # + Exhibit options
 # + add a target 'table'

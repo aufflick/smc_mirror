@@ -75,7 +75,7 @@ RM_RF=          rm -rf
 # Rules.
 #
 
-all :           $(TARGET) test
+all :           $(TARGET)
 
 %Context.java : %.sm
 		$(SMC) $(SMC_FLAGS) $<
@@ -110,6 +110,9 @@ clean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.10  2008/04/24 09:29:53  fperrad
+# + fix #1934494 : remove 'test' from 'all' target
+#
 # Revision 1.9  2008/02/04 12:37:39  fperrad
 # + Exhibit options
 # + add a target 'table'

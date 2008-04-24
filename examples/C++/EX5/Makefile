@@ -23,6 +23,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.9  2008/04/24 09:29:53  fperrad
+# + fix #1934494 : remove 'test' from 'all' target
+#
 # Revision 1.8  2008/04/23 16:20:25  fperrad
 # + fix #1934474 : wrong include path in C++ examples
 #
@@ -93,7 +96,7 @@ RM_F=           rm -f
 %_sm.html :     %.sm
 		$(SMC) -table $<
 
-all :           $(TARGET) test
+all :           $(TARGET)
 
 $(TARGET) :     $(HEADERS) $(SOURCES)
 		$(CXX) $(CPPFLAGS) -o $@ $(SOURCES)

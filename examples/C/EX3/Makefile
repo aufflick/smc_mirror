@@ -24,6 +24,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.7  2008/04/24 09:29:51  fperrad
+# + fix #1934494 : remove 'test' from 'all' target
+#
 # Revision 1.6  2008/02/04 10:59:06  fperrad
 # + Exhibit options
 #
@@ -81,7 +84,7 @@ RM_F=           rm -f
 %_sm.html :     %.sm
 		$(SMC) -table $<
 
-all :           $(TARGET) test
+all :           $(TARGET)
 
 $(TARGET) :     $(HEADERS) $(SOURCES)
 		$(CC) $(CFLAGS) -o $@ $(SOURCES)

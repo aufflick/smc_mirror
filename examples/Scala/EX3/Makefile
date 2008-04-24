@@ -74,7 +74,7 @@ RM_RF=          rm -rf
 %_sm.html :     %.sm
 		$(SMC) -table $<
 
-all :           checkstring test
+all :           checkstring
 
 checkstring :   $(SOURCES)
 		$(SCALAC) $(SCALAC_FLAGS) $(SOURCES)
@@ -102,6 +102,9 @@ clean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2008/04/24 09:29:55  fperrad
+# + fix #1934494 : remove 'test' from 'all' target
+#
 # Revision 1.1  2008/02/04 12:48:00  fperrad
 # Added Scala examples 1 - 3
 #

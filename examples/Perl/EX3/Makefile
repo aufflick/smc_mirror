@@ -24,6 +24,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.8  2008/04/24 09:29:54  fperrad
+# + fix #1934494 : remove 'test' from 'all' target
+#
 # Revision 1.7  2008/02/07 16:57:28  fperrad
 # Perl : StateMachine::Statemap -> DFA::Statemap
 #
@@ -79,7 +82,7 @@ RM_F=           rm -f
 %_sm.html :     %.sm
 		$(SMC) -table $<
 
-all :           checkstring test
+all :           checkstring
 
 checkstring :   $(SOURCES)
 
