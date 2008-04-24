@@ -21,7 +21,7 @@ http://smc.sourceforge.net/</description>
   <release>beta</release>
   <api>stable</api>
  </stability>
- <license uri="http://www.apache.org/licenses/">Apache</license>
+ <license uri="http://www.mozilla.org/MPL/">MPL 1.1</license>
  <notes>initial release</notes>
  <contents>
   <dir baseinstalldir="StateMachine" name="/">
@@ -50,7 +50,7 @@ http://smc.sourceforge.net/</description>
     <api>stable</api>
    </stability>
    <date>2008-02-14</date>
-   <license uri="http://www.apache.org/licenses/">Apache</license>
+   <license uri="http://www.mozilla.org/MPL/">MPL 1.1</license>
    <notes>initial release</notes>
   </release>
  </changelog>
