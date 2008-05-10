@@ -60,7 +60,7 @@ RM_F=           rm -f
 
 all :           checkstring
 
-checkstring :   $(SOURCES) test
+checkstring :   $(SOURCES)
 
 test:
 		-$(CHECKSTRING) ""
@@ -82,6 +82,9 @@ clean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.10  2008/05/10 12:30:14  fperrad
+# - forgotten target test'
+#
 # Revision 1.9  2008/04/24 09:29:55  fperrad
 # + fix #1934494 : remove 'test' from 'all' target
 #
