@@ -4,8 +4,8 @@
 # except in compliance with the License. You may obtain a copy of
 # the License at http://www.mozilla.org/MPL/
 # 
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+# Software distributed under the License is distributed on an
+# "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
 # 
@@ -98,6 +98,26 @@ clean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.9  2008/05/20 18:31:11  cwrapp
+# ----------------------------------------------------------------------
+#
+# Committing release 5.1.0.
+#
+# Modified Files:
+# 	Makefile README.txt smc.mk tar_list.txt bin/Smc.jar
+# 	examples/Ant/EX1/build.xml examples/Ant/EX2/build.xml
+# 	examples/Ant/EX3/build.xml examples/Ant/EX4/build.xml
+# 	examples/Ant/EX5/build.xml examples/Ant/EX6/build.xml
+# 	examples/Ant/EX7/build.xml examples/Ant/EX7/src/Telephone.java
+# 	examples/Java/EX1/Makefile examples/Java/EX4/Makefile
+# 	examples/Java/EX5/Makefile examples/Java/EX6/Makefile
+# 	examples/Java/EX7/Makefile examples/Ruby/EX1/Makefile
+# 	lib/statemap.jar lib/C++/statemap.h lib/Java/Makefile
+# 	lib/Php/statemap.php lib/Scala/Makefile
+# 	lib/Scala/statemap.scala net/sf/smc/CODE_README.txt
+# 	net/sf/smc/README.txt net/sf/smc/Smc.java
+# ----------------------------------------------------------------------
+#
 # Revision 1.8  2008/04/24 09:29:53  fperrad
 # + fix #1934494 : remove 'test' from 'all' target
 #

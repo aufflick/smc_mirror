@@ -29,6 +29,26 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2008/05/20 18:31:11  cwrapp
+// ----------------------------------------------------------------------
+//
+// Committing release 5.1.0.
+//
+// Modified Files:
+// 	Makefile README.txt smc.mk tar_list.txt bin/Smc.jar
+// 	examples/Ant/EX1/build.xml examples/Ant/EX2/build.xml
+// 	examples/Ant/EX3/build.xml examples/Ant/EX4/build.xml
+// 	examples/Ant/EX5/build.xml examples/Ant/EX6/build.xml
+// 	examples/Ant/EX7/build.xml examples/Ant/EX7/src/Telephone.java
+// 	examples/Java/EX1/Makefile examples/Java/EX4/Makefile
+// 	examples/Java/EX5/Makefile examples/Java/EX6/Makefile
+// 	examples/Java/EX7/Makefile examples/Ruby/EX1/Makefile
+// 	lib/statemap.jar lib/C++/statemap.h lib/Java/Makefile
+// 	lib/Php/statemap.php lib/Scala/Makefile
+// 	lib/Scala/statemap.scala net/sf/smc/CODE_README.txt
+// 	net/sf/smc/README.txt net/sf/smc/Smc.java
+// ----------------------------------------------------------------------
+//
 // Revision 1.2  2007/08/05 13:23:17  cwrapp
 // Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more information.
 //
@@ -585,7 +605,8 @@ public final class Telephone
 
     private void _loadSounds()
     {
-        String directory = "jar:file:./telephone.jar!/sounds/";
+        String currentDir = System.getProperty("user.dir");
+        String directory = "file://" + currentDir + "/sounds/";
         String urlString = "";
         URL soundURL;
         AudioClip audioClip;

@@ -1552,7 +1552,7 @@ public final class Smc
     /* package */ static final int TRANS_POP = 3;
 
     private static final String APP_NAME = "smc";
-    private static final String VERSION = "v. 5.0.2";
+    private static final String VERSION = "v. 5.1.0";
 
     // Command line option flags.
     private static final String CAST_FLAG = "-cast";
@@ -1798,6 +1798,26 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.29  2008/05/20 18:31:14  cwrapp
+// ----------------------------------------------------------------------
+//
+// Committing release 5.1.0.
+//
+// Modified Files:
+// 	Makefile README.txt smc.mk tar_list.txt bin/Smc.jar
+// 	examples/Ant/EX1/build.xml examples/Ant/EX2/build.xml
+// 	examples/Ant/EX3/build.xml examples/Ant/EX4/build.xml
+// 	examples/Ant/EX5/build.xml examples/Ant/EX6/build.xml
+// 	examples/Ant/EX7/build.xml examples/Ant/EX7/src/Telephone.java
+// 	examples/Java/EX1/Makefile examples/Java/EX4/Makefile
+// 	examples/Java/EX5/Makefile examples/Java/EX6/Makefile
+// 	examples/Java/EX7/Makefile examples/Ruby/EX1/Makefile
+// 	lib/statemap.jar lib/C++/statemap.h lib/Java/Makefile
+// 	lib/Php/statemap.php lib/Scala/Makefile
+// 	lib/Scala/statemap.scala net/sf/smc/CODE_README.txt
+// 	net/sf/smc/README.txt net/sf/smc/Smc.java
+// ----------------------------------------------------------------------
+//
 // Revision 1.28  2008/04/22 16:05:24  fperrad
 // - add PHP language (patch from Toni Arnold)
 //

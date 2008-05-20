@@ -18,7 +18,7 @@
   <property name="tcp.sm" location="${etc.dir}/TcpConnection.sm" />
 
   <path id="class.path">
-   <fileset dir="${lib.dir}" includes="**/*.jar" />
+   <fileset dir="${lib.dir}" includes="statemap.jar" />
    <pathelement location="${build.classes.dir}" />
   </path>
 

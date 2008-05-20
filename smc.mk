@@ -40,7 +40,7 @@
 # Macros.
 #
 
-VERSION=        5_0_2
+VERSION=        5_1_0
 
 STAGING_DIR=    ../staging
 SMC_STAGING_DIR=$(STAGING_DIR)/smc
@@ -77,6 +77,26 @@ $(SMC_STAGING_DIR) :    $(STAGING_DIR)
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.17  2008/05/20 18:31:06  cwrapp
+# ----------------------------------------------------------------------
+#
+# Committing release 5.1.0.
+#
+# Modified Files:
+# 	Makefile README.txt smc.mk tar_list.txt bin/Smc.jar
+# 	examples/Ant/EX1/build.xml examples/Ant/EX2/build.xml
+# 	examples/Ant/EX3/build.xml examples/Ant/EX4/build.xml
+# 	examples/Ant/EX5/build.xml examples/Ant/EX6/build.xml
+# 	examples/Ant/EX7/build.xml examples/Ant/EX7/src/Telephone.java
+# 	examples/Java/EX1/Makefile examples/Java/EX4/Makefile
+# 	examples/Java/EX5/Makefile examples/Java/EX6/Makefile
+# 	examples/Java/EX7/Makefile examples/Ruby/EX1/Makefile
+# 	lib/statemap.jar lib/C++/statemap.h lib/Java/Makefile
+# 	lib/Php/statemap.php lib/Scala/Makefile
+# 	lib/Scala/statemap.scala net/sf/smc/CODE_README.txt
+# 	net/sf/smc/README.txt net/sf/smc/Smc.java
+# ----------------------------------------------------------------------
+#
 # Revision 1.16  2008/02/04 10:39:48  fperrad
 # + common variables
 #

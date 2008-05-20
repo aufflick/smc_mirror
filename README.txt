@@ -2,7 +2,7 @@
 
                                SMC
                      The State Machine Compiler
-                         (Version: 5.0.2)
+                         (Version: 5.1.0)
 
                      http://smc.sourceforge.net
 
@@ -13,31 +13,38 @@
 
 Major changes:
 
-None.
++ (PHP)
+  Added support for PHP programming language (-php).
+
++ (Scala)
+  Added support for Scala programming language (-scala).
 
 
 Minor changes:
 
-+ (Java)
-    Added state change notification to C# and VB.Net.
-    (SF feature request 1570050)
-
-+ (Programmer's Manual)
-    Added section 12: Event Notification which explains how state
-    change notification can be used in C# and VB.Net.
++ (All)
+  Jump transition added. Works the same as a simple transition.
 
 
 Bug Fixes:
 
-+ (Java)
-    When a push transition is taken, the resulting state change
-    is not reported via the property change event.
-    (SF bug 1871371)
++ (C++)
+  The TransitionUndefinedException was missing the transition
+  name. The transition name is now placed into the exception.
+  (SF bug 1890694)
 
-+ (Groovy)
-    The necessary Groovy library and examples are missing from
-    release 5.0.1 package.
-    (SF bug 1869984)
++ (GraphViz)
+  Correctly handles $ in transition arguments.
+  (SF bug 1930388)
+
++ (Examples)
+  Corrected statemap.h -I include path in C++ examples.
+  Corrected C++ example 4 #if __GNUC__ condition.
+  Corrected C++ example 6 #include.
+  Corrected file names in TCL examples 4 and 5.
+  Corrected examples "all" rule.
+  Corrected #!/interpreter calls in scripts.
+  (SF bugs 1934474, 1934479, 1934484, 1934488, 1934494, 1934497)
 
 
 

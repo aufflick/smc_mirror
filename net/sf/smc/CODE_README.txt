@@ -1,5 +1,52 @@
                               SMC -
                   The State Machine Compiler
+                        Version 5.1.0
+
+
++ Major changes
+---------------
+
+(PHP)
+    Added support for PHP programming language (-php).
+
+(Scala)
+    Added support for Scala programming language (-scala).
+
+
++ Minor changes
+---------------
+
+(All)
+    Jump transition added. Works the same as a simple transition.
+
+
++ Bug fixes
+-----------
+
+(C++)
+    The TransitionUndefinedException was missing the transition
+    name. The transition name is now placed into the exception.
+    (SF bug 1890694)
+
+(GraphViz)
+    Correctly handles $ in transition arguments.
+    (SF bug 1930388)
+
+(Examples)
+    Corrected statemap.h -I include path in C++ examples.
+    Corrected C++ example 4 #if __GNUC__ condition.
+    Corrected C++ example 6 #include.
+    Corrected file names in TCL examples 4 and 5.
+    Corrected examples "all" rule.
+    Corrected #!/interpreter calls in scripts.
+    (SF bugs 1934474, 1934479, 1934484, 1934488, 1934494,
+     1934497)
+
+
+
+
+                              SMC -
+                  The State Machine Compiler
                         Version 5.0.2
 
 

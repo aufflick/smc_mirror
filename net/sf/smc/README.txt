@@ -80,8 +80,10 @@ SMC's command line options are:
     -lua     : Generate Lua code.
     -objc    : Generate Objective-C code.
     -perl    : Generate Perl code.
+    -php     : Generate PHP code.
     -python  : Generate Python code.
     -ruby    : Generate Ruby code.
+    -scala   : Generate Scala code.
     -table   : Generate an HTML table.
     -tcl     : Generate [incr Tcl] code.
     -vb      : Generate VB.Net code.
@@ -97,8 +99,10 @@ SMC's command line options are:
           + -lua
           + -objc
           + -perl
+          + -php
           + -python
           + -ruby
+          + -scala
           + -table
           + -tcl
           + -vb
