@@ -29,6 +29,9 @@
  *
  * Change Log
  * $Log$
+ * Revision 1.3  2008/05/30 21:14:48  fperrad
+ * - define TRACE only when undefined
+ *
  * Revision 1.2  2007/08/05 12:58:11  cwrapp
  * Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more information.
  *
@@ -40,7 +43,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifndef TRACE
 #define TRACE printf
+#endif
 
 #define STATE_MEMBERS \
     const char *_name; \
