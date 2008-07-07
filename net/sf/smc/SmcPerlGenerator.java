@@ -225,42 +225,32 @@ public final class SmcPerlGenerator
         _source.println("    }");
         _source.println();
 
-        // Generate the transition methods.
+        // Don't generate the transition methods.
+        // Use automatic delegation.
+        _source.println("    my %meth = (");
         for (SmcTransition trans: transitions)
         {
             transName = trans.getName();
-            params = trans.getParameters();
 
             if (transName.equals("Default") == false)
             {
-                _source.print("    sub ");
+                _source.print("        ");
                 _source.print(transName);
-                _source.println(" {");
-                _source.println("        my $self = shift;");
-
-                // Save away the transition name in case it is
-                // need in an UndefinedTransitionException.
-                _source.print(
-                    "        $self->{_transition} = '");
-                _source.print(transName);
-                _source.println("';");
-
-                _source.print("        $self->getState()->");
-                _source.print(transName);
-                _source.print("($self");
-
-                if (params.size() != 0)
-                {
-                    _source.print(", @_");
-                }
-                _source.println(");");
-                _source.println(
-                    "        $self->{_transition} = undef;");
-
-                _source.println("    }");
-                _source.println();
+                _source.println(" => undef,");
             }
         }
+        _source.println("    );");
+        _source.println();
+        _source.println("    sub AUTOLOAD {");
+        _source.println("        my $self = shift;");
+        _source.println("        use vars qw( $AUTOLOAD );");
+        _source.println("        (my $method = $AUTOLOAD) =~ s/^.*:://;");
+        _source.println("        return unless exists $meth{$method};");
+        _source.println("        $self->{_transition} = $method;");
+        _source.println("        $self->getState()->$method($self, @_);");
+        _source.println("        $self->{_transition} = undef;");
+        _source.println("    }");
+        _source.println();
 
         // getOwner() method.
         _source.println("    sub getOwner {");
@@ -1153,6 +1143,9 @@ public final class SmcPerlGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2008/07/07 14:45:15  fperrad
+// + automatic delegation (more perlish)
+//
 // Revision 1.9  2008/03/21 14:03:16  fperrad
 // refactor : move from the main file Smc.java to each language generator the following data :
 //  - the default file name suffix,
