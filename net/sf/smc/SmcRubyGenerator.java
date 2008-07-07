@@ -257,64 +257,16 @@ public final class SmcRubyGenerator
         _source.println("    end");
         _source.println();
 
-        // Generate the transition methods.
-        for (SmcTransition trans: transitions)
-        {
-            transName = trans.getName();
-            params = trans.getParameters();
-
-            if (transName.equals("Default") == false)
-            {
-                _source.print(_indent);
-                _source.print("    def ");
-                _source.print(transName);
-                if (params.size() != 0)
-                {
-                    _source.println("(*arglist)");
-                }
-                else
-                {
-                    _source.println("()");
-                }
-
-                // Save away the transition name in case it is
-                // need in an UndefinedTransitionException.
-                _source.print(_indent);
-                _source.print("        @_transition = '");
-                _source.print(transName);
-                _source.println("'");
-
-                _source.print(_indent);
-                _source.print("        getState.");
-                _source.print(transName);
-                _source.print("(self");
-
-                if (params.size() != 0)
-                {
-                    _source.print(", *arglist");
-                }
-                _source.println(")");
-                _source.print(_indent);
-                _source.println("        @_transition = nil");
-
-                _source.print(_indent);
-                _source.println("    end");
-                _source.println();
-            }
-        }
-
-        // getState() method.
+        // Don't generate the transition methods.
+        // Use automatic delegation.
         _source.print(_indent);
-        _source.println("    def getState()");
+        _source.println("    def method_missing(name, *args)");
         _source.print(_indent);
-        _source.println("        if @_state.nil? then");
+        _source.println("        @_transition = name");
         _source.print(_indent);
-        _source.println(
-            "            raise Statemap::StateUndefinedException");
+        _source.println("        getState.send(name, self, *args)");
         _source.print(_indent);
-        _source.println("        end");
-        _source.print(_indent);
-        _source.println("        return @_state");
+        _source.println("        @_transition = nil");
         _source.print(_indent);
         _source.println("    end");
         _source.println();
@@ -1214,6 +1166,9 @@ public final class SmcRubyGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2008/07/07 14:42:17  fperrad
+// + automatic delegation (more rubyesque)
+//
 // Revision 1.7  2008/03/21 14:03:17  fperrad
 // refactor : move from the main file Smc.java to each language generator the following data :
 //  - the default file name suffix,
