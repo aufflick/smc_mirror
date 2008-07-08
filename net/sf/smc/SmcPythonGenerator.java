@@ -115,36 +115,13 @@ public final class SmcPythonGenerator
         _source.println("        pass");
         _source.println();
 
-        // Get the transition list.
-        // Generate the default transition definitions.
-        transitions = fsm.getTransitions();
-        for (SmcTransition trans: transitions)
-        {
-            params = trans.getParameters();
-
-            // Don't generate the Default transition here.
-            if (trans.getName().equals("Default") == false)
-            {
-                _source.print("    def ");
-                _source.print(trans.getName());
-                _source.print("(self, fsm");
-
-                for (SmcParameter param: params)
-                {
-                    _source.print(", ");
-                    param.accept(this);
-                }
-
-                _source.println("):");
-
-                // If this method is reached, that means that
-                // this transition was passed to a state which
-                // does not define the transition. Call the
-                // state's default transition method.
-                _source.println("        self.Default(fsm)");
-                _source.println();
-            }
-        }
+        // Don't generate the default transition methods.
+        // Use automatic delegation.
+        _source.println("    def __getattr__(self, attrib):");
+        _source.println("        def trans(fsm, *arglist):");
+        _source.println("            self.Default(fsm)");
+        _source.println("        return trans");
+        _source.println();
 
         // Generate the overall Default transition for all maps.
         _source.println("    def Default(self, fsm):");
@@ -218,51 +195,14 @@ public final class SmcPythonGenerator
 
         _source.println();
 
-        // Generate the transition methods.
-        for (SmcTransition trans: transitions)
-        {
-            transName = trans.getName();
-            params = trans.getParameters();
-
-            if (transName.equals("Default") == false)
-            {
-                _source.print("    def ");
-                _source.print(transName);
-                _source.print("(self");
-                if (params.size() != 0)
-                {
-                    _source.print(", *arglist");
-                }
-                _source.println("):");
-
-                // Save away the transition name in case it is
-                // need in an UndefinedTransitionException.
-                _source.print("        self._transition = '");
-                _source.print(transName);
-                _source.println("'");
-
-                _source.print("        self.getState().");
-                _source.print(transName);
-                _source.print("(self");
-
-                if (params.size() != 0)
-                {
-                    _source.print(", *arglist");
-                }
-                _source.println(")");
-                _source.println(
-                    "        self._transition = None");
-
-                _source.println();
-            }
-        }
-
-        // getState() method.
-        _source.println("    def getState(self):");
-        _source.println("        if self._state == None:");
-        _source.println(
-            "            raise statemap.StateUndefinedException");
-        _source.println("        return self._state");
+        // Don't generate the transition methods.
+        // Use automatic delegation.
+        _source.println("    def __getattr__(self, attrib):");
+        _source.println("        def trans_sm(*arglist):");
+        _source.println("            self._transition = attrib");
+        _source.println("            getattr(self.getState(), attrib)(self, *arglist)");
+        _source.println("            self._transition = None");
+        _source.println("        return trans_sm");
         _source.println();
 
         // getOwner() method.
@@ -368,7 +308,7 @@ public final class SmcPythonGenerator
         _source.println();
         _source.print("class ");
         _source.print(mapName);
-        _source.println(':');
+        _source.println("(object):");
         _source.println();
 
         for (SmcState state: states)
@@ -1073,6 +1013,10 @@ public final class SmcPythonGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.12  2008/07/08 16:47:25  fperrad
+// + automatic delegation (more pythonic)
+//  needs 'new' object model
+//
 // Revision 1.11  2008/03/21 14:03:17  fperrad
 // refactor : move from the main file Smc.java to each language generator the following data :
 //  - the default file name suffix,
