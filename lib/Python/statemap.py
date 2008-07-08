@@ -48,7 +48,7 @@ class TransitionUndefinedException(Exception):
 	pass
 
 
-class State:
+class State(object):
 	"""base State class"""
 
 	def __init__(self, name, id):
@@ -64,7 +64,7 @@ class State:
 		return self._id
 
 
-class FSMContext:
+class FSMContext(object):
 	"""The user can derive FSM contexts from this class and interface
 	to them with the methods of this class.
 
