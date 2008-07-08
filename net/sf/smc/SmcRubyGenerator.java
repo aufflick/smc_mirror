@@ -149,41 +149,23 @@ public final class SmcRubyGenerator
         _source.println("    def Exit(fsm) end");
         _source.println();
 
-        // Get the transition list.
-        // Generate the default transition definitions.
-        transitions = fsm.getTransitions();
-        for (SmcTransition trans: transitions)
-        {
-            params = trans.getParameters();
+        // Don't generate the default transition methods.
+        // Use automatic delegation.
+        _source.print(_indent);
+        _source.println("    def method_missing(name, *args)");
+        _source.print(_indent);
+        _source.println("        fsm = args.shift");
 
-            // Don't generate the Default transition here.
-            if (trans.getName().equals("Default") == false)
-            {
-                _source.print(_indent);
-                _source.print("    def ");
-                _source.print(trans.getName());
-                _source.print("(fsm");
+        // If this method is reached, that means that
+        // this transition was passed to a state which
+        // does not define the transition. Call the
+        // state's default transition method.
+        _source.print(_indent);
+        _source.println("        Default(fsm)");
 
-                for (SmcParameter param: params)
-                {
-                    _source.print(", ");
-                    _source.print(param.getName());
-                }
-
-                _source.println(")");
-
-                // If this method is reached, that means that
-                // this transition was passed to a state which
-                // does not define the transition. Call the
-                // state's default transition method.
-                _source.print(_indent);
-                _source.println("        Default(fsm)");
-
-                _source.print(_indent);
-                _source.println("    end");
-                _source.println();
-            }
-        }
+        _source.print(_indent);
+        _source.println("    end");
+        _source.println();
 
         // Generate the overall Default transition for all maps.
         _source.print(_indent);
@@ -206,7 +188,7 @@ public final class SmcRubyGenerator
             "        msg = \"\\nState: \" + fsm.getState.getName +");
         _source.print(_indent);
         _source.println(
-            "            \"\\nTransition: \" + fsm.getTransition + \"\\n\"");
+            "            \"\\nTransition: \" + fsm.getTransition.to_s + \"\\n\"");
         _source.print(_indent);
         _source.println(
             "        raise Statemap::TransitionUndefinedException, msg");
@@ -1166,6 +1148,9 @@ public final class SmcRubyGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2008/07/08 11:25:43  fperrad
+// + automatic delegation (suite)
+//
 // Revision 1.8  2008/07/07 14:42:17  fperrad
 // + automatic delegation (more rubyesque)
 //
