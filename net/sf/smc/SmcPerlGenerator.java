@@ -126,30 +126,36 @@ public final class SmcPerlGenerator
         _source.println("    sub Exit {}");
         _source.println();
 
-        // Get the transition list.
-        // Generate the default transition definitions.
+        // Don't generate the default transition methods.
+        // Use automatic delegation.
+        _source.println("    my %meth = (");
         transitions = fsm.getTransitions();
         for (SmcTransition trans: transitions)
         {
-            params = trans.getParameters();
+            transName = trans.getName();
 
-            // Don't generate the Default transition here.
-            if (trans.getName().equals("Default") == false)
+            if (transName.equals("Default") == false)
             {
-                _source.print("    sub ");
-                _source.print(trans.getName());
-                _source.println(" {");
-
-                // If this method is reached, that means that
-                // this transition was passed to a state which
-                // does not define the transition. Call the
-                // state's default transition method.
-                _source.println("        shift->Default(@_);");
-
-                _source.println("    }");
-                _source.println();
+                _source.print("        ");
+                _source.print(transName);
+                _source.println(" => undef,");
             }
         }
+        _source.println("    );");
+        _source.println();
+        _source.println("    sub AUTOLOAD {");
+        _source.println("        my $self = shift;");
+        _source.println("        use vars qw( $AUTOLOAD );");
+        _source.println("        (my $method = $AUTOLOAD) =~ s/^.*:://;");
+        _source.println("        return unless exists $meth{$method};");
+
+        // If this method is reached, that means that
+        // this transition was passed to a state which
+        // does not define the transition. Call the
+        // state's default transition method.
+        _source.println("        $self->Default(@_);");
+        _source.println("    }");
+        _source.println();
 
         // Generate the overall Default transition for all maps.
         _source.println("    sub Default {");
@@ -227,20 +233,6 @@ public final class SmcPerlGenerator
 
         // Don't generate the transition methods.
         // Use automatic delegation.
-        _source.println("    my %meth = (");
-        for (SmcTransition trans: transitions)
-        {
-            transName = trans.getName();
-
-            if (transName.equals("Default") == false)
-            {
-                _source.print("        ");
-                _source.print(transName);
-                _source.println(" => undef,");
-            }
-        }
-        _source.println("    );");
-        _source.println();
         _source.println("    sub AUTOLOAD {");
         _source.println("        my $self = shift;");
         _source.println("        use vars qw( $AUTOLOAD );");
@@ -1143,6 +1135,9 @@ public final class SmcPerlGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2008/07/08 11:42:18  fperrad
+// + automatic delegation (suite)
+//
 // Revision 1.10  2008/07/07 14:45:15  fperrad
 // + automatic delegation (more perlish)
 //
