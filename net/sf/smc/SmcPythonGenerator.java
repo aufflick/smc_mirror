@@ -788,19 +788,13 @@ public final class SmcPythonGenerator
                 _source.println("pass");
             }
             // If there are:
-            // 1. No entry actions,
-            // 2. No exit actions,
-            // 3. Only one guard,
-            // 4. No condition,
-            // 5. No actions,
-            // 6. Not a loopback, push or pop transition and
-            // 7. No debug code being generated.
+            // 1. Only one guard,
+            // 2. No condition,
+            // 3. No actions,
+            // 4. Not a loopback, push or pop transition and
+            // 5. No debug code being generated.
             // then give this transition a pass.
             else if (_guardCount == 1 &&
-                     (entryActions == null ||
-                      entryActions.isEmpty() == true) &&
-                     (exitActions == null ||
-                      exitActions.isEmpty() == true) &&
                      transType != Smc.TRANS_PUSH &&
                      transType != Smc.TRANS_POP &&
                      loopbackFlag == true &&
@@ -1018,6 +1012,9 @@ public final class SmcPythonGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.14  2008/07/15 14:48:16  fperrad
+// + fix : confidition of "pass" generation
+//
 // Revision 1.13  2008/07/14 09:31:25  fperrad
 // + Added the generation of read-only macro for Vi & Emacs
 //
