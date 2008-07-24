@@ -684,7 +684,7 @@ public final class SmcPerlGenerator
 
             for (SmcParameter param: parameters)
             {
-                _source.print(", $");
+                _source.print(", ");
                 _source.print(param.getName());
             }
 
@@ -1141,6 +1141,9 @@ public final class SmcPerlGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.13  2008/07/24 06:23:08  fperrad
+// + fix Perl generation (double $$)
+//
 // Revision 1.12  2008/07/14 09:31:25  fperrad
 // + Added the generation of read-only macro for Vi & Emacs
 //
