@@ -172,7 +172,6 @@ public final class SmcGraphGenerator
                      state.getTransitions())
             {
                 transition.accept(this);
-                _source.println();
             }
         }
 
@@ -183,7 +182,6 @@ public final class SmcGraphGenerator
                      defaultState.getTransitions())
             {
                 transition.accept(this);
-                _source.println();
             }
         }
 
@@ -301,7 +299,6 @@ public final class SmcGraphGenerator
 
         for (SmcGuard guard: transition.getGuards())
         {
-            _source.println();
             guard.accept(this);
         }
 
@@ -323,6 +320,13 @@ public final class SmcGraphGenerator
         int graphLevel = Smc.graphLevel();
         List<SmcAction> actions = guard.getActions();
 
+        if (graphLevel == Smc.GRAPH_LEVEL_0 &&
+            isLoopback(transType, stateName, endStateName))
+        {
+            return;
+        }
+
+        _source.println();
         _source.print("        \"");
         _source.print(mapName);
         _source.print("::");
@@ -419,7 +423,7 @@ public final class SmcGraphGenerator
             }
         }
 
-        _source.print("\"];");
+        _source.println("\"];");
 
         return;
     } // end of visit(SmcGuard)
@@ -496,6 +500,9 @@ public final class SmcGraphGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2008/07/24 06:24:31  fperrad
+// + don't draw loopback (internal event) in level 0
+//
 // Revision 1.8  2008/03/21 14:03:16  fperrad
 // refactor : move from the main file Smc.java to each language generator the following data :
 //  - the default file name suffix,
