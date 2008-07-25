@@ -211,25 +211,22 @@ public final class SmcGraphGenerator
         }
         _source.println("\"");
 
-        // For graph levels 0 and 1, output just the state name.
-        if (graphLevel < Smc.GRAPH_LEVEL_2)
-        {
-            _source.println("            [label=\"\\N\"];");
-        }
-        // For graph level 2, output the state name, entry and
-        // exit actions.
-        else
+        // Output the state name.
+        _source.print("            [label=\"{\\N");
+
+        // For graph level 1 & 2, output entry and exit actions.
+        if (graphLevel >= Smc.GRAPH_LEVEL_1)
         {
             List<SmcAction> actions;
             Iterator<SmcAction> it;
             String sep;
 
-            _source.print("            [label=\"{\\N| Entry:");
-
-            // Output the entry actions, one per line.
             actions = state.getEntryActions();
             if (actions != null && actions.isEmpty() == false)
             {
+                _source.print("| Entry:");
+
+                // Output the entry actions, one per line.
                 for (it = actions.iterator(), sep = " ";
                      it.hasNext() == true;
                      sep = "\\l")
@@ -239,12 +236,12 @@ public final class SmcGraphGenerator
                 }
             }
 
-            _source.print("| Exit:");
-
-            // Output the exit actions, one per line.
             actions = state.getExitActions();
             if (actions != null && actions.isEmpty() == false)
             {
+                _source.print("| Exit:");
+
+                // Output the entry actions, one per line.
                 for (it = actions.iterator(), sep = " ";
                      it.hasNext() == true;
                      sep = "\\l")
@@ -253,10 +250,9 @@ public final class SmcGraphGenerator
                     (it.next()).accept(this);
                 }
             }
-
-            _source.println("}\"];");
         }
 
+        _source.println("}\"];");
         _source.println();
 
         return;
@@ -500,6 +496,10 @@ public final class SmcGraphGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2008/07/25 11:22:20  fperrad
+// + in level 2, don't draw entry/exit when no action
+// + in level 1, draw entry & exit
+//
 // Revision 1.9  2008/07/24 06:24:31  fperrad
 // + don't draw loopback (internal event) in level 0
 //
