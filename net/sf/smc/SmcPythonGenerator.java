@@ -116,13 +116,36 @@ public final class SmcPythonGenerator
         _source.println("        pass");
         _source.println();
 
-        // Don't generate the default transition methods.
-        // Use automatic delegation.
-        _source.println("    def __getattr__(self, attrib):");
-        _source.println("        def trans(fsm, *arglist):");
-        _source.println("            self.Default(fsm)");
-        _source.println("        return trans");
-        _source.println();
+        // Get the transition list.
+        // Generate the default transition definitions.
+        transitions = fsm.getTransitions();
+        for (SmcTransition trans: transitions)
+        {
+            params = trans.getParameters();
+
+            // Don't generate the Default transition here.
+            if (trans.getName().equals("Default") == false)
+            {
+                _source.print("    def ");
+                _source.print(trans.getName());
+                _source.print("(self, fsm");
+
+                for (SmcParameter param: params)
+                {
+                    _source.print(", ");
+                    param.accept(this);
+                }
+
+                _source.println("):");
+
+                // If this method is reached, that means that
+                // this transition was passed to a state which
+                // does not define the transition. Call the
+                // state's default transition method.
+                _source.println("        self.Default(fsm)");
+                _source.println();
+            }
+        }
 
         // Generate the overall Default transition for all maps.
         _source.println("    def Default(self, fsm):");
@@ -1012,6 +1035,9 @@ public final class SmcPythonGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.15  2008/07/26 07:56:09  fperrad
+// + revert some magic (don't mix inheritance & automatic delegation)
+//
 // Revision 1.14  2008/07/15 14:48:16  fperrad
 // + fix : confidition of "pass" generation
 //
