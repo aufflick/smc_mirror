@@ -222,32 +222,92 @@ public final class SmcGraphGenerator
             String sep;
 
             actions = state.getEntryActions();
-            if (actions != null && actions.isEmpty() == false)
+            if (actions != null)
             {
-                _source.print("| Entry:");
+                _source.print("| Entry/");
 
                 // Output the entry actions, one per line.
-                for (it = actions.iterator(), sep = " ";
-                     it.hasNext() == true;
-                     sep = "\\l")
+                for (SmcAction action: actions)
                 {
-                    _source.print(sep);
-                    (it.next()).accept(this);
+                    _source.print("\\l");
+                    action.accept(this);
                 }
+                _source.print("\\l");
             }
 
             actions = state.getExitActions();
-            if (actions != null && actions.isEmpty() == false)
+            if (actions != null)
             {
-                _source.print("| Exit:");
+                _source.print("| Exit/");
 
-                // Output the entry actions, one per line.
-                for (it = actions.iterator(), sep = " ";
-                     it.hasNext() == true;
-                     sep = "\\l")
+                // Output the exit actions, one per line.
+                for (SmcAction action: actions)
                 {
-                    _source.print(sep);
-                    (it.next()).accept(this);
+                    _source.print("\\l");
+                    action.accept(this);
+                }
+                _source.print("\\l");
+            }
+
+            for (SmcTransition transition: state.getTransitions())
+            {
+                for (SmcGuard guard: transition.getGuards())
+                {
+                    String endStateName = guard.getEndState();
+                    if (endStateName.equals(NIL_STATE))
+                    {
+                        String transName = transition.getName();
+                        String condition = guard.getCondition();
+                        actions = guard.getActions();
+
+                        _source.print("| ");
+                        _source.print(transName);
+
+                        // Graph Level 2: Output the transition parameters.
+                        if (graphLevel == Smc.GRAPH_LEVEL_2)
+                        {
+                            List<SmcParameter> parameters = transition.getParameters();
+                            Iterator<SmcParameter> pit;
+
+                            _source.print("(");
+                            for (pit = parameters.iterator(), sep = "";
+                                 pit.hasNext() == true;
+                                 sep = ", ")
+                            {
+                                _source.print(sep);
+                                (pit.next()).accept(this);
+                            }
+                            _source.print(")");
+                        }
+
+                        // Output the guard.
+                        if (condition != null && condition.length() > 0)
+                        {
+                            _source.print("\\l\\[");
+
+                            // If the condition contains line separators,
+                            // then replace them with a "\n" so Graphviz knows
+                            // about the line separation.
+                            _source.print(
+                                Smc.escape(condition).replaceAll(
+                                    "\\n", "\\\\\\n"));
+
+                            _source.print("\\]");
+                        }
+
+                        _source.print("/");
+
+                        if (actions != null)
+                        {
+                            // Output the actions, one per line.
+                            for (SmcAction action: actions)
+                            {
+                                _source.print("\\l");
+                                action.accept(this);
+                            }
+                            _source.print("\\l");
+                        }
+                    }
                 }
             }
         }
@@ -316,8 +376,8 @@ public final class SmcGraphGenerator
         int graphLevel = Smc.graphLevel();
         List<SmcAction> actions = guard.getActions();
 
-        if (graphLevel == Smc.GRAPH_LEVEL_0 &&
-            isLoopback(transType, stateName, endStateName))
+        // Loopback are added in the state
+        if (isLoopback(transType, stateName, endStateName))
         {
             return;
         }
@@ -398,25 +458,25 @@ public final class SmcGraphGenerator
             _source.print("\\]");
         }
 
+        _source.print("/");
+
         if (transType == Smc.TRANS_PUSH)
         {
-            _source.print("/\\lpush(");
+            _source.print("\\lpush(");
             _source.print(pushStateName);
             _source.print(")");
         }
 
         // Graph Level 1, 2: output actions.
         if (graphLevel > Smc.GRAPH_LEVEL_0 &&
-            actions != null &&
-            actions.isEmpty() == false)
+            actions != null)
         {
-            _source.print("/\\l");
-
             for (SmcAction action: actions)
             {
-                action.accept(this);
                 _source.print("\\l");
+                action.accept(this);
             }
+            _source.print("\\l");
         }
 
         _source.println("\"];");
@@ -496,6 +556,9 @@ public final class SmcGraphGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2008/07/26 07:42:35  fperrad
+// + draw loopback (internal event) in state instead as transition
+//
 // Revision 1.10  2008/07/25 11:22:20  fperrad
 // + in level 2, don't draw entry/exit when no action
 // + in level 1, draw entry & exit
