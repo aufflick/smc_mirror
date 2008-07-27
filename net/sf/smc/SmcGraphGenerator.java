@@ -254,7 +254,9 @@ public final class SmcGraphGenerator
                 for (SmcGuard guard: transition.getGuards())
                 {
                     String endStateName = guard.getEndState();
-                    if (endStateName.equals(NIL_STATE))
+                    int transType = guard.getTransType();
+
+                    if (isLoopback(transType, instanceName, endStateName))
                     {
                         String transName = transition.getName();
                         String condition = guard.getCondition();
@@ -556,6 +558,9 @@ public final class SmcGraphGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.12  2008/07/27 15:54:37  fperrad
+// + refactor with isLoopback()
+//
 // Revision 1.11  2008/07/26 07:42:35  fperrad
 // + draw loopback (internal event) in state instead as transition
 //
