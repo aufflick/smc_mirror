@@ -24,6 +24,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2008/07/29 06:51:05  fperrad
+# - add a target 'png'
+#
 # Revision 1.2  2008/04/23 07:10:09  fperrad
 # + exhibit options
 # + add a target 'table'
@@ -62,6 +65,9 @@ RM_F=           rm -f
 %_sm.dot :      %.sm
 		$(SMC) -graph -glevel 1 $<
 
+%_sm.png :      %_sm.dot
+		dot -T png -o $@ $<
+
 %_sm.html :     %.sm
 		$(SMC) -table $<
 
@@ -80,9 +86,12 @@ test:
 
 graph :         $(SM_SOURCES:%.sm=%_sm.dot)
 
+png :           $(SM_SOURCES:%.sm=%_sm.png)
+
 table :         $(SM_SOURCES:%.sm=%_sm.html)
 
 clean :
 		-$(RM_F) *_sm.php
 		-$(RM_F) *_sm.dot
+		-$(RM_F) *_sm.png
 		-$(RM_F) *_sm.html

@@ -24,6 +24,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.7  2008/07/29 06:50:59  fperrad
+# - add a target 'png'
+#
 # Revision 1.6  2008/04/24 09:29:53  fperrad
 # + fix #1934494 : remove 'test' from 'all' target
 #
@@ -76,6 +79,9 @@ RM_F=           rm -f
 %_sm.dot :      %.sm
 		$(SMC) -graph -glevel 1 $<
 
+%_sm.png :      %_sm.dot
+		dot -T png -o $@ $<
+
 %_sm.html :     %.sm
 		$(SMC) -table $<
 
@@ -93,9 +99,12 @@ test:
 
 graph :         $(SM_SOURCES:%.sm=%_sm.dot)
 
+png :           $(SM_SOURCES:%.sm=%_sm.png)
+
 table :         $(SM_SOURCES:%.sm=%_sm.html)
 
 clean :
 		-$(RM_F) *_sm.lua
 		-$(RM_F) *_sm.dot
+		-$(RM_F) *_sm.png
 		-$(RM_F) *_sm.html

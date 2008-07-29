@@ -1,21 +1,21 @@
-# 
+#
 # The contents of this file are subject to the Mozilla Public
 # License Version 1.1 (the "License"); you may not use this file
 # except in compliance with the License. You may obtain a copy
 # of the License at http://www.mozilla.org/MPL/
-# 
+#
 # Software distributed under the License is distributed on an
 # "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
-# 
+#
 # The Original Code is State Machine Compiler (SMC).
-# 
+#
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
 # Copyright (C) 2007. Charles W. Rapp.
 # All Rights Reserved.
-# 
+#
 # Contributor(s):
 #     Chris Liscio
 #
@@ -62,6 +62,9 @@ RM_F=           rm -f
 %_sm.dot :      %.sm
 		$(SMC) -graph -glevel 1 $<
 
+%_sm.png :      %_sm.dot
+		dot -T png -o $@ $<
+
 %_sm.html :     %.sm
 		$(SMC) -table $<
 
@@ -80,6 +83,8 @@ test :          $(TARGET)
 
 graph :         $(SM_SOURCES:%.sm=%_sm.dot)
 
+png :           $(SM_SOURCES:%.sm=%_sm.png)
+
 table :         $(SM_SOURCES:%.sm=%_sm.html)
 
 clean :
@@ -87,10 +92,14 @@ clean :
 		-$(RM_F) *_sm.h
 		-$(RM_F) *_sm.m
 		-$(RM_F) *_sm.dot
+		-$(RM_F) *_sm.png
 		-$(RM_F) *_sm.html
 
 # CHANGE LOG
 # $Log$
+# Revision 1.5  2008/07/29 06:51:00  fperrad
+# - add a target 'png'
+#
 # Revision 1.4  2008/04/24 09:29:53  fperrad
 # + fix #1934494 : remove 'test' from 'all' target
 #

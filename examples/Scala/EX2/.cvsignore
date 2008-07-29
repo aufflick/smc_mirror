@@ -2,4 +2,5 @@ statemap
 *Context.scala
 *.class
 *.dot
+*.png
 *.html

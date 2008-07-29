@@ -24,6 +24,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.7  2008/07/29 06:51:04  fperrad
+# - add a target 'png'
+#
 # Revision 1.6  2008/02/04 11:03:06  fperrad
 # + Exhibit options
 #
@@ -74,6 +77,9 @@ RM_F=           rm -f
 %_sm.dot :      %.sm
 		$(SMC) -graph -glevel 1 $<
 
+%_sm.png :      %_sm.dot
+		dot -T png -o $@ $<
+
 %_sm.html :     %.sm
 		$(SMC) -table $<
 
@@ -83,9 +89,12 @@ $(TARGET) :     $(SOURCES)
 
 graph :         $(SM_SOURCES:%.sm=%_sm.dot)
 
+png :           $(SM_SOURCES:%.sm=%_sm.png)
+
 table :         $(SM_SOURCES:%.sm=%_sm.html)
 
 clean :
 		-$(RM_F) *_sm.pm
 		-$(RM_F) *_sm.dot
+		-$(RM_F) *_sm.png
 		-$(RM_F) *_sm.html
