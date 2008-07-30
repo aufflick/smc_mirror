@@ -77,9 +77,16 @@ public final class SmcGraphGenerator
         // Have each map generate its subgraph.
         for (SmcMap map: fsm.getMaps())
         {
+            String mapName = map.getName();
+
             _source.print("    subgraph cluster_");
-            _source.print(map.getName());
+            _source.print(mapName);
             _source.println(" {");
+            _source.println();
+            _source.print("        label=\"");
+            _source.print(mapName);
+            _source.println("\";");
+            _source.println();
 
             map.accept(this);
 
@@ -102,11 +109,6 @@ public final class SmcGraphGenerator
         List<SmcTransition> transitions = map.getTransitions();
         String popArgs;
 
-        _source.println();
-        _source.print("        label=\"");
-        _source.print(mapName);
-        _source.println("\";");
-        _source.println();
         _source.print("        //");
         _source.println(
             "-------------------------------------------------------");
@@ -285,15 +287,19 @@ public final class SmcGraphGenerator
                         // Output the guard.
                         if (condition != null && condition.length() > 0)
                         {
-                            _source.print("\\l\\[");
+                            String tmp = Smc.escape(condition);
 
                             // If the condition contains line separators,
                             // then replace them with a "\n" so Graphviz knows
                             // about the line separation.
-                            _source.print(
-                                Smc.escape(condition).replaceAll(
-                                    "\\n", "\\\\\\n"));
+                            tmp = tmp.replaceAll("\\n", "\\\\\\n");
 
+                            // Not needed when label in edge !!
+                            tmp = tmp.replaceAll(">", "\\\\>");
+                            tmp = tmp.replaceAll("<", "\\\\<");
+
+                            _source.print("\\l\\[");
+                            _source.print(tmp);
                             _source.print("\\]");
                         }
 
@@ -393,11 +399,7 @@ public final class SmcGraphGenerator
 
         if (transType != Smc.TRANS_POP)
         {
-            if (endStateName.equals(NIL_STATE) == true)
-            {
-                endStateName = mapName + "::" + stateName;
-            }
-            else if (endStateName.indexOf("::") < 0)
+            if (endStateName.indexOf("::") < 0)
             {
                 endStateName = mapName + "::" + endStateName;
             }
@@ -558,6 +560,9 @@ public final class SmcGraphGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.13  2008/07/30 07:07:23  fperrad
+// + fix : escape condition guard in loopback
+//
 // Revision 1.12  2008/07/27 15:54:37  fperrad
 // + refactor with isLoopback()
 //
