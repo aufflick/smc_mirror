@@ -150,7 +150,12 @@ public final class SmcGraphGenerator
                         popArgs.length() > 0)
                     {
                         _source.print(", ");
-                        _source.print(Smc.escape(popArgs));
+
+                        // If the argument contains line separators,
+                        // then replace them with a "\n" so Graphviz knows
+                        // about the line separation.
+                        _source.print(Smc.escape(popArgs).replaceAll(
+                            "\\n", "\\\\\\n"));
                     }
 
                     _source.println(")\"");
@@ -394,7 +399,14 @@ public final class SmcGraphGenerator
         _source.print("        \"");
         _source.print(mapName);
         _source.print("::");
-        _source.print(stateName);
+        if (stateName.equals("DefaultState") == true)
+        {
+            _source.print("Default");
+        }
+        else
+        {
+            _source.print(stateName);
+        }
         _source.print("\" -> ");
 
         if (transType != Smc.TRANS_POP)
@@ -422,7 +434,12 @@ public final class SmcGraphGenerator
                 popArgs.length() > 0)
             {
                 _source.print(", ");
-                _source.print(Smc.escape(popArgs));
+
+                // If the argument contains line separators,
+                // then replace them with a "\n" so Graphviz knows
+                // about the line separation.
+                _source.print(Smc.escape(popArgs).replaceAll(
+                    "\\n", "\\\\\\n"));
             }
 
             _source.println(")\"");
@@ -560,6 +577,10 @@ public final class SmcGraphGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.14  2008/07/31 06:20:59  fperrad
+// + fix : default state name in edge
+// + fix : escape newline in pop argument (level 2)
+//
 // Revision 1.13  2008/07/30 07:07:23  fperrad
 // + fix : escape condition guard in loopback
 //
