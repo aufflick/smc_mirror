@@ -107,6 +107,7 @@ public final class SmcGraphGenerator
         int graphLevel = Smc.graphLevel();
         SmcState defaultState = map.getDefaultState();
         List<SmcTransition> transitions = map.getTransitions();
+        String startStateName = map.getFSM().getStartState();
         String popArgs;
 
         _source.print("        //");
@@ -166,6 +167,14 @@ public final class SmcGraphGenerator
             }
         }
 
+        if (startStateName.indexOf(mapName) == 0)
+        {
+            // Output the start node only in the right map
+            _source.println("        \"%start\"");
+            _source.println("            [label=\"\" shape=plaintext];");
+            _source.println();
+        }
+
         _source.print("        //");
         _source.println(
             "-------------------------------------------------------");
@@ -190,6 +199,16 @@ public final class SmcGraphGenerator
             {
                 transition.accept(this);
             }
+        }
+
+        if (startStateName.indexOf(mapName) == 0)
+        {
+            // Output the start transition only in the right map
+            _source.println();
+            _source.print("        \"%start\" -> \"");
+            _source.print(startStateName);
+            _source.println("\"");
+            _source.println("            [arrowtail=dot];");
         }
 
         return;
@@ -218,8 +237,17 @@ public final class SmcGraphGenerator
         }
         _source.println("\"");
 
+        _source.print("            [label=\"{");
         // Output the state name.
-        _source.print("            [label=\"{\\N");
+        if (instanceName.equals("DefaultState") == true)
+        {
+            //_source.print("\\<\\<\\< \\N \\>\\>\\>");
+            _source.print("&laquo; \\N &raquo;");
+        }
+        else
+        {
+            _source.print("\\N");
+        }
 
         // For graph level 1 & 2, output entry and exit actions.
         if (graphLevel >= Smc.GRAPH_LEVEL_1)
@@ -577,6 +605,10 @@ public final class SmcGraphGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.15  2008/07/31 12:03:17  fperrad
+// + draw the start transition
+// + add emphasis to Default state
+//
 // Revision 1.14  2008/07/31 06:20:59  fperrad
 // + fix : default state name in edge
 // + fix : escape newline in pop argument (level 2)
