@@ -71,7 +71,7 @@ public final class SmcGraphGenerator
         _source.println(" {");
         _source.println();
         _source.println("    node");
-        _source.println("        [shape=record];");
+        _source.println("        [shape=Mrecord];");
         _source.println();
 
         // Have each map generate its subgraph.
@@ -161,7 +161,7 @@ public final class SmcGraphGenerator
 
                     _source.println(")\"");
                     _source.println(
-                        "            [shape=plaintext];");
+                        "            [shape=invhouse];");
                     _source.println();
                 }
             }
@@ -171,7 +171,7 @@ public final class SmcGraphGenerator
         {
             // Output the start node only in the right map
             _source.println("        \"%start\"");
-            _source.println("            [label=\"\" shape=plaintext];");
+            _source.println("            [label=\"\" shape=circle style=filled fillcolor=black];");
             _source.println();
         }
 
@@ -208,7 +208,6 @@ public final class SmcGraphGenerator
             _source.print("        \"%start\" -> \"");
             _source.print(startStateName);
             _source.println("\"");
-            _source.println("            [arrowtail=dot];");
         }
 
         return;
@@ -254,34 +253,42 @@ public final class SmcGraphGenerator
         {
             List<SmcAction> actions;
             Iterator<SmcAction> it;
-            String sep;
+            boolean first = true;
 
             actions = state.getEntryActions();
             if (actions != null)
             {
-                _source.print("| Entry/");
+                if (first == true)
+                {
+                    _source.print("|");
+                    first = false;
+                }
+                _source.print("Entry/\\l");
 
                 // Output the entry actions, one per line.
                 for (SmcAction action: actions)
                 {
-                    _source.print("\\l");
+                    _source.print("&nbsp;");
                     action.accept(this);
                 }
-                _source.print("\\l");
             }
 
             actions = state.getExitActions();
             if (actions != null)
             {
-                _source.print("| Exit/");
+                if (first == true)
+                {
+                    _source.print("|");
+                    first = false;
+                }
+                _source.print("Exit/\\l");
 
                 // Output the exit actions, one per line.
                 for (SmcAction action: actions)
                 {
-                    _source.print("\\l");
+                    _source.print("&nbsp;");
                     action.accept(this);
                 }
-                _source.print("\\l");
             }
 
             for (SmcTransition transition: state.getTransitions())
@@ -295,9 +302,14 @@ public final class SmcGraphGenerator
                     {
                         String transName = transition.getName();
                         String condition = guard.getCondition();
+                        String pushStateName = guard.getPushState();
                         actions = guard.getActions();
 
-                        _source.print("| ");
+                        if (first == true)
+                        {
+                            _source.print("|");
+                            first = false;
+                        }
                         _source.print(transName);
 
                         // Graph Level 2: Output the transition parameters.
@@ -305,6 +317,7 @@ public final class SmcGraphGenerator
                         {
                             List<SmcParameter> parameters = transition.getParameters();
                             Iterator<SmcParameter> pit;
+                            String sep;
 
                             _source.print("(");
                             for (pit = parameters.iterator(), sep = "";
@@ -330,23 +343,30 @@ public final class SmcGraphGenerator
                             // Not needed when label in edge !!
                             tmp = tmp.replaceAll(">", "\\\\>");
                             tmp = tmp.replaceAll("<", "\\\\<");
+                            tmp = tmp.replaceAll("\\|", "\\\\|");
 
                             _source.print("\\l\\[");
                             _source.print(tmp);
                             _source.print("\\]");
                         }
 
-                        _source.print("/");
+                        _source.print("/\\l");
+
+                        if (transType == Smc.TRANS_PUSH)
+                        {
+                            _source.print("&nbsp;push(");
+                            _source.print(pushStateName);
+                            _source.print(")\\l");
+                        }
 
                         if (actions != null)
                         {
                             // Output the actions, one per line.
                             for (SmcAction action: actions)
                             {
-                                _source.print("\\l");
+                                _source.print("&nbsp;");
                                 action.accept(this);
                             }
-                            _source.print("\\l");
                         }
                     }
                 }
@@ -506,14 +526,13 @@ public final class SmcGraphGenerator
 
             _source.print("\\]");
         }
-
-        _source.print("/");
+        _source.print("/\\l");
 
         if (transType == Smc.TRANS_PUSH)
         {
-            _source.print("\\lpush(");
+            _source.print("&nbsp;push(");
             _source.print(pushStateName);
-            _source.print(")");
+            _source.print(")\\l");
         }
 
         // Graph Level 1, 2: output actions.
@@ -522,10 +541,8 @@ public final class SmcGraphGenerator
         {
             for (SmcAction action: actions)
             {
-                _source.print("\\l");
                 action.accept(this);
             }
-            _source.print("\\l");
         }
 
         _source.println("\"];");
@@ -579,7 +596,7 @@ public final class SmcGraphGenerator
                 _source.print(")");
             }
 
-            _source.print(';');
+            _source.print(";\\l");
         }
 
         return;
@@ -605,6 +622,13 @@ public final class SmcGraphGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.16  2008/08/02 09:28:49  fperrad
+// + fix : push when internal event
+// + drawing close to UML
+//   - state with Mrecord
+//   - pop with invhouse
+//   - initial state with filled circle
+//
 // Revision 1.15  2008/07/31 12:03:17  fperrad
 // + draw the start transition
 // + add emphasis to Default state
