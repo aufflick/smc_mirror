@@ -4,20 +4,20 @@
 // License Version 1.1 (the "License"); you may not use this file
 // except in compliance with the License. You may obtain a copy of
 // the License at http://www.mozilla.org/MPL/
-// 
+//
 // Software distributed under the License is distributed on an "AS
 // IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
-// 
+//
 // The Original Code is State Machine Compiler (SMC).
-// 
+//
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
 // Copyright (C) 2000 - 2003 Charles W. Rapp.
 // All Rights Reserved.
-// 
-// Contributor(s): 
+//
+// Contributor(s):
 //
 // State Machine
 //	AppClass
@@ -31,6 +31,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2008/08/02 09:59:58  fperrad
+// + EX3 : start by the StartMap
+//
 // Revision 1.5  2005/06/03 19:58:28  cwrapp
 // Further updates for release 4.0.0
 //
@@ -46,6 +49,34 @@
 
 %start StartMap::PushIt
 %class AppClass
+
+%map StartMap
+%%
+// State	Transition		End State           Action(s)
+PushIt {
+			Zero			push(ZerosMap::PushIt)		{}
+			One				push(OnesMap::PushIt)		{}
+			C				PopIt					{}
+			OK				PopIt					{}
+			Error			Unacceptable		{}
+}
+
+PopIt {
+			EOS				Acceptable			{Acceptable();}
+			Default			Unacceptable		{}
+}
+
+Acceptable {}
+
+Unacceptable {
+		 	Default			nil					{}
+}
+
+Default {
+			EOS				Unacceptable		{Unacceptable();}
+			Unknown			Unacceptable		{}
+}
+%%
 
 %map ZerosMap
 %%
@@ -95,33 +126,4 @@ Default {
                                                 }
 			Unknown			StartMap::Unacceptable	{emptyStateStack();}
 }
-%%
-
-%map StartMap
-%%
-// State	Transition		End State           Action(s)
-PushIt {
-			Zero			push(ZerosMap::PushIt)		{}
-			One				push(OnesMap::PushIt)		{}
-			C				PopIt					{}
-			OK				PopIt					{}
-			Error			Unacceptable		{}
-}
-
-PopIt {
-			EOS				Acceptable			{Acceptable();}
-			Default			Unacceptable		{}
-}
-
-Acceptable {}
-
-Unacceptable {
-		 	Default			nil					{}
-}
-
-Default {
-			EOS				Unacceptable		{Unacceptable();}
-			Unknown			Unacceptable		{}
-}
-
 %%

@@ -32,6 +32,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2008/08/02 09:59:58  fperrad
+// + EX3 : start by the StartMap
+//
 // Revision 1.1  2007/01/03 15:42:33  fperrad
 // + Added Lua examples 1 - 3.
 //
@@ -40,6 +43,34 @@
 
 %start StartMap::PushIt
 %class AppClass
+
+%map StartMap
+%%
+// State	Transition		End State           Action(s)
+PushIt {
+			Zero			push(ZerosMap::PushIt)		{}
+			One				push(OnesMap::PushIt)		{}
+			C				PopIt					{}
+			OK				PopIt					{}
+			Error			Unacceptable		{}
+}
+
+PopIt {
+			EOS				Acceptable			{Acceptable();}
+			Default			Unacceptable		{}
+}
+
+Acceptable {}
+
+Unacceptable {
+		 	Default			nil					{}
+}
+
+Default {
+			EOS				Unacceptable		{Unacceptable();}
+			Unknown			Unacceptable		{}
+}
+%%
 
 %map ZerosMap
 %%
@@ -89,33 +120,4 @@ Default {
                                                 }
 			Unknown			StartMap::Unacceptable	{emptyStateStack();}
 }
-%%
-
-%map StartMap
-%%
-// State	Transition		End State           Action(s)
-PushIt {
-			Zero			push(ZerosMap::PushIt)		{}
-			One				push(OnesMap::PushIt)		{}
-			C				PopIt					{}
-			OK				PopIt					{}
-			Error			Unacceptable		{}
-}
-
-PopIt {
-			EOS				Acceptable			{Acceptable();}
-			Default			Unacceptable		{}
-}
-
-Acceptable {}
-
-Unacceptable {
-		 	Default			nil					{}
-}
-
-Default {
-			EOS				Unacceptable		{Unacceptable();}
-			Unknown			Unacceptable		{}
-}
-
 %%
