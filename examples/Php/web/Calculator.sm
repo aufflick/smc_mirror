@@ -31,6 +31,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2008/08/02 09:23:01  fperrad
+// + refactor with internal event
+//
 // Revision 1.1  2008/04/22 15:58:41  fperrad
 // - add PHP language (patch from Toni Arnold)
 //.
@@ -61,41 +64,41 @@ Calculate
 {
 				Add($stack: array)
 					[count($stack) >= 2]
-									Calculate		{Add();}
+									nil			{Add();}
 				Add($stack: array)	ErrorTuple		{}
 
 				Sub($stack: array)
 					[count($stack) >= 2]
-									Calculate		{Sub();}
+									nil			{Sub();}
 				Sub($stack: array)	ErrorTuple		{}
 
 				Mul($stack: array)
 					[count($stack) >= 2]
-									Calculate		{Mul();}
+									nil			{Mul();}
 				Mul($stack: array)	ErrorTuple		{}
 
 				Div($stack: array)
 					[count($stack) >= 2]
-									Calculate		{Div();}
+									nil			{Div();}
 				Div($stack: array)	ErrorTuple		{}
 
 				Pow($stack: array)
 					[count($stack) >= 1]
-									Calculate		{Pow();}
+									nil			{Pow();}
 				Pow($stack: array)	ErrorEmpty		{}
 
 				Sqrt($stack: array)
 					[count($stack) >= 1]
-									Calculate		{Sqrt();}
+									nil			{Sqrt();}
 				Sqrt($stack: array)	ErrorEmpty		{}
 
 				Clr($stack: array)
 					[count($stack) >= 1]
-									Calculate		{Clr();}
+									nil			{Clr();}
 				Clr($stack: array)	ErrorEmpty		{}
 
 				ClrAll($stack: array)
-									Calculate		{ClrAll();}
+									nil			{ClrAll();}
 
 				Enter($value)		Enter			{}
 }
