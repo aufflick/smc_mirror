@@ -58,8 +58,6 @@ public final class SmcGraphGenerator
     public SmcGraphGenerator(String srcfileBase)
     {
         super (srcfileBase, "{0}{1}_sm.{2}", "dot");
-
-        _parameters = null;
     } // end of SmcGraphGenerator(String)
 
     public void visit(SmcFSM fsm)
@@ -381,39 +379,6 @@ public final class SmcGraphGenerator
 
     public void visit(SmcTransition transition)
     {
-        // Graph level 2: add parameters to transition name.
-        // Generate the parameters once and pass the string to
-        // the guards in the "package" argument.
-        if (Smc.graphLevel() == Smc.GRAPH_LEVEL_2)
-        {
-            List<SmcParameter> parameters =
-                transition.getParameters();
-            Iterator<SmcParameter> pit;
-
-            if (parameters.isEmpty() == true)
-            {
-                _parameters = null;
-            }
-            else
-            {
-                ByteArrayOutputStream baos =
-                    new ByteArrayOutputStream();
-                PrintStream pstream = _source;
-                String sep;
-
-                _source = new PrintStream(baos);
-                for (pit = parameters.iterator(), sep = "";
-                     pit.hasNext() == true;
-                     sep = ", ")
-                {
-                    (pit.next()).accept(this);
-                }
-
-                _parameters = baos.toString();
-                _source = pstream;
-            }
-        }
-
         for (SmcGuard guard: transition.getGuards())
         {
             guard.accept(this);
@@ -497,12 +462,20 @@ public final class SmcGraphGenerator
         _source.print(transName);
 
         // Graph Level 2: Output the transition parameters.
-        if (graphLevel == Smc.GRAPH_LEVEL_2 &&
-            _parameters != null &&
-            _parameters.length() > 0)
+        if (graphLevel == Smc.GRAPH_LEVEL_2)
         {
+            List<SmcParameter> parameters =
+                transition.getParameters();
+            Iterator<SmcParameter> pit;
+            String sep;
+
             _source.print("(");
-            _source.print(_parameters);
+            for (pit = parameters.iterator(), sep = "";
+                 pit.hasNext() == true;
+                 sep = ", ")
+            {
+                (pit.next()).accept(this);
+            }
             _source.print(")");
         }
 
@@ -615,13 +588,14 @@ public final class SmcGraphGenerator
 // Member data
 //
 
-    // Store the serialized parameters here.
-    private String _parameters;
 } // end of class SmcGraphGenerator
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.17  2008/08/06 07:45:16  fperrad
+// + refactor : don't need optimization for speed
+//
 // Revision 1.16  2008/08/02 09:28:49  fperrad
 // + fix : push when internal event
 // + drawing close to UML
