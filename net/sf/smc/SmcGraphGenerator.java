@@ -34,7 +34,6 @@
 
 package net.sf.smc;
 
-import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Iterator;
 import java.util.List;
@@ -58,6 +57,7 @@ public final class SmcGraphGenerator
     public SmcGraphGenerator(String srcfileBase)
     {
         super (srcfileBase, "{0}{1}_sm.{2}", "dot");
+        _indent_action = "&nbsp;&nbsp;&nbsp;";
     } // end of SmcGraphGenerator(String)
 
     public void visit(SmcFSM fsm)
@@ -141,7 +141,7 @@ public final class SmcGraphGenerator
                     // Graph Level 2: Output the pop arguments.
                     _source.print("        \"");
                     _source.print(mapName);
-                    _source.print("::pop(");
+                    _source.print(".pop(");
                     _source.print(guard.getEndState());
 
                     if (graphLevel == Smc.GRAPH_LEVEL_2 &&
@@ -238,7 +238,6 @@ public final class SmcGraphGenerator
         // Output the state name.
         if (instanceName.equals("DefaultState") == true)
         {
-            //_source.print("\\<\\<\\< \\N \\>\\>\\>");
             _source.print("&laquo; \\N &raquo;");
         }
         else
@@ -251,22 +250,22 @@ public final class SmcGraphGenerator
         {
             List<SmcAction> actions;
             Iterator<SmcAction> it;
-            boolean first = true;
+            boolean empty = true;
 
             actions = state.getEntryActions();
             if (actions != null)
             {
-                if (first == true)
+                if (empty == true)
                 {
                     _source.print("|");
-                    first = false;
+                    empty = false;
                 }
                 _source.print("Entry/\\l");
 
                 // Output the entry actions, one per line.
                 for (SmcAction action: actions)
                 {
-                    _source.print("&nbsp;");
+                    _source.print(_indent_action);
                     action.accept(this);
                 }
             }
@@ -274,21 +273,22 @@ public final class SmcGraphGenerator
             actions = state.getExitActions();
             if (actions != null)
             {
-                if (first == true)
+                if (empty == true)
                 {
                     _source.print("|");
-                    first = false;
+                    empty = false;
                 }
                 _source.print("Exit/\\l");
 
                 // Output the exit actions, one per line.
                 for (SmcAction action: actions)
                 {
-                    _source.print("&nbsp;");
+                    _source.print(_indent_action);
                     action.accept(this);
                 }
             }
 
+            empty = true; // Starts a new compartiment
             for (SmcTransition transition: state.getTransitions())
             {
                 for (SmcGuard guard: transition.getGuards())
@@ -303,10 +303,10 @@ public final class SmcGraphGenerator
                         String pushStateName = guard.getPushState();
                         actions = guard.getActions();
 
-                        if (first == true)
+                        if (empty == true)
                         {
                             _source.print("|");
-                            first = false;
+                            empty = false;
                         }
                         _source.print(transName);
 
@@ -352,7 +352,8 @@ public final class SmcGraphGenerator
 
                         if (transType == Smc.TRANS_PUSH)
                         {
-                            _source.print("&nbsp;push(");
+                            _source.print(_indent_action);
+                            _source.print("push(");
                             _source.print(pushStateName);
                             _source.print(")\\l");
                         }
@@ -362,7 +363,7 @@ public final class SmcGraphGenerator
                             // Output the actions, one per line.
                             for (SmcAction action: actions)
                             {
-                                _source.print("&nbsp;");
+                                _source.print(_indent_action);
                                 action.accept(this);
                             }
                         }
@@ -439,7 +440,7 @@ public final class SmcGraphGenerator
 
             _source.print("\"");
             _source.print(mapName);
-            _source.print("::pop(");
+            _source.print(".pop(");
             _source.print(endStateName);
 
             if (graphLevel == Smc.GRAPH_LEVEL_2 &&
@@ -577,6 +578,7 @@ public final class SmcGraphGenerator
 
     public void visit(SmcParameter parameter)
     {
+        // Graph Level 2
         _source.print(parameter.getName());
         _source.print(": ");
         _source.print(parameter.getType());
@@ -587,12 +589,17 @@ public final class SmcGraphGenerator
 //---------------------------------------------------------------
 // Member data
 //
+    String _indent_action;
 
 } // end of class SmcGraphGenerator
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.18  2008/08/14 09:16:18  fperrad
+// + internal actions : more indentation
+// + split entry/exit & internal events in two compartiments
+//
 // Revision 1.17  2008/08/06 07:45:16  fperrad
 // + refactor : don't need optimization for speed
 //
