@@ -37,6 +37,8 @@ package net.sf.smc;
 import java.io.PrintStream;
 import java.util.Iterator;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Visits the abstract syntax tree, emitting a Graphviz diagram.
@@ -105,6 +107,7 @@ public final class SmcGraphGenerator
         int graphLevel = Smc.graphLevel();
         SmcState defaultState = map.getDefaultState();
         String startStateName = map.getFSM().getStartState();
+        Map<String, String> pushStateMap = new HashMap<String, String>();
         String popArgs;
 
         _source.println("        //");
@@ -199,6 +202,7 @@ public final class SmcGraphGenerator
 
                             if (pushStateName.indexOf(mapName) == 0)
                             {
+                                pushStateMap.put(pushStateName, pushStateName);
                                 // Output the push action.
                                 _source.print("        \"push(");
                                 _source.print(pushStateName);
@@ -246,33 +250,15 @@ public final class SmcGraphGenerator
         }
 
         // Now output the push actions as entry "transition".
-        for (SmcMap map2: map.getFSM().getMaps())
+        for (String pname: pushStateMap.values())
         {
-            for (SmcState state: map2.getAllStates())
-            {
-                for (SmcTransition transition: state.getTransitions())
-                {
-                    for (SmcGuard guard: transition.getGuards())
-                    {
-                        if (guard.getTransType() == Smc.TRANS_PUSH)
-                        {
-                            String pushStateName = guard.getPushState();
-
-                            if (pushStateName.indexOf(mapName) == 0)
-                            {
-                                // Output the push transition.
-                                _source.println();
-                                _source.print("        \"push(");
-                                _source.print(pushStateName);
-                                _source.print(")\" -> \"");
-                                _source.print(pushStateName);
-                                _source.println("\"");
-                                _source.println("            [arrowtail=odot];");
-                            }
-                        }
-                    }
-                }
-            }
+            _source.println();
+            _source.print("        \"push(");
+            _source.print(pname);
+            _source.print(")\" -> \"");
+            _source.print(pname);
+            _source.println("\"");
+            _source.println("            [arrowtail=odot];");
         }
 
         return;
@@ -728,6 +714,9 @@ public final class SmcGraphGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.20  2008/08/15 23:33:02  fperrad
+// + fix : unique push entry transition
+//
 // Revision 1.19  2008/08/15 22:24:38  fperrad
 // + draw push entry transition
 // + don't draw namespace
