@@ -421,42 +421,6 @@ public final class Smc
         return (retval);
     }
 
-    // Place a backslash escape character in front of backslashes
-    // and doublequotes.
-    public static String escape(String s)
-    {
-        String retval;
-
-        if (s.indexOf('\\') < 0 && s.indexOf('"') < 0)
-        {
-            retval = s;
-        }
-        else
-        {
-            StringBuffer buffer =
-                new StringBuffer(s.length() * 2);
-            int index;
-            int length = s.length();
-            char c;
-
-            for (index = 0; index < length; ++index)
-            {
-                c = s.charAt(index);
-                if (c == '\\' || c == '"')
-                {
-                    buffer.append('\\');
-                }
-
-                buffer.append(c);
-            }
-
-            retval = buffer.toString();
-        }
-
-        return (retval);
-    }
-
-    // Outputs a list of warning and error messages.
     public static void outputMessages(String srcFileName,
                                       PrintStream stream,
                                       List<SmcMessage> messages)
@@ -1798,6 +1762,9 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.30  2008/08/15 22:20:40  fperrad
+// + move method escape in SmcGraphGenerator.java
+//
 // Revision 1.29  2008/05/20 18:31:14  cwrapp
 // ----------------------------------------------------------------------
 //
