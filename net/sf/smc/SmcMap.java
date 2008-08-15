@@ -3,19 +3,19 @@
 // License Version 1.1 (the "License"); you may not use this file
 // except in compliance with the License. You may obtain a copy
 // of the License at http://www.mozilla.org/MPL/
-// 
+//
 // Software distributed under the License is distributed on an
 // "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
-// 
+//
 // The Original Code is State Machine Compiler (SMC).
-// 
+//
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
 // Copyright (C) 2000 - 2005. Charles W. Rapp.
 // All Rights Reserved.
-// 
+//
 // Contributor(s):
 //   Eitan Suez contributed examples/Ant.
 //   (Name withheld) contributed the C# code generation and
@@ -135,6 +135,17 @@ public final class SmcMap
     public SmcState getDefaultState()
     {
         return(_defaultState);
+    }
+
+    public List<SmcState> getAllStates()
+    {
+        List<SmcState> retval = new ArrayList<SmcState>();
+        retval.addAll(_states);
+        if (_defaultState != null)
+        {
+            retval.add(_defaultState);
+        }
+        return(retval);
     }
 
     // Return all transitions appearing in this map.
@@ -319,6 +330,9 @@ public final class SmcMap
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2008/08/15 22:21:35  fperrad
+// + add method getAllStates
+//
 // Revision 1.10  2008/02/08 08:46:02  fperrad
 // C : optimize footprint when no Entry action or no Exit action
 //
