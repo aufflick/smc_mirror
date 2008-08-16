@@ -127,6 +127,15 @@ all :		$(JAR_FILE) tags
 %Context.java :	%.sm
 		$(SMC) $(SMC_FLAGS) $<
 
+%_sm.dot :      %.sm
+		$(SMC) -graph -glevel 1 $<
+
+%_sm.png :      %_sm.dot
+		dot -T png -o $@ $<
+
+%_sm.html :     %.sm
+		$(SMC) -table $<
+
 $(JAR_FILE) :	$(CORE_SOURCES) $(LANG_SOURCES) $(STATEMAP_LIB_DIR)/statemap/FSMContext.class $(STATEMAP_LIB_DIR)/statemap/State.class
 		$(JAVAC) $(JAVAC_FLAGS) $(CORE_SOURCES) $(LANG_SOURCES)
 		$(JAR) $(JAR_CREATE_FLAGS) $(JAR_FILE) \
@@ -149,6 +158,12 @@ tags :
 uninstall :
 		-$(RM_F) $(INSTALL_DIR)/$(JAR_FILE)
 
+graph :         $(SM_SOURCES:%.sm=%_sm.dot)
+
+png :           $(SM_SOURCES:%.sm=%_sm.png)
+
+table :         $(SM_SOURCES:%.sm=%_sm.html)
+
 clean :
 		-$(RM_F) $(JAR_FILE)
 		-$(RM_F) *Context.java
@@ -158,10 +173,16 @@ realclean :	clean
 		-$(RM_F) $(TAG_FILE)
 		-$(RM_F) *.flc *~
 		-$(RM_RF) ./net
+		-$(RM_F) *_sm.dot
+		-$(RM_F) *_sm.png
+		-$(RM_F) *_sm.html
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.18  2008/08/16 13:29:08  fperrad
+# + add targets 'graph', 'png' and 'table'
+#
 # Revision 1.17  2008/04/22 16:05:24  fperrad
 # - add PHP language (patch from Toni Arnold)
 #
