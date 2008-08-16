@@ -30,6 +30,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2008/08/16 15:27:52  fperrad
+// + EX3 uses 'jump' when the end state is in another map
+//
 // Revision 1.2  2008/08/02 09:59:58  fperrad
 // + EX3 : start by the StartMap
 //
@@ -84,7 +87,7 @@ PushIt
             One         push(OnesMap::PushIt)  {}
             C           PopIt              {}
             OK          PopIt              {}
-            Error       StartMap::Unacceptable {emptyStateStack();}
+            Error       jump(StartMap::Unacceptable) {emptyStateStack();}
 }
 
 PopIt
@@ -95,12 +98,12 @@ PopIt
 
 Default
 {
-            EOS         StartMap::Unacceptable
+            EOS         jump(StartMap::Unacceptable)
                                         {
                                             emptyStateStack();
                                             Unacceptable();
 										}
-            Unknown     StartMap::Unacceptable {}
+            Unknown     jump(StartMap::Unacceptable) {}
 }
 %%
 
@@ -113,7 +116,7 @@ PushIt
             One         push(PushIt)    {}
             C           PopIt           {}
             OK          PopIt           {}
-            Error       StartMap::Unacceptable {emptyStateStack();}
+            Error       jump(StartMap::Unacceptable) {emptyStateStack();}
 }
 
 PopIt
@@ -124,11 +127,11 @@ PopIt
 
 Default
 {
-            EOS         StartMap::Unacceptable
+            EOS         jump(StartMap::Unacceptable)
                                         {
 											emptyStateStack();
 											Unacceptable();
 										}
-            Unknown     StartMap::Unacceptable {}
+            Unknown     jump(StartMap::Unacceptable) {}
 }
 %%

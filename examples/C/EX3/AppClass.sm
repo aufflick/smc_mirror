@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2008/08/16 15:26:09  fperrad
+// + EX3 uses 'jump' when the end state is in another map
+//
 // Revision 1.3  2008/08/02 09:59:57  fperrad
 // + EX3 : start by the StartMap
 //
@@ -50,9 +53,9 @@
 PushIt
 {
             Zero        push(ZerosMap::PushIt)  {}
-            One         push(OnesMap::PushIt)  {}
-            C           PopIt              {}
-            OK          PopIt              {}
+            One         push(OnesMap::PushIt)   {}
+            C           PopIt           {}
+            OK          PopIt           {}
             Error       Unacceptable    {}
 }
 
@@ -82,11 +85,11 @@ Default
 // State    Transition  End State       Action(s)
 PushIt
 {
-            Zero        push(PushIt)        {}
+            Zero        push(PushIt)       {}
             One         push(OnesMap::PushIt)  {}
             C           PopIt              {}
             OK          PopIt              {}
-            Error       StartMap::Unacceptable {emptyStateStack();}
+            Error       jump(StartMap::Unacceptable) {emptyStateStack();}
 }
 
 PopIt
@@ -97,12 +100,12 @@ PopIt
 
 Default
 {
-            EOS         StartMap::Unacceptable
+            EOS         jump(StartMap::Unacceptable)
                                         {
                                             emptyStateStack();
                                             Unacceptable();
                                         }
-            Unknown     StartMap::Unacceptable {}
+            Unknown     jump(StartMap::Unacceptable) {}
 }
 %%
 
@@ -112,10 +115,10 @@ Default
 PushIt
 {
             Zero        push(ZerosMap::PushIt)  {}
-            One         push(PushIt)        {}
+            One         push(PushIt)       {}
             C           PopIt              {}
             OK          PopIt              {}
-            Error       StartMap::Unacceptable {emptyStateStack();}
+            Error       jump(StartMap::Unacceptable) {emptyStateStack();}
 }
 
 PopIt
@@ -126,11 +129,11 @@ PopIt
 
 Default
 {
-            EOS         StartMap::Unacceptable
+            EOS         jump(StartMap::Unacceptable)
                                         {
                                             emptyStateStack();
                                             Unacceptable();
                                         }
-            Unknown     StartMap::Unacceptable {}
+            Unknown     jump(StartMap::Unacceptable) {}
 }
 %%
