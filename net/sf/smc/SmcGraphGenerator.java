@@ -108,7 +108,8 @@ public final class SmcGraphGenerator
         SmcState defaultState = map.getDefaultState();
         String startStateName = map.getFSM().getStartState();
         Map<String, String> pushStateMap = new HashMap<String, String>();
-        String popArgs;
+        Map<String, String> popTransMap = new HashMap<String, String>();
+        boolean needEnd = false;
 
         _source.println("        //");
         _source.println("        // States (Nodes)");
@@ -129,7 +130,6 @@ public final class SmcGraphGenerator
             defaultState.accept(this);
         }
 
-        // Now output the pop transitions as "nodes".
         for (SmcState state: map.getAllStates())
         {
             for (SmcTransition transition: state.getTransitions())
@@ -138,45 +138,51 @@ public final class SmcGraphGenerator
                 {
                     if (guard.getTransType() == Smc.TRANS_POP)
                     {
-                        // Graph Level 0, 1: Output the pop
-                        // transition.
-                        // Graph Level 2: Output the pop arguments.
-                        _source.print("        \"");
-                        _source.print(mapName);
-                        _source.print(".pop(");
-                        _source.print(guard.getEndState());
+                        String endState = guard.getEndState();
+                        String popKey = endState;
+                        String popVal = endState;
+                        String popArgs;
 
                         if (graphLevel == Smc.GRAPH_LEVEL_2 &&
                             (popArgs = guard.getPopArgs()) != null &&
                             popArgs.length() > 0)
                         {
-                            _source.print(", ");
-                            _source.print(_escape(_normalize(popArgs)));
-                        }
-
-                        _source.println(")\"");
-                        _source.print(
-                            "            [label=\"pop(");
-                        _source.print(guard.getEndState());
-
-                        if (graphLevel == Smc.GRAPH_LEVEL_2 &&
-                            (popArgs = guard.getPopArgs()) != null &&
-                            popArgs.length() > 0)
-                        {
-                            _source.print(", ");
-
+                            popKey += ", ";
+                            popVal += ", ";
+                            popKey += _escape(_normalize(popArgs));
                             // If the argument contains line separators,
                             // then replace them with a "\n" so Graphviz knows
                             // about the line separation.
-                            _source.print(_escape(popArgs).replaceAll(
-                            "\\n", "\\\\\\l"));
+                            popVal += _escape(popArgs).replaceAll(
+                                "\\n", "\\\\\\l");
                         }
-
-                        _source.println(")\\l\" shape=invhouse];");
-                        _source.println();
+                        popTransMap.put(popKey, popVal);
+                        needEnd = true;
                     }
                 }
             }
+        }
+        // Now output the pop transitions as "nodes".
+        for (String pname: popTransMap.keySet())
+        {
+            _source.print("        \"");
+            _source.print(mapName);
+            _source.print("::pop(");
+            _source.print(pname);
+            _source.println(")\"");
+            _source.println("            [label=\"\"]");
+            _source.println();
+        }
+
+        if (needEnd == true)
+        {
+            // Output the end node
+            _source.print("        \"");
+            _source.print(mapName);
+            _source.println("::%end\"");
+            _source.println(
+                "            [label=\"\" shape=doublecircle style=filled fillcolor=black width=0.15];");
+            _source.println();
         }
 
         if (startStateName.indexOf(mapName) == 0)
@@ -202,18 +208,21 @@ public final class SmcGraphGenerator
 
                             if (pushStateName.indexOf(mapName) == 0)
                             {
-                                pushStateMap.put(pushStateName, pushStateName);
-                                // Output the push action.
-                                _source.print("        \"push(");
-                                _source.print(pushStateName);
-                                _source.println(")\"");
-                                _source.println("            [label=\"\" shape=plaintext];");
-                                _source.println();
+                                pushStateMap.put(pushStateName, "");
                             }
                         }
                     }
                 }
             }
+        }
+        for (String pname: pushStateMap.keySet())
+        {
+            // Output the push action.
+            _source.print("        \"push(");
+            _source.print(pname);
+            _source.println(")\"");
+            _source.println("            [label=\"\" shape=plaintext];");
+            _source.println();
         }
 
         _source.println("        //");
@@ -240,6 +249,22 @@ public final class SmcGraphGenerator
             }
         }
 
+        // Now output the pop transitions.
+        for (String pname: popTransMap.keySet())
+        {
+            _source.println();
+            _source.print("        \"");
+            _source.print(mapName);
+            _source.print("::pop(");
+            _source.print(pname);
+            _source.print(")\" -> \"");
+            _source.print(mapName);
+            _source.println("::%end\"");
+            _source.print("            [label=\"pop(");
+            _source.print(popTransMap.get(pname));
+            _source.println(");\\l\"];");
+        }
+
         if (startStateName.indexOf(mapName) == 0)
         {
             // Output the start transition only in the right map
@@ -250,7 +275,7 @@ public final class SmcGraphGenerator
         }
 
         // Now output the push actions as entry "transition".
-        for (String pname: pushStateMap.values())
+        for (String pname: pushStateMap.keySet())
         {
             _source.println();
             _source.print("        \"push(");
@@ -333,7 +358,7 @@ public final class SmcGraphGenerator
                 }
             }
 
-            // Starts a new compartiment for internal events
+            // Starts a new compartment for internal events
             empty = true;
             for (SmcTransition transition: state.getTransitions())
             {
@@ -479,7 +504,7 @@ public final class SmcGraphGenerator
 
             _source.print("\"");
             _source.print(mapName);
-            _source.print(".pop(");
+            _source.print("::pop(");
             _source.print(endStateName);
 
             if (graphLevel == Smc.GRAPH_LEVEL_2 &&
@@ -714,6 +739,9 @@ public final class SmcGraphGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.21  2008/08/19 08:59:24  fperrad
+// + draw 'pop' transition with UML artifacts
+//
 // Revision 1.20  2008/08/15 23:33:02  fperrad
 // + fix : unique push entry transition
 //
@@ -723,7 +751,7 @@ public final class SmcGraphGenerator
 //
 // Revision 1.18  2008/08/14 09:16:18  fperrad
 // + internal actions : more indentation
-// + split entry/exit & internal events in two compartiments
+// + split entry/exit & internal events in two compartments
 //
 // Revision 1.17  2008/08/06 07:45:16  fperrad
 // + refactor : don't need optimization for speed
