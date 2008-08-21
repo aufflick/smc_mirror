@@ -140,13 +140,16 @@ public final class SmcGraphGenerator
                     String endStateName = guard.getEndState();
                     int transType = guard.getTransType();
 
-                    if (isLoopback(transType, state.getClassName(), endStateName) == false
-                       && transType == Smc.TRANS_PUSH)
+                    if (transType == Smc.TRANS_PUSH)
                     {
-                        String endState = guard.getEndState();
                         String pushStateName = guard.getPushState();
                         String pushMapName;
                         int index;
+
+                        if (endStateName.equals(NIL_STATE) == true)
+                        {
+                             endStateName = state.getInstanceName();
+                        }
 
                         if ((index = pushStateName.indexOf("::")) >= 0)
                         {
@@ -154,10 +157,10 @@ public final class SmcGraphGenerator
                         }
                         else
                         {
-                            pushMapName = pushStateName;
+                            pushMapName = mapName;
                         }
 
-                        pushStateMap.put(mapName + "::" + endState + "::" + pushMapName, pushMapName);
+                        pushStateMap.put(mapName + "::" + endStateName + "::" + pushMapName, pushMapName);
                     }
                     else if (transType == Smc.TRANS_POP)
                     {
@@ -413,7 +416,8 @@ public final class SmcGraphGenerator
                     String endStateName = guard.getEndState();
                     int transType = guard.getTransType();
 
-                    if (isLoopback(transType, instanceName, endStateName))
+                    if (isLoopback(transType, instanceName, endStateName)
+                     && transType != Smc.TRANS_PUSH)
                     {
                         String transName = transition.getName();
                         String condition = guard.getCondition();
@@ -521,7 +525,8 @@ public final class SmcGraphGenerator
         List<SmcAction> actions = guard.getActions();
 
         // Loopback are added in the state
-        if (isLoopback(transType, stateName, endStateName))
+        if (isLoopback(transType, stateName, endStateName)
+         && transType != Smc.TRANS_PUSH)
         {
             return;
         }
@@ -535,6 +540,11 @@ public final class SmcGraphGenerator
 
         if (transType != Smc.TRANS_POP)
         {
+            if (endStateName.equals(NIL_STATE) == true)
+            {
+                endStateName = stateName;
+            }
+
             if (endStateName.indexOf("::") < 0)
             {
                 endStateName = mapName + "::" + endStateName;
@@ -545,8 +555,18 @@ public final class SmcGraphGenerator
 
             if (transType == Smc.TRANS_PUSH)
             {
+                int index = pushStateName.indexOf("::");
+
                 _source.print("::");
-                _source.print(pushStateName.substring(0, pushStateName.indexOf("::")));
+
+                if (index < 0)
+                {
+                    _source.print(mapName);
+                }
+                else
+                {
+                    _source.print(pushStateName.substring(0, pushStateName.indexOf("::")));
+                }
             }
 
             _source.println("\"");
@@ -785,6 +805,9 @@ public final class SmcGraphGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.23  2008/08/21 11:21:56  fperrad
+// + draw a composite state when 'push' loopback
+//
 // Revision 1.22  2008/08/20 08:18:21  fperrad
 // + draw a composite state when 'push' transition
 //
