@@ -105,67 +105,71 @@ namespace statemap
     // Member functions.
     //
 
-        public FSMContext()
+        public FSMContext(State state)
         {
             // There is no state until the application explicitly
             // sets the initial state.
-            _name = "FSMContext";
-            _state = null;
-            _transition = "";
-            _previousState = null;
-            _stateStack = null;
-            _debugFlag = false;
-            _debugStream = null;
+            name_ = "FSMContext";
+            state_ = state;
+            transition_ = "";
+            previousState_ = null;
+            stateStack_ = null;
+            debugFlag_ = false;
+            debugStream_ = null;
         } // end of FSMContext()
 
         // The state change event.
         public event StateChangeEventHandler StateChange;
+
+        // Starts the finite state machine running by executing
+        // the initial state's entry action.
+        public abstract void EnterStartState();
 
         // The finite state machine name property.
         public string Name
         {
             get
             {
-                return (_name);
+                return (name_);
             }
             set
             {
-                _name = value;
+                name_ = value;
             }
         } // end of Name()
 
         // DEPRECATED
         // As of v. 4.3.3, System.Diagnostics.Trace is
-        // used instead of the _debugFlag, _debugStream
+        // used instead of the debugFlag_, debugStream_
         // pair.
         // Used to enable debugging output
         public bool Debug
         {
             get
             {
-                return _debugFlag;
+                return debugFlag_;
             }
             set
             {
-                _debugFlag = value;
+                debugFlag_ = value;
             }
         }
 
         // DEPRECATED
         // As of v. 4.3.3, System.Diagnostics.Trace is
-        // used instead of the _debugFlag, _debugStream
-        // pair. _debugStream will always be null.
+        // used instead of the debugFlag_, debugStream_
+        // pair. debugStream_ will always be null.
         // Used to set the output text writer.
         public TextWriter DebugStream
         {
             get
             {
-                return _debugStream;
+                return debugStream_;
             }
             set
             {
                 // DEPRECATED.
-                // _debugStream = value;
+                // debugStream_ = value;
             }
         }
 
@@ -175,7 +179,7 @@ namespace statemap
         {
             get 
             {
-                return(_state == null ? true : false);
+                return(state_ == null ? true : false);
             }
         }
 
@@ -183,13 +187,13 @@ namespace statemap
         {
             StateChangeEventArgs e =
                 new StateChangeEventArgs(
-                    _name, "SET", _state, state);
+                    name_, "SET", state_, state);
 
 #if TRACE
             Trace.WriteLine("NEW STATE    : " +    state.Name);
 #endif
 
-            _state = state;
+            state_ = state;
 
             OnStateChange(e);
 
@@ -198,8 +202,8 @@ namespace statemap
 
         public void ClearState()
         {
-            _previousState = _state;
-            _state = null;
+            previousState_ = state_;
+            state_ = null;
 
             return;
         }
@@ -208,9 +212,9 @@ namespace statemap
         {
             get
             {
-                if (_previousState != null)
+                if (previousState_ != null)
                 {
-                    return(_previousState);
+                    return(previousState_);
                 }
 
                 throw
@@ -223,23 +227,23 @@ namespace statemap
         {
             StateChangeEventArgs e =
                 new StateChangeEventArgs(
-                    _name, "PUSH", _state, state);
+                    name_, "PUSH", state_, state);
 
 #if TRACE
             Trace.WriteLine("PUSH TO STATE: " +    state.Name);
 #endif
 
-            if (_state != null)
+            if (state_ != null)
             {
-                if (_stateStack == null)
+                if (stateStack_ == null)
                 {
-                    _stateStack = new System.Collections.Stack();
+                    stateStack_ = new System.Collections.Stack();
                 }
 
-                _stateStack.Push(_state);
+                stateStack_.Push(state_);
             }
 
-            _state = state;
+            state_ = state;
 
             OnStateChange(e);
 
@@ -248,7 +252,7 @@ namespace statemap
 
         public void PopState()
         {
-            if (_stateStack.Count == 0)
+            if (stateStack_.Count == 0)
             {
 #if TRACE
                 Trace.WriteLine("POPPING ON EMPTY STATE STACK.");
@@ -260,17 +264,17 @@ namespace statemap
             }
             else
             {
-                State nextState = (State) _stateStack.Pop();
+                State nextState = (State) stateStack_.Pop();
                 StateChangeEventArgs e =
                     new StateChangeEventArgs(
-                        _name, "POP", _state, nextState);
+                        name_, "POP", state_, nextState);
 
                 // The pop method removes the top element
                 // from the stack and returns it.
-                _state = nextState;
+                state_ = nextState;
 
 #if TRACE
-                Trace.WriteLine("POP TO STATE : " + _state.Name);
+                Trace.WriteLine("POP TO STATE : " + state_.Name);
 #endif
 
                 OnStateChange(e);
@@ -281,22 +285,22 @@ namespace statemap
 
         public void EmptyStateStack()
         {
-            _stateStack.Clear();
+            stateStack_.Clear();
         }
 
         public string GetTransition()
         {
-            return _transition;
+            return transition_;
         }
 
         // Release all acquired resources.
         ~FSMContext()  //TODO: Add disposable
         {
-            _name = null;
-            _state = null;
-            _transition = null;
-            _previousState = null;
-            _stateStack = null;
+            name_ = null;
+            state_ = null;
+            transition_ = null;
+            previousState_ = null;
+            stateStack_ = null;
         }
 
         protected virtual void OnStateChange(StateChangeEventArgs e)
@@ -315,45 +319,48 @@ namespace statemap
 
         // The finite state machine's unique name.
         [NonSerialized]
-        protected string _name;
+        protected string name_;
 
         // The current state.
         [NonSerialized]
-        protected State _state;
+        protected State state_;
 
         // The current transition *name*. Used for debugging
         // purposes.
         [NonSerialized]
-        protected string _transition;
+        protected string transition_;
 
         // Remember what state a transition left.
         // Do no persist the previous state because an FSM should
         // be serialized while in transition.
         [NonSerialized]
-        protected State _previousState;
+        protected State previousState_;
 
         // This stack is used when a push transition is taken.
         [NonSerialized]
-        protected System.Collections.Stack _stateStack;
+        protected System.Collections.Stack stateStack_;
 
         // DEPRECATED
         // As of v. 4.3.3, System.Diagnostics.Trace is
-        // used instead of the _debugFlag, _debugStream
-        // pair. _debugStream will always be null.
+        // used instead of the debugFlag_, debugStream_
+        // pair. debugStream_ will always be null.
         // When this flag is set to true, this class will print
         // out debug messages.
         [NonSerialized]
-        protected bool _debugFlag;
+        protected bool debugFlag_;
 
         // Write debug output to this stream.
         [NonSerialized]
-        protected TextWriter _debugStream;
+        protected TextWriter debugStream_;
     } // end of class FSMContext
 } // end of namespace statemap
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2009/03/01 18:20:40  cwrapp
+// Preliminary v. 6.0.0 commit.
+//
 // Revision 1.5  2008/01/14 19:59:23  cwrapp
 // Release 5.0.2 check-in.
 //

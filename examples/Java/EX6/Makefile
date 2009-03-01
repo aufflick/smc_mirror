@@ -62,13 +62,16 @@ SYNC=           -sync
 # Uncomment to turn on reflection.
 # REFLECT=        -reflect
 
-SMC=            java -jar ../../../bin/Smc.jar
-SMC_FLAGS=      -java $(TRACE) $(SERIAL) $(SYNC) $(REFLECT)
+# Uncomment to turn on generic collections..
+# GENERIC=        -generic
 
-FSM_LIB_DIR=    ../../../lib
+SMC=            java -jar ../../../bin/Smc.jar
+SMC_FLAGS=      -java $(TRACE) $(SERIAL) $(SYNC) $(REFLECT) $(GENERIC)
+
+FSM_LIB_DIR=    ../../../lib/Java
 
 JAVAC=          javac
-JAVAC_FLAGS=    -d . -g -classpath $(FSM_LIB_DIR)/statemap.jar
+JAVAC_FLAGS=    -d . -g -Xlint:unchecked -classpath $(FSM_LIB_DIR)/statemap.jar
 
 JAR=                    jar
 JAR_CREATE_FLAGS=       cmf
@@ -126,6 +129,9 @@ clean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.13  2009/03/01 18:20:39  cwrapp
+# Preliminary v. 6.0.0 commit.
+#
 # Revision 1.12  2008/07/29 06:50:59  fperrad
 # - add a target 'png'
 #

@@ -53,20 +53,22 @@ $(LIB_STAGING_DIR) :
 		$(MKDIR) $(LIB_STAGING_DIR)
 
 # Copy all products to the staging directory.
+# Ignore any failed subdir makes because this may be due to
+# missing target language.
 install :       $(LIB_STAGING_DIR)
-		$(MAKE) -C C install
-		$(MAKE) -C C++ install
-		$(MAKE) -C CSharp install
-		$(MAKE) -C Groovy install
-		$(MAKE) -C Java install
-		$(MAKE) -C Lua install
-		$(MAKE) -C ObjC install
-		$(MAKE) -C Perl install
-		$(MAKE) -C Php install
-		$(MAKE) -C Python install
-		$(MAKE) -C Ruby install
-		$(MAKE) -C Scala install
-		$(MAKE) -C Tcl install
+		-$(MAKE) -C C install
+		-$(MAKE) -C C++ install
+		-$(MAKE) -C CSharp install
+		-$(MAKE) -C Groovy install
+		-$(MAKE) -C Java install
+		-$(MAKE) -C Lua install
+		-$(MAKE) -C ObjC install
+		-$(MAKE) -C Perl install
+		-$(MAKE) -C Php install
+		-$(MAKE) -C Python install
+		-$(MAKE) -C Ruby install
+		-$(MAKE) -C Scala install
+		-$(MAKE) -C Tcl install
 		-$(MAKE) -C VB install
 
 uninstall :
@@ -120,6 +122,9 @@ realclean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.14  2009/03/01 18:20:40  cwrapp
+# Preliminary v. 6.0.0 commit.
+#
 # Revision 1.13  2008/04/22 16:01:21  fperrad
 # - add PHP language (patch from Toni Arnold)
 #

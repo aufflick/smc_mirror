@@ -1,11 +1,11 @@
 # 
 # The contents of this file are subject to the Mozilla Public
 # License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
+# except in compliance with the License. You may obtain a copy
+# of the License at http://www.mozilla.org/MPL/
 # 
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+# Software distributed under the License is distributed on an
+# "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
 # 
@@ -53,9 +53,9 @@ $(LIB_STAGING_DIR) :
 		$(MKDIR) $@
 
 install :       $(LIB_STAGING_DIR) $(SOURCES)
-		$(CP) README.py $(LIB_STAGING_DIR)/README.py
-		$(CP) statemap.py $(LIB_STAGING_DIR)/statemap.py
-		$(CP) setup.py $(LIB_STAGING_DIR)/setup.py
+		$(CP_F) README.py $(LIB_STAGING_DIR)/README.py
+		$(CP_F) statemap.py $(LIB_STAGING_DIR)/statemap.py
+		$(CP_F) setup.py $(LIB_STAGING_DIR)/setup.py
 
 uninstall :
 		-$(RM_F) $(LIB_STAGING_DIR)/*.py
@@ -67,6 +67,9 @@ realclean :     clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.10  2009/03/01 18:20:41  cwrapp
+# Preliminary v. 6.0.0 commit.
+#
 # Revision 1.9  2008/02/04 10:46:22  fperrad
 # + use common variables
 #

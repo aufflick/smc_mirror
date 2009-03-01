@@ -34,7 +34,8 @@ include ../../smc.mk
 
 SOURCES=        statemap.tcl pkgIndex.tcl
 
-LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib/statemap1.0
+LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib/Tcl
+TCL_STAGING_DIR=$(LIB_STAGING_DIR)/statemap1.0
 
 #################################################################
 # Rules.
@@ -43,13 +44,16 @@ LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib/statemap1.0
 $(LIB_STAGING_DIR) :
 		$(MKDIR) $@
 
-install :       $(LIB_STAGING_DIR) $(SOURCES)
-		$(CP) statemap.tcl $(LIB_STAGING_DIR)/statemap.tcl
-		$(CP) pkgIndex.tcl $(LIB_STAGING_DIR)/pkgIndex.tcl
+$(TCL_STAGING_DIR) : $(LIB_STAGING_DIR)
+		$(MKDIR) $@
+
+install :       $(TCL_STAGING_DIR) $(SOURCES)
+		$(CP_F) statemap.tcl $(TCL_STAGING_DIR)/statemap.tcl
+		$(CP_F) pkgIndex.tcl $(TCL_STAGING_DIR)/pkgIndex.tcl
 
 uninstall :
-		-$(RM_F) $(LIB_STAGING_DIR)/statemap.tcl
-		-$(RM_F) $(LIB_STAGING_DIR)/pkgIndex.tcl
+		-$(RM_F) $(TCL_STAGING_DIR)/statemap.tcl
+		-$(RM_F) $(TCL_STAGING_DIR)/pkgIndex.tcl
 
 clean :
 
@@ -58,6 +62,9 @@ realclean :     clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.9  2009/03/01 18:20:41  cwrapp
+# Preliminary v. 6.0.0 commit.
+#
 # Revision 1.8  2008/02/04 10:46:51  fperrad
 # + use common variables
 #

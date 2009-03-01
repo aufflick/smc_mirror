@@ -1,11 +1,11 @@
 //
 // The contents of this file are subject to the Mozilla Public
 // License Version 1.1 (the "License"); you may not use this file
-// except in compliance with the License. You may obtain a copy of
-// the License at http://www.mozilla.org/MPL/
+// except in compliance with the License. You may obtain a copy
+// of the License at http://www.mozilla.org/MPL/
 // 
-// Software distributed under the License is distributed on an "AS
-// IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+// Software distributed under the License is distributed on an
+// "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 // 
@@ -13,7 +13,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 - 2003 Charles W. Rapp.
+// Copyright (C) 2000 - 2009. Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
@@ -33,6 +33,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2009/03/01 18:20:37  cwrapp
+// Preliminary v. 6.0.0 commit.
+//
 // Revision 1.7  2008/04/23 12:08:33  fperrad
 // + fix #1934479 (tested on Ubuntu 7.10, gcc 4.1.3)
 //
@@ -68,20 +71,9 @@ extern DWORD Gtimeout;
 
 namespace cpp_ex4
 {
-    Stoplight::Stoplight()
-        : _fsm(*this)
-    {
-        Initialize(NORTH_SOUTH);
-
-        // Uncomment to see debug messages.
-        // _fsm.setDebugFlag(true);
-    }
-
     Stoplight::Stoplight(Directions direction)
-        : _fsm(*this)
-    {
-        Initialize(direction);
-    }
+    : _fsm(*this, direction)
+    {}
 
     void Stoplight::TurnLight(StopLights light, LightColors color)
     {
@@ -138,21 +130,25 @@ namespace cpp_ex4
         return;
     }
 
-    void Stoplight::Initialize(Directions direction)
+    StopLight* Stoplight::Initialize(Directions direction)
     {
         switch(direction)
         {
             case NORTH_SOUTH:
                 cout << "Turning the north-south lights green." << endl;
-                _fsm.setState(StopMap::NorthSouthGreen);
+                retval = new Stoplight(direction);
+                _fsm.enterStartState();
                 SetTimer(NSGreenTimer);
                 break;
 
             case EAST_WEST:
                 cout << "Turning the east-west lights green." << endl;
-                _fsm.setState(StopMap::EastWestGreen);
+                retval = new Stoplight(direction);
+                _fsm.enterStartState();
                 SetTimer(EWGreenTimer);
                 break;
         }
+
+        return (retval);
     }
 }

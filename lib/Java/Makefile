@@ -1,11 +1,11 @@
 # 
 # The contents of this file are subject to the Mozilla Public
 # License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
+# except in compliance with the License. You may obtain a copy
+# of the License at http://www.mozilla.org/MPL/
 # 
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+# Software distributed under the License is distributed on an
+# "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
 # 
@@ -13,7 +13,7 @@
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
-# Copyright (C) 2000 - 2005 Charles W. Rapp.
+# Copyright (C) 2000 - 2005, 2009. Charles W. Rapp.
 # All Rights Reserved.
 # 
 # Contributor(s):
@@ -43,27 +43,28 @@ JAR=            jar
 JAR_FLAGS=      cvf
 JAR_FILE=       ./$(PACKAGE_NAME).jar
 
-LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib
+LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib/Java
 CLASS_DIR=      $(LIB_STAGING_DIR)/$(PACKAGE_NAME)
 
 #################################################################
 # Rules.
 #
 
-all :           $(JAR_FILE)
-
 $(JAR_FILE) :   $(LIB_SOURCES)
 		$(JAVAC) $(JAVAC_FLAGS) $(LIB_SOURCES)
 		$(JAR) $(JAR_FLAGS) $(JAR_FILE) $(PACKAGE_NAME)
 
-$(CLASS_DIR) :
+$(LIB_STAGING_DIR) :
+		$(MKDIR) $@
+
+$(CLASS_DIR) :  $(LIB_STAGING_DIR)
 		$(MKDIR) $@
 
 install :       $(JAR_FILE) $(CLASS_DIR)
-		$(CP) $(JAR_FILE) ..
-		$(CP) $(JAR_FILE) $(LIB_STAGING_DIR)
+		$(CP_F) $(JAR_FILE) ..
+		$(CP_F) $(JAR_FILE) $(LIB_STAGING_DIR)
 		-$(CHMOD) 444 $(LIB_STAGING_DIR)/$(JAR_FILE)
-		$(CP) $(PACKAGE_NAME)/*.class $(CLASS_DIR)
+		$(CP_F) $(PACKAGE_NAME)/*.class $(CLASS_DIR)
 
 uninstall :
 		-$(RM_F) ../$(JAR_FILE)
@@ -78,6 +79,9 @@ realclean :     clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.16  2009/03/01 18:20:40  cwrapp
+# Preliminary v. 6.0.0 commit.
+#
 # Revision 1.15  2008/05/20 18:31:12  cwrapp
 # ----------------------------------------------------------------------
 #

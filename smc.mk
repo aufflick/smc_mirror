@@ -40,7 +40,7 @@
 # Macros.
 #
 
-VERSION=        5_1_0
+VERSION=        6_0_0
 
 STAGING_DIR=    ../staging
 SMC_STAGING_DIR=$(STAGING_DIR)/smc
@@ -49,11 +49,35 @@ RELEASE_DIR=    $(STAGING_DIR)/releases
 
 PACKAGE_NAME=   statemap
 
-CP=             cp -f
-CHMOD=          chmod
-MKDIR=          mkdir -p
-RM_F=           rm -f
-RM_RF=          rm -rf
+CP_F=		cp -f
+CP_RFP=		cp -R -f -p
+CHMOD=		chmod
+MKDIR=		mkdir -p
+MV=		mv
+RM_F=		rm -f
+RM_RF=		rm -rf
+
+JAVADOC=		javadoc
+DOC_VERSION=	$(subst _,.,$(VERSION))
+DOC_DIR=		docs/javadocs
+DOC_SOURCES=	./doc_sources.txt
+
+WINDOW_TITLE=	"SMC v. $(DOC_VERSION) API Specification"
+DOC_TITLE=	"SMC v. $(DOC_VERSION) API Specification"
+HEADER=		"<b>SMC</b><br><font size="-1">$(DOC_VERSION)</font>"
+FOOTER=		"<font size=-1>Copyright &copy; 2009. Charles W. Rapp. All Rights Reserved. Use is subject to <a href=\"\">license terms</a>.</font>"
+OVERVIEW=	./overview.html
+
+JAVADOC_FLAGS=	-protected \
+		-d ./$(DOC_DIR) \
+		-sourcepath . \
+		-classpath ./lib/statemap.jar \
+		-overview $(OVERVIEW) \
+		-windowtitle $(WINDOW_TITLE) \
+		-doctitle $(DOC_TITLE) \
+		-header $(HEADER) \
+		-bottom $(FOOTER)
+
 # Alternate version based on Perl (compatible Windows / *nix)
 #CP=             perl -MExtUtils::Command -e cp
 #CHMOD=          perl -MExtUtils::Command -e ExtUtils::Command::chmod
@@ -77,6 +101,9 @@ $(SMC_STAGING_DIR) :    $(STAGING_DIR)
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.18  2009/03/01 18:20:36  cwrapp
+# Preliminary v. 6.0.0 commit.
+#
 # Revision 1.17  2008/05/20 18:31:06  cwrapp
 # ----------------------------------------------------------------------
 #

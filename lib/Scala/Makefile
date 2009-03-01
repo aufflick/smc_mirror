@@ -60,9 +60,9 @@ $(LIB_STAGING_DIR) :
 		$(MKDIR) $@
 
 install :       $(LIB_STAGING_DIR) $(JAR_FILE)
-		$(CP) $(JAR_FILE) $(LIB_STAGING_DIR)
+		$(CP_F) $(JAR_FILE) $(LIB_STAGING_DIR)
 		-$(CHMOD) 444 $(LIB_STAGING_DIR)/$(JAR_FILE)
-		$(CP) $(LIB_SOURCES) $(LIB_STAGING_DIR)
+		$(CP_F) $(LIB_SOURCES) $(LIB_STAGING_DIR)
 		-$(CHMOD) 444 $(LIB_STAGING_DIR)/$(LIB_SOURCES)
 
 uninstall :
@@ -78,6 +78,9 @@ realclean :     clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2009/03/01 18:20:41  cwrapp
+# Preliminary v. 6.0.0 commit.
+#
 # Revision 1.2  2008/05/20 18:31:13  cwrapp
 # ----------------------------------------------------------------------
 #

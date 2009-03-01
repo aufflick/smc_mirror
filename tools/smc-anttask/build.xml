@@ -27,6 +27,7 @@
     <javac debug="on" deprecation="on" classpathref="class.path"
       destdir="${build.classes.dir}">
       <src path="${src.dir}" />
+      <compilerarg value="-Xlint:unchecked" />
     </javac>
   </target>
 

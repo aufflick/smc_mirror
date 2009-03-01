@@ -44,7 +44,7 @@ $(LIB_STAGING_DIR) :
 		$(MKDIR) $@
 
 install :       $(LIB_STAGING_DIR) $(SOURCES)
-		$(CP) statemap.h $(LIB_STAGING_DIR)/statemap.h
+		$(CP_F) statemap.h $(LIB_STAGING_DIR)/statemap.h
 
 uninstall :
 		-$(RM_F) $(LIB_STAGING_DIR)/statemap.h
@@ -56,6 +56,9 @@ realclean :     clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.5  2009/03/01 18:20:40  cwrapp
+# Preliminary v. 6.0.0 commit.
+#
 # Revision 1.4  2008/02/04 10:40:48  fperrad
 # + use common variables
 #

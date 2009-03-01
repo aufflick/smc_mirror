@@ -40,20 +40,26 @@ public class SmcJarWrapper extends Task
    private boolean _reflect, _sync, _serial, _g;
    private String _glevel;
    
-   private static Map DEFAULT_SUFFIXES = new HashMap();
+   private static Map<String, String> DEFAULT_SUFFIXES =
+       new HashMap<String, String>();
    static
    {
      DEFAULT_SUFFIXES.put("c", "c");
      DEFAULT_SUFFIXES.put("c++", "cpp");
+     DEFAULT_SUFFIXES.put("csharp", "cs");
+     DEFAULT_SUFFIXES.put("graph", "dot");
+     DEFAULT_SUFFIXES.put("groovy", "groovy");
      DEFAULT_SUFFIXES.put("java", "java");
+     DEFAULT_SUFFIXES.put("lua", "lua");
+     DEFAULT_SUFFIXES.put("objc", "m");
      DEFAULT_SUFFIXES.put("perl", "pl");
+     DEFAULT_SUFFIXES.put("php", "php");
      DEFAULT_SUFFIXES.put("python", "py");
      DEFAULT_SUFFIXES.put("ruby", "rb");
+     DEFAULT_SUFFIXES.put("scala", "scala");
+     DEFAULT_SUFFIXES.put("table", "html");
      DEFAULT_SUFFIXES.put("tcl", "tcl");
      DEFAULT_SUFFIXES.put("vb", "vb");
-     DEFAULT_SUFFIXES.put("csharp", "cs");
-     DEFAULT_SUFFIXES.put("table", "html");
-     DEFAULT_SUFFIXES.put("graph", "dot");
    }
    
    public void setClasspath(Path classpath)
@@ -112,8 +118,24 @@ public class SmcJarWrapper extends Task
 
    
    private static String[] TARGET_OPTIONS = 
-      { "c++", "java", "tcl", "vb",
-         "csharp", "table", "graph"};
+   {
+       "c",
+       "c++",
+       "csharp",
+       "graph",
+       "groovy",
+       "java",
+       "lua",
+       "objc",
+       "perl",
+       "php",
+       "python",
+       "ruby",
+       "scala",
+       "table",
+       "tcl",
+       "vb"
+   };
    
    public static class TargetEnum extends EnumeratedAttribute
    {

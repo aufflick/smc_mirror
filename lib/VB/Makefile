@@ -62,11 +62,11 @@ $(LIB_STAGING_DIR)/Release : $(LIB_STAGING_DIR)
 install :       install_debug install_release
 
 install_debug : Debug/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug
-		$(CP) Debug/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug
-		$(CP) Debug/$(PDB_FILE) $(LIB_STAGING_DIR)/Debug
+		$(CP_F) Debug/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug
+		$(CP_F) Debug/$(PDB_FILE) $(LIB_STAGING_DIR)/Debug
 
 install_release : Release/$(DLL_FILE) $(LIB_STAGING_DIR)/Release
-		$(CP) Release/$(DLL_FILE) $(LIB_STAGING_DIR)/Release
+		$(CP_F) Release/$(DLL_FILE) $(LIB_STAGING_DIR)/Release
 
 uninstall :
 		-$(RM_F) $(LIB_STAGING_DIR)/Debug/$(DLL_FILE)
@@ -83,6 +83,9 @@ realclean :     clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.4  2009/03/01 18:20:41  cwrapp
+# Preliminary v. 6.0.0 commit.
+#
 # Revision 1.3  2008/02/04 10:47:07  fperrad
 # + use common variables
 #

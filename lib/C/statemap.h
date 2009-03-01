@@ -29,6 +29,9 @@
  *
  * Change Log
  * $Log$
+ * Revision 1.4  2009/03/01 18:20:40  cwrapp
+ * Preliminary v. 6.0.0 commit.
+ *
  * Revision 1.3  2008/05/30 21:14:48  fperrad
  * - define TRACE only when undefined
  *
@@ -78,8 +81,8 @@ struct FSMContext
     FSM_MEMBERS(_)
 };
 
-#define FSM_INIT(fsm) \
-    (fsm)->_state = NULL; \
+#define FSM_INIT(fsm, state)    \
+    (fsm)->_state = (state); \
     (fsm)->_previous_state = NULL; \
     (fsm)->_stack_start = NULL; \
     (fsm)->_stack_curr = NULL; \

@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2009/03/01 18:20:39  cwrapp
+// Preliminary v. 6.0.0 commit.
+//
 // Revision 1.6  2007/12/28 12:34:40  cwrapp
 // Version 5.0.1 check-in.
 //
@@ -178,6 +181,7 @@ public final class client
                          port_string +
                          " ... ");
         _opened = false;
+        _client_socket.start();
         _client_socket.open(address, port);
 
         // Wait for open to complete.

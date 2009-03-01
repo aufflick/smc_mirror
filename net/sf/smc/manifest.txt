@@ -1,5 +1,5 @@
 Main-Class: net.sf.smc.Smc
 Name: SMC - The State Machine Compiler
 Implementation-Title: SMC
-Implementation-Version: 5.0.1
+Implementation-Version: 6.0.0
 Implementation-Vendor: Charles Rapp

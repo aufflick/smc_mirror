@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2009/03/01 18:20:39  cwrapp
+// Preliminary v. 6.0.0 commit.
+//
 // Revision 1.5  2007/02/21 13:45:08  cwrapp
 // Moved Java code to release 1.5.0
 //
@@ -93,6 +96,8 @@ public final class Telephone
         Telephone telephone =
             new Telephone(frame.getContentPane());
 
+        telephone.start();
+
         // Finish up setting the frame and show it.
         frame.addWindowListener(
             new WindowAdapter()
@@ -131,6 +136,12 @@ public final class Telephone
 
         // DEBUG
         // _fsm.setDebugFlag(true);
+    }
+
+    public void start()
+    {
+        _fsm.start();
+        return;
     }
 
     public void issueTimeout(String timer)

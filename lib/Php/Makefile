@@ -55,9 +55,9 @@ $(LIB_STAGING_DIR) :
 		$(MKDIR) $@
 
 install :       $(LIB_STAGING_DIR) $(SOURCES)
-		$(CP) README.txt $(LIB_STAGING_DIR)/README.txt
-		$(CP) statemap.php $(LIB_STAGING_DIR)/statemap.php
-		$(CP) package.xml $(LIB_STAGING_DIR)/package.xml
+		$(CP_F) README.txt $(LIB_STAGING_DIR)/README.txt
+		$(CP_F) statemap.php $(LIB_STAGING_DIR)/statemap.php
+		$(CP_F) package.xml $(LIB_STAGING_DIR)/package.xml
 
 uninstall :
 		-$(RM_F) $(LIB_STAGING_DIR)/*.php
@@ -69,6 +69,9 @@ realclean :	clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2009/03/01 18:20:41  cwrapp
+# Preliminary v. 6.0.0 commit.
+#
 # Revision 1.2  2008/04/23 07:14:53  fperrad
 # + use common variables
 #

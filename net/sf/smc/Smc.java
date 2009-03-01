@@ -13,7 +13,7 @@
 //
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 - 2007. Charles W. Rapp.
+// Copyright (C) 2000 - 2008. Charles W. Rapp.
 // All Rights Reserved.
 //
 // Contributor(s):
@@ -58,10 +58,46 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import net.sf.smc.generator.SmcCGenerator;
+import net.sf.smc.generator.SmcCodeGenerator;
+import net.sf.smc.generator.SmcCppGenerator;
+import net.sf.smc.generator.SmcCSharpGenerator;
+import net.sf.smc.generator.SmcGraphGenerator;
+import net.sf.smc.generator.SmcGroovyGenerator;
+import net.sf.smc.generator.SmcHeaderGenerator;
+import net.sf.smc.generator.SmcHeaderCGenerator;
+import net.sf.smc.generator.SmcHeaderObjCGenerator;
+import net.sf.smc.generator.SmcJavaGenerator;
+import net.sf.smc.generator.SmcLuaGenerator;
+import net.sf.smc.generator.SmcObjCGenerator;
+import net.sf.smc.generator.SmcPerlGenerator;
+import net.sf.smc.generator.SmcPhpGenerator;
+import net.sf.smc.generator.SmcPythonGenerator;
+import net.sf.smc.generator.SmcRubyGenerator;
+import net.sf.smc.generator.SmcScalaGenerator;
+import net.sf.smc.generator.SmcTableGenerator;
+import net.sf.smc.generator.SmcTclGenerator;
+import net.sf.smc.generator.SmcVBGenerator;
+import net.sf.smc.model.SmcFSM;
+import net.sf.smc.parser.SmcMessage;
+import net.sf.smc.parser.SmcParser;
+import net.sf.smc.parser.SmcParser.TargetLanguage;
+
+/**
+ * Main class for the state machine compiler application.
+ * This class is responsible for processing the command line
+ * arguments, configuring the parser, model and generator
+ * packages according to the command line and outputing the
+ * results to the user. The actual work is performed by the
+ * parser, model and generator packages.
+ *
+ * @author <a href="mailto:rapp@acm.org">Charles Rapp</a>
+ */
 
 public final class Smc
 {
@@ -69,6 +105,14 @@ public final class Smc
 // Member Methods
 //
 
+    //-----------------------------------------------------------
+    // Main method.
+    //
+
+    /**
+     * The state machine compiler main method.
+     * @param args command line arguments.
+     */
     public static void main(String[] args)
     {
         int retcode = 0;
@@ -85,7 +129,7 @@ public final class Smc
         _nocatch = false;
         _serial = false;
         _castType = "dynamic_cast";
-        _graphLevel = GRAPH_LEVEL_0;
+        _graphLevel = SmcCodeGenerator.GRAPH_LEVEL_0;
         _sourceFileList = new ArrayList<String>();
         _verbose = false;
         _fsmVerbose = false;
@@ -105,7 +149,6 @@ public final class Smc
         // Arguments check out - start compiling..
         else
         {
-            SmcLexer lexer;
             SmcParser parser;
             SmcFSM fsm;
             Iterator<String> sit;
@@ -141,6 +184,7 @@ public final class Smc
                         new SmcParser(
                             _getFileName(_sourceFileName),
                             new FileInputStream(_sourceFileName),
+                            _targetLanguage.language(),
                             _fsmVerbose);
 
                     // First - do the parsing
@@ -160,16 +204,16 @@ public final class Smc
                         retcode = 1;
 
                         // Output the parser's messages.
-                        outputMessages(_sourceFileName,
-                                       System.err,
-                                       parser.getMessages());
+                        _outputMessages(_sourceFileName,
+                                        System.err,
+                                        parser.getMessages());
                     }
                     else
                     {
                         SmcSyntaxChecker checker =
                             new SmcSyntaxChecker(
                                 _sourceFileName,
-                                _targetLanguage.index());
+                                _targetLanguage.language());
 
                         if (_verbose == true)
                         {
@@ -186,7 +230,7 @@ public final class Smc
 
                             // Output the syntax checker's
                             // messages.
-                            outputMessages(
+                            _outputMessages(
                                 _sourceFileName,
                                 System.err,
                                 checker.getMessages());
@@ -276,176 +320,24 @@ public final class Smc
         }
     } // end of main(String[])
 
-    public static String sourceFileName()
-    {
-        return (_sourceFileName);
-    }
+    //
+    // end of Main method.
+    //-----------------------------------------------------------
 
-    public static boolean isDebug()
-    {
-        return (_debug);
-    }
+    //-----------------------------------------------------------
+    // Constructors.
+    //
 
-    public static boolean isNoStreams()
-    {
-        return (_nostreams);
-    }
+    // Private to prevent instantiation.
+    private Smc()
+    {}
 
-    public static boolean isSynchronized()
-    {
-        return (_sync);
-    }
+    //
+    // end of Constructors.
+    //-----------------------------------------------------------
 
-    public static boolean isNoExceptions()
-    {
-        return (_noex);
-    }
-
-    public static boolean isNoCatch()
-    {
-        return (_nocatch);
-    }
-
-    public static boolean isSerial()
-    {
-        return (_serial);
-    }
-
-    public static boolean isReflection()
-    {
-        return (_reflection);
-    }
-
-    public static String castType()
-    {
-        return (_castType);
-    }
-
-    public static int graphLevel()
-    {
-        return (_graphLevel);
-    }
-
-    public static String outputDirectory()
-    {
-        return (_outputDirectory);
-    }
-
-    public static String headerDirectory()
-    {
-        return (_headerDirectory);
-    }
-
-    // Merge two lists together, returning an ordered list with
-    // no multiple entries.
-    public static List<SmcTransition>
-        merge(List<SmcTransition> l1,
-              List<SmcTransition> l2,
-              Comparator<SmcTransition> c)
-    {
-        int result;
-        Iterator<SmcTransition> it1;
-        Iterator<SmcTransition> it2;
-        SmcTransition e1;
-        SmcTransition e2;
-        List<SmcTransition> retval =
-            new ArrayList<SmcTransition>();
-
-        // First, make certain that both lists are sorted.
-        Collections.sort(l1, c);
-        Collections.sort(l2, c);
-
-        // Now merge the two lists together.
-        // Continue until the end of either list is reached.
-        for (it1 = l1.iterator(),
-                     it2 = l2.iterator(),
-                     e1 = null,
-                     e2 = null;
-             (it1.hasNext() == true || e1 != null) &&
-                     (it2.hasNext() == true || e2 != null);
-            )
-        {
-            if (e1 == null)
-            {
-                e1 = it1.next();
-            }
-            if (e2 == null)
-            {
-                e2 = it2.next();
-            }
-
-            if ((result = c.compare(e1, e2)) < 0)
-            {
-                retval.add(e1);
-                e1 = null;
-            }
-            else if (result > 0)
-            {
-                retval.add(e2);
-                e2 = null;
-            }
-            else
-            {
-                retval.add(e1);
-                e1 = null;
-                e2 = null;
-            }
-        }
-
-        // Is there any more to add?
-        if (it1.hasNext() == true || e1 != null)
-        {
-            if (e1 != null)
-            {
-                retval.add(e1);
-            }
-
-            for (; it1.hasNext() == true;)
-            {
-                retval.add(it1.next());
-            }
-        }
-        else if (it2.hasNext() == true || e2 != null)
-        {
-            if (e2 != null)
-            {
-                retval.add(e2);
-            }
-
-            for (; it2.hasNext() == true;)
-            {
-                retval.add(it2.next());
-            }
-        }
-
-        return (retval);
-    }
-
-    public static void outputMessages(String srcFileName,
-                                      PrintStream stream,
-                                      List<SmcMessage> messages)
-    {
-        for (SmcMessage message: messages)
-        {
-            stream.print(srcFileName);
-            stream.print(':');
-            stream.print(message.getLineNumber());
-
-            if (message.getLevel() == SmcMessage.WARNING)
-            {
-                stream.print(": warning - ");
-            }
-            else
-            {
-                stream.print(": error - ");
-            }
-
-            stream.println(message.getText());
-        }
-
-        return;
-    }
-
+    // Parse the command line arguments and fill in the static
+    // data accordingly.
     private static boolean parseArgs(String[] args)
     {
         int i;
@@ -672,8 +564,8 @@ public final class Smc
                         _graphLevel =
                             Integer.parseInt(args[i+1]);
 
-                        if (_graphLevel < GRAPH_LEVEL_0 ||
-                            _graphLevel > GRAPH_LEVEL_2)
+                        if (_graphLevel < SmcCodeGenerator.GRAPH_LEVEL_0 ||
+                            _graphLevel > SmcCodeGenerator.GRAPH_LEVEL_2)
                         {
                             retcode = false;
                             _errorMsg =
@@ -797,6 +689,23 @@ public final class Smc
                     argsConsumed = 1;
                 }
             }
+            else if (args[i].startsWith("-ge") == true)
+            {
+                if (_supportsOption(GENERIC_FLAG) == false)
+                {
+                    retcode = false;
+                    _errorMsg =
+                        _targetLanguage.name() +
+                        " does not support " +
+                        GENERIC_FLAG +
+                        ".";
+                }
+                else
+                {
+                    _generic = true;
+                    argsConsumed = 1;
+                }
+            }
             else if (args[i].startsWith("-se") == true)
             {
                 if (_supportsOption(SERIAL_FLAG) == false)
@@ -886,7 +795,7 @@ public final class Smc
         }
 
         return (retcode);
-    }
+    } // end of parseArgs(String[])
 
     // Process the -help and -version flags separately.
     private static boolean _needHelp(String[] args)
@@ -909,7 +818,7 @@ public final class Smc
         }
 
         return (retval);
-    }
+    } // end of _needHelp(String[])
 
     // Returns the target language found in the command line
     // arguments. Throws an IllegalArgumentException if more than
@@ -942,7 +851,7 @@ public final class Smc
         }
 
         return (retval);
-    }
+    } // end of _findTargetLanguage(String[])
 
     // Returns the langugage record associated with the given
     // command line option.
@@ -963,7 +872,7 @@ public final class Smc
         }
 
         return (retval);
-    }
+    } // end of _findLanguage(String)
 
     // Returns true if the target language supports the specified
     // option.
@@ -974,7 +883,7 @@ public final class Smc
         return (
             languages != null &&
             languages.contains(_targetLanguage));
-    }
+    } // end of _supportsOption(String)
 
     // Returns true if the string is a valid C++ cast.
     private static boolean _isValidCast(String castType)
@@ -982,7 +891,7 @@ public final class Smc
         return (castType.equals("dynamic_cast") == true ||
                 castType.equals("static_cast") == true ||
                 castType.equals("reinterpret_cast") == true);
-    }
+    } // end of _isValidCast(String)
 
     // Returns true if the path is a valid destination directory.
     private static boolean _isValidDirectory(String path)
@@ -1014,7 +923,7 @@ public final class Smc
         }
 
         return (retcode);
-    }
+    } // end of _isValidDirectory(String)
 
     private static void _usage(PrintStream stream)
     {
@@ -1032,6 +941,7 @@ public final class Smc
         stream.print(" [-serial]");
         stream.print(" [-return]");
         stream.print(" [-reflect]");
+        stream.print(" [-generic]");
         stream.print(" [-cast cast_type]");
         stream.print(" [-d directory]");
         stream.print(" [-headerd directory]");
@@ -1077,6 +987,9 @@ public final class Smc
         stream.print("\t          ");
         stream.print("(use with -java, -tcl, -vb, -csharp, ");
         stream.println("-groovy, -lua, -perl, -php, -python, -ruby and -scala only)");
+        stream.println("\t-generic  Use generic collections");
+        stream.print("\t        ");
+        stream.println("(use with -java and -reflect only)");
         stream.println("\t-cast     Use this C++ cast type ");
         stream.print("\t          ");
         stream.println("(use with -c++ only)");
@@ -1118,7 +1031,7 @@ public final class Smc
             "-php, -python, -ruby, -scala, -table, -tcl or -vb.");
 
         return;
-    }
+    } // end of _usage(PrintStream)
 
     // Returns the <name> portion from <path>/<name>.sm.
     private static String _getFileName(String fullName)
@@ -1131,9 +1044,9 @@ public final class Smc
         return (
             fileName.substring(
                 0, fileName.toLowerCase().indexOf(".sm")));
-    }
+    } // end of _getFileName(String)
 
-    // Generate the State pattern in the target language.
+    // Generates the State pattern in the target language.
     private static void _generateCode(SmcFSM fsm)
         throws FileNotFoundException,
                IOException,
@@ -1196,7 +1109,20 @@ public final class Smc
             }
 
             headerGenerator =
-                _targetLanguage.headerGenerator(srcFileBase);
+                _targetLanguage.headerGenerator(
+                    srcFileBase,
+                    _outputDirectory,
+                    _headerDirectory,
+                    _castType,
+                    _graphLevel,
+                    _serial,
+                    _debug,
+                    _noex,
+                    _nocatch,
+                    _nostreams,
+                    _reflection,
+                    _sync,
+                    _generic);
             headerFileName =
                 headerGenerator.sourceFile(
                     headerPath, srcFileBase, null);
@@ -1209,7 +1135,19 @@ public final class Smc
 
         // Create the language-specific source code generator.
         generator =
-            _targetLanguage.generator(srcFileBase);
+            _targetLanguage.generator(srcFileBase,
+                                      _outputDirectory,
+                                      _headerDirectory,
+                                      _castType,
+                                      _graphLevel,
+                                      _serial,
+                                      _debug,
+                                      _noex,
+                                      _nocatch,
+                                      _nostreams,
+                                      _reflection,
+                                      _sync,
+                                      _generic);
         srcFileName =
             generator.sourceFile(
                 srcFilePath, srcFileBase, _suffix);
@@ -1250,7 +1188,34 @@ public final class Smc
         }
 
         return;
-    }
+    } // end of _generateCode(SmcFSM)
+
+    // Outputs parser warning and error messages concerning the
+    // named .sm file to the provided stream.
+    private static void _outputMessages(String srcFileName,
+                                        PrintStream stream,
+                                        List<SmcMessage> messages)
+    {
+        for (SmcMessage message: messages)
+        {
+            stream.print(srcFileName);
+            stream.print(':');
+            stream.print(message.getLineNumber());
+
+            if (message.getLevel() == SmcMessage.WARNING)
+            {
+                stream.print(": warning - ");
+            }
+            else
+            {
+                stream.print(": error - ");
+            }
+
+            stream.println(message.getText());
+        }
+
+        return;
+    } // end of _outputMessages(String, PrintStream, List<>)
 
 //---------------------------------------------------------------
 // Inner classes
@@ -1271,21 +1236,35 @@ public final class Smc
     //
 
         // Constructor.
-        public Language(int index,
+        @SuppressWarnings("unchecked")
+        public Language(TargetLanguage language,
                         String optionFlag,
                         String name,
                         Class generator,
                         Class headerGenerator)
         {
-            Class[] params = new Class[1];
+            Class[] params = new Class[13];
             Constructor sourceCtor = null;
             Constructor headerCtor = null;
 
-            _index = index;
+            _language = language;
             _optionFlag = optionFlag;
             _name = name;
 
             params[0] = String.class;
+            params[1] = String.class;
+            params[2] = String.class;
+            params[3] = String.class;
+            params[4] = int.class;
+            params[5] = boolean.class;
+            params[6] = boolean.class;
+            params[7] = boolean.class;
+            params[8] = boolean.class;
+            params[9] =  boolean.class;
+            params[10] = boolean.class;
+            params[11] = boolean.class;
+            params[12] = boolean.class;
+
             if (generator != null)
             {
                 try
@@ -1293,7 +1272,7 @@ public final class Smc
                     sourceCtor =
                         generator.getDeclaredConstructor(params);
                 }
-                catch (NoSuchMethodException methoex)
+                catch (NoSuchMethodException methodex)
                 {}
             }
 
@@ -1311,36 +1290,60 @@ public final class Smc
 
             _generator = sourceCtor;
             _headerGenerator = headerCtor;
-        }
+        } // end of Language(...)
 
         //-------------------------------------------------------
         // Get methods.
         //
 
-        public int index()
+        public TargetLanguage language()
         {
-            return (_index);
-        }
+            return (_language);
+        } // end of language()
 
         public String optionFlag()
         {
             return (_optionFlag);
-        }
+        } // end of optionFlag()
 
         public String name()
         {
             return (_name);
-        }
+        } // end of name()
 
-        public SmcCodeGenerator generator(String basename)
+        public SmcCodeGenerator generator(String basename,
+                                          String directory,
+                                          String headerDirectory,
+                                          String castType,
+                                          int graphLevel,
+                                          boolean serialFlag,
+                                          boolean debugFlag,
+                                          boolean noExFlag,
+                                          boolean noCatchFlag,
+                                          boolean noStreamsFlag,
+                                          boolean reflectFlag,
+                                          boolean syncFlag,
+                                          boolean genericFlag)
         {
             SmcCodeGenerator retval = null;
 
             try
             {
-                Object[] args = new Object[1];
+                Object[] args = new Object[13];
 
                 args[0] = basename;
+                args[1] = directory;
+                args[2] = headerDirectory;
+                args[3] = castType;
+                args[4] = graphLevel;
+                args[5] = serialFlag;
+                args[6] = debugFlag;
+                args[7] = noExFlag;
+                args[8] = noCatchFlag;
+                args[9] = noStreamsFlag;
+                args[10] = reflectFlag;
+                args[11] = syncFlag;
+                args[12] = genericFlag;
 
                 retval =
                     (SmcCodeGenerator)
@@ -1352,23 +1355,47 @@ public final class Smc
             }
 
             return (retval);
-        }
+        } // end of generator(...)
 
         public boolean hasHeaderFile()
         {
             return (_headerGenerator != null);
-        }
+        } // end of hasHeaderFile()
 
         public SmcCodeGenerator
-            headerGenerator(String basename)
+            headerGenerator(String basename,
+                            String directory,
+                            String headerDirectory,
+                            String castType,
+                            int graphLevel,
+                            boolean serialFlag,
+                            boolean debugFlag,
+                            boolean noExFlag,
+                            boolean noCatchFlag,
+                            boolean noStreamsFlag,
+                            boolean reflectFlag,
+                            boolean syncFlag,
+                            boolean genericFlag)
         {
             SmcCodeGenerator retval = null;
 
             try
             {
-                Object[] args = new Object[1];
+                Object[] args = new Object[13];
 
                 args[0] = basename;
+                args[1] = directory;
+                args[2] = headerDirectory;
+                args[3] = castType;
+                args[4] = graphLevel;
+                args[5] = serialFlag;
+                args[6] = debugFlag;
+                args[7] = noExFlag;
+                args[8] = noCatchFlag;
+                args[9] = noStreamsFlag;
+                args[10] = reflectFlag;
+                args[11] = syncFlag;
+                args[12] = genericFlag;
 
                 retval =
                     (SmcCodeGenerator)
@@ -1380,12 +1407,13 @@ public final class Smc
             }
 
             return (retval);
-        }
+        } // end of headerGenerator(String)
 
+        @Override
         public String toString()
         {
             return (_name);
-        }
+        } // end of toString()
 
         //
         // end of Get methods.
@@ -1395,12 +1423,12 @@ public final class Smc
     // Member data.
     //
 
-        private final int _index;
+        private final TargetLanguage _language;
         private final String _optionFlag;
         private final String _name;
         private final Constructor _generator;
         private final Constructor _headerGenerator;
-    }
+    } // end of class Language
 
 //---------------------------------------------------------------
 // Member Data
@@ -1449,6 +1477,10 @@ public final class Smc
     // state.
     private static boolean _reflection;
 
+    // If true, then use a Map<String, Integer> for the
+    // reflection map.
+    private static boolean _generic;
+
     // If true, then generate compiler verbose messages.
     private static boolean _verbose;
 
@@ -1484,44 +1516,15 @@ public final class Smc
 
     // Specifies target programming language.
     /* package */ static Language _targetLanguage;
-    /* package */ static final int LANG_NOT_SET = 0;
-    /* package */ static final int C_PLUS_PLUS = 1;
-    /* package */ static final int JAVA = 2;
-    /* package */ static final int TCL = 3;
-    /* package */ static final int VB = 4;
-    /* package */ static final int C_SHARP = 5;
-    /* package */ static final int PYTHON = 6;
-    /* package */ static final int TABLE = 7;
-    /* package */ static final int GRAPH = 8;
-    /* package */ static final int PERL = 9;
-    /* package */ static final int RUBY = 10;
-    /* package */ static final int C = 11;
-    /* package */ static final int OBJECTIVE_C = 12;
-    /* package */ static final int LUA = 13;
-    /* package */ static final int GROOVY = 14;
-    /* package */ static final int SCALA = 15;
-    /* package */ static final int PHP = 16;
-    /* package */ static final int LANGUAGE_COUNT = 17;
-
-    // GraphViz detail level.
-    /* package */ static final int NO_GRAPH_LEVEL = -1;
-    /* package */ static final int GRAPH_LEVEL_0 = 0;
-    /* package */ static final int GRAPH_LEVEL_1 = 1;
-    /* package */ static final int GRAPH_LEVEL_2 = 2;
-
-    // Specifies the transition's type.
-    /* package */ static final int TRANS_NOT_SET = 0;
-    /* package */ static final int TRANS_SET = 1;
-    /* package */ static final int TRANS_PUSH = 2;
-    /* package */ static final int TRANS_POP = 3;
 
     private static final String APP_NAME = "smc";
-    private static final String VERSION = "v. 5.1.0";
+    private static final String VERSION = "v. 6.0.0";
 
     // Command line option flags.
     private static final String CAST_FLAG = "-cast";
     private static final String DIRECTORY_FLAG = "-d";
     private static final String DEBUG_FLAG = "-g";
+    private static final String GENERIC_FLAG = "-generic";
     private static final String GLEVEL_FLAG = "-glevel";
     private static final String HEADER_FLAG = "-headerd";
     private static final String HELP_FLAG = "-help";
@@ -1540,128 +1543,127 @@ public final class Smc
     static
     {
         // Fill in the static languages array.
-        _languages = new Language[LANGUAGE_COUNT];
-        _languages[LANG_NOT_SET] =
-            new Language(LANG_NOT_SET,
+        _languages = new Language[SmcParser.LANGUAGE_COUNT];
+        _languages[TargetLanguage.LANG_NOT_SET.ordinal()] =
+            new Language(TargetLanguage.LANG_NOT_SET,
                          "",
                          null,
                          null,
                          null);
-        _languages[C] =
+        _languages[TargetLanguage.C.ordinal()] =
             new Language(
-                C,
+                TargetLanguage.C,
                 "-c",
                 "C",
                 SmcCGenerator.class,
                 SmcHeaderCGenerator.class);
-        _languages[C_PLUS_PLUS] =
+        _languages[TargetLanguage.C_PLUS_PLUS.ordinal()] =
             new Language(
-                C_PLUS_PLUS,
+                TargetLanguage.C_PLUS_PLUS,
                 "-c++",
                 "C++",
                 SmcCppGenerator.class,
                 SmcHeaderGenerator.class);
-        _languages[C_SHARP] =
+        _languages[TargetLanguage.C_SHARP.ordinal()] =
             new Language(
-                C_SHARP,
+                TargetLanguage.C_SHARP,
                 "-csharp",
                 "C#",
                 SmcCSharpGenerator.class,
                 null);
-        _languages[JAVA] =
+        _languages[TargetLanguage.JAVA.ordinal()] =
             new Language(
-                JAVA,
+                TargetLanguage.JAVA,
                 "-java",
                 "Java",
                 SmcJavaGenerator.class,
                 null);
-        _languages[GRAPH] =
+        _languages[TargetLanguage.GRAPH.ordinal()] =
             new Language(
-                GRAPH,
+                TargetLanguage.GRAPH,
                 "-graph",
                 "-graph",
                 SmcGraphGenerator.class,
                 null);
-        _languages[GROOVY] =
+        _languages[TargetLanguage.GROOVY.ordinal()] =
             new Language(
-                GROOVY,
+                TargetLanguage.GROOVY,
                 "-groovy",
                 "Groovy",
                 SmcGroovyGenerator.class,
                 null);
-        _languages[LUA] =
+        _languages[TargetLanguage.LUA.ordinal()] =
             new Language(
-                LUA,
+                TargetLanguage.LUA,
                 "-lua",
                 "Lua",
                 SmcLuaGenerator.class,
                 null);
-        _languages[OBJECTIVE_C] =
+        _languages[TargetLanguage.OBJECTIVE_C.ordinal()] =
             new Language(
-                OBJECTIVE_C,
+                TargetLanguage.OBJECTIVE_C,
                 "-objc",
                 "Objective-C",
                 SmcObjCGenerator.class,
                 SmcHeaderObjCGenerator.class);
-        _languages[PERL] =
+        _languages[TargetLanguage.PERL.ordinal()] =
             new Language(
-                PERL,
+                TargetLanguage.PERL,
                 "-perl",
                 "Perl",
                 SmcPerlGenerator.class,
                 null);
-        _languages[PHP] =
+        _languages[TargetLanguage.PHP.ordinal()] =
             new Language(
-                PERL,
+                TargetLanguage.PERL,
                 "-php",
                 "PHP",
                 SmcPhpGenerator.class,
                 null);
-        _languages[PYTHON] =
+        _languages[TargetLanguage.PYTHON.ordinal()] =
             new Language(
-                PYTHON,
+                TargetLanguage.PYTHON,
                 "-python",
                 "Python",
                 SmcPythonGenerator.class,
                 null);
-        _languages[RUBY] =
+        _languages[TargetLanguage.RUBY.ordinal()] =
             new Language(
-                RUBY,
+                TargetLanguage.RUBY,
                 "-ruby",
                 "Ruby",
                 SmcRubyGenerator.class,
                 null);
-        _languages[SCALA] =
+        _languages[TargetLanguage.SCALA.ordinal()] =
             new Language(
-                SCALA,
+                TargetLanguage.SCALA,
                 "-scala",
                 "Scala",
                 SmcScalaGenerator.class,
                 null);
-        _languages[TABLE] =
+        _languages[TargetLanguage.TABLE.ordinal()] =
             new Language(
-                TABLE,
+                TargetLanguage.TABLE,
                 "-table",
                 "-table",
                 SmcTableGenerator.class,
                 null);
-        _languages[TCL] =
+        _languages[TargetLanguage.TCL.ordinal()] =
             new Language(
-                TCL,
+                TargetLanguage.TCL,
                 "-tcl",
                 "[incr Tcl]",
                 SmcTclGenerator.class,
                 null);
-        _languages[VB] =
+        _languages[TargetLanguage.VB.ordinal()] =
             new Language(
-                VB,
+                TargetLanguage.VB,
                 "-vb",
                 "VB.net",
                 SmcVBGenerator.class,
                 null);
 
         List<Language> languages = new ArrayList<Language>();
-        int target;
 
         _optionMap = new HashMap<String, List<Language>>();
 
@@ -1686,11 +1688,10 @@ public final class Smc
         // +  -vverbose: all
 
         // Set the options supporting all languages first.
-        for (target = (LANG_NOT_SET + 1);
-             target < LANGUAGE_COUNT;
-             ++target)
+        for (TargetLanguage target :
+                 EnumSet.allOf(TargetLanguage.class))
         {
-            languages.add(_languages[target]);
+            languages.add(_languages[target.ordinal()]);
         }
 
         _optionMap.put(DIRECTORY_FLAG, languages);
@@ -1705,63 +1706,71 @@ public final class Smc
 
         // Set the options supported by less than all langugages.
         languages = new ArrayList<Language>();
-        languages.add(_languages[C_PLUS_PLUS]);
+        languages.add(_languages[TargetLanguage.C_PLUS_PLUS.ordinal()]);
         _optionMap.put(CAST_FLAG, languages);
         _optionMap.put(NO_EXCEPTIONS_FLAG, languages);
         _optionMap.put(NO_STREAMS_FLAG, languages);
 
         // Languages using a header file.
         languages = new ArrayList<Language>();
-        languages.add(_languages[C_PLUS_PLUS]);
-        languages.add(_languages[C]);
-        languages.add(_languages[OBJECTIVE_C]);
+        languages.add(_languages[TargetLanguage.C_PLUS_PLUS.ordinal()]);
+        languages.add(_languages[TargetLanguage.C.ordinal()]);
+        languages.add(_languages[TargetLanguage.OBJECTIVE_C.ordinal()]);
         _optionMap.put(HEADER_FLAG, languages);
 
         // Languages supporting thread synchronization.
         languages = new ArrayList<Language>();
-        languages.add(_languages[C_SHARP]);
-        languages.add(_languages[JAVA]);
-        languages.add(_languages[VB]);
-        languages.add(_languages[GROOVY]);
-        languages.add(_languages[SCALA]);
+        languages.add(_languages[TargetLanguage.C_SHARP.ordinal()]);
+        languages.add(_languages[TargetLanguage.JAVA.ordinal()]);
+        languages.add(_languages[TargetLanguage.VB.ordinal()]);
+        languages.add(_languages[TargetLanguage.GROOVY.ordinal()]);
+        languages.add(_languages[TargetLanguage.SCALA.ordinal()]);
         _optionMap.put(SYNC_FLAG, languages);
 
         // Languages supporting reflection.
         languages = new ArrayList<Language>();
-        languages.add(_languages[C_SHARP]);
-        languages.add(_languages[JAVA]);
-        languages.add(_languages[VB]);
-        languages.add(_languages[TCL]);
-        languages.add(_languages[LUA]);
-        languages.add(_languages[PERL]);
-        languages.add(_languages[PHP]);
-        languages.add(_languages[PYTHON]);
-        languages.add(_languages[RUBY]);
-        languages.add(_languages[GROOVY]);
-        languages.add(_languages[SCALA]);
+        languages.add(_languages[TargetLanguage.C_SHARP.ordinal()]);
+        languages.add(_languages[TargetLanguage.JAVA.ordinal()]);
+        languages.add(_languages[TargetLanguage.VB.ordinal()]);
+        languages.add(_languages[TargetLanguage.TCL.ordinal()]);
+        languages.add(_languages[TargetLanguage.LUA.ordinal()]);
+        languages.add(_languages[TargetLanguage.PERL.ordinal()]);
+        languages.add(_languages[TargetLanguage.PHP.ordinal()]);
+        languages.add(_languages[TargetLanguage.PYTHON.ordinal()]);
+        languages.add(_languages[TargetLanguage.RUBY.ordinal()]);
+        languages.add(_languages[TargetLanguage.GROOVY.ordinal()]);
+        languages.add(_languages[TargetLanguage.SCALA.ordinal()]);
         _optionMap.put(REFLECT_FLAG, languages);
 
         // Languages supporting serialization.
         languages = new ArrayList<Language>();
-        languages.add(_languages[C_SHARP]);
-        languages.add(_languages[JAVA]);
-        languages.add(_languages[VB]);
-        languages.add(_languages[TCL]);
-        languages.add(_languages[C_PLUS_PLUS]);
-        languages.add(_languages[GROOVY]);
-        languages.add(_languages[SCALA]);
+        languages.add(_languages[TargetLanguage.C_SHARP.ordinal()]);
+        languages.add(_languages[TargetLanguage.JAVA.ordinal()]);
+        languages.add(_languages[TargetLanguage.VB.ordinal()]);
+        languages.add(_languages[TargetLanguage.TCL.ordinal()]);
+        languages.add(_languages[TargetLanguage.C_PLUS_PLUS.ordinal()]);
+        languages.add(_languages[TargetLanguage.GROOVY.ordinal()]);
+        languages.add(_languages[TargetLanguage.SCALA.ordinal()]);
         _optionMap.put(SERIAL_FLAG, languages);
 
         // The -glevel option.
         languages = new ArrayList<Language>();
-        languages.add(_languages[GRAPH]);
+        languages.add(_languages[TargetLanguage.GRAPH.ordinal()]);
         _optionMap.put(GLEVEL_FLAG, languages);
-    }
-}
+
+        // The -generic option.
+        languages = new ArrayList<Language>();
+        languages.add(_languages[TargetLanguage.JAVA.ordinal()]);
+        _optionMap.put(GENERIC_FLAG, languages);
+    } // end of static
+} // end of class Smc
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.31  2009/03/01 18:20:42  cwrapp
+// Preliminary v. 6.0.0 commit.
+//
 // Revision 1.30  2008/08/15 22:20:40  fperrad
 // + move method escape in SmcGraphGenerator.java
 //

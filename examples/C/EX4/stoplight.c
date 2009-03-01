@@ -34,6 +34,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.3  2009/03/01 18:20:37  cwrapp
+ * Preliminary v. 6.0.0 commit.
+ *
  * Revision 1.2  2007/08/05 13:43:36  cwrapp
  * Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more information.
  *
@@ -58,6 +61,7 @@ extern long Gtimeout;
 void smc_ex4_Stoplight_Init(struct smc_ex4_Stoplight* this, enum Directions direction)
 {
     smc_ex4_StoplightContext_Init(&this->_fsm, this);
+    smc_ex4_StoplightContext_EnterStartState(&this->_fsm);
 
     switch(direction)
     {

@@ -13,7 +13,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 - 2007. Charles W. Rapp.
+// Copyright (C) 2000 - 2009. Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s): 
@@ -59,22 +59,39 @@ public abstract class FSMContext
     // Constructors.
     //
 
-    public FSMContext()
+    /**
+     * Creates a finite state machine context for the given
+     * initial state.
+     * @param initState the finite state machine's start state.
+     */
+    protected FSMContext(State initState)
     {
-        // There is no state until the application explicitly
-        // sets the initial state.
         _name = "FSMContext";
-        _state = null;
+        _state = initState;
         _transition = "";
         _previousState = null;
         _stateStack = null;
         _debugFlag = false;
         _debugStream = System.err;
         _listeners = new PropertyChangeSupport(this);
-    } // end of FSMContext()
+    } // end of FSMContext(State)
 
     //
     // end of Constructors.
+    //-----------------------------------------------------------
+
+    //-----------------------------------------------------------
+    // Abstract method declarations.
+    //
+
+    /**
+     * Starts the finite state machine running by executing the
+     * initial state's entry actions.
+     */
+    public abstract void enterStartState();
+
+    //
+    // end of Abstract method declarations.
     //-----------------------------------------------------------
 
     //-----------------------------------------------------------
@@ -165,8 +182,6 @@ public abstract class FSMContext
 
     public void setState(State state)
     {
-        State previousState = _state;
-
         if (getDebugFlag() == true)
         {
             getDebugStream().println("NEW STATE    : " +
@@ -178,7 +193,7 @@ public abstract class FSMContext
         // Inform any and all listeners about this state
         // change.
         _listeners.firePropertyChange(
-            "State", previousState, _state);
+            "State", _previousState, _state);
 
         return;
     } // end of setState(State)
@@ -333,6 +348,9 @@ public abstract class FSMContext
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2009/03/01 18:20:40  cwrapp
+// Preliminary v. 6.0.0 commit.
+//
 // Revision 1.10  2008/01/14 19:59:23  cwrapp
 // Release 5.0.2 check-in.
 //

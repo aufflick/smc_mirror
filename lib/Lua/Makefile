@@ -44,8 +44,8 @@ $(LIB_STAGING_DIR) :
 		$(MKDIR) $@
 
 install :       $(LIB_STAGING_DIR) $(SOURCES)
-		$(CP) statemap.lua $(LIB_STAGING_DIR)/statemap.lua
-		$(CP) README $(LIB_STAGING_DIR)/README
+		$(CP_F) statemap.lua $(LIB_STAGING_DIR)/statemap.lua
+		$(CP_F) README $(LIB_STAGING_DIR)/README
 
 uninstall :
 		-$(RM_F) $(LIB_STAGING_DIR)/statemap.lua
@@ -58,6 +58,9 @@ realclean :     clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.4  2009/03/01 18:20:41  cwrapp
+# Preliminary v. 6.0.0 commit.
+#
 # Revision 1.3  2008/02/04 10:45:36  fperrad
 # + use common variables
 #

@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2009/03/01 18:20:38  cwrapp
+// Preliminary v. 6.0.0 commit.
+//
 // Revision 1.6  2007/02/21 13:38:38  cwrapp
 // Moved Java code to release 1.5.0
 //
@@ -90,6 +93,8 @@ public final class TrafficCanvas
         {
             _stoplightQueue[i] = new LinkedList();
         }
+
+        _stopLight.start();
     }
 
     public int getMinX()
@@ -430,6 +435,8 @@ public final class TrafficCanvas
         // Put this new vehicle on the list.
         _vehicleList.add(vehicle);
 
+        _vehicle.start();
+
         // South-bound starting on north edge.
         startingPoint.setLocation(
             (RECT_CORNERS[1].x + CURB_OFFSET),
@@ -442,6 +449,7 @@ public final class TrafficCanvas
                               this);
         vehicle.paint((Graphics2D) getGraphics());
         _vehicleList.add(vehicle);
+        _vehicle.start();
 
         // West-bound starting on east edge.
         startingPoint.setLocation(
@@ -454,6 +462,7 @@ public final class TrafficCanvas
                               this);
         vehicle.paint((Graphics2D) getGraphics());
         _vehicleList.add(vehicle);
+        _vehicle.start();
 
         // North-bound starting on south edge.
         startingPoint.setLocation(
@@ -466,6 +475,7 @@ public final class TrafficCanvas
                               this);
         vehicle.paint((Graphics2D) getGraphics());
         _vehicleList.add(vehicle);
+        _vehicle.start();
 
         return;
     }

@@ -31,6 +31,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2009/03/01 18:20:40  cwrapp
+// Preliminary v. 6.0.0 commit.
+//
 // Revision 1.3  2008/01/04 20:40:39  cwrapp
 // Corrected minor misspellings and incorrect information.
 //
@@ -44,6 +47,7 @@
 // Initial revision
 //
 
+using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -52,14 +56,17 @@ using System.Runtime.CompilerServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 //
-[assembly: AssemblyTitle("SMC statemap C# Library")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("SMC statemap .Net Library")]
+[assembly: AssemblyDescription("State Machine Compiler .Net runtime library")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]		
+
+// Force CLS compliance.
+[assembly: CLSCompliant(true)]
 
 //
 // Version information for an assembly consists of the following four values:
@@ -72,7 +79,7 @@ using System.Runtime.CompilerServices;
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
 
-[assembly: AssemblyVersion("4.3.1.1")]
+[assembly: AssemblyVersion("6.0.0.0")]
 
 //
 // In order to sign your assembly you must specify a key to use. Refer to the 

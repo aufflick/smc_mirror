@@ -30,6 +30,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2009/03/01 18:20:38  cwrapp
+// Preliminary v. 6.0.0 commit.
+//
 // Revision 1.4  2005/05/28 13:51:23  cwrapp
 // Update Java examples 1 - 7.
 //
@@ -56,6 +59,8 @@ public class AppClass
         int i,
             Length;
         char c;
+
+        _fsm.start();
 
         for (i = 0, Length = string.length();
              i < Length;

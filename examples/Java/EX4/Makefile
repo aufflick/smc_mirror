@@ -1,11 +1,11 @@
 #
 # The contents of this file are subject to the Mozilla Public
 # License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+# except in compliance with the License. You may obtain a copy
+# of the License at http://www.mozilla.org/MPL/
+# 
+# Software distributed under the License is distributed on an
+# "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
 #
@@ -57,13 +57,16 @@ SYNC=           -sync
 # Uncomment to turn on reflection.
 # REFLECT=        -reflect
 
-SMC=            java -jar ../../../bin/Smc.jar
-SMC_FLAGS=      -java $(TRACE) $(SERIAL) $(SYNC) $(REFLECT)
+# Uncomment to turn on generic collections..
+# GENERIC=        -generic
 
-FSM_LIB_DIR=    ../../../lib
+SMC=            java -jar ../../../bin/Smc.jar
+SMC_FLAGS=      -java $(TRACE) $(SERIAL) $(SYNC) $(REFLECT) $(GENERIC)
+
+FSM_LIB_DIR=    ../../../lib/Java
 
 JAVAC=          javac
-JAVAC_FLAGS=    -d . -g -classpath $(FSM_LIB_DIR)/statemap.jar
+JAVAC_FLAGS=    -d . -g -Xlint:unchecked -classpath $(FSM_LIB_DIR)/statemap.jar
 
 JAR=                    jar
 JAR_CREATE_FLAGS=       cmf manifest.txt
@@ -119,6 +122,9 @@ clean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.15  2009/03/01 18:20:38  cwrapp
+# Preliminary v. 6.0.0 commit.
+#
 # Revision 1.14  2008/07/29 06:50:59  fperrad
 # - add a target 'png'
 #

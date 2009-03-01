@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2009/03/01 18:20:39  cwrapp
+// Preliminary v. 6.0.0 commit.
+//
 // Revision 1.6  2007/02/21 13:40:36  cwrapp
 // Moved Java code to release 1.5.0
 //
@@ -86,6 +89,12 @@ public final class Task
         control.postMessage("Task GUI",
                             "Task Created",
                             args);
+    }
+
+    public void start()
+    {
+        _fsm.start();
+        return;
     }
 
     public String getName()

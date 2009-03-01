@@ -1,11 +1,11 @@
 #
 # The contents of this file are subject to the Mozilla Public
 # License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
+# except in compliance with the License. You may obtain a copy
+# of the License at http://www.mozilla.org/MPL/
 #
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+# Software distributed under the License is distributed on an
+# "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
 #
@@ -13,7 +13,7 @@
 #
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
-# Copyright (C) 2000 - 2005. Charles W. Rapp.
+# Copyright (C) 2000 - 2009. Charles W. Rapp.
 # All Rights Reserved.
 #
 # Contributor(s):
@@ -39,60 +39,69 @@
 # Macros
 #
 
-SM_SOURCES= \
-		SmcLexer.sm \
-		SmcParser.sm
-
 CORE_SOURCES= \
-		$(SM_SOURCES:%.sm=%Context.java) \
-		SmcMessage.java \
-		SmcElement.java \
-		SmcParameter.java \
-		SmcAction.java \
-		SmcGuard.java \
-		SmcTransition.java \
-		SmcState.java \
-		SmcMap.java \
-		SmcFSM.java \
-		SmcLexer.java \
-		SmcParser.java \
-		SmcVisitor.java \
 		SmcSyntaxChecker.java \
-		SmcCodeGenerator.java \
 		Smc.java
 
-LANG_SOURCES= \
-		SmcJavaGenerator.java \
-		SmcHeaderGenerator.java \
-		SmcCppGenerator.java \
-		SmcTclGenerator.java \
-		SmcVBGenerator.java \
-		SmcCSharpGenerator.java \
-		SmcPythonGenerator.java \
-		SmcTableGenerator.java \
-		SmcGraphGenerator.java \
-		SmcHeaderCGenerator.java \
-		SmcCGenerator.java \
-		SmcLuaGenerator.java \
-		SmcPerlGenerator.java \
-		SmcRubyGenerator.java \
-		SmcHeaderObjCGenerator.java \
-		SmcObjCGenerator.java \
-		SmcGroovyGenerator.java \
-		SmcScalaGenerator.java \
-		SmcPhpGenerator.java
-
 PACKAGE_NAME=	net.sf.smc
-PACKAGE_DIR=	net/sf/smc
+PACKAGE_DIR=	$(subst .,/,$(PACKAGE_NAME))
+
+MODEL_SOURCES= \
+		model/SmcAction.java \
+		model/SmcElement.java \
+		model/SmcFSM.java \
+		model/SmcGuard.java \
+		model/SmcMap.java \
+		model/SmcParameter.java \
+		model/SmcState.java \
+		model/SmcTransition.java \
+		model/SmcVisitor.java
+MODEL_PACKAGE=	net.sf.smc.model
+MODEL_DIR=	$(subst .,/,$(MODEL_PACKAGE))
+
+PARSER_SM_SOURCES= \
+		parser/SmcLexer.sm \
+		parser/SmcParser.sm
+PARSER_SOURCES= \
+		$(PARSER_SM_SOURCES:%.sm=%Context.java) \
+		parser/SmcMessage.java \
+		parser/SmcLexer.java \
+		parser/SmcParser.java
+PARSER_PACKAGE=	net.sf.smc.parser
+PARSER_DIR=	$(subst .,/,$(PARSER_PACKAGE))
+
+GENERATOR_SOURCES= \
+		generator/SmcCGenerator.java \
+		generator/SmcCodeGenerator.java \
+		generator/SmcCppGenerator.java \
+		generator/SmcCSharpGenerator.java \
+		generator/SmcGraphGenerator.java \
+		generator/SmcGroovyGenerator.java \
+		generator/SmcHeaderGenerator.java \
+		generator/SmcHeaderCGenerator.java \
+		generator/SmcHeaderObjCGenerator.java \
+		generator/SmcJavaGenerator.java \
+		generator/SmcLuaGenerator.java \
+		generator/SmcObjCGenerator.java \
+		generator/SmcPerlGenerator.java \
+		generator/SmcPhpGenerator.java \
+		generator/SmcPythonGenerator.java \
+		generator/SmcRubyGenerator.java \
+		generator/SmcScalaGenerator.java \
+		generator/SmcTableGenerator.java \
+		generator/SmcTclGenerator.java \
+		generator/SmcVBGenerator.java
+GENERATOR_PACKAGE= net.sf.smc.generator
+GENERATOR_DIR=	$(subst .,/,$(GENERATOR_PACKAGE))
 
 STATEMAP_LIB_DIR=	../../../lib/Java
-APP_CLASSPATH=	"$(STATEMAP_LIB_DIR)/statemap.jar"
+APP_CLASSPATH=	$(STATEMAP_LIB_DIR)/statemap.jar
 
 BIN_DIR=	../../../bin
 INSTALL_DIR=	../../../../staging/smc/bin
 
 JAVAC=		javac
-JAVAC_FLAGS=	-d . -g -Xlint:unchecked -classpath $(APP_CLASSPATH)
+JAVAC_FLAGS=	-d . -g -Xlint:unchecked -classpath .:$(APP_CLASSPATH)
 
 SMC=		java -jar $(BIN_DIR)/Smc.jar
 SMC_FLAGS=	-java -g
@@ -106,7 +115,7 @@ TAGS=		jtags
 TAG_FILE=	TAGS
 TAG_FLAGS=	-a -o $(TAG_FILE) --members
 
-CP=			cp
+CP=		cp
 MKDIR=		mkdir -p
 MV=		mv
 RM_F=		rm -f
@@ -136,13 +145,22 @@ all :		$(JAR_FILE) tags
 %_sm.html :     %.sm
 		$(SMC) -table $<
 
-$(JAR_FILE) :	$(CORE_SOURCES) $(LANG_SOURCES) $(STATEMAP_LIB_DIR)/statemap/FSMContext.class $(STATEMAP_LIB_DIR)/statemap/State.class
-		$(JAVAC) $(JAVAC_FLAGS) $(CORE_SOURCES) $(LANG_SOURCES)
+$(JAR_FILE) :	$(CORE_SOURCES) $(MODEL_SOURCES) $(PARSER_SOURCES) $(GENERATOR_SOURCES) $(STATEMAP_LIB_DIR)/statemap/FSMContext.class $(STATEMAP_LIB_DIR)/statemap/State.class
+		$(MAKE) -C model all
+		$(MAKE) -C generator all
+		$(MAKE) -C parser all
+		$(JAVAC) $(JAVAC_FLAGS) $(CORE_SOURCES) $(MODEL_SOURCES) $(PARSER_SOURCES) $(GENERATOR_SOURCES)
 		$(JAR) $(JAR_CREATE_FLAGS) $(JAR_FILE) \
-			$(PACKAGE_DIR)/*.class
+			$(PACKAGE_DIR)/*.class \
+			$(MODEL_DIR) \
+			$(PARSER_DIR) \
+			$(GENERATOR_DIR)
 		$(JAR) $(JAR_UPDATE_FLAGS) $(JAR_FILE) -C $(STATEMAP_LIB_DIR) statemap
 
 install :	$(INSTALL_DIR) $(JAR_FILE)
+		$(MAKE) -C model install
+		$(MAKE) -C generator install
+		$(MAKE) -C parser install
 		-$(RM) -f $(BIN_DIR)/$(JAR_FILE).FBK
 		-$(MV) $(BIN_DIR)/$(JAR_FILE) $(BIN_DIR)/$(JAR_FILE).FBK
 		$(CP) $(JAR_FILE) $(BIN_DIR)
@@ -156,6 +174,9 @@ tags :
 		$(TAGS) $(TAG_FLAGS)
 
 uninstall :
+		$(MAKE) -C model uninstall
+		$(MAKE) -C generator uninstall
+		$(MAKE) -C xxx uninstall
 		-$(RM_F) $(INSTALL_DIR)/$(JAR_FILE)
 
 graph :         $(SM_SOURCES:%.sm=%_sm.dot)
@@ -165,11 +186,17 @@ png :           $(SM_SOURCES:%.sm=%_sm.png)
 table :         $(SM_SOURCES:%.sm=%_sm.html)
 
 clean :
+		$(MAKE) -C model clean
+		$(MAKE) -C generator clean
+		$(MAKE) -C parser clean
 		-$(RM_F) $(JAR_FILE)
 		-$(RM_F) *Context.java
-		-$(RM_F) $(PACKAGE_DIR)/*.class
+		-$(RM_F) $(PACKAGE_DIR)/*.class $(MODEL_DIR)/*.class $(PARSER_DIR)/*.class $(GENERATOR_DIR)/*.class
 
 realclean :	clean
+		$(MAKE) -C model realclean
+		$(MAKE) -C generator realclean
+		$(MAKE) -C parsers realclean
 		-$(RM_F) $(TAG_FILE)
 		-$(RM_F) *.flc *~
 		-$(RM_RF) ./net
@@ -180,6 +207,9 @@ realclean :	clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.19  2009/03/01 18:20:42  cwrapp
+# Preliminary v. 6.0.0 commit.
+#
 # Revision 1.18  2008/08/16 13:29:08  fperrad
 # + add targets 'graph', 'png' and 'table'
 #

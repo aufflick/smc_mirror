@@ -44,8 +44,8 @@ $(LIB_STAGING_DIR) :
 		$(MKDIR) $@
 
 install :       $(LIB_STAGING_DIR) $(SOURCES)
-		$(CP) statemap.h ..
-		$(CP) statemap.h $(LIB_STAGING_DIR)/statemap.h
+		$(CP_F) statemap.h ..
+		$(CP_F) statemap.h $(LIB_STAGING_DIR)/statemap.h
 
 uninstall :
 		-$(RM_F) $(LIB_STAGING_DIR)/statemap.h
@@ -57,6 +57,9 @@ realclean :     clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.10  2009/03/01 18:20:40  cwrapp
+# Preliminary v. 6.0.0 commit.
+#
 # Revision 1.9  2008/04/23 16:21:21  fperrad
 # + fix #1934474 : wrong include path in C++ examples
 #

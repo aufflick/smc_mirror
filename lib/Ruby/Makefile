@@ -44,8 +44,8 @@ $(LIB_STAGING_DIR) :
 		$(MKDIR) $@
 
 install :       $(LIB_STAGING_DIR) $(SOURCES)
-		$(CP) statemap.rb $(LIB_STAGING_DIR)/statemap.rb
-		$(CP) README $(LIB_STAGING_DIR)/README
+		$(CP_F) statemap.rb $(LIB_STAGING_DIR)/statemap.rb
+		$(CP_F) README $(LIB_STAGING_DIR)/README
 
 uninstall :
 		-$(RM_F) $(LIB_STAGING_DIR)/statemap.rb
@@ -58,6 +58,9 @@ realclean :     clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.5  2009/03/01 18:20:41  cwrapp
+# Preliminary v. 6.0.0 commit.
+#
 # Revision 1.4  2008/02/04 10:46:38  fperrad
 # + use common variables
 #

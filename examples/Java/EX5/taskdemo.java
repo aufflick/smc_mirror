@@ -30,6 +30,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2009/03/01 18:20:39  cwrapp
+// Preliminary v. 6.0.0 commit.
+//
 // Revision 1.5  2007/02/21 13:41:11  cwrapp
 // Moved Java code to release 1.5.0
 //
@@ -84,6 +87,8 @@ public final class taskdemo
 
         // TaskManager model "runs" the jobs.
         TaskManager taskManager = new TaskManager();
+
+        taskManager.start();
 
         // Create the top-level container and add contents to it.
         JFrame frame = new JFrame("Task Demo");

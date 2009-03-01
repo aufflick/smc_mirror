@@ -28,6 +28,9 @@
 '
 ' Change Log
 ' $Log$
+' Revision 1.2  2009/03/01 18:20:41  cwrapp
+' Preliminary v. 6.0.0 commit.
+'
 ' Revision 1.1  2005/05/28 18:47:13  cwrapp
 ' Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
 '
@@ -131,6 +134,9 @@ Public MustInherit Class FSMContext
     ' Member methods
     '
 
+    Public MustOverride Sub EnterStartState()
+    End Sub
+
     Public Sub ClearState()
 
         _previousState = _state
@@ -194,11 +200,11 @@ Public MustInherit Class FSMContext
 
     End Sub
 
-    Protected Sub New()
+    Protected Sub New(ByRef state As State)
 
         ' There is no state until the start state is explicitly
         ' set.
-        _state = Nothing
+        _state = state
         _previousState = Nothing
         _stateStack = Nothing
         _transition = ""

@@ -1,11 +1,11 @@
 #
 # The contents of this file are subject to the Mozilla Public
 # License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+# except in compliance with the License. You may obtain a copy
+# of the License at http://www.mozilla.org/MPL/
+# 
+# Software distributed under the License is distributed on an
+# "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
 #
@@ -48,14 +48,17 @@ TRACE=          -g
 # Uncomment to turn on reflection.
 # REFLECT=        -reflect
 
+# Uncomment to turn on generic collections..
+# GENERIC=        -generic
+
 SMC=            java -jar ../../../bin/Smc.jar
-SMC_FLAGS=      -java $(TRACE) $(SERIAL) $(SYNC) $(REFLECT)
+SMC_FLAGS=      -java $(TRACE) $(SERIAL) $(SYNC) $(REFLECT) $(GENERIC)
 
 JAVAC=          javac
-JAVAC_FLAGS=    -g -classpath ../../../lib/statemap.jar
+JAVAC_FLAGS=    -g -Xlint:unchecked -classpath ../../../lib/Java/statemap.jar
 
 JAVA=           java
-JAVA_FLAGS=     -classpath .:../../../lib/statemap.jar
+JAVA_FLAGS=     -classpath .:../../../lib/Java/statemap.jar
 
 RM_F=           rm -f
 
@@ -104,6 +107,9 @@ clean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.10  2009/03/01 18:20:38  cwrapp
+# Preliminary v. 6.0.0 commit.
+#
 # Revision 1.9  2008/07/29 06:50:58  fperrad
 # - add a target 'png'
 #

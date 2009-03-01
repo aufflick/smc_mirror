@@ -518,9 +518,11 @@ namespace statemap
         {
             StateEntry *state;
 
-            // We didn't allocate this pointer, so we don't
-            // delete it.
-            _transition = NULL;
+            if (_transition != NULL)
+            {
+                delete[] _transition;
+                _transition = NULL;
+            }
 
             // But we did allocate the state stack.
             while (_state_stack != NULL)
@@ -544,6 +546,10 @@ namespace statemap
 
             return(*this);
         };
+
+        // Starts the finite state machine running by executing
+        // the initial state's entry actions.
+        virtual void enterStartState()=0;
 
         // Exact same object (is it me?)
         int same(const FSMContext& fsm) const
@@ -596,11 +602,18 @@ namespace statemap
 
         // Saves away the transition name only if debugging
         // is turned on.
-        void setTransition(char *transition)
+        void setTransition(const char *transition)
         {
-            _transition = transition;
+            if (_transition != NULL)
+            {
+                delete[] _transition;
+                _transition = NULL;
+            }
+
+            _transition = copyString(transition);
+
             return;
-        }
+        };
 
         // Clears the current state.
         void clearState()
@@ -738,8 +751,8 @@ namespace statemap
     protected:
 
         // Default constructor.
-        FSMContext()
-        : _state(NULL),
+        FSMContext(const State& state)
+        : _state(const_cast<State *>(&state)),
           _previous_state(NULL),
           _state_stack(NULL),
           _transition(NULL),
@@ -802,6 +815,9 @@ namespace statemap
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.14  2009/03/01 18:20:40  cwrapp
+// Preliminary v. 6.0.0 commit.
+//
 // Revision 1.13  2008/05/20 18:31:12  cwrapp
 // ----------------------------------------------------------------------
 //

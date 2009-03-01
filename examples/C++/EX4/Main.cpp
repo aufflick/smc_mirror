@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2009/03/01 18:20:37  cwrapp
+// Preliminary v. 6.0.0 commit.
+//
 // Revision 1.6  2005/06/08 11:09:12  cwrapp
 // + Updated Python code generator to place "pass" in methods with empty
 //   bodies.
@@ -117,7 +120,7 @@ int main()
 	}
 #endif
 
-	TheLight = new Stoplight(EAST_WEST);
+	TheLight = Stoplight::Initialize(EAST_WEST);
 	if (TheLight == (Stoplight *) NULL)
 	{
 		cerr << "Failed to create stoplight object." << endl;

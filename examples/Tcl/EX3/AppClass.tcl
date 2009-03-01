@@ -1,11 +1,11 @@
 # 
 # The contents of this file are subject to the Mozilla Public
 # License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
+# except in compliance with the License. You may obtain a copy
+# of the License at http://www.mozilla.org/MPL/
 # 
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+# Software distributed under the License is distributed on an
+# "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
 # 
@@ -13,7 +13,7 @@
 # 
 # The Initial Developer of the Original Code is Charles W. Rapp.
 # Portions created by Charles W. Rapp are
-# Copyright (C) 2000 - 2003 Charles W. Rapp.
+# Copyright (C) 2000 - 2009. Charles W. Rapp.
 # All Rights Reserved.
 # 
 # Contributor(s):
@@ -28,6 +28,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.5  2009/03/01 18:20:40  cwrapp
+# Preliminary v. 6.0.0 commit.
+#
 # Revision 1.4  2005/05/28 18:02:55  cwrapp
 # Updated Tcl examples, removed EX6.
 #
@@ -54,32 +57,35 @@ class AppClass {
     }
 
     public method CheckString {astring} {
-		set string_length [string length $astring];
-		for {set i 0} {$i < $string_length} {incr i} {
-			switch -exact -- [string index $astring $i] {
-				0 { set Transition Zero; }
-				1 { set Transition One; }
-				C -
-				c { set Transition C; }
-				default { set Transition Unknown; }
-			}
 
-			# puts stdout "TRANSITION: $Transition";
+        $_fsm enterStartState;
 
-			$_fsm $Transition;
-		}
+        set string_length [string length $astring];
+        for {set i 0} {$i < $string_length} {incr i} {
+            switch -exact -- [string index $astring $i] {
+                0 { set Transition Zero; }
+                1 { set Transition One; }
+                C -
+                c { set Transition C; }
+                default { set Transition Unknown; }
+            }
 
-		# puts stdout "TRANSITION: EOS";
-		$_fsm EOS;
+            # puts stdout "TRANSITION: $Transition";
 
-		return -code ok $_is_acceptable;
+            $_fsm $Transition;
+        }
+
+        # puts stdout "TRANSITION: EOS";
+        $_fsm EOS;
+
+        return -code ok $_is_acceptable;
     }
 
     public method Acceptable {} {
-		set _is_acceptable 1;
+        set _is_acceptable 1;
     }
 
     public method Unacceptable {} {
-		set _is_acceptable 0;
+        set _is_acceptable 0;
     }
 }

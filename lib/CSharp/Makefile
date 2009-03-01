@@ -51,7 +51,7 @@ LIB_STAGING_DIR=../../$(SMC_STAGING_DIR)/lib/DotNet
 
 all :           $(DLL_FILE)
 
-# .dll can only be built withing Dev Studio.
+# .dll can only be built within Dev Studio.
 
 $(LIB_STAGING_DIR) :
 		$(MKDIR) $@
@@ -79,20 +79,20 @@ install :       install_debug install_release
 install_debug : install_debug_w_trace install_debug_wo_trace
 
 install_debug_w_trace : Debug/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug/Trace
-		$(CP) Debug/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug/Trace
-		$(CP) Debug/$(PDB_FILE) $(LIB_STAGING_DIR)/Debug/Trace
+		$(CP_F) Debug/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug/Trace
+		$(CP_F) Debug/$(PDB_FILE) $(LIB_STAGING_DIR)/Debug/Trace
 
 install_debug_wo_trace : Debug/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug/NoTrace
-		$(CP) DebugNoTrace/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug/NoTrace
-		$(CP) DebugNoTrace/$(PDB_FILE) $(LIB_STAGING_DIR)/Debug/NoTrace
+		$(CP_F) DebugNoTrace/$(DLL_FILE) $(LIB_STAGING_DIR)/Debug/NoTrace
+		$(CP_F) DebugNoTrace/$(PDB_FILE) $(LIB_STAGING_DIR)/Debug/NoTrace
 
 install_release : install_release_w_trace install_release_wo_trace
 
 install_release_w_trace : Release/$(DLL_FILE) $(LIB_STAGING_DIR)/Release/Trace
-		$(CP) Release/$(DLL_FILE) $(LIB_STAGING_DIR)/Release/Trace
+		$(CP_F) Release/$(DLL_FILE) $(LIB_STAGING_DIR)/Release/Trace
 
 install_release_wo_trace : Release/$(DLL_FILE) $(LIB_STAGING_DIR)/Release/NoTrace
-		$(CP) ReleaseNoTrace/$(DLL_FILE) $(LIB_STAGING_DIR)/Release/NoTrace
+		$(CP_F) ReleaseNoTrace/$(DLL_FILE) $(LIB_STAGING_DIR)/Release/NoTrace
 
 uninstall :
 		-$(RM_F) $(LIB_STAGING_DIR)/Debug/Trace/$(DLL_FILE)
@@ -112,6 +112,9 @@ realclean :     clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.5  2009/03/01 18:20:40  cwrapp
+# Preliminary v. 6.0.0 commit.
+#
 # Revision 1.4  2008/02/04 10:44:03  fperrad
 # + use common variables
 #

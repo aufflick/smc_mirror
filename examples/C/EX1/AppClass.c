@@ -27,6 +27,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.3  2009/03/01 18:20:37  cwrapp
+ * Preliminary v. 6.0.0 commit.
+ *
  * Revision 1.2  2007/08/05 13:36:32  cwrapp
  * Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more information.
  *
@@ -44,6 +47,7 @@ void AppClass_Init(struct AppClass *this)
 	this->isAcceptable = 0;
 
 	AppClassContext_Init(&this->_fsm, this);
+     AppClassContext_EnterStartState(&this->_fsm);
 
 	/* Uncomment to see debug output. */
 	/* setDebugFlag(&this->_fsm, 1); */

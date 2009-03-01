@@ -29,6 +29,9 @@
 #
 # Change Log
 # $Log$
+# Revision 1.8  2009/03/01 18:20:41  cwrapp
+# Preliminary v. 6.0.0 commit.
+#
 # Revision 1.7  2005/05/28 18:47:13  cwrapp
 # Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
 #
@@ -77,13 +80,18 @@ namespace eval ::statemap:: {
 
 # Member functions.
 
-    constructor {} {
-        set _state "";
+    constructor {initState} {
+        set _state $initState;
         set _previous_state "";
         set _state_stack {};
         set _transition "";
         set _debug_flag 0;
         set _debug_stream stderr;
+    }
+
+    public method enterStartState {} {
+        ${_state} Entry $this;
+        return -code ok;
     }
 
     public method getDebugFlag {} {

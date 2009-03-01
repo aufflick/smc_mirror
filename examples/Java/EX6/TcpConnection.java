@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2009/03/01 18:20:39  cwrapp
+// Preliminary v. 6.0.0 commit.
+//
 // Revision 1.7  2007/12/28 12:34:40  cwrapp
 // Version 5.0.1 check-in.
 //
@@ -87,6 +90,12 @@ public abstract class TcpConnection
 //---------------------------------------------------------------
 // Member methods.
 //
+
+    public final void start()
+    {
+        _fsm.start();
+        return;
+    }
 
     public final void close()
     {

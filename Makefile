@@ -43,80 +43,92 @@
 # Include the official macros.
 include ./smc.mk
 
-TAR_FILE=	$(RELEASE_DIR)/smc_$(VERSION).tar
+TAR_FILE=	./smc_$(VERSION).tar
 TAR_GZ_FILE=	$(TAR_FILE:.tar=.tar.gz)
 GZIP_FILE=	$(TAR_FILE:.tar=.tgz)
-ZIP_FILE=	$(RELEASE_DIR)/smc_$(VERSION).zip
+ZIP_FILE=	./smc_$(VERSION).zip
 
-SRC_TAR_FILE=	./staging/releases/SmcSrc_$(VERSION).tar
-SRC_TAR_GZ_FILE=$(SRC_TAR_FILE:.tar=.tar.gz)
+SRC_TAR_FILE=	./staging/Releases/SmcSrc_$(VERSION).tar
+SRC_TAR_GZ_FILE=	$(SRC_TAR_FILE:.tar=.tar.gz)
 SRC_GZIP_FILE=	$(SRC_TAR_FILE:.tar=.tgz)
-SRC_ZIP_FILE=	./staging/releases/SmcSrc_$(VERSION).zip
+SRC_ZIP_FILE=	./staging/Releases/SmcSrc_$(VERSION).zip
 SRC_TAR_LIST=	./smc/tar_list.txt
 
 #################################################################
 # Rules.
 #
 
+# Compile the Java documentation.
+javadocs :
+		$(JAVADOC) $(JAVADOC_FLAGS) @$(DOC_SOURCES)
+
 # Copy all products to the staging directory.
-install :	$(SMC_STAGING_DIR)
-		-rm -fr $(SMC_STAGING_DIR)/*
+install :	$(SMC_STAGING_DIR) javadocs
+		-$(RM_RF) $(SMC_STAGING_DIR)/*
 		$(MAKE) -C lib install
 		$(MAKE) -C net/sf/smc install
-		cp -R -f -p ./docs $(SMC_STAGING_DIR)
-		cp -R -f -p ./examples $(SMC_STAGING_DIR)
-		cp -R -f -p ./tools $(SMC_STAGING_DIR)
+		$(CP_RFP) ./docs $(SMC_STAGING_DIR)
+		$(CP_RFP) ./examples $(SMC_STAGING_DIR)
+		$(CP_RFP) ./tools $(SMC_STAGING_DIR)
 		-find $(SMC_STAGING_DIR) -name CVS -type d -exec rm -fr {} \; -prune
 		-find $(SMC_STAGING_DIR) -name .DS_Store -exec rm -fr {} \;
 		$(MAKE) -C misc install
-		cp -f LICENSE.txt $(SMC_STAGING_DIR)
-		cp -f README.txt $(SMC_STAGING_DIR)
-		chmod 444 $(SMC_STAGING_DIR)/bin/Smc.jar
+		$(CP_F) LICENSE.txt $(SMC_STAGING_DIR)
+		$(CP_F) README.txt $(SMC_STAGING_DIR)
+		$(CHMOD) 444 $(SMC_STAGING_DIR)/bin/Smc.jar
 
 uninstall :
 		$(MAKE) -C lib uninstall
 		$(MAKE) -C net/sf/smc uninstall
 		$(MAKE) -C misc uninstall
-		-rm -fr $(SMC_STAGING_DIR)/examples
-		-rm -f $(SMC_STAGING_DIR)/LICENSE.txt
-		-rm -f $(SMC_STAGING_DIR)/README.txt
+		$(RM_RF) $(SMC_STAGING_DIR)/examples
+		-$(RM_F) $(SMC_STAGING_DIR)/LICENSE.txt
+		-$(RM_F) $(SMC_STAGING_DIR)/README.txt
 
 clean :
 		$(MAKE) -C lib clean
 		$(MAKE) -C ./net/sf/smc clean
 
 smc_dist :	$(SMC_STAGING_DIR)
-		-rm -f $(TAR_FILE) $(TAR_GZ_FILE) $(GZIP_FILE) $(ZIP_FILE)
-		-rm -fr $(SMC_RELEASE_DIR)
-		mv $(SMC_STAGING_DIR) $(SMC_RELEASE_DIR)
-		(cd $(SMC_RELEASE_DIR)/..; \
-		  tar cvf $(TAR_FILE) ./smc_$(VERSION))
-		gzip $(TAR_FILE)
-		mv $(TAR_GZ_FILE) $(GZIP_FILE)
-		(cd $(SMC_RELEASE_DIR)/..; \
+		-(cd $(RELEASE_DIR); \
+		   $(RM_F) $(TAR_FILE) \
+		           $(TAR_GZ_FILE) \
+		           $(GZIP_FILE) \
+		           $(ZIP_FILE))
+		-$(RM_RF) $(SMC_RELEASE_DIR)
+		$(MV) $(SMC_STAGING_DIR) $(SMC_RELEASE_DIR)
+		(cd $(STAGING_DIR); \
+		  tar cvf $(TAR_FILE) ./smc_$(VERSION); \
+		  gzip $(TAR_FILE); \
+		  $(MV) $(TAR_GZ_FILE) $(GZIP_FILE))
+		(cd $(STAGING_DIR); \
 		  zip -b . -r $(ZIP_FILE) ./smc_$(VERSION))
 
 src_dist :	$(SMC_RELEASE_DIR)
 		(cd ..; \
-		    rm -f $(SRC_TAR_FILE) \
-			$(SRC_TAR_GZ_FILE) \
-			$(SRC_GZIP_FILE) \
-			$(SRC_ZIP_FILE); \
+		    $(RM_F) $(SRC_TAR_FILE) \
+			  $(SRC_TAR_GZ_FILE) \
+			  $(SRC_GZIP_FILE) \
+			  $(SRC_ZIP_FILE); \
 		    tar cvmpfT $(SRC_TAR_FILE) $(SRC_TAR_LIST); \
 		    gzip $(SRC_TAR_FILE); \
-		    mv $(SRC_TAR_GZ_FILE) $(SRC_GZIP_FILE); \
+		    $(MV) $(SRC_TAR_GZ_FILE) $(SRC_GZIP_FILE); \
 		    zip -b . -r $(SRC_ZIP_FILE) ./smc -i@$(SRC_TAR_LIST))
 
 dist : 		install smc_dist src_dist
 
 distclean :
-		-rm -f $(TAR_FILE) $(TAR_GZ_FILE) $(GZIP_FILE) $(ZIP_FILE)
-		-rm -fr $(SMC_RELEASE_DIR)
-		(cd ..; \
-		    rm -f $(SRC_TAR_FILE) \
-			  $(SRC_TAR_GZ_FILE) \
-			  $(SRC_GZIP_FILE) \
-			  $(SRC_ZIP_FILE))
+		-(cd $(RELEASE_DIR); \
+		    $(RM_F) $(TAR_FILE) \
+		            $(TAR_GZ_FILE) \
+		            $(GZIP_FILE) \
+		            $(ZIP_FILE))
+		-$(RM_RF) $(SMC_RELEASE_DIR)
+		-(cd ..; \
+		    $(RM_FR) $(SRC_TAR_FILE) \
+			   $(SRC_TAR_GZ_FILE) \
+			   $(SRC_GZIP_FILE) \
+			   $(SRC_ZIP_FILE))
 
 realclean :
 		$(MAKE) -C lib realclean
@@ -125,6 +137,9 @@ realclean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.13  2009/03/01 18:20:36  cwrapp
+# Preliminary v. 6.0.0 commit.
+#
 # Revision 1.12  2008/05/20 18:31:06  cwrapp
 # ----------------------------------------------------------------------
 #

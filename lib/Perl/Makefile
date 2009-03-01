@@ -50,12 +50,12 @@ $(LIB_STAGING_DIR)/lib/DFA : $(LIB_STAGING_DIR)/lib
 		$(MKDIR) $@
 
 install :       $(LIB_STAGING_DIR)/lib/DFA $(SOURCES)
-		$(CP) Makefile.PL $(LIB_STAGING_DIR)/Makefile.PL
-		$(CP) MANIFEST $(LIB_STAGING_DIR)/MANIFEST
-		$(CP) README $(LIB_STAGING_DIR)/README
-		$(CP) Changes $(LIB_STAGING_DIR)/Changes
-		$(CP) Statemap.pm $(LIB_STAGING_DIR)/lib/DFA/Statemap.pm
-		$(CP) test.pl $(LIB_STAGING_DIR)/test.pl
+		$(CP_F) Makefile.PL $(LIB_STAGING_DIR)/Makefile.PL
+		$(CP_F) MANIFEST $(LIB_STAGING_DIR)/MANIFEST
+		$(CP_F) README $(LIB_STAGING_DIR)/README
+		$(CP_F) Changes $(LIB_STAGING_DIR)/Changes
+		$(CP_F) Statemap.pm $(LIB_STAGING_DIR)/lib/DFA/Statemap.pm
+		$(CP_F) test.pl $(LIB_STAGING_DIR)/test.pl
 
 uninstall :     $(LIB_STAGING_DIR)
 		-$(RM_F) $(LIB_STAGING_DIR)/Makefile.PL
@@ -71,6 +71,9 @@ realclean :     clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.7  2009/03/01 18:20:41  cwrapp
+# Preliminary v. 6.0.0 commit.
+#
 # Revision 1.6  2008/02/07 16:54:51  fperrad
 # Perl : StateMachine::Statemap -> DFA::Statemap
 #

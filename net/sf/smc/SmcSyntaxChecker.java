@@ -13,7 +13,7 @@
 // 
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright (C) 2000 - 2005. Charles W. Rapp.
+// Copyright (C) 2000 - 2005, 2008. Charles W. Rapp.
 // All Rights Reserved.
 // 
 // Contributor(s):
@@ -37,10 +37,50 @@ package net.sf.smc;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import net.sf.smc.model.SmcAction;
+import net.sf.smc.model.SmcElement;
+import net.sf.smc.model.SmcElement.TransType;
+import net.sf.smc.model.SmcFSM;
+import net.sf.smc.model.SmcGuard;
+import net.sf.smc.model.SmcMap;
+import net.sf.smc.model.SmcParameter;
+import net.sf.smc.model.SmcState;
+import net.sf.smc.model.SmcTransition;
+import net.sf.smc.model.SmcVisitor;
+import net.sf.smc.parser.SmcMessage;
+import net.sf.smc.parser.SmcParser.TargetLanguage;
 
 /**
  * Performs a global syntax check on the various elements of the
- * abstract syntax tree.
+ * abstract syntax tree. This includes:
+ * <ul>
+ *   <li>
+ *     Verifying that a start state has been specified and that
+ *     the state exists.
+ *   </li>
+ *   <li>
+ *     If this is C++ code generation that a header file is
+ *     specified
+ *   </li>
+ *   <li>
+ *     If this is Java code generation that the .sm fle and the
+ *     context class have the same name.
+ *   </li>
+ *   <li>
+ *     If this is TCL code generation that argument parameter
+ *     types are eith value or reerence.
+ *   </li>
+ *   <li>
+ *     That if a transition is defined multiple times within the
+ *     same state that each transition definition has a unique
+ *     guard.
+ *   </li>
+ *   <li>
+ *     That transition end states are valid states (the state
+ *     exists and is not the Default state).
+ *   </li>
+ * </ul>
+ *
  * @see SmcElement
  *
  * @author <a href="mailto:rapp@acm.org">Charles Rapp</a>
@@ -59,7 +99,8 @@ public final class SmcSyntaxChecker
      * @param fsm the finite state machine's name.
      * @param targetLanguage the target programming language.
      */
-    public SmcSyntaxChecker(String fsm, int targetLanguage)
+    public SmcSyntaxChecker(String fsm,
+                            TargetLanguage targetLanguage)
     {
         super ();
 
@@ -67,7 +108,7 @@ public final class SmcSyntaxChecker
         _targetLanguage = targetLanguage;
         _messages = new ArrayList<SmcMessage>();
         _checkFlag = true;
-    } // end of SmcSyntaxCheck(String, int)
+    } // end of SmcSyntaxCheck(String, TargetLanguage)
 
     /**
      * Returns <code>true</code> if no errors were found and
@@ -126,7 +167,7 @@ public final class SmcSyntaxChecker
             _checkFlag = false;
         }
 
-        if (_targetLanguage == Smc.C_PLUS_PLUS &&
+        if (_targetLanguage == TargetLanguage.C_PLUS_PLUS &&
             (header == null ||
              header.length() == 0))
         {
@@ -142,7 +183,7 @@ public final class SmcSyntaxChecker
         // If this is Java, then <name> in <name>.sm must match
         // %class <name>.
         // That is foo.sm is the FSM for foo.java.
-        if (_targetLanguage == Smc.JAVA &&
+        if (_targetLanguage == TargetLanguage.JAVA &&
             fsm.getName().equals(context) == false)
         {
             _messages.add(
@@ -207,7 +248,7 @@ public final class SmcSyntaxChecker
 
         // If this is Tcl, then make sure the parameter types
         // are either value or reference.
-        if (_targetLanguage == Smc.TCL)
+        if (_targetLanguage == TargetLanguage.TCL)
         {
             for (SmcParameter parameter:
                      transition.getParameters())
@@ -280,7 +321,7 @@ public final class SmcSyntaxChecker
         String condition = guard.getCondition();
 
         // Ignore pop transitions.
-        if (guard.getTransType() == Smc.TRANS_POP)
+        if (guard.getTransType() == TransType.TRANS_POP)
         {
             // Do nothing.
         }
@@ -323,7 +364,7 @@ public final class SmcSyntaxChecker
         // Reference means that this parameters name is passed
         // (no $ is prepended). Verify that the type name is one
         // of these two.
-        if (_targetLanguage == Smc.TCL &&
+        if (_targetLanguage == TargetLanguage.TCL &&
             typeName.equals(
                 SmcParameter.TCL_VALUE_TYPE) == false &&
             typeName.equals(
@@ -415,7 +456,7 @@ public final class SmcSyntaxChecker
     private String _fsmName;
 
     // The target programming language.
-    private int _targetLanguage;
+    private TargetLanguage _targetLanguage;
 
     // Store warning and error messages in this list. Do not
     // output them. Let the application do that.
@@ -428,6 +469,9 @@ public final class SmcSyntaxChecker
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2009/03/01 18:20:42  cwrapp
+// Preliminary v. 6.0.0 commit.
+//
 // Revision 1.6  2007/02/21 13:56:47  cwrapp
 // Moved Java code to release 1.5.0
 //

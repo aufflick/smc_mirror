@@ -30,6 +30,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2009/03/01 18:20:38  cwrapp
+// Preliminary v. 6.0.0 commit.
+//
 // Revision 1.5  2005/05/28 13:51:24  cwrapp
 // Update Java examples 1 - 7.
 //
@@ -106,6 +109,12 @@ public final class Stoplight
 
         // Uncomment to see debug output.
         // _fsm.setDebugFlag(true);
+    }
+
+    public void start()
+    {
+        _fsm.start();
+        return;
     }
 
     public Color getLightsColor(int direction)

@@ -1,5 +1,102 @@
                               SMC -
                   The State Machine Compiler
+                        Version 6.0.0
+
+
++ Major changes
+---------------
+
+(All)
+    Moved source files into three separate directories: model,
+    parser and generator. The model directory contains
+    SmcElement.java and those classes extending SmcElement.
+    The parser directory contains the classes for parsing a .sm
+    file. The generator directory contains SmcCodeGenerator.java
+    and those classes extending SmcCodeGenerator. Only Smc.java
+    and SmcSyntaxChecker.java remains in the original source
+    directory.
+
+    There are four jar files built: the original Smc.jar,
+    model.jar, parser.jar and generator.jar. Smc.jar uses the
+    other three packages to implement the State Machine Compiler.
+    The point of dividing SMC into different packages is to open
+    SMC's capabilities to other applications. For example, if an
+    IDE defines a the finite state machine using the model
+    package then the generator package to emit the FSM in a
+    target programming language. The new jar files are placed
+    in lib/Java.
+
+    This change in source file location does not otherwise affect
+    how SMC works.
+
+(All)
+    The loopback transition is now divided into external and
+    internal loopback transitions. The external loopback is
+    specified by using the current state's name as the
+    transition's next state. The external loopback executes the
+    current state's exit and entry actions. The internal loopback
+    uses "nil" as the next state and does not execute the current
+    state's exit and entry actions. The internal loopback's
+    behavior is the same as the previous loopback transition.
+
+    NOTE: THIS CHANGE MAY BREAK EXISTING CODE.
+    If you implemented loopbacks by placing the current state's
+    name in the transition next state, then the transition's
+    behavior will change. You will need to replace the explicit
+    state name with "nil" to maintain existing behavior.
+
+(All)
+    The SMC distribution now generates javadocs and places the
+    generated HTML files in docs/javadocs. All SMC source files
+    now have javadoc comments.
+
+
++ Minor changes
+---------------
+
+
++ Bug fixes
+-----------
+
+(PHP, Python)
+    Default state fails on transition overloading.
+    (SF bug 1905336)
+
+(All)
+    Changes lib source file layout regular by making sure all
+    source files are stored in a programming language directory.
+    (SF bug 1930423, 1934483)
+
+(All)
+    Changed FSMContext class constructor so that initial state
+    is set in this constructor. Moved call to initial state entry
+    action execution from generated context class constructor to
+    new enterStartState() method.
+    (SF bug 1964266)
+
+(C++)
+    Corrected statemap.h to remove compiler warnings.
+    (SF bug 1970979)
+
+(Java)
+    Corrected passing null previous state to
+    PropertyChangeListener.
+    (SF bug 2060426)
+
+(Ant)
+    Updated ant SmcJarWrapper.java to include all supported
+    target programming languages.
+    (SF bug 2234925)
+
+(C#, VB)
+     Made .Net dll CLS-compliant.
+     (SF bug 2378072)
+
+
+
+
+                              SMC -
+                  The State Machine Compiler
                         Version 5.1.0
 
 

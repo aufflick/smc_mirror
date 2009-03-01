@@ -122,6 +122,7 @@ public final class server
         StopThread thread = new StopThread(this);
         Iterator<client> it;
 
+
         // Remember this thread for latter.
         _myThread = Thread.currentThread();
 
@@ -133,6 +134,7 @@ public final class server
                          Integer.toString(port) +
                          " ... ");
         _opened = false;
+        server_socket.start();
         server_socket.open(port);
 
         // Wait for open to complete.
@@ -317,6 +319,9 @@ public final class server
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2009/03/01 18:20:39  cwrapp
+// Preliminary v. 6.0.0 commit.
+//
 // Revision 1.6  2007/02/21 13:42:57  cwrapp
 // Moved Java code to release 1.5.0
 //
