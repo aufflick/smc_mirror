@@ -37,6 +37,13 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.2  2009/03/03 17:28:53  kgreg99
+ * 1. Bugs resolved:
+ * #2657779 - modified SmcParser.sm and SmcParserContext.java
+ * #2648516 - modified SmcCSharpGenerator.java
+ * #2648472 - modified SmcSyntaxChecker.java
+ * #2648469 - modified SmcMap.java
+ *
  * Revision 1.1  2009/03/01 18:20:42  cwrapp
  * Preliminary v. 6.0.0 commit.
  *
@@ -6504,6 +6511,7 @@ public final class SmcParserContext
                 }
 
                 if (ctxt.getTargetLanguage() != TargetLanguage.VB &&
+       ctxt.getTargetLanguage() != TargetLanguage.GRAPH &&
        ctxt.getTargetLanguage() != TargetLanguage.C_SHARP)
                 {
 
@@ -6512,7 +6520,7 @@ public final class SmcParserContext
                     try
                     {
                         ctxt.clearActions();
-                        ctxt.error("'=' property assignment may only be used with -vb or -csharp.", token.getLineNumber());
+                        ctxt.error("'=' property assignment may only be used with -vb, -csharp or -graph.", token.getLineNumber());
                     }
                     finally
                     {

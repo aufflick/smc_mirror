@@ -160,6 +160,11 @@ public final class SmcMap
      */
     public boolean isKnownState(String stateName)
     {
+        if (stateName.compareToIgnoreCase("default" ) == 0 )
+        {
+            return this.hasDefaultState();
+        }
+
         SmcState state;
         Iterator<SmcState> it;
         boolean retval;
@@ -447,6 +452,13 @@ public final class SmcMap
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2009/03/03 17:28:53  kgreg99
+// 1. Bugs resolved:
+// #2657779 - modified SmcParser.sm and SmcParserContext.java
+// #2648516 - modified SmcCSharpGenerator.java
+// #2648472 - modified SmcSyntaxChecker.java
+// #2648469 - modified SmcMap.java
+//
 // Revision 1.1  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
 //

@@ -1165,6 +1165,7 @@ public final class SmcCSharpGenerator
             List<SmcTransition> allTransitions =
                 map.getFSM().getTransitions();
             String transName;
+			List<SmcParameter> parameters;            
             int transDefinition;
 
             _source.println();
@@ -1202,6 +1203,18 @@ public final class SmcCSharpGenerator
             for (SmcTransition transition: allTransitions)
             {
                 transName = transition.getName();
+                transName += "(";
+                parameters = transition.getParameters();
+                for ( int i = 0; i < parameters.size(); i++)
+                {
+                	SmcParameter singleParam= parameters.get( i );
+                	transName += singleParam.getType() + " " + singleParam.getName();
+                	if ( i < parameters.size() - 1 )
+                	{
+		                transName += ", ";
+                	}
+                }
+                transName += ")";
 
                 // If the transition is defined in this map's
                 // default state, then the value is 2.
@@ -1406,6 +1419,7 @@ public final class SmcCSharpGenerator
             SmcState defaultState = map.getDefaultState();
             List<SmcTransition> defaultTransitions;
             String transName;
+			List<SmcParameter> parameters;            
             int transDefinition;
 
             // Initialize the default transition list to all the
@@ -1458,6 +1472,18 @@ public final class SmcCSharpGenerator
             for (SmcTransition transition: allTransitions)
             {
                 transName = transition.getName();
+                transName += "(";
+                parameters = transition.getParameters();
+                for ( int i = 0; i < parameters.size(); i++)
+                {
+                	SmcParameter singleParam= parameters.get( i );
+                	transName += singleParam.getType() + " " + singleParam.getName();
+                	if ( i < parameters.size() - 1 )
+                	{
+		                transName += ", ";
+                	}
+                }
+                transName += ")";
 
                 // If the transition is in this state, then its
                 // value is 1.
@@ -2044,6 +2070,13 @@ public final class SmcCSharpGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2009/03/03 17:28:53  kgreg99
+// 1. Bugs resolved:
+// #2657779 - modified SmcParser.sm and SmcParserContext.java
+// #2648516 - modified SmcCSharpGenerator.java
+// #2648472 - modified SmcSyntaxChecker.java
+// #2648469 - modified SmcMap.java
+//
 // Revision 1.1  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
 //

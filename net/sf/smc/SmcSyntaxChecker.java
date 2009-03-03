@@ -349,6 +349,24 @@ public final class SmcSyntaxChecker
 
             _checkFlag = false;
         }
+        // check also push state
+        if ( guard.getTransType() == TransType.TRANS_PUSH )
+        {
+        	endState = guard.getPushState();
+
+	        if (endState.compareTo("nil") != 0 &&
+	                 _findState(endState, guard) == false)
+	        {
+	            _messages.add(
+	                new SmcMessage(
+	                    _fsmName,
+	                    guard.getLineNumber(),
+	                    SmcMessage.ERROR,
+	                    "no such state as \"" + endState + "\"."));
+	
+	            _checkFlag = false;
+	        }
+        }
 
         return;
     } // end of visit(SmcGuard)
@@ -469,6 +487,13 @@ public final class SmcSyntaxChecker
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2009/03/03 17:28:52  kgreg99
+// 1. Bugs resolved:
+// #2657779 - modified SmcParser.sm and SmcParserContext.java
+// #2648516 - modified SmcCSharpGenerator.java
+// #2648472 - modified SmcSyntaxChecker.java
+// #2648469 - modified SmcMap.java
+//
 // Revision 1.7  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
 //
