@@ -208,9 +208,9 @@ public abstract class SmcCodeGenerator
                                  String endState)
     {
         return (
-            (transType == TransType.TRANS_SET &&
-             endState.equals(SmcElement.NIL_STATE) == true) ||
-            transType == TransType.TRANS_PUSH);
+            (transType == TransType.TRANS_SET ||
+             transType == TransType.TRANS_PUSH) &&
+            endState.equals(SmcElement.NIL_STATE) == true);
     } // end of isLoopback(int transType, String)
 
     /**
@@ -465,6 +465,9 @@ public abstract class SmcCodeGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2009/03/16 19:45:26  cwrapp
+// Corrected isLoopback.
+//
 // Revision 1.1  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
 //
