@@ -215,7 +215,8 @@ public final class SmcJavaGenerator
         // inner classes, so generate the context first rather
         // than last.
         _source.print(accessLevel);
-        _source.print(" final class ");
+//         _source.print(" final class ");
+        _source.print(" class ");
         _source.print(context);
         _source.println("Context");
         _source.println("    extends statemap.FSMContext");
@@ -1402,7 +1403,7 @@ public final class SmcJavaGenerator
         // immediately. Otherwise, unset the current state so
         // that if an action tries to issue a transition, it will
         // fail.
-        if (hasActions == false)
+        if (hasActions == false || loopbackFlag == false)
         {
             fqEndStateName = endStateName;
         }
@@ -1412,7 +1413,7 @@ public final class SmcJavaGenerator
         // executed. Remember: actions are not allowed to
         // issue transitions and clearing the current state
         // prevents them from doing do.
-        else if (loopbackFlag == true)
+        else
         {
             fqEndStateName = "endState";
 
@@ -1421,10 +1422,6 @@ public final class SmcJavaGenerator
             _source.print("State ");
             _source.print(fqEndStateName);
             _source.println(" = context.getState();");
-        }
-        else
-        {
-            fqEndStateName = endStateName;
         }
 
         _source.println();
@@ -1671,6 +1668,9 @@ public final class SmcJavaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2009/03/16 19:46:25  cwrapp
+// Removed final from context class. Cleaned up push transition code.
+//
 // Revision 1.1  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
 //
