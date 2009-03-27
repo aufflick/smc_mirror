@@ -28,6 +28,9 @@
 //
 // Change Log
 // $Log$
+// Revision 1.5  2009/03/27 09:41:07  cwrapp
+// Added F. Perrad changes back in.
+//
 // Revision 1.4  2005/05/28 18:44:13  cwrapp
 // Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
 //
@@ -42,17 +45,28 @@ package statemap;
  * an SMC-generated state machine whenever a transition is taken
  * and there is no state currently set. This occurs when a
  * transition is issued from with a transition action.
+ *
+ * @author <a href="mailto:rapp@acm.org">Charles Rapp</a>
  */
+
 public final class StateUndefinedException
     extends RuntimeException
 {
+//---------------------------------------------------------------
+// Member methods.
+//
+
+    //-----------------------------------------------------------
+    // Constructors.
+    //
+
     /**
      * Default constructor.
      */
     public StateUndefinedException()
     {
         super();
-    }
+    } // end of StateUndefinedException()
 
     /**
      * Constructs a <code>StateUndefinedException</code>
@@ -62,5 +76,18 @@ public final class StateUndefinedException
     public StateUndefinedException(String reason)
     {
         super(reason);
-    }
-}
+    } // end of stateUndefinedException(String)
+
+    //
+    // end of Constructors.
+    //-----------------------------------------------------------
+
+//---------------------------------------------------------------
+// Member data.
+//
+
+    //-----------------------------------------------------------
+    // Constants.
+    //
+    private static final long serialVersionUID = 0x060000L;
+} // end of class StateUndefinedException

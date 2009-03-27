@@ -22,17 +22,17 @@ Unix & Windows:
 
 Try several different strings, such as:
 
-    $ java -classpath ${CLASSPATH}:../../../lib/statemap.jar:gen/classes checkstring ""
+    $ java -classpath ${CLASSPATH}:../../../lib/Java/statemap.jar:build/classes checkstring ""
       -> unacceptable
-    $ java -classpath ${CLASSPATH}:../../../lib/statemap.jar:gen/classes checkstring 00
+    $ java -classpath ${CLASSPATH}:../../../lib/Java/statemap.jar:build/classes checkstring 00
       -> unacceptable
-    $ java -classpath ${CLASSPATH}:../../../lib/statemap.jar:gen/classes checkstring 1c
+    $ java -classpath ${CLASSPATH}:../../../lib/Java/statemap.jar:build/classes checkstring 1c
       -> unacceptable
-    $ java -classpath ${CLASSPATH}:../../../lib/statemap.jar:gen/classes checkstring c0
+    $ java -classpath ${CLASSPATH}:../../../lib/Java/statemap.jar:build/classes checkstring c0
       -> unacceptable
-    $ java -classpath ${CLASSPATH}:../../../lib/statemap.jar:gen/classes checkstring abcba
+    $ java -classpath ${CLASSPATH}:../../../lib/Java/statemap.jar:build/classes checkstring abcba
       -> unacceptable
-    $ java -classpath ${CLASSPATH}:../../../lib/statemap.jar:gen/classes checkstring 110010c010011
+    $ java -classpath ${CLASSPATH}:../../../lib/Java/statemap.jar:build/classes checkstring 110010c010011
       -> acceptable
-    $ java -classpath ${CLASSPATH}:../../../lib/statemap.jar:gen/classes checkstring 110010c110010
+    $ java -classpath ${CLASSPATH}:../../../lib/Java/statemap.jar:build/classes checkstring 110010c110010
       -> unacceptable

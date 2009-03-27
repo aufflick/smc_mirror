@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2009/03/27 09:41:46  cwrapp
+// Added F. Perrad changes back in.
+//
 // Revision 1.7  2009/03/01 18:20:38  cwrapp
 // Preliminary v. 6.0.0 commit.
 //
@@ -66,6 +69,7 @@ public final class TrafficCanvas
 // Member methods.
 //
 
+    @SuppressWarnings("unchecked")
     public TrafficCanvas()
     {
         setSize(CANVAS_SIZE.width, CANVAS_SIZE.height);
@@ -88,10 +92,10 @@ public final class TrafficCanvas
         _newVehicleTimerDuration = 4000;
         _lightChanged = false;
 
-        _stoplightQueue = new LinkedList[4];
+        _stoplightQueue = new List[4];
         for (int i = 0; i < 4; ++i)
         {
-            _stoplightQueue[i] = new LinkedList();
+            _stoplightQueue[i] = new LinkedList<Vehicle>();
         }
 
         _stopLight.start();
@@ -435,7 +439,7 @@ public final class TrafficCanvas
         // Put this new vehicle on the list.
         _vehicleList.add(vehicle);
 
-        _vehicle.start();
+        vehicle.start();
 
         // South-bound starting on north edge.
         startingPoint.setLocation(
@@ -449,7 +453,7 @@ public final class TrafficCanvas
                               this);
         vehicle.paint((Graphics2D) getGraphics());
         _vehicleList.add(vehicle);
-        _vehicle.start();
+        vehicle.start();
 
         // West-bound starting on east edge.
         startingPoint.setLocation(
@@ -462,7 +466,7 @@ public final class TrafficCanvas
                               this);
         vehicle.paint((Graphics2D) getGraphics());
         _vehicleList.add(vehicle);
-        _vehicle.start();
+        vehicle.start();
 
         // North-bound starting on south edge.
         startingPoint.setLocation(
@@ -475,7 +479,7 @@ public final class TrafficCanvas
                               this);
         vehicle.paint((Graphics2D) getGraphics());
         _vehicleList.add(vehicle);
-        _vehicle.start();
+        vehicle.start();
 
         return;
     }

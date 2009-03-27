@@ -33,7 +33,7 @@
 + Executing Smc.jar
 -------------------
 
-Run SMC with Java 1.5.0 or later.
+Run SMC with Java 1.6.0 or later.
 
 $ java -jar Smc.jar <options> <.sm source files>
 

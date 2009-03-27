@@ -37,8 +37,14 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.2  2009/03/27 09:41:47  cwrapp
+ * Added F. Perrad changes back in.
+ *
  * Revision 1.1  2009/03/01 18:20:42  cwrapp
  * Preliminary v. 6.0.0 commit.
+ *
+ * Revision 1.10  2008/08/16 14:31:37  fperrad
+ * + detabify
  *
  * Revision 1.9  2007/12/28 12:34:41  cwrapp
  * Version 5.0.1 check-in.
@@ -86,147 +92,148 @@
 %%
 Start
 {
-	// Is this the start of a comment?
-	slash           CommentStart		{}
+    // Is this the start of a comment?
+    slash           CommentStart        {}
 
-	// Multi-character tokens.
-	percent 		PercentStart		{startToken();
+    // Multi-character tokens.
+    percent         PercentStart        {startToken();
                                          addToToken();}
-	alpha           Word				{startToken();
+    alpha           Word                {startToken();
                                          addToToken();}
-	underscore      Word				{startToken();
+    underscore      Word                {startToken();
                                          addToToken();}
     colon           Colon               {startToken();
                                          addToToken();}
 
-	// Single character tokens.
-	left_brace      nil					{startToken();
+    // Single character tokens.
+    left_brace      nil                 {startToken();
                                          addToToken();
-										 endToken(SmcLexer.LEFT_BRACE);}
-	right_brace     nil					{startToken();
+                                         endToken(SmcLexer.LEFT_BRACE);}
+    right_brace     nil                 {startToken();
                                          addToToken();
-										 endToken(SmcLexer.RIGHT_BRACE);}
-	left_bracket	nil					{startToken();
+                                         endToken(SmcLexer.RIGHT_BRACE);}
+    left_bracket    nil                 {startToken();
                                          addToToken();
-										 endToken(SmcLexer.LEFT_BRACKET);}
-	left_paren      nil					{startToken();
+                                         endToken(SmcLexer.LEFT_BRACKET);}
+    left_paren      nil                 {startToken();
                                          addToToken();
-										 endToken(SmcLexer.LEFT_PAREN);}
-	right_paren     nil					{startToken();
+                                         endToken(SmcLexer.LEFT_PAREN);}
+    right_paren     nil                 {startToken();
                                          addToToken();
-										 endToken(SmcLexer.RIGHT_PAREN);}
-	comma           nil					{startToken();
+                                         endToken(SmcLexer.RIGHT_PAREN);}
+    comma           nil                 {startToken();
                                          addToToken();
-										 endToken(SmcLexer.COMMA);}
-	semicolon       nil					{startToken();
+                                         endToken(SmcLexer.COMMA);}
+    semicolon       nil                 {startToken();
                                          addToToken();
-										 endToken(SmcLexer.SEMICOLON);}
+                                         endToken(SmcLexer.SEMICOLON);}
     equal           nil                 {startToken();
                                          addToToken();
                                          endToken(SmcLexer.EQUAL);}
 
-	dollar          nil					{startToken();
+    dollar          nil                 {startToken();
                                          addToToken();
-										 endToken(SmcLexer.DOLLAR);}
+                                         endToken(SmcLexer.DOLLAR);}
 
-	// Ignore whitespace and end-of-line.
-	whitespace      nil					{}
-	EOL             nil					{}
+    // Ignore whitespace and end-of-line.
+    whitespace      nil                 {}
+    EOL             nil                 {}
 
-	unicode         nil					{startToken();
-                                                 addToToken();
-                                                 outputChar();
-									      badToken("Unknown character");}
+    unicode         nil                 {startToken();
+                                         addToToken();
+                                         outputChar();
+                                         badToken("Unknown character");}
 }
 
 CommentStart
 {
-	asterisk	    push(OldCommentMap::Start)	{}
-	slash           push(NewCommentMap::Start)
+    asterisk        push(OldCommentMap::Start)
                                         {}
-	commentDone     Start				{}
+    slash           push(NewCommentMap::Start)
+                                        {}
+    commentDone     Start               {}
 
-	// Any other character following a slash means this is
+    // Any other character following a slash means this is
     // a plain-old slash.
-	Default 	   Start			    {ungetChar();
-										 endToken(SmcLexer.SLASH);}
+    Default         Start               {ungetChar();
+                                         endToken(SmcLexer.SLASH);}
 }
 
 PercentStart
 {
-	// This the start of a source code.
-	left_brace      push(SourceMap::Start)
+    // This the start of a source code.
+    left_brace      push(SourceMap::Start)
                                         {startToken();}
-	sourceDone      Start				{}
+    sourceDone      Start               {}
 
-	// This is the map delimiter.
-	percent 		Start				{addToToken();
-										 endToken(SmcLexer.EOD);}
+    // This is the map delimiter.
+    percent         Start               {addToToken();
+                                         endToken(SmcLexer.EOD);}
 
-	// Look for %start, %map, %class, %header or %package.
-	alpha            PercentKeyword		{addToToken();}
+    // Look for %start, %map, %class, %header or %package.
+    alpha            PercentKeyword     {addToToken();}
 
-	// Any other character following a percent is a malformed token.
-	right_brace     Start				{addToToken();
-										 badToken("End-of-source appears without matching start-of-source");}
+    // Any other character following a percent is a malformed token.
+    right_brace     Start               {addToToken();
+                                         badToken("End-of-source appears without matching start-of-source");}
 
-	Default         Start			    {addToToken();
-										 badToken("Unknown % directive");}
+    Default         Start               {addToToken();
+                                         badToken("Unknown % directive");}
 }
 
 PercentKeyword
 {
-	// Keep collecting characters until whitespace or EOL is reached.
-	whitespace      Start				{checkPercentKeyword();}
-	EOL             Start				{checkPercentKeyword();}
+    // Keep collecting characters until whitespace or EOL is reached.
+    whitespace      Start               {checkPercentKeyword();}
+    EOL             Start               {checkPercentKeyword();}
 
-	// Only letters are allowed after the percent.
-	alpha           nil					{addToToken();}
+    // Only letters are allowed after the percent.
+    alpha           nil                 {addToToken();}
 
-	// Anything else is a bad token.
-	Default         Start				{addToToken();
-										 badToken("Unknown % directive");}
+    // Anything else is a bad token.
+    Default         Start               {addToToken();
+                                         badToken("Unknown % directive");}
 }
 
 Word
 {
-	alpha           nil					{addToToken();}
-	digit           nil					{addToToken();}
-	underscore      nil					{addToToken();}
-	period          nil					{addToToken();}
+    alpha           nil                 {addToToken();}
+    digit           nil                 {addToToken();}
+    underscore      nil                 {addToToken();}
+    period          nil                 {addToToken();}
     colon           Scope               {}
 
-	whitespace      Start				{checkKeyword();}
-	EOL             Start				{checkKeyword();}
+    whitespace      Start               {checkKeyword();}
+    EOL             Start               {checkKeyword();}
 
-	// All other characters are a part of other tokens. "Unread"
-	// the tokens so they can be read the next call to nextToken()
-	// and then pass this token back.
-	left_brace      Start				{ungetChar();
-										 checkKeyword();}
-	right_brace  	Start				{ungetChar();
-										 checkKeyword();}
-	left_bracket	Start				{ungetChar();
-										 checkKeyword();}
-	left_paren      Start				{ungetChar();
-										 checkKeyword();}
-	right_paren     Start				{ungetChar();
-										 checkKeyword();}
-	comma           Start				{ungetChar();
-										 checkKeyword();}
-	semicolon       Start				{ungetChar();
-										 checkKeyword();}
-	slash           Start				{ungetChar();
-										 checkKeyword();}
-	asterisk        Start               {ungetChar();
+    // All other characters are a part of other tokens. "Unread"
+    // the tokens so they can be read the next call to nextToken()
+    // and then pass this token back.
+    left_brace      Start               {ungetChar();
                                          checkKeyword();}
-	equal           Start               {ungetChar();
+    right_brace     Start               {ungetChar();
                                          checkKeyword();}
-	dollar          Start               {ungetChar();
+    left_bracket    Start               {ungetChar();
+                                         checkKeyword();}
+    left_paren      Start               {ungetChar();
+                                         checkKeyword();}
+    right_paren     Start               {ungetChar();
+                                         checkKeyword();}
+    comma           Start               {ungetChar();
+                                         checkKeyword();}
+    semicolon       Start               {ungetChar();
+                                         checkKeyword();}
+    slash           Start               {ungetChar();
+                                         checkKeyword();}
+    asterisk        Start               {ungetChar();
+                                         checkKeyword();}
+    equal           Start               {ungetChar();
+                                         checkKeyword();}
+    dollar          Start               {ungetChar();
                                          checkKeyword();}
 
-	// The remaining characters form an invalid token.
-	Default         Start				{badToken("Unknown token");}
+    // The remaining characters form an invalid token.
+    Default         Start               {badToken("Unknown token");}
 }
 
 Scope
@@ -258,46 +265,48 @@ Default
 Start
 {
     // This grammar correctly handles nested comments!
-	slash           CommentStart		{}
+    slash           CommentStart        {}
 
     // A comment's end is */.
-	asterisk	    CommentEnd			{}
+    asterisk        CommentEnd          {}
 }
 
 CommentStart
 {
-	asterisk		push(OldCommentMap::Start)	{}
-	slash           push(NewCommentMap::Start)	{}
-	commentDone		Start				{}
+    asterisk        push(OldCommentMap::Start)
+                                        {}
+    slash           push(NewCommentMap::Start)
+                                        {}
+    commentDone     Start               {}
 }
 
 CommentEnd
 {
-	asterisk	    nil					{}
-	slash           pop(commentDone)	{}
+    asterisk        nil                 {}
+    slash           pop(commentDone)    {}
 }
 
 Default
 {
-	alpha           Start				{}
-	digit           Start				{}
-	percent         Start				{}
-	slash           Start				{}
-	asterisk		Start				{}
-	left_brace      Start				{}
-	right_brace     Start				{}
-	left_bracket	Start				{}
-	left_paren      Start				{}
-	right_paren     Start				{}
-	period          Start				{}
-	colon           Start				{}
-	comma           Start				{}
-	semicolon		Start				{}
-	underscore      Start				{}
+    alpha           Start               {}
+    digit           Start               {}
+    percent         Start               {}
+    slash           Start               {}
+    asterisk        Start               {}
+    left_brace      Start               {}
+    right_brace     Start               {}
+    left_bracket    Start               {}
+    left_paren      Start               {}
+    right_paren     Start               {}
+    period          Start               {}
+    colon           Start               {}
+    comma           Start               {}
+    semicolon       Start               {}
+    underscore      Start               {}
     equal           Start               {}
-	dollar          Start				{}
-	whitespace   	Start				{}
-	EOL             Start				{}
+    dollar          Start               {}
+    whitespace      Start               {}
+    EOL             Start               {}
     unicode         Start               {}
 }
 %%
@@ -307,30 +316,30 @@ Default
 // Wait here for the end of the // comment.
 Start
 {
-	// The end of line marks the end of the comment.
-	EOL             pop(commentDone)	{}
+    // The end of line marks the end of the comment.
+    EOL             pop(commentDone)    {}
 }
 
 Default
 {
-	alpha           Start				{}
-	digit           Start				{}
-	percent  		Start				{}
-	slash           Start				{}
-	asterisk	    Start				{}
-	left_brace      Start				{}
-	right_brace     Start				{}
-	left_bracket	Start				{}
-	left_paren      Start				{}
-	right_paren     Start				{}
-	period          Start				{}
-	colon           Start				{}
-	comma           Start				{}
-	semicolon		Start				{}
-	underscore      Start				{}
+    alpha           Start               {}
+    digit           Start               {}
+    percent         Start               {}
+    slash           Start               {}
+    asterisk        Start               {}
+    left_brace      Start               {}
+    right_brace     Start               {}
+    left_bracket    Start               {}
+    left_paren      Start               {}
+    right_paren     Start               {}
+    period          Start               {}
+    colon           Start               {}
+    comma           Start               {}
+    semicolon       Start               {}
+    underscore      Start               {}
     equal           Start               {}
-	dollar          Start				{}
-	whitespace      Start				{}
+    dollar          Start               {}
+    whitespace      Start               {}
     unicode         Start               {}
 }
 %%
@@ -340,48 +349,48 @@ Default
 // Look for the end of the source block.
 Start
 {
-	// Is this the end of the raw source code?
-	percent 		SourceEnd			{}
+    // Is this the end of the raw source code?
+    percent         SourceEnd           {}
 
-	// No, the end has not come.
-	Default		    Start               {addToToken();}
+    // No, the end has not come.
+    Default         Start               {addToToken();}
 }
 
 SourceEnd
 {
-	// Yes, we are add the end of the raw source code.
-	right_brace     pop(sourceDone)		{endToken(SmcLexer.SOURCE);}
+    // Yes, we are add the end of the raw source code.
+    right_brace     pop(sourceDone)     {endToken(SmcLexer.SOURCE);}
 
-	// Perhaps this is the end of the raw source.
-	percent 		nil					{addToToken("%");}
+    // Perhaps this is the end of the raw source.
+    percent         nil                 {addToToken("%");}
 
-	// Nope, this is not the end of the raw source.
-	Default		    Start				{addToToken("%");
-										 addToToken();}
+    // Nope, this is not the end of the raw source.
+    Default         Start               {addToToken("%");
+                                         addToToken();}
 }
 
 // This state is never used. It is here to force smc to generate
 // all the necessary default transitions.
 NeverUsed
 {
-    alpha           nil					{}
-    digit           nil					{}
-    slash           nil					{}
-    asterisk	    nil					{}
-    left_brace      nil					{}
-    right_brace     nil					{}
-    left_bracket	nil					{}
-    left_paren      nil					{}
-    right_paren     nil					{}
-    period          nil					{}
-    colon           nil					{}
-    comma           nil					{}
-    semicolon		nil					{}
-    underscore      nil					{}
+    alpha           nil                 {}
+    digit           nil                 {}
+    slash           nil                 {}
+    asterisk        nil                 {}
+    left_brace      nil                 {}
+    right_brace     nil                 {}
+    left_bracket    nil                 {}
+    left_paren      nil                 {}
+    right_paren     nil                 {}
+    period          nil                 {}
+    colon           nil                 {}
+    comma           nil                 {}
+    semicolon       nil                 {}
+    underscore      nil                 {}
     equal           nil                 {}
-    dollar          nil					{}
-    whitespace      nil					{}
+    dollar          nil                 {}
+    whitespace      nil                 {}
     unicode         nil                 {}
-    EOL             nil					{}
+    EOL             nil                 {}
 }
 %%

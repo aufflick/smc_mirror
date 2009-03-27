@@ -160,27 +160,26 @@ public final class SmcMap
      */
     public boolean isKnownState(String stateName)
     {
-        if (stateName.compareToIgnoreCase("default" ) == 0 )
-        {
-            return this.hasDefaultState();
-        }
-
         SmcState state;
         Iterator<SmcState> it;
         boolean retval;
 
-        for (it = _states.iterator(), retval = false;
-             it.hasNext() == true && retval == false;
-            )
+        if (stateName.compareToIgnoreCase("default" ) == 0 )
         {
-            state = it.next();
-            if (stateName.equals(
-                    state.getInstanceName()) == true)
+            retval = this.hasDefaultState();
+        }
+        else
+        {
+            for (it = _states.iterator(), retval = false;
+                 it.hasNext() == true && retval == false;
+                )
             {
-                retval = true;
+                state = it.next();
+                retval =
+                    stateName.equals(state.getInstanceName());
             }
         }
-
+        
         return (retval);
     } // end of isKnownState(String)
 
@@ -212,9 +211,8 @@ public final class SmcMap
      */
     public List<SmcState> getAllStates()
     {
-        List<SmcState> retval = new ArrayList<SmcState>();
+        List<SmcState> retval = new ArrayList<SmcState>(_states);
 
-        retval.addAll(_states);
         if (_defaultState != null)
         {
             retval.add(_defaultState);
@@ -452,6 +450,9 @@ public final class SmcMap
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2009/03/27 09:41:47  cwrapp
+// Added F. Perrad changes back in.
+//
 // Revision 1.2  2009/03/03 17:28:53  kgreg99
 // 1. Bugs resolved:
 // #2657779 - modified SmcParser.sm and SmcParserContext.java
@@ -461,6 +462,9 @@ public final class SmcMap
 //
 // Revision 1.1  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
+//
+// Revision 1.11  2008/08/15 22:21:35  fperrad
+// + add method getAllStates
 //
 // Revision 1.10  2008/02/08 08:46:02  fperrad
 // C : optimize footprint when no Entry action or no Exit action

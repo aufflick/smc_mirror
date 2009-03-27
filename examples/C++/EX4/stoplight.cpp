@@ -33,6 +33,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2009/03/27 09:41:45  cwrapp
+// Added F. Perrad changes back in.
+//
 // Revision 1.8  2009/03/01 18:20:37  cwrapp
 // Preliminary v. 6.0.0 commit.
 //
@@ -71,9 +74,15 @@ extern DWORD Gtimeout;
 
 namespace cpp_ex4
 {
-    Stoplight::Stoplight(Directions direction)
-    : _fsm(*this, direction)
+    Stoplight::Stoplight(const statemap::State& state)
+    : _fsm(*this, state)
     {}
+
+    void Stoplight::start()
+    {
+        _fsm.enterStartState();
+        return;
+    }
 
     void Stoplight::TurnLight(StopLights light, LightColors color)
     {
@@ -130,22 +139,20 @@ namespace cpp_ex4
         return;
     }
 
-    StopLight* Stoplight::Initialize(Directions direction)
+    Stoplight* Stoplight::Initialize(Directions direction)
     {
+        Stoplight *retval(NULL);
+
         switch(direction)
         {
             case NORTH_SOUTH:
                 cout << "Turning the north-south lights green." << endl;
-                retval = new Stoplight(direction);
-                _fsm.enterStartState();
-                SetTimer(NSGreenTimer);
+                retval = new Stoplight(cpp_ex4::StopMap::NorthSouthGreen);
                 break;
 
             case EAST_WEST:
                 cout << "Turning the east-west lights green." << endl;
-                retval = new Stoplight(direction);
-                _fsm.enterStartState();
-                SetTimer(EWGreenTimer);
+                retval = new Stoplight(StopMap::EastWestGreen);
                 break;
         }
 

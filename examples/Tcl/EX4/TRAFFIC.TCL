@@ -32,6 +32,9 @@ exec wish -f "$0" "$@"
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.7  2009/03/27 09:41:47  cwrapp
+# Added F. Perrad changes back in.
+#
 # Revision 1.6  2008/02/04 12:38:37  fperrad
 # fix filename case on linux
 #
@@ -45,7 +48,7 @@ exec wish -f "$0" "$@"
 # Initial revision
 #
 
-lappend auto_path ../../../lib
+lappend auto_path ../../../lib/Tcl
 
 package require Itcl;
 package require statemap;

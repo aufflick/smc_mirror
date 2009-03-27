@@ -30,6 +30,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2009/03/27 09:41:46  cwrapp
+// Added F. Perrad changes back in.
+//
 // Revision 1.6  2009/03/01 18:20:38  cwrapp
 // Preliminary v. 6.0.0 commit.
 //
@@ -68,13 +71,13 @@ public final class Vehicle
 
         // Uncomment to see debug output.
         // _fsm.setDebugFlag(true);
-
-        _fsm.Start();
     }
 
     public void start()
     {
-        _fsm.start();
+        _fsm.enterStartState();
+        _fsm.Start();
+
         return;
     }
 

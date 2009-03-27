@@ -28,6 +28,9 @@ exec wish -f "$0" "$@"
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.8  2009/03/27 09:41:47  cwrapp
+# Added F. Perrad changes back in.
+#
 # Revision 1.7  2008/02/04 12:39:02  fperrad
 # fix filename case on linux
 #
@@ -77,7 +80,7 @@ set widget(rev,.top17.scr18) {TaskYScrollbar}
 set widget(rev,.top17.scr22) {MessageXScrollbar}
 set widget(rev,.top17.scr23) {MessageYScrollbar}
 
-lappend auto_path ../../../lib
+lappend auto_path ../../../lib/Tcl
 
 #################################
 # USER DEFINED PROCEDURES

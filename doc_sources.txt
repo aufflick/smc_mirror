@@ -1,3 +1,7 @@
+./lib/Java/FSMContext.java
+./lib/Java/State.java
+./lib/Java/StateUndefinedException.java
+./lib/Java/TransitionUndefinedException.java
 ./net/sf/smc/Smc.java
 ./net/sf/smc/SmcSyntaxChecker.java
 ./net/sf/smc/generator/SmcCGenerator.java

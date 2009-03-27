@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2009/03/27 09:41:46  cwrapp
+// Added F. Perrad changes back in.
+//
 // Revision 1.8  2009/03/01 18:20:39  cwrapp
 // Preliminary v. 6.0.0 commit.
 //
@@ -83,6 +86,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+@SuppressWarnings("unchecked")
 public abstract class TcpConnection
     implements DatagramSocketListener,
                TimerListener
@@ -93,7 +97,7 @@ public abstract class TcpConnection
 
     public final void start()
     {
-        _fsm.start();
+        _fsm.enterStartState();
         return;
     }
 

@@ -58,7 +58,7 @@ RM_F=		rm -f
 RM_RF=		rm -rf
 
 JAVADOC=		javadoc
-DOC_VERSION=	$(subst _,.,$(VERSION))
+DOC_VERSION=	6_0_0
 DOC_DIR=		docs/javadocs
 DOC_SOURCES=	./doc_sources.txt
 
@@ -101,6 +101,9 @@ $(SMC_STAGING_DIR) :    $(STAGING_DIR)
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.19  2009/03/27 09:41:44  cwrapp
+# Added F. Perrad changes back in.
+#
 # Revision 1.18  2009/03/01 18:20:36  cwrapp
 # Preliminary v. 6.0.0 commit.
 #

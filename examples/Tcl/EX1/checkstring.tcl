@@ -33,6 +33,9 @@ exec tclsh "$0" "$@"
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.6  2009/03/27 09:41:46  cwrapp
+# Added F. Perrad changes back in.
+#
 # Revision 1.5  2009/03/01 18:20:39  cwrapp
 # Preliminary v. 6.0.0 commit.
 #
@@ -46,7 +49,7 @@ exec tclsh "$0" "$@"
 # Initial revision
 #
 
-lappend auto_path ../../../lib
+lappend auto_path ../../../lib/Tcl
 
 package require Itcl;
 

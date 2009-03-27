@@ -33,6 +33,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2009/03/27 09:41:45  cwrapp
+// Added F. Perrad changes back in.
+//
 // Revision 1.5  2005/05/28 13:31:18  cwrapp
 // Updated C++ examples.
 //
@@ -54,44 +57,56 @@ extern int EWGreenTimer;
 %map StopMap
 %%
 EastWestGreen
+    Entry
+    {
+        SetTimer(EWGreenTimer);
+    }
 {
     Timeout
         EastWestYellow
         {
             TurnLight(EWLIGHT, YELLOW);
-            SetTimer(YellowTimer);
         }
 }
 
 EastWestYellow
+    Entry
+    {
+        SetTimer(YellowTimer);
+    }
 {
     Timeout
         NorthSouthGreen
         {
             TurnLight(EWLIGHT, RED);
             TurnLight(NSLIGHT, GREEN);
-            SetTimer(NSGreenTimer);
         }
 }
 
 NorthSouthGreen
+    Entry
+    {
+        SetTimer(NSGreenTimer);
+    }
 {
     Timeout
         NorthSouthYellow
         {
             TurnLight(NSLIGHT, YELLOW);
-            SetTimer(YellowTimer);
         }
 }
 
 NorthSouthYellow
+    Entry
+    {
+        SetTimer(YellowTimer);
+    }
 {
     Timeout
         EastWestGreen
         {
             TurnLight(NSLIGHT, RED);
             TurnLight(EWLIGHT, GREEN);
-            SetTimer(EWGreenTimer);
         }
 }
 %%

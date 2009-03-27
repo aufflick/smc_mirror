@@ -3,7 +3,7 @@
 
   <property name="build.dir" location="build" />
   <property name="build.classes.dir" location="${build.dir}/classes" />
-  <property name="lib.dir" location="../../../lib" />
+  <property name="lib.dir" location="../../../lib/Java" />
   <property name="src.dir" location="src" />
   <property name="gen.dir" location="gen" />
   <property name="bin.dir" location="../../../bin" />
@@ -40,8 +40,8 @@
   </target>
 
   <target name="gen-one">
-     <java dir="${gen.dir}" jar="${smc.jar}" classpathref="class.path" fork="true">
-       <arg line="-java -d ${src.dir} ${smfile}" />
+     <java dir="${gen.dir}" jar="${smc.jar}" fork="true">
+       <arg line="-java -d ${src.dir} -return ${smfile}" />
      </java>
   </target>
 

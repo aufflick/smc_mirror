@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2009/03/27 09:41:46  cwrapp
+// Added F. Perrad changes back in.
+//
 // Revision 1.7  2009/03/01 18:20:39  cwrapp
 // Preliminary v. 6.0.0 commit.
 //
@@ -93,7 +96,7 @@ public final class Task
 
     public void start()
     {
-        _fsm.start();
+        _fsm.enterStartState();
         return;
     }
 

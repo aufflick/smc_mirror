@@ -19,6 +19,10 @@ Unix & Windows:
 + Executing
 -----------
 
+To run:
+
+    $ java -classpath ${CLASSPATH}:../../../lib/Java/statemap.jar:build/classes smc_ex4.Traffic
+
 Click on the "Configure..." button and modify the demo's
 settings. Increase the vehicle speed and appearance
 rate. Decrease the stoplight times.

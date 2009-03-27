@@ -754,6 +754,7 @@ public final class Smc
             else
             {
                 File sourceFile;
+                String fileName;
 
                 for (; i < args.length && retcode == true; ++i)
                 {
@@ -787,7 +788,19 @@ public final class Smc
                         }
                         else
                         {
-                            _sourceFileList.add(args[i]);
+                            // Normalize the file name. If the /
+                            // file name separator is used and
+                            // this is Windows, then replace with
+                            // \.
+                            fileName = args[i];
+                            if (File.separatorChar != '/')
+                            {
+                                fileName =
+                                    fileName.replaceAll(
+                                        "/", File.separator);
+                            }
+
+                            _sourceFileList.add(fileName);
                         }
                     }
                 }
@@ -969,7 +982,7 @@ public final class Smc
         stream.println(
             "\t-sync     Synchronize generated Java code ");
         stream.print("\t          ");
-        stream.println("(use with -java, -groovy, -scala, -vb and -csharp only)");
+        stream.println("(use with -csharep, -java, -groovy, -scala and -vb only)");
         stream.println(
             "\t-noex     Do not generate C++ exception throws ");
         stream.print("\t          ");
@@ -985,8 +998,9 @@ public final class Smc
         stream.println("(use this option with ANT)");
         stream.println("\t-reflect  Generate reflection code");
         stream.print("\t          ");
-        stream.print("(use with -java, -tcl, -vb, -csharp, ");
-        stream.println("-groovy, -lua, -perl, -php, -python, -ruby and -scala only)");
+        stream.print("(use with -csharp, -groovy, -java, -lua,");
+        stream.print(" -perl, -php, -python, -ruby, -scala, ");
+        stream.println("-tcl and -vb only)");
         stream.println("\t-generic  Use generic collections");
         stream.print("\t        ");
         stream.println("(use with -java and -reflect only)");
@@ -1768,6 +1782,9 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.32  2009/03/27 09:41:47  cwrapp
+// Added F. Perrad changes back in.
+//
 // Revision 1.31  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
 //

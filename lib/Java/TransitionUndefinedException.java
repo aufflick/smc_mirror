@@ -28,6 +28,9 @@
 //
 // Change Log
 // $Log$
+// Revision 1.5  2009/03/27 09:41:07  cwrapp
+// Added F. Perrad changes back in.
+//
 // Revision 1.4  2005/05/28 18:44:13  cwrapp
 // Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
 //
@@ -42,15 +45,32 @@ package statemap;
  * an SMC-generated state machine whenever a transition is taken
  * which:
  * <ol>
- *   <li>Is not explicitly defined in the current state.
- *   <li>Is not explicitly defined in the current FSM's default
- *       state.
- *   <li>There is no Default transition in the current state.
+ *   <li>
+ *     Is not explicitly defined in the current state <i>and</i>
+ *   </li>
+ *   <li>
+ *     Is not explicitly defined in the current FSM's default
+ *     state <i>and</i>
+ *   </li>
+ *   <li>
+ *     There is no Default transition in the current state.
+ *   </li>
  * </ol>
+ *
+ * @author <a href="mailto:rapp@acm.org">Charles Rapp</a>
  */
+
 public final class TransitionUndefinedException
     extends RuntimeException
 {
+//---------------------------------------------------------------
+// Member methods.
+//
+
+    //-----------------------------------------------------------
+    // Constructors.
+    //
+
     /**
      * Constructs a <code>TransitionUndefinedException</code>
      * with no detail message.
@@ -58,7 +78,7 @@ public final class TransitionUndefinedException
     public TransitionUndefinedException()
     {
         super();
-    }
+    } // end of TransitionUndefinedException()
 
     /**
      * Constructs a <code>TransitionUndefinedException</code>
@@ -68,5 +88,18 @@ public final class TransitionUndefinedException
     public TransitionUndefinedException(String reason)
     {
         super(reason);
-    }
-}
+    } // end of TransitionUndefinedException(String)
+
+    //
+    // end of Constructors.
+    //-----------------------------------------------------------
+
+//---------------------------------------------------------------
+// Member data.
+//
+
+    //-----------------------------------------------------------
+    // Constants.
+    //
+    private static final long serialVersionUID = 0x060000L;
+} // end fo class TransitionUndefinedException

@@ -20,15 +20,15 @@ Unix & Windows:
 
 Try several different strings, such as:
 
-    $ java -classpath ${CLASSPATH}:../../../lib/statemap.jar:gen/classes checkstring ""
+    $ java -classpath ${CLASSPATH}:../../../lib/Java/statemap.jar:build/classes checkstring ""
       -> acceptable
-    $ java -classpath ${CLASSPATH}:../../../lib/statemap.jar:gen/classes checkstring 000
+    $ java -classpath ${CLASSPATH}:../../../lib/Java/statemap.jar:build/classes checkstring 000
       -> acceptable
-    $ java -classpath ${CLASSPATH}:../../../lib/statemap.jar:gen/classes checkstring 00011
+    $ java -classpath ${CLASSPATH}:../../../lib/Java/statemap.jar:build/classes checkstring 00011
       -> acceptable
-    $ java -classpath ${CLASSPATH}:../../../lib/statemap.jar:gen/classes checkstring 111
+    $ java -classpath ${CLASSPATH}:../../../lib/Java/statemap.jar:build/classes checkstring 111
       -> acceptable
-    $ java -classpath ${CLASSPATH}:../../../lib/statemap.jar:gen/classes checkstring 000111100
+    $ java -classpath ${CLASSPATH}:../../../lib/Java/statemap.jar:build/classes checkstring 000111100
       -> unacceptable
-    $ java -classpath ${CLASSPATH}:../../../lib/statemap.jar:gen/classes checkstring 00011a1b10c0
+    $ java -classpath ${CLASSPATH}:../../../lib/Java/statemap.jar:build/classes checkstring 00011a1b10c0
       -> unacceptable

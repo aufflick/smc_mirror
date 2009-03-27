@@ -2,11 +2,11 @@
 //
 // The contents of this file are subject to the Mozilla Public
 // License Version 1.1 (the "License"); you may not use this file
-// except in compliance with the License. You may obtain a copy of
-// the License at http://www.mozilla.org/MPL/
+// except in compliance with the License. You may obtain a copy
+// of the License at http://www.mozilla.org/MPL/
 //
-// Software distributed under the License is distributed on an "AS
-// IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+// Software distributed under the License is distributed on an
+// "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
 //
@@ -20,7 +20,7 @@
 // Contributor(s):
 //
 // State Machine
-//	AppClass
+//    AppClass
 //
 // Description
 //  This state machine is recognizes the regular expression wcw(r) or
@@ -31,6 +31,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2009/03/27 09:41:46  cwrapp
+// Added F. Perrad changes back in.
+//
 // Revision 1.7  2008/08/16 15:27:18  fperrad
 // + EX3 uses 'jump' when the end state is in another map
 //
@@ -55,78 +58,95 @@
 
 %map StartMap
 %%
-// State	Transition		End State           Action(s)
-PushIt {
-			Zero			push(ZerosMap::PushIt)		{}
-			One				push(OnesMap::PushIt)		{}
-			C				PopIt					{}
-			OK				PopIt					{}
-			Error			Unacceptable		{}
+// State    Transition      End State               Action(s)
+PushIt
+{
+            Zero            push(ZerosMap::PushIt)  {}
+            One             push(OnesMap::PushIt)   {}
+            C               PopIt                   {}
+            OK              PopIt                   {}
+            Error           Unacceptable            {}
 }
 
-PopIt {
-			EOS				Acceptable			{Acceptable();}
-			Default			Unacceptable		{}
+PopIt
+{
+            EOS             Acceptable              {Acceptable();}
+            Default         Unacceptable            {}
 }
 
-Acceptable {}
+Acceptable
+{}
 
-Unacceptable {
-		 	Default			nil					{}
+Unacceptable
+{
+            Default         nil                     {}
 }
 
-Default {
-			EOS				Unacceptable		{Unacceptable();}
-			Unknown			Unacceptable		{}
+Default
+{
+            EOS             Unacceptable            {Unacceptable();}
+            Unknown         Unacceptable            {}
 }
 %%
 
 %map ZerosMap
 %%
-// State	Transition		End State           Action(s)
-PushIt {
-        	Zero			push(PushIt)            {}
-			One				push(OnesMap::PushIt)		{}
-			C				PopIt					{}
-			OK				PopIt					{}
-			Error			jump(StartMap::Unacceptable)  {emptyStateStack();}
+// State    Transition      End State               Action(s)
+PushIt
+{
+            Zero            push(PushIt)            {}
+            One             push(OnesMap::PushIt)   {}
+            C               PopIt                   {}
+            OK              PopIt                   {}
+            Error           jump(StartMap::Unacceptable)
+                                                    {emptyStateStack();}
 }
 
-PopIt {
-			Zero			pop(OK)				{}
-			Default			pop(Error)			{}
+PopIt
+{
+            Zero            pop(OK)                 {}
+            Default         pop(Error)              {}
 }
 
-Default {
-			EOS				jump(StartMap::Unacceptable)  {
-                                                emptyStateStack();
-                                                Unacceptable();
-                                                }
-			Unknown			jump(StartMap::Unacceptable)  {emptyStateStack();}
+Default
+{
+            EOS             jump(StartMap::Unacceptable)
+                                                    {
+                                                        emptyStateStack();
+                                                        Unacceptable();
+                                                    }
+            Unknown         ump(StartMap::Unacceptable)
+                                                    {emptyStateStack();}
 }
 %%
 
 %map OnesMap
 %%
-// State	Transition		End State           Action(s)
-PushIt {
-			Zero			push(ZerosMap::PushIt)		{}
-			One				push(PushIt)            {}
-			C				PopIt					{}
-			OK				PopIt					{}
-			Error			jump(StartMap::Unacceptable)  {emptyStateStack();}
+// State    Transition      End State               Action(s)
+PushIt
+{
+            Zero            push(ZerosMap::PushIt)  {}
+            One             push(PushIt)            {}
+            C               PopIt                   {}
+            OK              PopIt                   {}
+            Error           jump(StartMap::Unacceptable)
+                                                    {emptyStateStack();}
 }
 
-PopIt {
-			One				pop(OK)				{}
-			Default			pop(Error)			{}
+PopIt
+{
+            One             pop(OK)                 {}
+            Default         pop(Error)              {}
 }
 
-Default {
-			EOS				jump(StartMap::Unacceptable)  {
-                                                emptyStateStack();
-                                                Unacceptable();
-                                                }
-			Unknown			jump(StartMap::Unacceptable)  {emptyStateStack();}
+Default
+{
+            EOS             jump(StartMap::Unacceptable)
+                                                    {
+                                                        emptyStateStack();
+                                                        Unacceptable();
+                                                    }
+            Unknown         jump(StartMap::Unacceptable) 
+                                                    {emptyStateStack();}
 }
 %%

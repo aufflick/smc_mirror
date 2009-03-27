@@ -105,6 +105,8 @@ smc_dist :	$(SMC_STAGING_DIR)
 		  zip -b . -r $(ZIP_FILE) ./smc_$(VERSION))
 
 src_dist :	$(SMC_RELEASE_DIR)
+		$(CP_F) lib/C++/statemap.h $(SMC_RELEASE_DIR)/lib
+		$(CP_F) lib/Java/statemap.jar $(SMC_RELEASE_DIR)/lib
 		(cd ..; \
 		    $(RM_F) $(SRC_TAR_FILE) \
 			  $(SRC_TAR_GZ_FILE) \
@@ -137,6 +139,9 @@ realclean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.14  2009/03/27 09:41:44  cwrapp
+# Added F. Perrad changes back in.
+#
 # Revision 1.13  2009/03/01 18:20:36  cwrapp
 # Preliminary v. 6.0.0 commit.
 #

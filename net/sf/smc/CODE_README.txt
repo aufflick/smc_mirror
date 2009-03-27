@@ -92,6 +92,35 @@
      Made .Net dll CLS-compliant.
      (SF bug 2378072)
 
+(All)
+     Checking if a map has multiple default states.
+     (SF bug 2648469)
+
+(All)
+     Checking push transition to see if it contains a valid
+     state.
+     (SF bug 2648472)
+
+(C#)
+     Corrected C# reflection code generated when there is an
+     overloaded transition name.
+     (SF bug 2648516)
+
+(GraphViz)
+     Corrected dot file generated when transition action contains
+     an "=" operator.
+     (SF bug 2657779)
+
+(Java)
+     Remove "final" keyword from generated context class
+     declaration.
+     (SF bug 2672508)
+
+(All)
+     Normalized -d and -headerd paths to make sure the specified
+     paths use the system file name separator character.
+     (SF bug 2677138)
+
 
 
 

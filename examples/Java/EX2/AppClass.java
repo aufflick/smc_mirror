@@ -30,6 +30,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2009/03/27 09:41:46  cwrapp
+// Added F. Perrad changes back in.
+//
 // Revision 1.5  2009/03/01 18:20:38  cwrapp
 // Preliminary v. 6.0.0 commit.
 //
@@ -60,7 +63,7 @@ public class AppClass
             Length;
         char c;
 
-        _fsm.start();
+        _fsm.enterStartState();
 
         for (i = 0, Length = string.length();
              i < Length;

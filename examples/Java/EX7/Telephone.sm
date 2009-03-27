@@ -33,6 +33,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2009/03/27 09:41:46  cwrapp
+// Added F. Perrad changes back in.
+//
 // Revision 1.7  2006/04/22 12:45:24  cwrapp
 // Version 4.3.1
 //
@@ -62,15 +65,15 @@
 %%
 
 OnHook
-Entry
-{
-    updateClock();
-    startClockTimer();
-}
-Exit
-{
-    stopTimer("ClockTimer");
-}
+    Entry
+    {
+        updateClock();
+        startClockTimer();
+    }
+    Exit
+    {
+        stopTimer("ClockTimer");
+    }
 {
     // We are handling the caller's side of the connection.
     OffHook
@@ -87,6 +90,11 @@ Exit
             updateClock();
             startClockTimer();
         }
+
+    // Oops.
+    OnHook
+        nil
+        {}
 }
 
 // The number is being dialed.
@@ -142,16 +150,16 @@ Routing
 }
 
 NYCTemp
-Entry
-{
-    loop("ringing");
-    startTimer("RingTimer", 10000);
-}
-Exit
-{
-    stopTimer("RingTimer");
-    stopLoop("ringing");
-}
+    Entry
+    {
+        loop("ringing");
+        startTimer("RingTimer", 10000);
+    }
+    Exit
+    {
+        stopTimer("RingTimer");
+        stopLoop("ringing");
+    }
 {
     RingTimer
         PlayingMessage
@@ -161,16 +169,16 @@ Exit
 }
 
 Time
-Entry
-{
-    loop("ringing");
-    startTimer("RingTimer", 10000);
-}
-Exit
-{
-    stopTimer("RingTimer");
-    stopLoop("ringing");
-}
+    Entry
+    {
+        loop("ringing");
+        startTimer("RingTimer", 10000);
+    }
+    Exit
+    {
+        stopTimer("RingTimer");
+        stopLoop("ringing");
+    }
 {
     RingTimer
         PlayingMessage
@@ -180,16 +188,16 @@ Exit
 }
 
 DepositMoney
-Entry
-{
-    loop("ringing");
-    startTimer("RingTimer", 5000);
-}
-Exit
-{
-    stopTimer("RingTimer");
-    stopLoop("ringing");
-}
+    Entry
+    {
+        loop("ringing");
+        startTimer("RingTimer", 5000);
+    }
+    Exit
+    {
+        stopTimer("RingTimer");
+        stopLoop("ringing");
+    }
 {
     RingTimer
         PlayingMessage
@@ -199,14 +207,14 @@ Exit
 }
 
 BusySignal
-Entry
-{
-    loop("busy");
-}
-Exit
-{
-    stopLoop("busy");
-}
+    Entry
+    {
+        loop("busy");
+    }
+    Exit
+    {
+        stopLoop("busy");
+    }
 {
     // Wait for on hook only.
 }
@@ -229,14 +237,14 @@ PlayingMessage
 }
 
 MessagePlayed
-Entry
-{
-    startTimer("OffHookTimer", 10000);
-}
-Exit
-{
-    stopTimer("OffHookTimer");
-}
+    Entry
+    {
+        startTimer("OffHookTimer", 10000);
+    }
+    Exit
+    {
+        stopTimer("OffHookTimer");
+    }
 {
     OffHookTimer
         LeftOffHook
@@ -248,16 +256,16 @@ Exit
 //
 // Let someone know the phone has been left off the hook.
 LeftOffHook
-Entry
-{
-    startTimer("LoopTimer", 10000);
-    loop("phone_off_hook");
-}
-Exit
-{
-    stopTimer("LoopTimer");
-    stopLoop("phone_off_hook");
-}
+    Entry
+    {
+        startTimer("LoopTimer", 10000);
+        loop("phone_off_hook");
+    }
+    Exit
+    {
+        stopTimer("LoopTimer");
+        stopLoop("phone_off_hook");
+    }
 {
     LoopTimer
         WaitForOnHook
@@ -269,16 +277,16 @@ Exit
 }
 
 InvalidDigit
-Entry
-{
-    startTimer("LoopTimer", 10000);
-    loop("fast_busy");
-}
-Exit
-{
-    stopTimer("LoopTimer");
-    stopLoop("fast_busy");
-}
+    Entry
+    {
+        startTimer("LoopTimer", 10000);
+        loop("fast_busy");
+    }
+    Exit
+    {
+        stopTimer("LoopTimer");
+        stopLoop("fast_busy");
+    }
 {
     LoopTimer
         WaitForOnHook
@@ -334,16 +342,16 @@ Default
 %map PhoneNumber
 %%
 DialTone
-Entry
-{
-    loop("dialtone");
-    startTimer("OffHookTimer", 10000);
-}
-Exit
-{
-    stopTimer("OffHookTimer");
-    stopLoop("dialtone");
-}
+    Entry
+    {
+        loop("dialtone");
+        startTimer("OffHookTimer", 10000);
+    }
+    Exit
+    {
+        stopTimer("OffHookTimer");
+        stopLoop("dialtone");
+    }
 {
     // If an invalid digit is dialed, give up collecting
     // digits immediately.
@@ -387,14 +395,14 @@ Exit
 
 // Collect the area and then move on to the local number.
 LongDistance
-Entry
-{
-    startTimer("OffHookTimer", 10000);
-}
-Exit
-{
-    stopTimer("OffHookTimer");
-}
+    Entry
+    {
+        startTimer("OffHookTimer", 10000);
+    }
+    Exit
+    {
+        stopTimer("OffHookTimer");
+    }
 {
     // If an invalid digit is dialed, give up collecting
     // digits immediately.
@@ -426,14 +434,14 @@ Exit
 
 // Check if this is a 911 call.
 OneOneStart
-Entry
-{
-    startTimer("OffHookTimer", 10000);
-}
-Exit
-{
-    stopTimer("OffHookTimer");
-}
+    Entry
+    {
+        startTimer("OffHookTimer", 10000);
+    }
+    Exit
+    {
+        stopTimer("OffHookTimer");
+    }
 {
     // If an invalid digit is dialed, give up collecting
     // digits immediately.
@@ -464,14 +472,14 @@ Exit
 
 // Almost there.
 NineOne
-Entry
-{
-    startTimer("OffHookTimer", 10000);
-}
-Exit
-{
-    stopTimer("OffHookTimer");
-}
+    Entry
+    {
+        startTimer("OffHookTimer", 10000);
+    }
+    Exit
+    {
+        stopTimer("OffHookTimer");
+    }
 {
     // If an invalid digit is dialed, give up collecting
     // digits immediately.
@@ -508,14 +516,14 @@ Exit
 
 // Collect the three digit exchange.
 Exchange
-Entry
-{
-    startTimer("OffHookTimer", 10000);
-}
-Exit
-{
-    stopTimer("OffHookTimer");
-}
+    Entry
+    {
+        startTimer("OffHookTimer", 10000);
+    }
+    Exit
+    {
+        stopTimer("OffHookTimer");
+    }
 {
     // If an invalid digit is dialed, give up collecting
     // digits immediately.
@@ -547,14 +555,14 @@ Exit
 
 // Process a local call.
 LocalCall
-Entry
-{
-    startTimer("OffHookTimer", 10000);
-}
-Exit
-{
-    stopTimer("OffHookTimer");
-}
+    Entry
+    {
+        startTimer("OffHookTimer", 10000);
+    }
+    Exit
+    {
+        stopTimer("OffHookTimer");
+    }
 {
     // If an invalid digit is dialed, give up collecting
     // digits immediately.

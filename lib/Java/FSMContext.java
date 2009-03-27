@@ -39,14 +39,14 @@ import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.EmptyStackException;
 
-//
-// statemap.FSMContext --
-//
-//  All Java classes wanting to use an SMC-generated state
-//  machine must extend this class. Since FSMContext provides
-//  functionality, it was not possible to implement it as an
-//  interface. See the SMC FAQ for how a class can use a state
-//  machine when that class is already extending another class.
+/**
+ * Base class for all SMC-generated application context classes.
+ * This class stores the FSM name, current and previous states,
+ * the state stack, debugging information and state change
+ * listeners.
+ *
+ * @author <a href="mailto:rapp@acm.org">Charles Rapp</a>
+ */
 
 public abstract class FSMContext
     implements Serializable
@@ -98,20 +98,29 @@ public abstract class FSMContext
     // Get methods.
     //
 
-    // Returns the FSM name.
+    /**
+     * Returns the FSM name.
+     * @return the FSM name.
+     */
     public String getName()
     {
         return (_name);
     } // end of getName()
 
-    // When debug is set to true, the state machine
-    // will print messages to the console.
+    /**
+     * When debug is set to {@code true}, the state machine
+     * will print messages to the console.
+     * @return {@code true} if debug output is generated.
+     */
     public boolean getDebugFlag()
     {
         return(_debugFlag && _debugStream != null);
     } // end of getDebugFlag()
 
-    // Write the debug output to this stream.
+    /**
+     * Writes the debug output to this stream.
+     * @return the debug output stream.
+     */
     public PrintStream getDebugStream()
     {
         return (_debugStream == null ?
@@ -119,8 +128,12 @@ public abstract class FSMContext
                 _debugStream);
     } // end of getDebugStream()
 
-    // Is this state machine in a transition? If state is null,
-    // then true; otherwise, false.
+    /**
+     * Returns {@code true} if this FSM is in a transition and
+     * {@code false} otherwise.
+     * @return {@code true} if this FSM is in a transition and
+     * {@code false} otherwise.
+     */
     public boolean isInTransition()
     {
         return(_state == null ? true : false);
@@ -128,20 +141,24 @@ public abstract class FSMContext
 
     // NOTE: getState() is defined in the SMC-generated
     // FSMContext subclass.
-
+    
+    /**
+     * If this FSM is in transition, then returns the previous
+     * state which the last transition left.
+     * @return the previous state which the current transition
+     * left. May return {@code null}.
+     */
     public State getPreviousState()
         throws NullPointerException
     {
-        if (_previousState == null)
-        {
-            throw (new NullPointerException());
-        }
-        else
-        {
-            return(_previousState);
-        }
+        return(_previousState);
     } // end of getPreviousState()
 
+    /**
+     * If this FSM is in transition, then returns the transition
+     * name. If not in trnasition, then returns an empty string.
+     * @return the current transition name.
+     */
     public String getTransition()
     {
         return(_transition);
@@ -155,7 +172,10 @@ public abstract class FSMContext
     // Set methods.
     //
 
-    // Sets the FSM name.
+    /**
+     * Sets the FSM name.
+     * @param name The finite state machine name.
+     */
     public void setName(String name)
     {
         if (name != null &&
@@ -168,18 +188,32 @@ public abstract class FSMContext
         return;
     } // end of setName(String)
 
+    /**
+     * Turns debug output on if {@code flag} is {@code true} and
+     * off if {@code flag} is {@code false}.
+     * @param flag {@code true} to turn debuggin on and
+     * {@code false} to turn debugging off.
+     */
     public void setDebugFlag(boolean flag)
     {
         _debugFlag = flag;
         return;
     } // end of setDebugFlag(boolean)
 
+    /**
+     * Sets the debug output stream to the given value.
+     * @param stream The debug output stream.
+     */
     public void setDebugStream(PrintStream stream)
     {
         _debugStream = stream;
         return;
     } // end of setDebugStream(PrintStream)
 
+    /**
+     * Sets the current state to the given value.
+     * @param state The current state.
+     */
     public void setState(State state)
     {
         if (getDebugFlag() == true)
@@ -198,6 +232,10 @@ public abstract class FSMContext
         return;
     } // end of setState(State)
 
+    /**
+     * Places the current state into the previous state sets
+     * the current state to {@code null}.
+     */
     public void clearState()
     {
         _previousState = _state;
@@ -206,6 +244,13 @@ public abstract class FSMContext
         return;
     } // end of clearState()
 
+    /**
+     * Pushes the current state on top of the state stack and
+     * sets the current state to {@code state}.
+     * @param state The new current state.
+     * @exception NullPointerException
+     * if {@code state} is {@code null}.
+     */
     public void pushState(State state)
     {
         State previousState = _state;
@@ -237,6 +282,13 @@ public abstract class FSMContext
         return;
     } // end of pushState(State)
 
+    /**
+     * Sets the previous state to the current state and pops
+     * the top state off the stack and places it into the
+     * current state.
+     * @exception EmptyStackException
+     * if the state stack is empty.
+     */
     public void popState()
         throws EmptyStackException
     {
@@ -279,10 +331,16 @@ public abstract class FSMContext
         return;
     } // end of popState()
 
+    /**
+     * Empties the state stack.
+     */
     public void emptyStateStack()
     {
-        _stateStack.clear();
-        _stateStack = null;
+        if (_stateStack != null)
+        {
+            _stateStack.clear();
+            _stateStack = null;
+        }
 
         return;
     } // end of emptyStateStack()
@@ -296,58 +354,101 @@ public abstract class FSMContext
     // Note: if a transition does not cause a state change,
     // then no state change event is fired.
 
+    /**
+     * Adds a PropertyChangeListener to the listener list. The
+     * listener is registered for state property changes only.
+     * The same listener may be added more than once. For each
+     * state change, the listener will be invoked the number of
+     * times it was added. If {@code listener} is {@code null},
+     * no exception is thrown and no action is taken.
+     * @param listener The PropertyChangeListener to be added.
+     */
     public void
         addStateChangeListener(PropertyChangeListener listener)
     {
-        _listeners.addPropertyChangeListener("State", listener);
+        _listeners.addPropertyChangeListener(
+            STATE_PROPERTY, listener);
         return;
     }
 
+    /**
+     * Removes a PropertyChangeListener for the state change
+     * property. If {@code listener} was added more than once
+     * to the same event source, it will be notified one less
+     * time after being removed. If {@code listener} is
+     * {@code null} or was never added, no exception is thrown
+     * and no action is taken.
+     * @param listener The PropertyChangeListener to be removed.
+     */
     public void
         removeStateChangeListener(
             PropertyChangeListener listener)
     {
         _listeners.removePropertyChangeListener(
-            "State", listener);
+            STATE_PROPERTY, listener);
         return;
-    }
+    } // end of removeStateChangeListener(PropertyChangeListener)
 
 //---------------------------------------------------------------
 // Member data
 //
 
-    // The FSM name.
+    /**
+     * The FSM name.
+     */
     transient protected String _name;
 
-    // The current state.
+    /**
+     * The current state. Will be {@code null} while in
+     * transition.
+     */
     transient protected State _state;
 
-    // The current transition *name*. Used for debugging
-    // purposes.
+    /**
+     * The current transition name. Used for debugging
+     * purposes. Will be en empty string when not in
+     * transition.
+     */
     transient protected String _transition;
 
-    // Remember what state a transition left.
-    // Do no persist the previous state because an FSM should be
-    // serialized while in transition.
+    /**
+     * Stores which state a transition left. May be {@code null}.
+     */
     transient protected State _previousState;
 
-    // This stack is used when a push transition is taken.
+    /**
+     * This stack is used to store the current state when a push
+     * transition is taken.
+     */
     transient protected java.util.Stack<State> _stateStack;
 
-    // When this flag is set to true, this class will print
-    // out debug messages.
+    /**
+     * When this flag is set to {@code true}, this class will
+     * print out debug messages.
+     */
     transient protected boolean _debugFlag;
 
-    // Write debug output to this stream.
+    /**
+     * Write debug output to this stream.
+     */
     transient protected PrintStream _debugStream;
 
-    // Store the property change listeners here.
+    // Stores the property change listeners here.
     transient private PropertyChangeSupport _listeners;
+
+    //-----------------------------------------------------------
+    // Constants.
+    //
+    private static final long serialVersionUID = 0x060000L;
+    private static final String STATE_PROPERTY = "State";
 } // end of class FSMContext
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.12  2009/03/27 09:41:07  cwrapp
+// Added F. Perrad changes back in.
+//
 // Revision 1.11  2009/03/01 18:20:40  cwrapp
 // Preliminary v. 6.0.0 commit.
 //

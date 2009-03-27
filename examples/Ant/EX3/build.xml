@@ -3,7 +3,7 @@
 
   <property name="build.dir" location="build" />
   <property name="build.classes.dir" location="${build.dir}/classes" />
-  <property name="lib.dir" location="../../../lib" />
+  <property name="lib.dir" location="../../../lib/Java" />
   <property name="src.dir" location="src" />
   <property name="gen.dir" location="gen" />
   <property name="bin.dir" location="../../../bin" />
@@ -34,8 +34,8 @@
   </target>
 
   <target name="gen" description="Generate state support code (smc)" depends="init">
-     <java dir="${gen.dir}" jar="${smc.jar}" classpathref="class.path" fork="true">
-     <arg line="-java -d ${src.dir} ${sm.file}" />
+     <java dir="${gen.dir}" jar="${smc.jar}" fork="true">
+     <arg line="-java -d ${src.dir} -return ${sm.file}" />
     </java>
   </target>
 

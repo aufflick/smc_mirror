@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2009/03/27 09:41:45  cwrapp
+// Added F. Perrad changes back in.
+//
 // Revision 1.7  2009/03/01 18:20:37  cwrapp
 // Preliminary v. 6.0.0 commit.
 //
@@ -126,6 +129,8 @@ int main()
 		cerr << "Failed to create stoplight object." << endl;
 		exit(1);
 	}
+
+    TheLight->start();
 
 #ifdef WIN32
     // Wait for either the app to end or for timers to expire.

@@ -33,6 +33,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2009/03/27 09:41:45  cwrapp
+// Added F. Perrad changes back in.
+//
 // Revision 1.6  2009/03/01 18:20:37  cwrapp
 // Preliminary v. 6.0.0 commit.
 //
@@ -63,6 +66,8 @@ namespace cpp_ex4
         virtual ~Stoplight()
         {};
 
+        void start();
+
         // Change a stoplight's color.
         void TurnLight(StopLights light, LightColors color);
 
@@ -82,7 +87,7 @@ namespace cpp_ex4
 
         // Specify the initial direction with
         // the green light.
-        Stoplight(Directions direction);
+        Stoplight(const statemap::State& state);
 
     }; // end of class Stoplight
 }; // end of namespace cpp_ex4

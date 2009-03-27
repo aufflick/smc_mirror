@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2009/03/27 09:41:46  cwrapp
+// Added F. Perrad changes back in.
+//
 // Revision 1.1  2007/01/15 00:23:49  cwrapp
 // Release 4.4.0 initial commit.
 //
@@ -40,7 +43,7 @@
 
 %map Map1
 %%
-// State    Transition	End State	Action(s)
+// State    Transition  End State   Action(s)
 Start
 {
             Zero        Zeros       {}
@@ -69,6 +72,7 @@ Error
 {
             Zero        nil         {}
             One         nil         {}
+            Unknown     nil         {}
             EOS         nil         {Unacceptable();}
 }
 

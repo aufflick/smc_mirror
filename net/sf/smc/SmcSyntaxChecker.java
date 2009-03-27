@@ -337,7 +337,7 @@ public final class SmcSyntaxChecker
             _checkFlag = false;
         }
         // "nil" is always a valid end state.
-        else if (endState.compareTo("nil") != 0 &&
+        else if (endState.compareTo(SmcElement.NIL_STATE) != 0 &&
                  _findState(endState, guard) == false)
         {
             _messages.add(
@@ -349,13 +349,24 @@ public final class SmcSyntaxChecker
 
             _checkFlag = false;
         }
+
         // check also push state
         if ( guard.getTransType() == TransType.TRANS_PUSH )
         {
-        	endState = guard.getPushState();
+            endState = guard.getPushState();
 
-	        if (endState.compareTo("nil") != 0 &&
-	                 _findState(endState, guard) == false)
+	        if (endState.compareTo(SmcElement.NIL_STATE) == 0)
+            {
+	            _messages.add(
+	                new SmcMessage(
+	                    _fsmName,
+	                    guard.getLineNumber(),
+	                    SmcMessage.ERROR,
+	                    "may not push to nil state."));
+	
+	            _checkFlag = false;
+            }
+            else if (_findState(endState, guard) == false)
 	        {
 	            _messages.add(
 	                new SmcMessage(
@@ -487,6 +498,9 @@ public final class SmcSyntaxChecker
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2009/03/27 09:41:47  cwrapp
+// Added F. Perrad changes back in.
+//
 // Revision 1.8  2009/03/03 17:28:52  kgreg99
 // 1. Bugs resolved:
 // #2657779 - modified SmcParser.sm and SmcParserContext.java
