@@ -34,6 +34,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.4  2009/03/27 15:26:55  fperrad
+ * C : the function Context_EnterStartState is generated only if FSM hasEntryActions
+ *
  * Revision 1.3  2009/03/01 18:20:37  cwrapp
  * Preliminary v. 6.0.0 commit.
  *
@@ -61,7 +64,6 @@ extern long Gtimeout;
 void smc_ex4_Stoplight_Init(struct smc_ex4_Stoplight* this, enum Directions direction)
 {
     smc_ex4_StoplightContext_Init(&this->_fsm, this);
-    smc_ex4_StoplightContext_EnterStartState(&this->_fsm);
 
     switch(direction)
     {

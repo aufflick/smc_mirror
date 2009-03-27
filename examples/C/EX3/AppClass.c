@@ -27,6 +27,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.4  2009/03/27 15:26:55  fperrad
+ * C : the function Context_EnterStartState is generated only if FSM hasEntryActions
+ *
  * Revision 1.3  2009/03/01 18:20:37  cwrapp
  * Preliminary v. 6.0.0 commit.
  *
@@ -50,7 +53,6 @@ void AppClass_Init(struct AppClass *this)
 
 	AppClassContext_Init(&this->_fsm, this);
 	FSM_STACK(&this->_fsm, AppStack);
-     AppClassContext_EnterStartState(&this->_fsm);
 
 	/* Uncomment to see debug output. */
 	/* setDebugFlag(&this->_fsm, 1); */

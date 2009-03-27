@@ -434,15 +434,18 @@ public final class SmcCGenerator
         _source.println("}");
 
         // EnterStartState method.
-        _source.println();
-        _source.print("void ");
-        _source.print(context);
-        _source.print("Context_EnterStartState(struct ");
-        _source.print(context);
-        _source.println("Context* fsm)");
-        _source.println("{");
-        _source.println("    ENTRY_STATE(getState(fsm));");
-        _source.println("}");
+        if (fsm.hasEntryActions() == true)
+        {
+            _source.println();
+            _source.print("void ");
+            _source.print(context);
+            _source.print("Context_EnterStartState(struct ");
+            _source.print(context);
+            _source.println("Context* fsm)");
+            _source.println("{");
+            _source.println("    ENTRY_STATE(getState(fsm));");
+            _source.println("}");
+        }
 
         // Generate the context class.
         // Generate a method for every transition in every map
@@ -1336,6 +1339,9 @@ public final class SmcCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2009/03/27 15:26:55  fperrad
+// C : the function Context_EnterStartState is generated only if FSM hasEntryActions
+//
 // Revision 1.2  2009/03/27 09:41:47  cwrapp
 // Added F. Perrad changes back in.
 //

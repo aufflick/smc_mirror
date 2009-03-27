@@ -312,11 +312,14 @@ public final class SmcHeaderCGenerator
         _source.println("*);");
 
         // EnterStartState method.
-        _source.print("extern void ");
-        _source.print(context);
-        _source.print("Context_EnterStartState(struct ");
-        _source.print(context);
-        _source.println("Context*);");
+        if (fsm.hasEntryActions() == true)
+        {
+            _source.print("extern void ");
+            _source.print(context);
+            _source.print("Context_EnterStartState(struct ");
+            _source.print(context);
+            _source.println("Context*);");
+        }
 
         // Generate a method for every transition in every map
         // *except* the default transition.
@@ -402,6 +405,9 @@ public final class SmcHeaderCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2009/03/27 15:26:55  fperrad
+// C : the function Context_EnterStartState is generated only if FSM hasEntryActions
+//
 // Revision 1.2  2009/03/27 09:41:47  cwrapp
 // Added F. Perrad changes back in.
 //
