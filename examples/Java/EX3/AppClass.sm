@@ -31,6 +31,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2009/03/28 11:56:00  cwrapp
+// Corrected keyword misspelling.
+//
 // Revision 1.8  2009/03/27 09:41:46  cwrapp
 // Added F. Perrad changes back in.
 //
@@ -115,7 +118,7 @@ Default
                                                         emptyStateStack();
                                                         Unacceptable();
                                                     }
-            Unknown         ump(StartMap::Unacceptable)
+            Unknown         jump(StartMap::Unacceptable)
                                                     {emptyStateStack();}
 }
 %%
