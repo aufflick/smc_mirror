@@ -113,7 +113,7 @@ namespace statemap
             state_ = state;
             transition_ = "";
             previousState_ = null;
-            stateStack_ = null;
+            stateStack_ = new System.Collections.Stack();
             debugFlag_ = false;
             debugStream_ = null;
         } // end of FSMContext()
@@ -235,10 +235,6 @@ namespace statemap
 
             if (state_ != null)
             {
-                if (stateStack_ == null)
-                {
-                    stateStack_ = new System.Collections.Stack();
-                }
 
                 stateStack_.Push(state_);
             }
@@ -358,6 +354,9 @@ namespace statemap
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2009/03/30 19:05:44  kgreg99
+// 1. Patch for bug  #2722356. Variable stateStack_ is initialized in the constructor and not by the first "push". This prevents an unhandled exception in EmptyStateStack() without pushing a state.
+//
 // Revision 1.6  2009/03/01 18:20:40  cwrapp
 // Preliminary v. 6.0.0 commit.
 //
