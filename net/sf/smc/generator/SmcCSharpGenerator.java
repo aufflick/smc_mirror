@@ -1938,9 +1938,7 @@ public final class SmcCSharpGenerator
         // 1) this is a standard, non-loopback transition or
         // 2) a push transition.
         if ((transType == TransType.TRANS_SET &&
-              endStateName.equals(
-                  SmcElement.NIL_STATE) == false &&
-              endStateName.equals(stateName) == false) ||
+             loopbackFlag == false) ||
              transType == TransType.TRANS_PUSH)
         {
             _source.print(indent3);
@@ -2070,6 +2068,9 @@ public final class SmcCSharpGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2009/03/30 21:23:47  kgreg99
+// 1. Patch for bug #2679204. Source code was compared to SmcJavaGenerator. At the end of function Visit(SmcGuard ... ) the condition to emit Entry() code was changed. Notice: there are other disimilarities in checking conditions in that function !
+//
 // Revision 1.2  2009/03/03 17:28:53  kgreg99
 // 1. Bugs resolved:
 // #2657779 - modified SmcParser.sm and SmcParserContext.java
