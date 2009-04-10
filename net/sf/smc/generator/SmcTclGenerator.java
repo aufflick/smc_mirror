@@ -210,6 +210,8 @@ public final class SmcTclGenerator
         _source.print(_indent);
         _source.println("# Member functions.");
         _source.println();
+
+        // The default constructor.
         _source.print(_indent);
         _source.println("    constructor {owner} {");
         _source.print(_indent);
@@ -218,6 +220,20 @@ public final class SmcTclGenerator
         _source.print(_pkgScope);
         _source.print(startState);
         _source.println("};");
+        _source.print(_indent);
+        _source.println("    } {");
+        _source.print(_indent);
+        _source.println("        set _owner $owner;");
+        _source.print(_indent);
+        _source.println("    }");
+
+        // The initial state constructor.
+        _source.print(_indent);
+        _source.println("    constructor {owner state} {");
+        _source.print(_indent);
+        _source.print("        ");
+        _source.println(
+            "::statemap::FSMContext::constructor $state;");
         _source.print(_indent);
         _source.println("    } {");
         _source.print(_indent);
@@ -1485,6 +1501,9 @@ public final class SmcTclGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2009/04/10 14:07:00  cwrapp
+// Added initial state constructor.
+//
 // Revision 1.2  2009/03/27 09:41:47  cwrapp
 // Added F. Perrad changes back in.
 //
