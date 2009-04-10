@@ -417,8 +417,12 @@ public final class SmcObjCGenerator
         // Dump the initWithOwner method
         // - (id)initWithOwner:(Foo*)owner;
         // {
-        //     [self setOwner:owner];
-        //     [self setState:startState]
+        //     self = [super initWithState: [Map Start];
+        //     if (!self) {
+        //         return nil;
+        //     }
+        //     _owner = owner;
+        //     return self;
         // }
         _source.print(_indent);
         _source.print("- (id)initWithOwner:(");
@@ -429,7 +433,9 @@ public final class SmcObjCGenerator
         _source.println("{");
         _source.print(_indent);
         _source.print("    ");
-        _source.println("self = [super init];");
+        _source.print("self = [super initWithState:");
+        _source.print(fqStateName);
+        _source.println("];");
         _source.print(_indent);
         _source.print("    ");
         _source.println("if (!self)");
@@ -443,16 +449,6 @@ public final class SmcObjCGenerator
         _source.print(_indent);
         _source.print("    ");
         _source.println("_owner = owner;");
-        _source.print(_indent);
-        _source.print("    ");
-        _source.print("[self setState:");
-        _source.print(fqStateName);
-        _source.println("];");
-
-        _source.print(_indent);
-        _source.print("    [");
-        _source.print(fqStateName);
-        _source.println(" Entry:self];");
 
         _source.print(_indent);
         _source.print("    ");
@@ -460,7 +456,51 @@ public final class SmcObjCGenerator
         _source.print(_indent);
         _source.println("}");
 
+        // Dump the initWithOwner state method
+        // - (id)initWithOwner:(Foo*)owner state:(SMCState*)aState;
+        // {
+        //     self = [super initWithState: aState;
+        //     if (!self) {
+        //         return nil;
+        //     }
+        //     _owner = owner;
+        //     return self;
+        // }
+        _source.print(_indent);
+        _source.print("- (id)initWithOwner:(");
+        _source.print(context);
+        _source.print("*)");
+        _source.println("owner state:(SMCState*)aState;");
+        _source.print(_indent);
+        _source.println("{");
+        _source.print(_indent);
+        _source.print("    ");
+        _source.println("self = [super initWithState: aState];");
+        _source.print(_indent);
+        _source.print("    ");
+        _source.println("if (!self)");
+        _source.print(_indent);
+        _source.println("{");
+        _source.print(_indent);
+        _source.print("        ");
+        _source.println("return nil;");
+        _source.print(_indent);
+        _source.println("    }");
+        _source.print(_indent);
+        _source.print("    ");
+        _source.println("_owner = owner;");
 
+        _source.print(_indent);
+        _source.print("    ");
+        _source.println("return self;");
+        _source.print(_indent);
+        _source.println("}");
+
+        // Output the state method
+        // - (FooState*)state;
+        // {
+        //     return (FooState*)_state;
+        // }
         _source.print(_indent);
         _source.print("- (" );
         _source.print(context);
@@ -475,6 +515,11 @@ public final class SmcObjCGenerator
         _source.print(_indent);
         _source.println("}");
 
+        // Output the owner method.
+        // - (Foo*)owner;
+        // {
+        //     return _owner;
+        // }
         _source.print(_indent);
         _source.print("- (");
         _source.print(context);
@@ -484,6 +529,20 @@ public final class SmcObjCGenerator
         _source.print(_indent);
         _source.print("    ");
         _source.println("return _owner;");
+        _source.print(_indent);
+        _source.println("}");
+
+        // Output the enterStartState method.
+        // - (void)enterStartState;
+        // {
+        //     [[self state] Entry:self];
+        // }
+        _source.print(_indent);
+        _source.println("- (void)enterStartState;");
+        _source.print(_indent);
+        _source.println("{");
+        _source.print(_indent);
+        _source.println("    [[self state] Entry:self];");
         _source.print(_indent);
         _source.println("}");
 
@@ -1256,6 +1315,9 @@ public final class SmcObjCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2009/04/10 14:02:48  cwrapp
+// Set initial state via initializer.
+//
 // Revision 1.2  2009/03/27 09:41:47  cwrapp
 // Added F. Perrad changes back in.
 //

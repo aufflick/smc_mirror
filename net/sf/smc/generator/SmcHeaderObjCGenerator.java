@@ -334,6 +334,12 @@ public final class SmcHeaderObjCGenerator
         _source.println("owner;");
 
         _source.print(_indent);
+        _source.print("- (id)initWithOwner:(");
+        _source.print(context);
+        _source.print("*)");
+        _source.println("owner state:(SMCState*)aState;");
+
+        _source.print(_indent);
         _source.print("- (");
         _source.print(context);
         _source.println("*)owner;");
@@ -343,6 +349,10 @@ public final class SmcHeaderObjCGenerator
         _source.print(context);
         _source.println("State*)state;");
 
+        _source.println();
+
+        _source.print(_indent);
+        _source.println("- (void)enterStartState;");
         _source.println();
 
         // Generate a method for every transition in every map
@@ -611,6 +621,9 @@ public final class SmcHeaderObjCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2009/04/10 14:02:48  cwrapp
+// Set initial state via initializer.
+//
 // Revision 1.2  2009/03/27 09:41:47  cwrapp
 // Added F. Perrad changes back in.
 //

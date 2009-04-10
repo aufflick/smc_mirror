@@ -91,6 +91,7 @@
     NSString* _transition;
     BOOL _debugFlag;    
 }
+- (id)initWithState: (SMCState*)aState;
 - (void)emptyStateStack;
 - (BOOL)debugFlag;
 - (void)setDebugFlag:(BOOL)newDebugFlag;
@@ -109,6 +110,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2009/04/10 14:02:10  cwrapp
+// Set initial state via initializer.
+//
 // Revision 1.1  2007/01/15 00:23:50  cwrapp
 // Release 4.4.0 initial commit.
 //

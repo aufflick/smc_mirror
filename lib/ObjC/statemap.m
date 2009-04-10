@@ -126,6 +126,20 @@
 @end
 
 @implementation SMCFSMContext
+- (id) initWithState: (SMCState*) aState;
+{
+    self = [super init];
+
+    if (!self)
+    {
+        return nil;
+    }
+
+    _state = aState;
+
+    return self;
+}
+
 - (BOOL)isInTransition;
 {
     return(_state == NULL ? YES : NO);
@@ -262,6 +276,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2009/04/10 14:02:10  cwrapp
+// Set initial state via initializer.
+//
 // Revision 1.1  2007/01/15 00:23:50  cwrapp
 // Release 4.4.0 initial commit.
 //
