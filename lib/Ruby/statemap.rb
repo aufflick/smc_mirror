@@ -77,8 +77,8 @@ module Statemap
 	# of the derived class.
 	class FSMContext
 
-		def initialize()
-			@_state = nil
+		def initialize(initState)
+			@_state = initState
 			@_previous_state = nil
 			@_state_stack = []
 			@_transition = nil
