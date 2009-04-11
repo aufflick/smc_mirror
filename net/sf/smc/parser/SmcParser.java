@@ -227,7 +227,7 @@ public final class SmcParser
                 context.length() > 0 &&
                 start != null &&
                 start.length() > 0);
-    }
+    } // end of isValidHeader()
 
     /* package */ boolean isValidStartState(String name)
     {
@@ -247,18 +247,18 @@ public final class SmcParser
         }
 
         return (retval);
-    }
+    } // end of isValidStartState(String)
 
     /* package */ boolean isDuplicateMap(String name)
     {
         return (_fsm.findMap(name) == null ?
                 false : true);
-    }
+    } // end of isDuplicateMap(String)
 
     /* package */ boolean isDuplicateState(String name)
     {
         return (_mapInProgress.isKnownState(name));
-    }
+    } // end of isDuplicateState(String)
 
     //
     // end of State Machine Guards
@@ -276,7 +276,7 @@ public final class SmcParser
                            SmcMessage.WARNING,
                            errorMsg));
         return;
-    }
+    } // end of warning(String, int)
 
     /* package */ void error(String errorMsg, int lineNumber)
     {
@@ -289,7 +289,7 @@ public final class SmcParser
         _parseStatus = false;
 
         return;
-    }
+    } // end of error(String, int)
 
     /* package */ int getLineNumber()
     {
@@ -308,19 +308,17 @@ public final class SmcParser
         _lexer.setRawMode(openChar.charAt(0),
                           closeChar.charAt(0));
         return;
-    }
+    } // end of setRawMode(String, String)
 
     // Put the lexer into the raw mode used for
     // collecting parameter types.
-    /* package */ void setRawMode(String openChar,
-                                  String closeChar,
-                                  String separator)
+    /* package */ void setRawMode2()
     {
-        _lexer.setRawMode(openChar.charAt(0),
-                          closeChar.charAt(0),
-                          separator.charAt(0));
+        _lexer.setRawMode(
+            OPEN_CLAUSE_LIST, CLOSE_CLAUSE_LIST, ')', ',');
+
         return;
-    }
+    } // end of setRawMode2()
 
     // Put the lexer into the raw mode used for collecting
     // parameter types.
@@ -328,20 +326,20 @@ public final class SmcParser
     {
         _lexer.setRawMode(closeChars);
         return;
-    }
+    } // end of setRawMode(String)
 
     // Put the lexer into cooked mode.
     /* package */ void setCookedMode()
     {
         _lexer.setCookedMode();
         return;
-    }
+    } // end of setCookedMode()
 
     /* package */ void setHeaderLine(int lineNumber)
     {
         _fsm.setHeaderLine(lineNumber);
         return;
-    }
+    } // end of setHeaderList(int)
 
     /* package */ void setSource(String source)
     {
@@ -359,7 +357,7 @@ public final class SmcParser
         }
 
         return;
-    }
+    } // end of setSource(String)
 
     /* package */ void setStartState(String stateName)
     {
@@ -1233,7 +1231,7 @@ public final class SmcParser
         }
 
         return;
-    }
+    } // end of createArgument(String, int)
 
     /* package */ void addArgument()
     {
@@ -1256,7 +1254,7 @@ public final class SmcParser
         }
 
         return;
-    }
+    } // end of addArgument()
 
     /* package */ void clearArguments()
     {
@@ -1267,7 +1265,7 @@ public final class SmcParser
         }
 
         return;
-    }
+    } // end of clearArguments()
 
     //
     // end of State Machine Actions
@@ -1426,6 +1424,10 @@ public final class SmcParser
     // Statics.
     //
 
+    // List of characters which open and clause subexpressions.
+    private static List<Character> OPEN_CLAUSE_LIST;
+    private static List<Character> CLOSE_CLAUSE_LIST;
+
     // Create a hashmap which associates token names with
     // parser transitions. When a token is received, use this
     // table to get the appropriate transition method and
@@ -1435,6 +1437,19 @@ public final class SmcParser
     static
     {
         String transName = "<not set>";
+
+        OPEN_CLAUSE_LIST = new ArrayList<Character>();
+        CLOSE_CLAUSE_LIST = new ArrayList<Character>();
+
+        OPEN_CLAUSE_LIST.add(new Character('('));
+        OPEN_CLAUSE_LIST.add(new Character('{'));
+        OPEN_CLAUSE_LIST.add(new Character('['));
+        OPEN_CLAUSE_LIST.add(new Character('<'));
+
+        CLOSE_CLAUSE_LIST.add(new Character(')'));
+        CLOSE_CLAUSE_LIST.add(new Character('}'));
+        CLOSE_CLAUSE_LIST.add(new Character(']'));
+        CLOSE_CLAUSE_LIST.add(new Character('>'));
 
         _TransMethod = new Method[SmcLexer.TOKEN_COUNT];
 
@@ -1576,12 +1591,15 @@ public final class SmcParser
                                ".");
             System.exit(2);
         }
-    }
+    } // end of static
 } // end of class SmcParser
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2009/04/11 13:11:13  cwrapp
+// Corrected raw mode 3 to handle multiple argument template/generic declarations.
+//
 // Revision 1.1  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
 //

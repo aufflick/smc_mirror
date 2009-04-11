@@ -39,6 +39,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.4  2009/04/11 13:11:13  cwrapp
+ * Corrected raw mode 3 to handle multiple argument template/generic declarations.
+ *
  * Revision 1.3  2009/03/27 09:41:47  cwrapp
  * Added F. Perrad changes back in.
  *
@@ -151,6 +154,7 @@
 
 %map ParserMap
 %%
+
 Start
 {
     // The statemap can start with an optional raw source code
@@ -239,7 +243,7 @@ Start
                 ctxt.getLineNumber());
             setHeaderLine(ctxt.getLineNumber());
         }
-}
+} // end of state Start
 
 Context
 {
@@ -255,7 +259,7 @@ Context
             error("Missing name after %class.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state Context
 
 // The state name must be of the form "map::state".
 StartState
@@ -281,7 +285,7 @@ StartState
             error("Missing state after %start.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state StartState
 
 HeaderFile
     Entry
@@ -305,7 +309,7 @@ HeaderFile
             error("Missing header file after %header.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state HeaderFile
 
 IncludeFile
     Entry
@@ -329,7 +333,7 @@ IncludeFile
             error("Missing include file after %include.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state IncludeFile
 
 Package
 {
@@ -345,7 +349,7 @@ Package
             error("Missing name after %package.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state Package
 
 Import
     Entry
@@ -369,12 +373,12 @@ Import
             error("Missing name after %import.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state Import
 
 Declare
     Entry
     {
-        setRawMode("\n\r");
+        setRawMode("\n\r\f");
     }
     Exit
     {
@@ -393,7 +397,7 @@ Declare
             error("Missing name after %declare.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state Declare
 
 Access
     Entry
@@ -417,7 +421,7 @@ Access
             error("Missing access level after %access.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state Access
 
 // Remain in this state until a known good token is found.
 StartError
@@ -477,7 +481,7 @@ StartError
     Default
         nil
         {}
-}
+} // end of state StartError
 
 MapStart
 {
@@ -490,7 +494,7 @@ MapStart
         {
             error("Expecting %map.", ctxt.getLineNumber());
         }
-}
+} // end of state MapStart
 
 MapStartError
 {
@@ -501,7 +505,7 @@ MapStartError
     Default
         nil
         {}
-}
+} // end of state MapStartError
 
 MapName
 {
@@ -534,7 +538,7 @@ MapName
             error("Name expected after \"%map\".",
                   ctxt.getLineNumber());
         }
-}
+} // end of state MapName
 
 MapStates
 {
@@ -557,7 +561,7 @@ MapStates
             error("Expecting %% after \"%map mapname\".",
                   ctxt.getLineNumber());
         }
-}
+} // end of state MapStates
 
 MapStatesError
 {
@@ -580,7 +584,7 @@ MapStatesError
     Default
         nil
         {}
-}
+} // end of state MapStatesError
 
 States
 {
@@ -660,7 +664,7 @@ States
                 "Expecting either a new state definition or end of map (%%).",
                 ctxt.getLineNumber());
         }
-}
+} // end of state States
 
 StateStart
 {
@@ -683,10 +687,10 @@ StateStart
         StateStartError
         {
             error(
-                "After the state name is given, then either an entry action, exit action or '{' is expected.",
+                "After the state name is given, then either an entry action, exit action or opening brace is expected.",
                 ctxt.getLineNumber());
         }
-}
+} // end of state StateStart
 
 StateStartError
 {
@@ -705,7 +709,7 @@ StateStartError
     Default
         nil
         {}
-}
+} // end of state StateStartError
 
 EntryStart
 {
@@ -718,10 +722,10 @@ EntryStart
     Default
         StateStartError
         {
-            error("A '{' is expected after Entry.",
+            error("An opening brace is expected after Entry.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state EntryStart
 
 EntryEnd
 {
@@ -734,7 +738,7 @@ EntryEnd
     actionsError
         StartState
         {}
-}
+} // end of state EntryEnd
 
 ExitStart
 {
@@ -747,10 +751,10 @@ ExitStart
     Default
         StateStartError
         {
-            error("A '{' is expected after Exit.",
+            error("A opening brace is expected after Exit.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state ExitStart
 
 ExitEnd
 {
@@ -763,7 +767,7 @@ ExitEnd
     actionsError
         StateStart
         {}
-}
+} // end of state ExitEnd
 
 Transitions
 {
@@ -785,10 +789,10 @@ Transitions
     Default
         TransError
         {
-            error("Expecting either a new transition or a '}'.",
+            error("Expecting either a new transition or a closing brace.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state Transitions
 
 TransError
 {
@@ -807,7 +811,7 @@ TransError
     Default
         nil
         {}
-}
+} // end of state TransError
 
 TransStart
 {
@@ -883,7 +887,7 @@ TransStart
             // handling will function.
             createTransition(ctxt.getLineNumber());
         }
-}
+} // end of state TransStart
 
 TransStartError
 {
@@ -951,7 +955,7 @@ TransStartError
     Default
         nil
         {}
-}
+} // end of state TransStartError
 
 // Wait here for the transition parameter list to be returned.
 TransParams
@@ -981,7 +985,7 @@ TransParams
         {
             createTransition(params, lineNumber);
         }
-}
+} // end of state TransParams
 
 TransNext
 {
@@ -1040,7 +1044,7 @@ TransNext
             error("Expecting either a guard, \"push\", \"pop\", \"jump\" or end state.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state TransNext
 
 TransNextError
 {
@@ -1096,7 +1100,7 @@ TransNextError
     Default
         nil
         {}
-}
+} // end of state TransNextError
 
 // Because the lexer is operating in raw mode, the lexer will
 // return either a SOURCE token or an ERROR token. Since ERROR
@@ -1119,7 +1123,7 @@ TransGuard
                         token.getValue(),
                         token.getLineNumber());
         }
-}
+} // end of state TransGuard
 
 EndState
 {
@@ -1159,7 +1163,7 @@ EndState
             error("Expecting either \"push\", \"pop\", \"jump\" or end state.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state EndState
 
 EndStateError
 {
@@ -1172,7 +1176,7 @@ EndStateError
     Default
         nil
         {}
-}
+} // end of state EndStateError
 
 SimpleTrans
 {
@@ -1193,10 +1197,10 @@ SimpleTrans
     Default
         ActionStartError
         {
-            error("A '{' must proceed any action definitions.",
+            error("An opening brace must proceed any action definitions.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state SimpleTrans
 
 // This is the push part of a "<state1>/push(<state2>)" end statefd
 // <state1> has been parse, now look for the push.
@@ -1212,7 +1216,7 @@ PushTransition
             error("\"push\" must follow a '/'.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state PushTransition
 
 PushStart
 {
@@ -1226,7 +1230,7 @@ PushStart
             error("\"push\" must be followed by a '/'.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state PushStart
 
 PushError
 {
@@ -1243,7 +1247,7 @@ PushError
     Default
         nil
         {}
-}
+} // end of state PushError
 
 PushMap
 {
@@ -1259,7 +1263,7 @@ PushMap
             error("Expecting a state name.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state PushMap
 
 PushEnd
 {
@@ -1273,8 +1277,9 @@ PushEnd
             error("push transition missing closing paren.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state PushEnd
 
+// Must be a dead battery ...
 JumpStart
 {
     LEFT_PAREN(token: SmcLexer.Token)
@@ -1287,8 +1292,9 @@ JumpStart
             error("\"jump\" must be followed by a '/'.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state JumpStart
 
+// Must have reversed the leads ...
 JumpError
 {
     RIGHT_PAREN(token: SmcLexer.Token)
@@ -1304,7 +1310,7 @@ JumpError
     Default
         nil
         {}
-}
+} // end of state JumpError
 
 JumpMap
 {
@@ -1320,7 +1326,7 @@ JumpMap
             error("Expecting a state name.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state JumpMap
 
 JumpEnd
 {
@@ -1334,7 +1340,7 @@ JumpEnd
             error("jump transition missing closing paren.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state JumpEnd
 
 PopStart
 {
@@ -1353,10 +1359,10 @@ PopStart
     Default
         PopError
         {
-            error("Expecting '(trans)' or '{' after pop.",
+            error("Expecting '(trans)' or opening brace after pop.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state PopStart
 
 PopError
 {
@@ -1373,7 +1379,7 @@ PopError
     Default
         nil
         {}
-}
+} // end of state PopError
 
 PopAction
 {
@@ -1393,7 +1399,7 @@ PopAction
             error("Expecting either a pop transition or closing paren.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state PopAction
 
 PopArgs
 {
@@ -1414,7 +1420,7 @@ PopArgs
             error("Pop transition missing closing paren.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state PopArgs
 
 PopArgsEnd
     Entry
@@ -1431,7 +1437,7 @@ PopArgsEnd
         {
             setPopArgs(token.getValue());
         }
-}
+} // end of state PopArgsEnd
 
 ActionStart
 {
@@ -1445,10 +1451,10 @@ ActionStart
     Default
         ActionStartError
         {
-            error("A '{' must proceed any action definitions.",
+            error("An opening brace must proceed any action definitions.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state ActionStart
 
 ActionEnd
 {
@@ -1463,7 +1469,7 @@ ActionEnd
     actionsError
         Transitions
         {}
-}
+} // end of state ActionEnd
 
 ActionStartError
 {
@@ -1476,12 +1482,14 @@ ActionStartError
     Default
         nil
         {}
-}
-%%
+} // end of state ActionStartError
+
+%% // end of map ParserMap
 
 // This map parses transition parameters.
 %map ParamMap
 %%
+
 Start
     Entry
     {
@@ -1521,7 +1529,7 @@ Start
             error("Invalid parameter syntax.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state Start
 
 Dollar
 {
@@ -1542,7 +1550,7 @@ Dollar
             error("Invalid parameter syntax.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state Dolloar
 
 ParamSeparator
 {
@@ -1608,12 +1616,12 @@ ParamSeparator
             error("Invalid parameter syntax.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state ParamSeparator
 
 ParamType
     Entry
     {
-        setRawMode("(", ")", ",");
+        setRawMode2();
     }
     Exit
     {
@@ -1625,7 +1633,7 @@ ParamType
         {
             setParamType(token.getValue());
         }
-}
+} // end of state ParamType
 
 NextParam
 {
@@ -1649,7 +1657,7 @@ NextParam
             error("Invalid parameter syntax.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state NextParam
 
 Error
     Entry
@@ -1668,9 +1676,9 @@ Error
             ctxt.getParamList(),
             token.getLineNumber())
         {}
-}
+} // end of state Error
 
-%%
+%% // end of map ParamMap
 
 // This map parses transition actions.
 // Transition actions are of the form:
@@ -1681,6 +1689,7 @@ Error
 //
 %map ActionMap
 %%
+
 Start
 {
     // This word is the action name.
@@ -1701,10 +1710,10 @@ Start
         ActionError
         {
             clearActions();
-            error("Expecting either a method name or a '}'",
+            error("Expecting either a method name or a closing brace",
                   ctxt.getLineNumber());
         }
-}
+} // end of state Start
 
 ActionName
 {
@@ -1753,7 +1762,7 @@ ActionName
                 "Expecting an open paren after the method name",
                 ctxt.getLineNumber());
         }
-}
+} // end of state ActionName
 
 ActionArgs
 {
@@ -1766,7 +1775,7 @@ ActionArgs
     argsError
         ActionError
         {}
-}
+} // end of state ActionArgs
 
 ActionEnd
 {
@@ -1783,7 +1792,7 @@ ActionEnd
             error("Expecting a ';' after closing paren",
                   ctxt.getLineNumber());
         }
-}
+} // end of state ActionEnd
 
 PropertyAssignment
     Entry
@@ -1812,7 +1821,7 @@ PropertyAssignment
             error("Missing ';' at end of property assignment",
                   ctxt.getLineNumber());
         }
-}
+} // end of state PropertyAssignment
 
 // Wait here for a right brace which we will assume to be the
 // action body's end.
@@ -1825,17 +1834,18 @@ ActionError
     Default
         nil
         {}
-}
+} // end of state ActionError
 
-%%
+%% // end of map ActionMap
 
 // This map parses an action's arguments.
 %map ArgsMap
 %%
+
 Start
     Entry
     {
-        setRawMode("(", ")", ",");
+        setRawMode2();
     }
     Exit
     {
@@ -1848,7 +1858,7 @@ Start
             createArgument(token.getValue(),
                            token.getLineNumber());
         }
-}
+} // end of state Start
 
 NextArg
 {
@@ -1870,7 +1880,7 @@ NextArg
             error("Missing ',' or closing paren after argument.",
                   ctxt.getLineNumber());
         }
-}
+} // end of state NextArg
 
 Error
     Entry
@@ -1886,5 +1896,6 @@ Error
     SOURCE(token: SmcLexer.Token)
         pop(argsError)
         {}
-}
-%%
+} // end of state Error
+
+%% // end of map ArgsMap

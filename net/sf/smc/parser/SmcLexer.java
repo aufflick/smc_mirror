@@ -39,7 +39,10 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /* package */ final class SmcLexer
@@ -110,13 +113,15 @@ import java.util.Map;
 
     // Put the lexer in raw mode 2. This is used to collect
     // parameter type declarations.
-    /* package */ void setRawMode(char openChar,
-                                  char closeChar,
+    /* package */ void setRawMode(List<Character> openList,
+                                  List<Character> closeList,
+                                  char endChar,
                                   char separator)
     {
         _mode = RAW2;
-        _openChar = openChar;
-        _closeChar = closeChar;
+        _openList = openList;
+        _closeList = closeList;
+        _endChar = endChar;
         _separator = separator;
 
         return;
@@ -471,6 +476,7 @@ import java.util.Map;
         throws IOException
     {
         int startLine = _lineNumber;
+        int tokenType = SOURCE;
 
         // Clear out the token and get ready to work.
         startToken();
@@ -479,16 +485,22 @@ import java.util.Map;
         // end-of-file is reached.
         try
         {
-            int depth = 0;
+            Deque<Character> depth = new LinkedList<Character>();
+            Character openChar;
+            int openIndex;
+            int closeIndex;
 
             _stopFlag = false;
             while (_stopFlag == false)
             {
                 _currentChar = readChar();
 
-                if ((_currentChar == _closeChar ||
+                // Terminate when the end or separator character
+                // is seen - but only if we are not inside a
+                // collection.
+                if ((_currentChar == _endChar ||
                      _currentChar == _separator) &&
-                    depth == 0)
+                    depth.isEmpty() == true)
                 {
                     _stopFlag = true;
 
@@ -501,13 +513,61 @@ import java.util.Map;
                 {
                     _tokenBuffer.append(_currentChar);
 
-                    if (_currentChar == _closeChar)
+                    // Is this a closing character?
+                    closeIndex =
+                        _closeList.indexOf(_currentChar);
+                    if (closeIndex >= 0)
                     {
-                        --depth;
+                        // Yes. Does it match the opening
+                        // character?
+                        if (depth.isEmpty() == true)
+                        {
+                            // No because there is no opening
+                            // character to match.
+                            tokenType = DONE_FAILED;
+
+                            // Place the error message into the
+                            // token buffer.
+                            _tokenBuffer.delete(
+                                0, _tokenBuffer.length());
+                            _tokenBuffer.append("'");
+                            _tokenBuffer.append(_currentChar);
+                            _tokenBuffer.append(
+                                "' has no matching '");
+                            _tokenBuffer.append(
+                                _openList.get(closeIndex));
+                            _tokenBuffer.append("'.");
+                        }
+                        // There is an open character.
+                        else
+                        {
+                            openChar = depth.removeFirst();
+                            openIndex =
+                                _openList.indexOf(openChar);
+                            if (closeIndex != openIndex)
+                            {
+                                // No, the closing character does
+                                // not match the opening.
+                                tokenType = DONE_FAILED;
+
+                                _tokenBuffer.delete(
+                                    0, _tokenBuffer.length());
+                                _tokenBuffer.append("'");
+                                _tokenBuffer.append(
+                                    _currentChar);
+                                _tokenBuffer.append(
+                                    "' does not match '");
+                                _tokenBuffer.append(openChar);
+                                _tokenBuffer.append("'.");
+                            }
+                            // Yes, the closing character matches
+                            // the opening character.
+                        }
                     }
-                    else if (_currentChar == _openChar)
+                    else if (_openList.contains(
+                                 _currentChar) == true)
                     {
-                        ++depth;
+                        depth.addFirst(_currentChar);
                     }
                     else if (_currentChar == 10)
                     {
@@ -515,28 +575,23 @@ import java.util.Map;
                     }
                 }
             }
-
-            _token.setType(SOURCE);
-            _token.setValue(_tokenBuffer.toString());
-            _token.setLineNumber(startLine);
         }
         catch (EOFException e)
         {
-            StringBuilder msg = new StringBuilder(80);
-
-            msg.append(
-                "User source code contains an unbalanced ");
-            msg.append(_openChar);
-            msg.append(", ");
-            msg.append(_closeChar);
-            msg.append(" pair.");
-
             // If this is the end of the source file, then the
             // raw code section has an unbalanced open character/
             // close character pair.
-            _token.setType(DONE_FAILED);
-            _token.setValue(msg.toString());
+            tokenType = DONE_FAILED;
+
+            _tokenBuffer.delete(0, _tokenBuffer.length());
+            _tokenBuffer.append("User source code contains ");
+            _tokenBuffer.append("an unbalanced open, closing ");
+            _tokenBuffer.append(" pair.");
         }
+
+        _token.setType(tokenType);
+        _token.setValue(_tokenBuffer.toString());
+        _token.setLineNumber(startLine);
 
         return (_token);
     }
@@ -663,9 +718,21 @@ import java.util.Map;
     // processed by the FSM. Instead, they are blindly
     // collected until the close character is seen. Store the
     // close character and its matching open character here.
+
+    // Raw mode 1: open and closing characters.
     private char _openChar;
     private char _closeChar;
+
+    // Raw mode 2: List of known opening and closing pairs and
+    // ending and separator characters which terminate the raw
+    // token collection.
+    private List<Character> _openList;
+    private List<Character> _closeList;
+    private char _endChar;
     private char _separator;
+
+    // Raw mode 3: List of characters terminating the raw token
+    // collection.
     private String _closeChars;
 
     //-----------------------------------------------------------
@@ -985,7 +1052,7 @@ import java.util.Map;
                 ".");
             System.exit(1);
         }
-    }
+    } // end of static
 
 //---------------------------------------------------------------
 // Inner classes.
@@ -1063,12 +1130,15 @@ import java.util.Map;
         private int _type;
         private String _value;
         private int _lineNumber;
-    }
-}
+    } // end of class Token
+} // end of class SmcLexer
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2009/04/11 13:11:12  cwrapp
+// Corrected raw mode 3 to handle multiple argument template/generic declarations.
+//
 // Revision 1.1  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
 //

@@ -37,6 +37,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.3  2009/04/11 13:11:12  cwrapp
+ * Corrected raw mode 3 to handle multiple argument template/generic declarations.
+ *
  * Revision 1.2  2009/03/27 09:41:47  cwrapp
  * Added F. Perrad changes back in.
  *
@@ -90,6 +93,7 @@
 
 %map TokenMap
 %%
+
 Start
 {
     // Is this the start of a comment?
@@ -143,7 +147,7 @@ Start
                                          addToToken();
                                          outputChar();
                                          badToken("Unknown character");}
-}
+} // end of state Start
 
 CommentStart
 {
@@ -157,7 +161,7 @@ CommentStart
     // a plain-old slash.
     Default         Start               {ungetChar();
                                          endToken(SmcLexer.SLASH);}
-}
+} // end of state CommentStart
 
 PercentStart
 {
@@ -179,7 +183,7 @@ PercentStart
 
     Default         Start               {addToToken();
                                          badToken("Unknown % directive");}
-}
+} // end of state PercentStart
 
 PercentKeyword
 {
@@ -193,7 +197,7 @@ PercentKeyword
     // Anything else is a bad token.
     Default         Start               {addToToken();
                                          badToken("Unknown % directive");}
-}
+} // end of state PercentKeyword
 
 Word
 {
@@ -234,7 +238,7 @@ Word
 
     // The remaining characters form an invalid token.
     Default         Start               {badToken("Unknown token");}
-}
+} // end of state Word
 
 Scope
 {
@@ -242,7 +246,7 @@ Scope
     Default         Start               {ungetChar();
                                          ungetChar();
                                          checkKeyword();}
-}
+} // end of state Scope
 
 Colon
 {
@@ -252,16 +256,18 @@ Colon
     Default         Start               {ungetChar();
                                          addToToken(":");
                                          endToken(SmcLexer.COLON);}
-}
+} // end of state Colon
 
 Default
 {
     asterisk        Start               {badToken("Unknown token");}
-}
-%%
+} // end of state Default
+
+%% // end of map TokenMap
 
 %map OldCommentMap
 %%
+
 Start
 {
     // This grammar correctly handles nested comments!
@@ -269,7 +275,7 @@ Start
 
     // A comment's end is */.
     asterisk        CommentEnd          {}
-}
+} // end of state Start
 
 CommentStart
 {
@@ -278,13 +284,13 @@ CommentStart
     slash           push(NewCommentMap::Start)
                                         {}
     commentDone     Start               {}
-}
+} // end of state CommentStart
 
 CommentEnd
 {
     asterisk        nil                 {}
     slash           pop(commentDone)    {}
-}
+} // end of state CommentEnd
 
 Default
 {
@@ -308,17 +314,19 @@ Default
     whitespace      Start               {}
     EOL             Start               {}
     unicode         Start               {}
-}
-%%
+} // end of state Default
+
+%% // end of map OldCommentMap
 
 %map NewCommentMap
 %%
+
 // Wait here for the end of the // comment.
 Start
 {
     // The end of line marks the end of the comment.
     EOL             pop(commentDone)    {}
-}
+} // end of state Start
 
 Default
 {
@@ -341,11 +349,13 @@ Default
     dollar          Start               {}
     whitespace      Start               {}
     unicode         Start               {}
-}
-%%
+} // end of state Default
+
+%% // end of NewCommentMap
 
 %map SourceMap
 %%
+
 // Look for the end of the source block.
 Start
 {
@@ -354,7 +364,7 @@ Start
 
     // No, the end has not come.
     Default         Start               {addToToken();}
-}
+} // end of state Start
 
 SourceEnd
 {
@@ -367,7 +377,7 @@ SourceEnd
     // Nope, this is not the end of the raw source.
     Default         Start               {addToToken("%");
                                          addToToken();}
-}
+} // end of state SourceEnd
 
 // This state is never used. It is here to force smc to generate
 // all the necessary default transitions.
@@ -392,5 +402,6 @@ NeverUsed
     whitespace      nil                 {}
     unicode         nil                 {}
     EOL             nil                 {}
-}
-%%
+} // end of state NeverUsed
+
+%% // end of map SourceMap
