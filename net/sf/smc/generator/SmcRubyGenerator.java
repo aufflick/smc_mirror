@@ -303,21 +303,20 @@ public final class SmcRubyGenerator
         _source.print(_indent);
         _source.println("    def initialize(owner)");
         _source.print(_indent);
-        _source.println("        super()");
-        _source.print(_indent);
-        _source.println("        @_owner = owner");
-
-        _source.print(_indent);
-        _source.print("        setState(");
+        _source.print("        super(");
         _source.print(startState);
         _source.println(")");
-
-        // Execute the start state's entry actions.
         _source.print(_indent);
-        _source.print("        ");
-        _source.print(startState);
-        _source.println(".Entry(self)");
+        _source.println("        @_owner = owner");
+        _source.print(_indent);
+        _source.println("    end");
+        _source.println();
 
+        // Generate the enterStartState method.
+        _source.print(_indent);
+        _source.println("    def enterStartState()");
+        _source.print(_indent);
+        _source.println("        getState.Entry(self)");
         _source.print(_indent);
         _source.println("    end");
         _source.println();
@@ -1190,6 +1189,9 @@ public final class SmcRubyGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2009/04/11 14:31:20  cwrapp
+// Pass initial state to FSMContext initializer. Added enterStartState method.
+//
 // Revision 1.2  2009/03/27 09:41:47  cwrapp
 // Added F. Perrad changes back in.
 //
