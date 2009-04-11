@@ -65,6 +65,7 @@ static NSArray *gSoundNameArray = nil;
     _timerDict = [[NSMutableDictionary alloc] init];
     _fsm = [[TelephoneContext alloc] initWithOwner:self];
     [_fsm setDebugFlag:YES];
+    [_fsm enterStartState];
 }
 
 //
@@ -494,6 +495,9 @@ static NSArray *gSoundNameArray = nil;
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2009/04/11 13:05:37  cwrapp
+// Added enterStartState call.
+//
 // Revision 1.1  2009/03/01 18:20:39  cwrapp
 // Preliminary v. 6.0.0 commit.
 //

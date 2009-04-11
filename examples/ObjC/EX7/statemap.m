@@ -126,6 +126,20 @@
 @end
 
 @implementation SMCFSMContext
+- (id) initWithState: (SMCState*) aState;
+{
+    self = [super init];
+
+    if (!self)
+    {
+        return nil;
+    }
+
+    _state = aState;
+
+    return self;
+}
+
 - (BOOL)isInTransition;
 {
     return(_state == NULL ? YES : NO);
@@ -262,6 +276,9 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.1  2009/03/01 18:20:39  cwrapp
-// Preliminary v. 6.0.0 commit.
+// Revision 1.2  2009/04/11 13:05:37  cwrapp
+// Added enterStartState call.
+//
+// Revision 1.1  2007/01/15 00:23:50  cwrapp
+// Release 4.4.0 initial commit.
 //

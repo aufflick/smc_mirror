@@ -46,6 +46,7 @@
 
 - (BOOL)checkString:(char *)theString
 {
+    [_fsm enterStartState];
 	while(*theString)
 	{
 		switch(*theString)
@@ -91,6 +92,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2009/04/11 13:04:47  cwrapp
+// Added enterStartState call.
+//
 // Revision 1.1  2007/01/15 00:23:49  cwrapp
 // Release 4.4.0 initial commit.
 //
