@@ -216,14 +216,6 @@ public final class SmcGroovyGenerator
         _source.println("    def owner");
         _source.println();
 
-        // Generate the context class' constructor.
-        _source.print("    def ");
-        _source.print(context);
-        _source.println("Context (owner) {");
-        _source.println("        super()");
-        _source.println();
-        _source.println("        this.owner = owner");
-
         // The state name "map::state" must be changed to
         // "map.state".
         if ((index = startState.indexOf("::")) >= 0)
@@ -238,15 +230,15 @@ public final class SmcGroovyGenerator
             javaState = startState;
         }
 
-        _source.print("        setState(");
+        // Generate the context class' constructor.
+        _source.print("    def ");
+        _source.print(context);
+        _source.println("Context (owner) {");
+        _source.print("        super(");
         _source.print(javaState);
         _source.println(")");
-
-        // Execute the start state's entry actions.
-        _source.print("        ");
-        _source.print(javaState);
-        _source.println(".Entry(this)");
-
+        _source.println();
+        _source.println("        this.owner = owner");
         _source.println("    }");
         _source.println();
 
@@ -256,11 +248,15 @@ public final class SmcGroovyGenerator
         _source.print("    def ");
         _source.print(context);
         _source.println("Context (owner, initState) {");
-        _source.println("        super()");
+        _source.println("        super(initState)");
         _source.println();
         _source.println("        this.owner = owner");
-        _source.println("        setState(initState)");
-        _source.println("        initState.Entry(this)");
+        _source.println("    }");
+        _source.println();
+
+        // Generate the enterStartState method.
+        _source.println("    def enterStartState() {");
+        _source.println("        state.Entry(this)");
         _source.println("    }");
         _source.println();
 
@@ -1207,6 +1203,9 @@ public final class SmcGroovyGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2009/04/11 13:08:23  cwrapp
+// Pass initial state to FSMContext constructor. Moved calling initial state to enterStartState.
+//
 // Revision 1.2  2009/03/27 09:41:47  cwrapp
 // Added F. Perrad changes back in.
 //
