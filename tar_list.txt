@@ -764,6 +764,7 @@
 ./smc/examples/VB/EX3/README.txt
 ./smc/examples/VB/EX3/checkstring.vb
 ./smc/lib/Makefile
+./smc/lib/statemap.h
 ./smc/lib/statemap.jar
 ./smc/lib/CSharp/AssemblyInfo.cs
 ./smc/lib/CSharp/FSMContext.cs
