@@ -34,7 +34,7 @@ package statemap
 import java.beans.PropertyChangeListener
 import java.beans.PropertyChangeSupport
 
-class State implements Serializable {
+abstract class State implements Serializable {
     String name
     int id
 
@@ -49,7 +49,7 @@ class StateUndefinedException extends RuntimeException {
 class TransitionUndefinedException extends RuntimeException {
 }
 
-class FSMContext implements Serializable {
+abstract class FSMContext implements Serializable {
     private _state = null
     private _stateStack = []
     def previousState = null
@@ -57,6 +57,14 @@ class FSMContext implements Serializable {
     boolean debugFlag = false
     def debugStream = System.err
     private _listeners = new PropertyChangeSupport(this)
+
+    // Creates a finite state machine context with the given
+    // initial state.
+    FSMContext(State initState) {
+        _state = initState;
+    }
+
+    abstract enterStartState()
 
     // Is this state machine in a transition? If state is null,
     // then true; otherwise, false.
@@ -133,6 +141,9 @@ class FSMContext implements Serializable {
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2009/04/11 13:07:23  cwrapp
+// Added FSMContext initial state constructor.
+//
 // Revision 1.3  2008/02/04 10:54:01  fperrad
 // + Added Event Notification
 //
