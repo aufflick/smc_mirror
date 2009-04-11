@@ -30,6 +30,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2009/04/11 14:28:50  cwrapp
+# Added called to enterStartState.
+#
 # Revision 1.1  2005/06/16 17:52:03  fperrad
 # Added Ruby examples 1 - 4 and 7.
 #
@@ -48,6 +51,7 @@ class AppClass
 	end
 
 	def CheckString(string)
+                   @_fsm.enterStartState
 		for c in string.split(//) do
 			if c == '0' then
 				@_fsm.Zero

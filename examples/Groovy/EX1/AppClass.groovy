@@ -34,6 +34,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2009/04/11 14:28:00  cwrapp
+// Added called to enterStartState.
+//
 // Revision 1.2  2009/03/01 18:20:38  cwrapp
 // Preliminary v. 6.0.0 commit.
 //
@@ -55,6 +58,7 @@ class AppClass {
     }
 
     def CheckString (String string) {
+        _fsm.enterStartState()
         for (c in string) {
             switch (c) {
                 case '0':

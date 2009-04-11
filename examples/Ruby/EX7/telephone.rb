@@ -33,6 +33,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2009/04/11 14:29:14  cwrapp
+# Added called to enterStartState.
+#
 # Revision 1.1  2005/06/16 17:52:04  fperrad
 # Added Ruby examples 1 - 4 and 7.
 #
@@ -177,6 +180,10 @@ class Telephone
 		# Cntl-C stops the demo as well.
 		@_root.bind('Control-c') { exit }
 	end
+
+    def startFSM()
+        @_fsm.enterStartState
+    end
 
 	#-----------------------------------------------------------
 	# State Machine Actions.
@@ -384,4 +391,5 @@ end
 # the user quits the window.
 root = TkRoot.new
 tel = Telephone.new(root)
+tel.startFSM
 Tk.mainloop

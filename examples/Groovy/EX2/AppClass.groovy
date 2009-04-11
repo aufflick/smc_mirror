@@ -34,6 +34,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2009/04/11 14:28:05  cwrapp
+// Added called to enterStartState.
+//
 // Revision 1.1  2007/07/16 06:31:21  fperrad
 // + Added Groovy examples 1 - 3.
 //
@@ -52,6 +55,7 @@ class AppClass {
     }
 
     def CheckString (String string) {
+        _fsm.enterStartState()
         for (c in string) {
             switch (c) {
                 case '0':
