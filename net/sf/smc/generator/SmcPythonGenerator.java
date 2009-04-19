@@ -261,21 +261,6 @@ public final class SmcPythonGenerator
             map.accept(this);
         }
 
-        // The context class contains all the state classes as
-        // inner classes, so generate the context first rather
-        // than last.
-        _source.println();
-        _source.print("class ");
-        _source.print(context);
-        _source.println("_sm(statemap.FSMContext):");
-        _source.println();
-
-        // Generate the context class' constructor.
-        _source.println("    def __init__(self, owner):");
-        _source.println(
-            "        statemap.FSMContext.__init__(self)");
-        _source.println("        self._owner = owner");
-
         // The state name "map::state" must be changed to
         // "map.state".
         if ((index = startState.indexOf("::")) >= 0)
@@ -290,15 +275,22 @@ public final class SmcPythonGenerator
             pythonState = startState;
         }
 
-        _source.print("        self.setState(");
+        // The context class contains all the state classes as
+        // inner classes, so generate the context first rather
+        // than last.
+        _source.println();
+        _source.print("class ");
+        _source.print(context);
+        _source.println("_sm(statemap.FSMContext):");
+        _source.println();
+
+        // Generate the context class' constructor.
+        _source.println("    def __init__(self, owner):");
+        _source.print(
+            "        statemap.FSMContext.__init__(self, ");
         _source.print(pythonState);
         _source.println(")");
-
-        // Execute the start state's entry actions.
-        _source.print("        ");
-        _source.print(pythonState);
-        _source.println(".Entry(self)");
-
+        _source.println("        self._owner = owner");
         _source.println();
 
         // Don't generate the transition methods.
@@ -309,6 +301,12 @@ public final class SmcPythonGenerator
         _source.println("            getattr(self.getState(), attrib)(self, *arglist)");
         _source.println("            self._transition = None");
         _source.println("        return trans_sm");
+        _source.println();
+
+        // enterStartState()
+        // Execute the start state's entry actions.
+        _source.println("    def enterStartState(self):");
+        _source.println("        self._state.Entry(self)");
         _source.println();
 
         // getOwner() method.
@@ -1101,6 +1099,9 @@ public final class SmcPythonGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2009/04/19 14:35:04  cwrapp
+// Add initial state to FSMContext constructor. Added enterStartState method to application FSMContext subclass.
+//
 // Revision 1.2  2009/03/27 09:41:47  cwrapp
 // Added F. Perrad changes back in.
 //
