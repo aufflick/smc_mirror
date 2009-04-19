@@ -29,6 +29,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2009/04/19 14:39:48  cwrapp
+# Added call to enterStartState before issuing first FSM transition.
+#
 # Revision 1.1  2005/05/28 17:48:30  cwrapp
 # Added Python examples 1 - 4 and 7.
 #
@@ -184,6 +187,7 @@ class Vehicle:
 	#   None.
 
 	def Start(self):
+		self._fsm.enterStartState()
 		self._fsm.Start()
 
 	# pause --

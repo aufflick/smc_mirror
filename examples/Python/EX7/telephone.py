@@ -33,6 +33,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2009/04/19 14:39:48  cwrapp
+# Added call to enterStartState before issuing first FSM transition.
+#
 # Revision 1.2  2005/06/08 11:09:13  cwrapp
 # + Updated Python code generator to place "pass" in methods with empty
 #   bodies.
@@ -181,6 +184,9 @@ class Telephone:
 
 		# Cntl-C stops the demo as well.
 		self._root.bind('<Control-c>', lambda x: sys.exit(0))
+
+	def Start(self):
+		self._fsm.enterStartState()
 
 	#-----------------------------------------------------------
 	# State Machine Actions.
@@ -350,4 +356,5 @@ class Telephone:
 # the user quits the window.
 root = Tk()
 tel = Telephone(root)
+tel.Start()
 root.mainloop()

@@ -30,6 +30,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2009/04/19 14:39:48  cwrapp
+# Added call to enterStartState before issuing first FSM transition.
+#
 # Revision 1.1  2005/05/28 17:48:29  cwrapp
 # Added Python examples 1 - 4 and 7.
 #
@@ -47,6 +50,7 @@ class AppClass:
 		#self._fsm.setDebugFlag(True)
 
 	def CheckString(self, string):
+		self._fsm.enterStartState()
 		for c in string:
 			if c == '0':
 				self._fsm.Zero()
