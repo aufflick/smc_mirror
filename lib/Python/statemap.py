@@ -73,8 +73,8 @@ class FSMContext(object):
 	of the derived class.
 	"""
 
-	def __init__(self):
-		self._state = None
+	def __init__(self, state):
+		self._state = state
 		self._previous_state = None
 		self._state_stack = []
 		self._transition = None
