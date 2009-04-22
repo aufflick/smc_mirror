@@ -29,6 +29,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2009/04/22 19:07:03  fperrad
+# Added enterStartState method
+#
 # Revision 1.2  2008/02/04 12:40:28  fperrad
 # some Perl Best Practices
 #
@@ -221,6 +224,7 @@ sub isDone {
 
 sub Start {
     my $self = shift;
+    $self->{_fsm}->enterStartState();
     $self->{_fsm}->Start();
 }
 

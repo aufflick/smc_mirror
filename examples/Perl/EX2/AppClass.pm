@@ -30,6 +30,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2009/04/22 19:07:03  fperrad
+# Added enterStartState method
+#
 # Revision 1.2  2008/02/04 11:02:24  fperrad
 # + Exhibit options
 #
@@ -62,6 +65,7 @@ sub new {
 sub CheckString {
     my $self = shift;
     my ($string) = @_;
+    $self->{_fsm}->enterStartState();
     foreach (split //, $string) {
         if (/0/) {
             $self->{_fsm}->Zero();

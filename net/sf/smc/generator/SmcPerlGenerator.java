@@ -298,18 +298,11 @@ public final class SmcPerlGenerator
         _source.println("    sub new {");
         _source.println("        my $proto = shift;");
         _source.println("        my $class = ref($proto) || $proto;");
-        _source.println("        my $self = $class->SUPER::new();");
-        _source.println("        my ($owner) = @_;");
-        _source.println("        $self->{_owner} = $owner;");
-
-        _source.print("        $self->setState($");
+        _source.print("        my $self = $class->SUPER::new($");
         _source.print(startState);
         _source.println(");");
-
-        // Execute the start state's entry actions.
-        _source.print("        $");
-        _source.print(startState);
-        _source.println("->Entry($self);");
+        _source.println("        my ($owner) = @_;");
+        _source.println("        $self->{_owner} = $owner;");
 
         _source.println("        return $self;");
         _source.println("    }");
@@ -325,6 +318,14 @@ public final class SmcPerlGenerator
         _source.println("        $self->{_transition} = $method;");
         _source.println("        $self->getState()->$method($self, @_);");
         _source.println("        $self->{_transition} = undef;");
+        _source.println("    }");
+        _source.println();
+
+        // enterStartState()
+        // Execute the start state's entry actions.
+        _source.println("    sub enterStartState {");
+        _source.println("        my $self = shift;");
+        _source.println("        $self->{_state}->Entry($self);");
         _source.println("    }");
         _source.println();
 
@@ -1174,81 +1175,13 @@ public final class SmcPerlGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2009/04/22 19:07:04  fperrad
+// Added enterStartState method
+//
 // Revision 1.2  2009/03/27 09:41:47  cwrapp
 // Added F. Perrad changes back in.
 //
 // Revision 1.1  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
-//
-// Revision 1.13  2008/07/24 06:23:08  fperrad
-// + fix Perl generation (double $$)
-//
-// Revision 1.12  2008/07/14 09:31:25  fperrad
-// + Added the generation of read-only macro for Vi & Emacs
-//
-// Revision 1.11  2008/07/08 11:42:18  fperrad
-// + automatic delegation (suite)
-//
-// Revision 1.10  2008/07/07 14:45:15  fperrad
-// + automatic delegation (more perlish)
-//
-// Revision 1.9  2008/03/21 14:03:16  fperrad
-// refactor : move from the main file Smc.java to each language generator the following data :
-//  - the default file name suffix,
-//  - the file name format for the generated SMC files
-//
-// Revision 1.8  2008/02/07 16:55:47  fperrad
-// Perl : StateMachine::Statemap -> DFA::Statemap
-//
-// Revision 1.7  2008/02/04 10:26:51  fperrad
-// Don't generate cuddled else
-//
-// Revision 1.6  2007/02/21 13:56:21  cwrapp
-// Moved Java code to release 1.5.0
-//
-// Revision 1.5  2007/01/15 00:23:51  cwrapp
-// Release 4.4.0 initial commit.
-//
-// Revision 1.4  2007/01/03 14:34:16  fperrad
-// + Added -reflect option for Perl, Python and Ruby code generation
-//
-// Revision 1.3  2006/09/16 15:04:29  cwrapp
-// Initial v. 4.3.3 check-in.
-//
-// Revision 1.2  2005/11/07 19:34:54  cwrapp
-// Changes in release 4.3.0:
-// New features:
-//
-// + Added -reflect option for Java, C#, VB.Net and Tcl code
-//   generation. When used, allows applications to query a state
-//   about its supported transitions. Returns a list of transition
-//   names. This feature is useful to GUI developers who want to
-//   enable/disable features based on the current state. See
-//   Programmer's Manual section 11: On Reflection for more
-//   information.
-//
-// + Updated LICENSE.txt with a missing final paragraph which allows
-//   MPL 1.1 covered code to work with the GNU GPL.
-//
-// + Added a Maven plug-in and an ant task to a new tools directory.
-//   Added Eiten Suez's SMC tutorial (in PDF) to a new docs
-//   directory.
-//
-// Fixed the following bugs:
-//
-// + (GraphViz) DOT file generation did not properly escape
-//   double quotes appearing in transition guards. This has been
-//   corrected.
-//
-// + A note: the SMC FAQ incorrectly stated that C/C++ generated
-//   code is thread safe. This is wrong. C/C++ generated is
-//   certainly *not* thread safe. Multi-threaded C/C++ applications
-//   are required to synchronize access to the FSM to allow for
-//   correct performance.
-//
-// + (Java) The generated getState() method is now public.
-//
-// Revision 1.1  2005/06/16 18:11:01  fperrad
-// Added C, Perl & Ruby generators.
 //
 //

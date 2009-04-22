@@ -33,6 +33,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2009/04/22 19:07:03  fperrad
+# Added enterStartState method
+#
 # Revision 1.2  2008/02/04 12:40:11  fperrad
 # some Perl Best Practices
 #
@@ -198,6 +201,11 @@ sub _loadUI {
     $mw->bind('<Control-c>',
         [sub { exit(0); }]
     );
+}
+
+sub Start {
+    my $self = shift;
+    $self->{_fsm}->enterStartState();
 }
 
 #-----------------------------------------------------------
@@ -469,4 +477,5 @@ package main;
 # Display the "telephone" user interface and run until
 # the user quits the window.
 my $tel = new Telephone();
+$tel->Start();
 MainLoop();
