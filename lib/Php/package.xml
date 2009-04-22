@@ -11,11 +11,11 @@ http://smc.sourceforge.net/</description>
   <email>rapp@acm.org</email>
   <active>yes</active>
  </lead>
- <date>2008-02-14</date>
+ <date>2009-04-22</date>
  <time>13:24:49</time>
  <version>
-  <release>5.0.2</release>
-  <api>5.0.2</api>
+  <release>6.0.0</release>
+  <api>6.0.0</api>
  </version>
  <stability>
   <release>beta</release>
@@ -25,7 +25,7 @@ http://smc.sourceforge.net/</description>
  <notes>initial release</notes>
  <contents>
   <dir baseinstalldir="StateMachine" name="/">
-   <file baseinstalldir="StateMachine" md5sum="3743438ff40ca2cf8c223b5e218af84c" name="statemap.php" role="php" />
+   <file baseinstalldir="StateMachine" md5sum="59485da7c5f6ef8f1f9f0937946b438a" name="statemap.php" role="php" />
   </dir>
  </contents>
  <dependencies>
@@ -42,14 +42,14 @@ http://smc.sourceforge.net/</description>
  <changelog>
   <release>
    <version>
-    <release>5.0.2</release>
-    <api>5.0.2</api>
+    <release>6.0.0</release>
+    <api>6.0.0</api>
    </version>
    <stability>
     <release>beta</release>
     <api>stable</api>
    </stability>
-   <date>2008-02-14</date>
+   <date>2009-04-22</date>
    <license uri="http://www.mozilla.org/MPL/">MPL 1.1</license>
    <notes>initial release</notes>
   </release>
