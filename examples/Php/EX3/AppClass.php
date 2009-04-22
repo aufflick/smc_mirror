@@ -31,6 +31,9 @@
 
  CHANGE LOG
  $Log$
+ Revision 1.2  2009/04/22 20:26:29  fperrad
+ Added enterStartState method
+
  Revision 1.1  2008/04/22 15:58:41  fperrad
  - add PHP language (patch from Toni Arnold)
 
@@ -53,6 +56,7 @@ class AppClass {
     }
 
     public function CheckString($string) {
+        $this->_fsm->enterStartState();
         if ($string != "") {
             $array = str_split($string);
             foreach($array as $c) {

@@ -282,22 +282,15 @@ public final class SmcPhpGenerator
         _source.println("_sm extends FSMContext {");
         _source.println();
 
-        // Generate the context class' constructor.
-        _source.println("    public function __construct($owner) {");
-        _source.println(
-            "        parent::__construct();");
-        _source.println("        $this->_owner = $owner;");
-
         phpState = phpStateName(startState);
 
-        _source.print("        $this->setState(");
+        // Generate the context class' constructor.
+        _source.println("    public function __construct($owner) {");
+        _source.print("        parent::__construct(");
         _source.print(phpState);
         _source.println(");");
+        _source.println("        $this->_owner = $owner;");
 
-        // Execute the start state's entry actions.
-        _source.print("        ");
-        _source.print(phpState);
-        _source.println("->Entry($this);");
         _source.println("    }");
         _source.println();
 
@@ -357,6 +350,13 @@ public final class SmcPhpGenerator
             "            throw new StateUndefinedException();");
         _source.println("        }");
         _source.println("        return $this->_state;");
+        _source.println("    }");
+        _source.println();
+
+        // enterStartState()
+        // Execute the start state's entry actions.
+        _source.println("    public function enterStartState() {");
+        _source.println("        $this->_state->Entry($this);");
         _source.println("    }");
         _source.println();
 
@@ -1267,16 +1267,13 @@ public final class SmcPhpGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2009/04/22 20:26:29  fperrad
+// Added enterStartState method
+//
 // Revision 1.2  2009/03/27 09:41:47  cwrapp
 // Added F. Perrad changes back in.
 //
 // Revision 1.1  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
-//
-// Revision 1.2  2008/07/14 09:31:25  fperrad
-// + Added the generation of read-only macro for Vi & Emacs
-//
-// Revision 1.1  2008/04/22 16:05:24  fperrad
-// - add PHP language (patch from Toni Arnold)
 //
 //
