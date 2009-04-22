@@ -30,6 +30,9 @@
 --
 -- CHANGE LOG
 -- $Log$
+-- Revision 1.2  2009/04/22 19:40:07  fperrad
+-- Added enterStartState method
+--
 -- Revision 1.1  2007/01/03 15:42:33  fperrad
 -- + Added Lua examples 1 - 3.
 --
@@ -51,6 +54,7 @@ function new (self)
 end
 
 function CheckString (self, str)
+    self._fsm:enterStartState()
     for c in string.gmatch(str, '.') do
         if c == '0' then
             self._fsm:Zero()

@@ -322,11 +322,6 @@ public final class SmcLuaGenerator
         _source.print(luaState);
         _source.println(")");
 
-        // Execute the start state's entry actions.
-        _source.print("    ");
-        _source.print(luaState);
-        _source.println(":Entry(self)");
-
         _source.println("end");
         _source.println();
 
@@ -370,6 +365,15 @@ public final class SmcLuaGenerator
                 _source.println();
             }
         }
+
+        // enterStartState()
+        // Execute the start state's entry actions.
+        _source.print("function ");
+        _source.print(context);
+        _source.println("Context:enterStartState ()");
+        _source.println("    self:getState():Entry(self)");
+        _source.println("end");
+        _source.println();
 
         // getOwner() method.
         _source.print("function ");
@@ -1129,34 +1133,13 @@ public final class SmcLuaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2009/04/22 19:40:07  fperrad
+// Added enterStartState method
+//
 // Revision 1.2  2009/03/27 09:41:47  cwrapp
 // Added F. Perrad changes back in.
 //
 // Revision 1.1  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
-//
-// Revision 1.7  2008/03/21 14:03:16  fperrad
-// refactor : move from the main file Smc.java to each language generator the following data :
-//  - the default file name suffix,
-//  - the file name format for the generated SMC files
-//
-// Revision 1.6  2008/02/05 12:54:36  fperrad
-// fix Bug 1884100 : Lua - Printing actual parameters of transition
-//
-// Revision 1.5  2008/02/05 12:41:26  fperrad
-// fix Bug 1883981 : wrong Lua generation
-//
-// Revision 1.4  2008/02/05 09:12:35  fperrad
-// fix Bug 1884108 : Lua - Generate verbatim section after module
-//
-// Revision 1.3  2007/02/21 13:55:41  cwrapp
-// Moved Java code to release 1.5.0
-//
-// Revision 1.2  2007/01/05 12:34:38  fperrad
-// + Remove getState() method generation.
-//
-// Revision 1.1  2007/01/03 15:22:39  fperrad
-// + Added Lua generator.
-//
 //
 //
