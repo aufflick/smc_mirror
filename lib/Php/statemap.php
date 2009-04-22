@@ -20,9 +20,6 @@
 
  Port (from the Python port) to PHP5 by Toni Arnold
 
- Copyright 2004, Francois Perrad.
- All Rights Reserved.
-
  Contributor(s):
 
  See: http://smc.sourceforge.net/
@@ -32,6 +29,9 @@
 
  CHANGE LOG
  $Log$
+ Revision 1.3  2009/04/22 20:19:57  fperrad
+ Pass initial state to FSMContext constructor
+
  Revision 1.2  2008/05/20 18:31:13  cwrapp
  ----------------------------------------------------------------------
 
@@ -121,8 +121,8 @@ class FSMContext {
     protected $_transition;
     protected $_debug_flag;
 
-    public function __construct() {
-        $this->_state = NULL;
+    public function __construct($init_state) {
+        $this->_state = $init_state;
         $this->_previous_state = NULL;
         $this->_state_stack = array();
         $this->_transition = NULL;
