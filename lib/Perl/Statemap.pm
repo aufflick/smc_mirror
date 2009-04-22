@@ -9,7 +9,7 @@ use warnings;
 package DFA::Statemap;
 
 use vars qw($VERSION);
-$VERSION = '1.00';
+$VERSION = '1.01';
 
 =head1 NAME
 
@@ -93,7 +93,7 @@ The finite state machine needs to be initialized to the starting
 state of the FSM.  This must be done manually in the constructor
 of the derived class.
 
-=head2 new
+=head2 new ( $init_state )
 
 Default constructor.
 
@@ -104,7 +104,8 @@ sub new {
     my $class = ref($proto) || $proto;
     my $self = {};
     bless($self, $class);
-    $self->{_state} = undef;
+    my ($init_state) = @_;
+    $self->{_state} = $init_state;
     $self->{_previous_state} = undef;
     $self->{_state_stack} = [];
     $self->{_transition} = undef;
@@ -364,7 +365,7 @@ The Initial Developer of the Original Code is Charles W. Rapp.
 
 Port to Perl by Francois Perrad, francois.perrad@gadz.org
 
-Copyright 2004-2008, Francois Perrad.
+Copyright 2004-2009, Francois Perrad.
 All Rights Reserved.
 
 Contributor(s):
