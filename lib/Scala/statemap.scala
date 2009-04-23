@@ -52,6 +52,8 @@ abstract class FSMContext[State] {
     private var _listeners: PropertyChangeSupport = new PropertyChangeSupport(this)
     private var _isInTransaction: Boolean = true
 
+    def enterStartState(): Unit
+
     def getDebugFlag(): Boolean = _debugFlag
 
     def setDebugFlag(flag: Boolean): Unit = {
@@ -134,6 +136,9 @@ abstract class FSMContext[State] {
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2009/04/23 13:12:08  fperrad
+// Added enterStartState method
+//
 // Revision 1.4  2008/05/20 18:31:14  cwrapp
 // ----------------------------------------------------------------------
 //

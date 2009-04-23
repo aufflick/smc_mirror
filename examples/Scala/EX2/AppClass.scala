@@ -34,6 +34,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2009/04/23 13:12:08  fperrad
+// Added enterStartState method
+//
 // Revision 1.1  2008/02/04 12:47:45  fperrad
 // Added Scala examples 1 - 3
 //
@@ -47,6 +50,7 @@ class AppClass() {
     // _fsm.setDebugFlag(true)
 
     def CheckString(string: String): Boolean = {
+        _fsm.enterStartState()
         for (val c <- string.elements) {
             c match {
                 case '0' => _fsm.Zero()

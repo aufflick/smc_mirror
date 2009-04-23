@@ -17,7 +17,7 @@
 // All Rights Reserved.
 //
 // Port to Scala by Francois Perrad, francois.perrad@gadz.org
-// Copyright 2008, Francois Perrad.
+// Copyright 2008-2009, Francois Perrad.
 // All Rights Reserved.
 //
 // Contributor(s):
@@ -242,11 +242,6 @@ public final class SmcScalaGenerator
         _source.print(javaState);
         _source.println(")");
 
-        // Execute the start state's entry actions.
-        _source.print("    ");
-        _source.print(javaState);
-        _source.println(".Entry(this)");
-
         _source.println();
 
         // Generate the default transition methods.
@@ -303,6 +298,13 @@ public final class SmcScalaGenerator
                 _source.println();
             }
         }
+
+        // enterStartState()
+        // Execute the start state's entry actions.
+        _source.println("    override def enterStartState(): Unit = {");
+        _source.println("        getState().Entry(this)");
+        _source.println("    }");
+        _source.println();
 
         // getOwner() method.
         _source.print("    def getOwner(): ");
@@ -1209,27 +1211,13 @@ public final class SmcScalaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2009/04/23 13:12:08  fperrad
+// Added enterStartState method
+//
 // Revision 1.2  2009/03/27 09:41:47  cwrapp
 // Added F. Perrad changes back in.
 //
 // Revision 1.1  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
-//
-// Revision 1.5  2008/07/14 09:31:25  fperrad
-// + Added the generation of read-only macro for Vi & Emacs
-//
-// Revision 1.4  2008/03/21 14:03:17  fperrad
-// refactor : move from the main file Smc.java to each language generator the following data :
-//  - the default file name suffix,
-//  - the file name format for the generated SMC files
-//
-// Revision 1.3  2008/02/06 09:34:24  fperrad
-// add getName()
-//
-// Revision 1.2  2008/02/06 09:07:03  fperrad
-// Scala 2.3 -> 2.6
-//
-// Revision 1.1  2008/02/04 10:32:49  fperrad
-// + Added Scala language generation.
 //
 //
