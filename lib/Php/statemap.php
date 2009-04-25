@@ -29,6 +29,9 @@
 
  CHANGE LOG
  $Log$
+ Revision 1.4  2009/04/25 14:29:10  cwrapp
+ Corrected isInTransition.
+
  Revision 1.3  2009/04/22 20:19:57  fperrad
  Pass initial state to FSMContext constructor
 
@@ -156,7 +159,7 @@ class FSMContext {
     // Is this state machine already inside a transition?
     // True if state is undefined.
     public function isInTransition() {
-        if ($this->_state = NULL)
+        if ($this->_state == NULL)
             return TRUE;
         else
             return FALSE;
