@@ -227,20 +227,6 @@ public final class SmcTclGenerator
         _source.print(_indent);
         _source.println("    }");
 
-        // The initial state constructor.
-        _source.print(_indent);
-        _source.println("    constructor {owner state} {");
-        _source.print(_indent);
-        _source.print("        ");
-        _source.println(
-            "::statemap::FSMContext::constructor $state;");
-        _source.print(_indent);
-        _source.println("    } {");
-        _source.print(_indent);
-        _source.println("        set _owner $owner;");
-        _source.print(_indent);
-        _source.println("    }");
-
         // For every possible transition in every state map,
         // create a method.
         // First, get the transitions list.
@@ -1501,6 +1487,9 @@ public final class SmcTclGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2009/04/25 14:25:40  cwrapp
+// Removed context class initial state constructor as Tcl does not support multiple constructors.
+//
 // Revision 1.3  2009/04/10 14:07:00  cwrapp
 // Added initial state constructor.
 //
