@@ -7,6 +7,9 @@
 ---------------
 
 (All)
+    Smc.jar requires Java 6.
+
+(All)
     Moved source files into three separate directories: model,
     parser and generator. The model directory contains
     SmcElement.java and those classes extending SmcElement.
@@ -44,6 +47,7 @@
     name in the transition next state, then the transition's
     behavior will change. You will need to replace the explicit
     state name with "nil" to maintain existing behavior.
+    (SF Feature Request 1876271)
 
 (All)
     The SMC distribution now generates javadocs and places the
@@ -54,6 +58,8 @@
 + Minor changes
 ---------------
 
+None.
+
 
 + Bug fixes
 -----------
@@ -61,6 +67,11 @@
 (PHP, Python)
     Default state fails on transition overloading.
     (SF bug 1905336)
+
+(GraphViz)
+    Corrected parser error when code parameter uses "$" as in
+    Perl and PHP.
+    (SF bug 1930388)
 
 (All)
     Changes lib source file layout regular by making sure all
@@ -120,6 +131,11 @@
      Normalized -d and -headerd paths to make sure the specified
      paths use the system file name separator character.
      (SF bug 2677138)
+
+(All)
+     Corrected compiler to accept templates with multiple types.
+     For example, Map<String, Integer>.
+     (SF feature request 2655248)
 
 
 
