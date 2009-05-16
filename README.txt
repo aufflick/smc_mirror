@@ -2,7 +2,7 @@
 
                                SMC
                      The State Machine Compiler
-                         (Version: 5.1.0)
+                         (Version: 6.0.0)
 
                      http://smc.sourceforge.net
 
@@ -13,46 +13,141 @@
 
 Major changes:
 
-+ (PHP)
-  Added support for PHP programming language (-php).
+(All)
+    Smc.jar requires Java 6.
 
-+ (Scala)
-  Added support for Scala programming language (-scala).
+(All)
+    Moved source files into three separate directories: model,
+    parser and generator. The model directory contains
+    SmcElement.java and those classes extending SmcElement.
+    The parser directory contains the classes for parsing a .sm
+    file. The generator directory contains SmcCodeGenerator.java
+    and those classes extending SmcCodeGenerator. Only Smc.java
+    and SmcSyntaxChecker.java remains in the original source
+    directory.
+
+    There are four jar files built: the original Smc.jar,
+    model.jar, parser.jar and generator.jar. Smc.jar uses the
+    other three packages to implement the State Machine Compiler.
+    The point of dividing SMC into different packages is to open
+    SMC's capabilities to other applications. For example, if an
+    IDE defines a the finite state machine using the model
+    package then the generator package to emit the FSM in a
+    target programming language. The new jar files are placed
+    in lib/Java.
+
+    This change in source file location does not otherwise affect
+    how SMC works.
+
+(All)
+    The loopback transition is now divided into external and
+    internal loopback transitions. The external loopback is
+    specified by using the current state's name as the
+    transition's next state. The external loopback executes the
+    current state's exit and entry actions. The internal loopback
+    uses "nil" as the next state and does not execute the current
+    state's exit and entry actions. The internal loopback's
+    behavior is the same as the previous loopback transition.
+
+    NOTE: THIS CHANGE MAY BREAK EXISTING CODE.
+    If you implemented loopbacks by placing the current state's
+    name in the transition next state, then the transition's
+    behavior will change. You will need to replace the explicit
+    state name with "nil" to maintain existing behavior.
+    (SF Feature Request 1876271)
+
+(All)
+    The SMC distribution now generates javadocs and places the
+    generated HTML files in docs/javadocs. All SMC source files
+    now have javadoc comments.
 
 
 Minor changes:
 
-+ (All)
-  Jump transition added. Works the same as a simple transition.
+None
 
 
 Bug Fixes:
 
-+ (C++)
-  The TransitionUndefinedException was missing the transition
-  name. The transition name is now placed into the exception.
-  (SF bug 1890694)
+(PHP, Python)
+    Default state fails on transition overloading.
+    (SF bug 1905336)
 
-+ (GraphViz)
-  Correctly handles $ in transition arguments.
-  (SF bug 1930388)
+(GraphViz)
+    Corrected parser error when code parameter uses "$" as in
+    Perl and PHP.
+    (SF bug 1930388)
 
-+ (Examples)
-  Corrected statemap.h -I include path in C++ examples.
-  Corrected C++ example 4 #if __GNUC__ condition.
-  Corrected C++ example 6 #include.
-  Corrected file names in TCL examples 4 and 5.
-  Corrected examples "all" rule.
-  Corrected #!/interpreter calls in scripts.
-  (SF bugs 1934474, 1934479, 1934484, 1934488, 1934494, 1934497)
+(All)
+    Changes lib source file layout regular by making sure all
+    source files are stored in a programming language directory.
+    (SF bug 1930423, 1934483)
 
+(All)
+    Changed FSMContext class constructor so that initial state
+    is set in this constructor. Moved call to initial state entry
+    action execution from generated context class constructor to
+    new enterStartState() method.
+    (SF bug 1964266)
+
+(C++)
+    Corrected statemap.h to remove compiler warnings.
+    (SF bug 1970979)
+
+(Java)
+    Corrected passing null previous state to
+    PropertyChangeListener.
+    (SF bug 2060426)
+
+(Ant)
+    Updated ant SmcJarWrapper.java to include all supported
+    target programming languages.
+    (SF bug 2234925)
+
+(C#, VB)
+     Made .Net dll CLS-compliant.
+     (SF bug 2378072)
+
+(All)
+     Checking if a map has multiple default states.
+     (SF bug 2648469)
+
+(All)
+     Checking push transition to see if it contains a valid
+     state.
+     (SF bug 2648472)
+
+(C#)
+     Corrected C# reflection code generated when there is an
+     overloaded transition name.
+     (SF bug 2648516)
+
+(GraphViz)
+     Corrected dot file generated when transition action contains
+     an "=" operator.
+     (SF bug 2657779)
+
+(Java)
+     Remove "final" keyword from generated context class
+     declaration.
+     (SF bug 2672508)
+
+(All)
+     Normalized -d and -headerd paths to make sure the specified
+     paths use the system file name separator character.
+     (SF bug 2677138)
+
+(All)
+     Corrected compiler to accept templates with multiple types.
+     For example, Map<String, Integer>.
+     (SF feature request 2655248)
 
 
 
 1. System Requirements
 ----------------------
 
-+ JRE (Standard Edition) 1.5.0 or better.
++ JRE (Standard Edition) 1.6.0 or better.
 + Whatever JRE's requirements are (see http://java.sun.com/j2se/
   for more information).
 
@@ -85,7 +180,7 @@ Congratulations! You've integrated a state machine into your
 object.
 
 SMC is written in Java and is truly "Write once, run anywhere".
-If you have at least the Java Standard Edition v. 1.5.0 loaded,
+If you have at least the Java Standard Edition v. 1.6.0 loaded,
 then you can run SMC (if you have the Java Enterpise Edition, so
 much the better!)
 
@@ -93,18 +188,21 @@ Java Standard Edition can be downloaded for FREE from
 
                     http://java.sun.com/j2se/
 
-SMC currently supports ten programming languages:
+SMC currently supports fourteen programming languages:
   1. C,
   2. C++,
   3. C#,
-  4. Java,
-  5. Lua,
-  6. Objective-C,
-  7. Perl,
-  8. Python,
-  9. Ruby,
- 10. [incr Tcl] and
- 11. VB.Net.
+  4. Groovy,
+  5. Java,
+  6. Lua,
+  7. Objective-C,
+  8. Perl,
+  9. PHP,
+ 10. Python,
+ 11. Ruby,
+ 12. Scala,
+ 13. [incr Tcl] and
+ 14. VB.Net.
 
 SMC is also able to generate an HTML table representation of your
 FSM and a GraphViz DOT file representation
@@ -115,7 +213,7 @@ FSM and a GraphViz DOT file representation
 -----------
 
 Surf over to http://smc.sourceforge.net and check out
-"File Releases". The latest SMC version is 3.0.0.
+"File Releases". The latest SMC version is 6.0.0.
 SMC downloads come in two flavors: tar/gzip (for Unix)
 and self-extracting zip file (for Windows).
 
@@ -141,24 +239,45 @@ The download package's directory layout is:
          |
          +-bin---Smc.jar 
          |
-         +-docs--SMC_Tutorial.pdf
+         +-docs-+-SMC_Tutorial.pdf
+         |      |
+         |      +-javadocs--(javadoc html files)
          |
          +-lib-+-statemap.h
          |     |
          |     +-statemap.jar
          |     |
-         |     +-setup.py
-         |     |
-         |     +-statemap.py
-         |     |
          |     +-C---statemap.h
          |     |
-         |     +-CSharp-+-Debug-+-statemap.dll
-         |     |        |       |
-         |     |        |       +-statemap.pdb
-         |     |        |
-         |     |        +-Release-+-statemap.dll
+         |     +-C++---statemap.h
          |     |
+         |     +-DotNet-+-Debug-+-NoTrace-+-statemap.dll
+         |     |        |       |         |
+         |     |        |       |         +-statemap.pdb
+         |     |        |       |
+         |     |        |       +-Trace---+-statemap.dll
+         |     |        |                 |
+         |     |        |                 +-statemap.pdb
+         |     |        |
+         |     |        +-Release-+-NoTrace--statemap.dll
+         |     |                  |
+         |     |                  +-Trace----statemap.dll
+         |     |
+         |     +-Java-+-SmcGenerator.jar
+         |     |      |
+         |     |      +-SmcModel.jar
+         |     |      |
+         |     |      +-SmcParser.jar
+         |     |      |
+         |     |      +-statemap.jar
+         |     |      |
+         |     |      +-statemap-+-FSMContext.class
+         |     |                 |
+         |     |                 +-State.class
+         |     |                 |
+         |     |                 +-StateUndefinedException.class
+         |     |                 |
+         |     |                 +-TransitionUndefinedException.class
          |     |
          |     +-Lua--+-README
          |     |      |
@@ -180,27 +299,28 @@ The download package's directory layout is:
          |     |      |
          |     |      +-test.pl
          |     |
+         |     +-Php-+-README.txt
+         |     |     |
+         |     |     +-package.xml
+         |     |     |
+         |     |     +-statemap.php
+         |     |
+         |     +-Python-+-README.py
+         |     |        |
+         |     |        +-setup.py
+         |     |        |
+         |     |        +-statemap.py
+         |     |
          |     +-Ruby-+-README
          |     |      |
          |     |      +-statemap.rb
          |     |
-         |     +-VB-+-Debug-+-statemap.dll
-         |     |    |       |
-         |     |    |       +-statemap.pdb
-         |     |    |
-         |     |    +-Release---statemap.dll
-         |     |
-         |     +-statemap-+-FSMContext.class
-         |     |          |
-         |     |          +-State.class
-         |     |          |
-         |     |          +-StateUndefinedException.class
-         |     |          |
-         |     |          +-TransitionUndefinedException.class
-         |     |
-         |     +-statemap1.0-+-statemap.tcl
-         |                   |
-         |                   +-pkgIndex.tcl
+         |     +-Scala-+-statemap.jar
+         |     |       |
+         |     |       +-statemap.scala
+         |     +-Tcl-+-statemap1.0-+-statemap.tcl
+         |                         |
+         |                         +-pkgIndex.tcl
          |
          +-misc-+-smc.ico (smc Windows icon)
          |
@@ -366,8 +486,8 @@ file), you install SMC as follows:
    out of the new version. Once you are satisfied with the new
    version, you may delete the old SMC.
 3. Load the SMC package:
-    (Unix) $ tar xvfz Smc_4_0_0.tgz
-    (Windows) running Smc_4_0_0.zip
+    (Unix) $ tar xvfz Smc_6_0_0.tgz
+    (Windows) running Smc_6_0_0.zip
 
 You're done! There really is nothing more that needs to be done.
 You may want to take the following steps.
