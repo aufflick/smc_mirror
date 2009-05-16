@@ -69,7 +69,6 @@ install :       $(LIB_STAGING_DIR)
 		-$(MAKE) -C Ruby install
 		-$(MAKE) -C Scala install
 		-$(MAKE) -C Tcl install
-		-$(MAKE) -C VB install
 
 uninstall :
 		$(MAKE) -C C uninstall
@@ -85,7 +84,6 @@ uninstall :
 		$(MAKE) -C Ruby uninstall
 		$(MAKE) -C Scala uninstall
 		$(MAKE) -C Tcl uninstall
-		$(MAKE) -C VB uninstall
 
 clean :
 		$(MAKE) -C C clean
@@ -101,7 +99,6 @@ clean :
 		$(MAKE) -C Ruby clean
 		$(MAKE) -C Scala clean
 		$(MAKE) -C Tcl clean
-		$(MAKE) -C VB clean
 
 realclean :
 		$(MAKE) -C C realclean
@@ -117,11 +114,13 @@ realclean :
 		$(MAKE) -C Ruby realclean
 		$(MAKE) -C Scala realclean
 		$(MAKE) -C Tcl realclean
-		$(MAKE) -C VB realclean
 
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.15  2009/05/16 15:42:03  cwrapp
+# Removed VB from lib release, superceded by DotNot.
+#
 # Revision 1.14  2009/03/01 18:20:40  cwrapp
 # Preliminary v. 6.0.0 commit.
 #
