@@ -314,8 +314,11 @@ public final class SmcParser
     // collecting parameter types.
     /* package */ void setRawMode2()
     {
-        _lexer.setRawMode(
-            OPEN_CLAUSE_LIST, CLOSE_CLAUSE_LIST, ')', ',');
+        _lexer.setRawMode(OPEN_CLAUSE_LIST,
+                          CLOSE_CLAUSE_LIST,
+                          QUOTE_LIST,
+                          ')',
+                          ',');
 
         return;
     } // end of setRawMode2()
@@ -1427,6 +1430,7 @@ public final class SmcParser
     // List of characters which open and clause subexpressions.
     private static List<Character> OPEN_CLAUSE_LIST;
     private static List<Character> CLOSE_CLAUSE_LIST;
+    private static List<Character> QUOTE_LIST;
 
     // Create a hashmap which associates token names with
     // parser transitions. When a token is received, use this
@@ -1440,6 +1444,7 @@ public final class SmcParser
 
         OPEN_CLAUSE_LIST = new ArrayList<Character>();
         CLOSE_CLAUSE_LIST = new ArrayList<Character>();
+        QUOTE_LIST = new ArrayList<Character>();
 
         OPEN_CLAUSE_LIST.add(new Character('('));
         OPEN_CLAUSE_LIST.add(new Character('{'));
@@ -1450,6 +1455,9 @@ public final class SmcParser
         CLOSE_CLAUSE_LIST.add(new Character('}'));
         CLOSE_CLAUSE_LIST.add(new Character(']'));
         CLOSE_CLAUSE_LIST.add(new Character('>'));
+
+        QUOTE_LIST.add(new Character('"'));
+        QUOTE_LIST.add(new Character('\''));
 
         _TransMethod = new Method[SmcLexer.TOKEN_COUNT];
 
@@ -1597,6 +1605,9 @@ public final class SmcParser
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2009/09/05 15:39:20  cwrapp
+// Checking in fixes for 1944542, 1983929, 2731415, 2803547 and feature 2797126.
+//
 // Revision 1.2  2009/04/11 13:11:13  cwrapp
 // Corrected raw mode 3 to handle multiple argument template/generic declarations.
 //

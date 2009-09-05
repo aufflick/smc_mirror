@@ -6,6 +6,29 @@
 + Major changes
 ---------------
 
+None.
+
+
++ Minor changes
+---------------
+
+None.
+
+
++ Bug fixes
+-----------
+
+
+
+
+                              SMC -
+                  The State Machine Compiler
+                        Version 6.0.0
+
+
++ Major changes
+---------------
+
 (All)
     Smc.jar requires Java 6.
 

@@ -108,22 +108,25 @@ public abstract class SmcCodeGenerator
      * synchronization code.
      * @param genericFlag if {@code true} then use generic
      * collections.
+     * @param accessLevel use this access keyword for the
+     * generated classes.
      */
-    protected SmcCodeGenerator(String srcfileBase,
-                               String sourceNameFormat,
-                               String suffix,
-                               String srcDirectory,
-                               String headerDirectory,
-                               String castType,
-                               int graphLevel,
-                               boolean serialFlag,
-                               boolean debugFlag,
-                               boolean noExceptionFlag,
-                               boolean noCatchFlag,
-                               boolean noStreamsFlag,
-                               boolean reflectFlag,
-                               boolean syncFlag,
-                               boolean genericFlag)
+    protected SmcCodeGenerator(final String srcfileBase,
+                               final String sourceNameFormat,
+                               final String suffix,
+                               final String srcDirectory,
+                               final String headerDirectory,
+                               final String castType,
+                               final int graphLevel,
+                               final boolean serialFlag,
+                               final boolean debugFlag,
+                               final boolean noExceptionFlag,
+                               final boolean noCatchFlag,
+                               final boolean noStreamsFlag,
+                               final boolean reflectFlag,
+                               final boolean syncFlag,
+                               final boolean genericFlag,
+                               final String accessLevel)
     {
         super ();
 
@@ -143,6 +146,7 @@ public abstract class SmcCodeGenerator
         _reflectFlag = reflectFlag;
         _syncFlag = syncFlag;
         _genericFlag = genericFlag;
+        _accessLevel = accessLevel;
         _indent = "";
         _guardCount = 0;
         _guardIndex = 0;
@@ -425,6 +429,11 @@ public abstract class SmcCodeGenerator
      */
     protected final boolean _genericFlag;
 
+    /**
+     * Used this access keyword for the generated classes.
+     */
+    protected final String _accessLevel;
+
     //-----------------------------------------------------------
     // Statics.
     //
@@ -465,6 +474,9 @@ public abstract class SmcCodeGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2009/09/05 15:39:20  cwrapp
+// Checking in fixes for 1944542, 1983929, 2731415, 2803547 and feature 2797126.
+//
 // Revision 1.2  2009/03/16 19:45:26  cwrapp
 // Corrected isLoopback.
 //

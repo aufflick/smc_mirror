@@ -98,6 +98,8 @@ public final class SmcHeaderGenerator
      * synchronization code.
      * @param genericFlag if {@code true} then use generic
      * collections.
+     * @param accessLevel use this access keyword for the
+     * generated classes.
      */
     public SmcHeaderGenerator(String srcfileBase,
                               String srcDirectory,
@@ -111,7 +113,8 @@ public final class SmcHeaderGenerator
                               boolean noStreamsFlag,
                               boolean reflectFlag,
                               boolean syncFlag,
-                              boolean genericFlag)
+                              boolean genericFlag,
+                              String accessLevel)
     {
         super (srcfileBase,
                "{0}{1}_sm.{2}",
@@ -127,7 +130,8 @@ public final class SmcHeaderGenerator
                noStreamsFlag,
                reflectFlag,
                syncFlag,
-               genericFlag);
+               genericFlag,
+               accessLevel);
     } // end of SmcHeaderGenerator(...)
 
     //
@@ -924,6 +928,9 @@ public final class SmcHeaderGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2009/09/05 15:39:20  cwrapp
+// Checking in fixes for 1944542, 1983929, 2731415, 2803547 and feature 2797126.
+//
 // Revision 1.2  2009/03/27 09:41:47  cwrapp
 // Added F. Perrad changes back in.
 //

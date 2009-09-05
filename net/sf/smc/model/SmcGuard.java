@@ -230,13 +230,15 @@ public final class SmcGuard
         // The ctxt variable may appear in the condition, the
         // actions or in the pop arguments.
         if ((_condition != null &&
-             (_condition.indexOf("ctxt.") >= 0 ||
+             (_condition.indexOf("ctxt ") >= 0 ||
+              _condition.indexOf("ctxt.") >= 0 ||
               _condition.indexOf("ctxt->") >= 0 ||
               _condition.indexOf("ctxt:") >= 0)) ||
             _hasActions() == true ||
             (_transType == TransType.TRANS_POP &&
              _popArgs != null &&
-             (_popArgs.indexOf("ctxt.") >= 0 ||
+             (_popArgs.indexOf("ctxt ") >= 0 ||
+              _popArgs.indexOf("ctxt.") >= 0 ||
               _popArgs.indexOf("ctxt->") >= 0 ||
               _popArgs.indexOf("ctxt:") >= 0)))
         {
@@ -454,6 +456,9 @@ public final class SmcGuard
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2009/09/05 15:39:20  cwrapp
+// Checking in fixes for 1944542, 1983929, 2731415, 2803547 and feature 2797126.
+//
 // Revision 1.1  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
 //

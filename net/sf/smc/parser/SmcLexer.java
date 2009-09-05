@@ -51,7 +51,12 @@ import java.util.Map;
 // Member Methods.
 //
 
-    /* package */ SmcLexer(InputStream stream, boolean debugFlag)
+    //-----------------------------------------------------------
+    // Constructors.
+    //
+
+    /* package */ SmcLexer(final InputStream stream,
+                           final boolean debugFlag)
     {
         _stream = stream;
         _token = new Token();
@@ -63,13 +68,21 @@ import java.util.Map;
 
         _lexerFSM = new SmcLexerContext(this);
         _lexerFSM.setDebugFlag(debugFlag);
-    }
+    } // end of SmcLexer(InputStream, boolean)
+
+    //
+    // end of Constructors.
+    //-----------------------------------------------------------
+
+    //-----------------------------------------------------------
+    // Get methods.
+    //
 
     // Return the current line being parsed.
     /* package */ int getLineNumber()
     {
         return(_lineNumber);
-    }
+    } // end of getLineNumber()
 
     // Return the next token and its token name.
     /* package */ Token nextToken()
@@ -98,51 +111,66 @@ import java.util.Map;
         }
 
         return (retval);
-    }
+    } // end of nextToken()
+
+    //
+    // end of Get methods.
+    //-----------------------------------------------------------
+
+    //-----------------------------------------------------------
+    // Set methods.
+    //
 
     // Put the lexer in raw mode. This means the characters are
     // *not* passed through the FSM.
-    /* package */ void setRawMode(char openChar, char closeChar)
+    /* package */ void setRawMode(final char openChar,
+                                  final char closeChar)
     {
         _mode = RAW;
         _openChar = openChar;
         _closeChar = closeChar;
 
         return;
-    }
+    } // end of setRawMode(char, char)
 
     // Put the lexer in raw mode 2. This is used to collect
     // parameter type declarations.
     /* package */ void setRawMode(List<Character> openList,
                                   List<Character> closeList,
+                                  List<Character> quoteList,
                                   char endChar,
                                   char separator)
     {
         _mode = RAW2;
         _openList = openList;
         _closeList = closeList;
+        _quoteList = quoteList;
         _endChar = endChar;
         _separator = separator;
 
         return;
-    }
+    } // end of setRawMode(List<>, List<>, char, char)
 
     // Put the lexer in raw mode 3. Collect all characters
     // until the close character is seen.
-    /* package */ void setRawMode(String closeChars)
+    /* package */ void setRawMode(final String closeChars)
     {
         _mode = RAW3;
         _closeChars = closeChars;
 
         return;
-    }
+    } // end of setRawMode(String)
 
     // Put the lexer in cooked mode.
     /* package */ void setCookedMode()
     {
         _mode = COOKED;
         return;
-    }
+    } // end of setCookedMode()
+
+    //
+    // end of Set methods.
+    //-----------------------------------------------------------
 
     //-----------------------------------------------------------
     // State Map Actions
@@ -158,13 +186,13 @@ import java.util.Map;
         _token.setLineNumber(_lineNumber);
 
         return;
-    }
+    } // end of startToken()
 
     /* package */ void addToToken()
     {
         _tokenBuffer.append(_currentChar);
         return;
-    }
+    } // end of addToToken()
 
     // DEBUG
     /* package */ void outputChar()
@@ -175,24 +203,24 @@ import java.util.Map;
             Integer.toHexString((int) _currentChar));
 
         return;
-    }
+    } // end of outputChar()
 
-    /* package */ void addToToken(String s)
+    /* package */ void addToToken(final String s)
     {
         _tokenBuffer.append(s);
         return;
-    }
+    } // end of addToToken(String)
 
-    /* package */ void endToken(int type)
+    /* package */ void endToken(final int type)
     {
         _token.setType(type);
         _token.setValue(_tokenBuffer.toString());
         _stopFlag = true;
         return;
-    }
+    } // end of endTokne(int)
 
     // A malformed token has been detected.
-    /* package */ void badToken(String error_msg)
+    /* package */ void badToken(final String error_msg)
     {
         _token.setType(DONE_FAILED);
         _token.setValue(error_msg +
@@ -201,7 +229,7 @@ import java.util.Map;
                         ")");
         _stopFlag = true;
         return;
-    }
+    } // end of badToken(String)
 
     // Check if the token is a keyword. Otherwise, set the token
     // type to WORD.
@@ -226,7 +254,7 @@ import java.util.Map;
         }
 
         return;
-    }
+    } // end of checkKeyword()
 
     /* package */ void checkPercentKeyword()
     {
@@ -245,7 +273,7 @@ import java.util.Map;
         }
 
         return;
-    }
+    } // end of checkPercentKeyword()
 
     // Back up one character in the file so that the character
     // will be read again when nextToken() is called. This is
@@ -259,7 +287,7 @@ import java.util.Map;
         }
 
         return;
-    }
+    } // end of ungetChar()
 
     // End of State Machine Actions.
     //-----------------------------------------------------------
@@ -291,7 +319,7 @@ import java.util.Map;
                     // If this is an end-of-line character, add
                     // one to the current line number. CR-LF is
                     // a single end-of-line.
-                    if (_currentChar == 10)
+                    if (_currentChar == NEW_LINE)
                     {
                         ++_lineNumber;
                     }
@@ -322,7 +350,7 @@ import java.util.Map;
         }
 
         return(_token);
-    }
+    } // end of nextCookedToken()
 
     // Keep reading in characters until the close character is
     // found.
@@ -383,7 +411,7 @@ import java.util.Map;
                         // If this is an end-of-line character,
                         // add one to the current line number.
                         // CR-LF is a single end-of-line.
-                        else if (_currentChar == 10)
+                        else if (_currentChar == NEW_LINE)
                         {
                             ++_lineNumber;
                         }
@@ -438,7 +466,7 @@ import java.util.Map;
                 // If this is an end-of-line character, add one
                 // to the current line number. CR-LF is a single
                 // end-of-line.
-                if (_currentChar == 10)
+                if (_currentChar == NEW_LINE)
                 {
                     ++_lineNumber;
                 }
@@ -469,7 +497,7 @@ import java.util.Map;
         }
 
         return (_token);
-    }
+    } // end of nextRaw3Token()
 
     // Read in a parameter type declaration as raw source code.
     private Token nextParamTypeToken()
@@ -489,6 +517,10 @@ import java.util.Map;
             Character openChar;
             int openIndex;
             int closeIndex;
+            int quoteIndex;
+            boolean quoteFlag = false;
+            char quoteChar = ' ';
+            boolean escapeFlag = false;
 
             _stopFlag = false;
             while (_stopFlag == false)
@@ -500,7 +532,8 @@ import java.util.Map;
                 // collection.
                 if ((_currentChar == _endChar ||
                      _currentChar == _separator) &&
-                    depth.isEmpty() == true)
+                    depth.isEmpty() == true &&
+                    quoteFlag == false)
                 {
                     _stopFlag = true;
 
@@ -513,10 +546,52 @@ import java.util.Map;
                 {
                     _tokenBuffer.append(_currentChar);
 
+                    // Is this an escaped character?
+                    if (escapeFlag == true)
+                    {
+                        // Yes. Turn off the escape.
+                        escapeFlag = false;
+                    }
+                    // Is this the escape character?
+                    else if (_currentChar == ESCAPE)
+                    {
+                        // Yes. Escape the next character.
+                        escapeFlag = true;
+                    }
+                    // Is this a quote charater?
+                    else if (
+                        (quoteIndex =
+                         _quoteList.indexOf(_currentChar)) >= 0)
+                    {
+                        // Is this the opening quote?
+                        if (quoteFlag == false)
+                        {
+                            // Yes, we are entering a quoted
+                            // section.
+                            quoteFlag = true;
+                            quoteChar = _currentChar;
+                        }
+                        // Does this character match the opening
+                        // quote character?
+                        else if (_currentChar == quoteChar)
+                        {
+                            // Yes. So this must be a closing
+                            // quote.
+                            quoteFlag = false;
+                            quoteChar = ' ';
+                        }
+                        // Otherwise this is just another
+                        // character in the quoted string.
+                    }
+                    // Are we inside a quote?
+                    else if (quoteFlag == true)
+                    {
+                        // Yes. Nothing more to do.
+                    }
                     // Is this a closing character?
-                    closeIndex =
-                        _closeList.indexOf(_currentChar);
-                    if (closeIndex >= 0)
+                    else if (
+                        (closeIndex =
+                         _closeList.indexOf(_currentChar)) >= 0)
                     {
                         // Yes. Does it match the opening
                         // character?
@@ -569,7 +644,7 @@ import java.util.Map;
                     {
                         depth.addFirst(_currentChar);
                     }
-                    else if (_currentChar == 10)
+                    else if (_currentChar == NEW_LINE)
                     {
                         ++_lineNumber;
                     }
@@ -594,7 +669,7 @@ import java.util.Map;
         _token.setLineNumber(startLine);
 
         return (_token);
-    }
+    } // end of nextParamTypeToken()
 
     // Read the next character. Actually, this routine reads in
     // a large buffer and data returns the next character from
@@ -728,6 +803,7 @@ import java.util.Map;
     // token collection.
     private List<Character> _openList;
     private List<Character> _closeList;
+    private List<Character> _quoteList;
     private char _endChar;
     private char _separator;
 
@@ -831,6 +907,12 @@ import java.util.Map;
     // transition.
     private static final int MIN_ASCII_CHAR = 0;
     private static final int MAX_ASCII_CHAR = 128;
+
+    // New line character.
+    private static final int NEW_LINE = 10;
+
+    // The escape character.
+    private static final char ESCAPE = '\\';
 
     static
     {
@@ -1136,6 +1218,9 @@ import java.util.Map;
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2009/09/05 15:39:20  cwrapp
+// Checking in fixes for 1944542, 1983929, 2731415, 2803547 and feature 2797126.
+//
 // Revision 1.2  2009/04/11 13:11:12  cwrapp
 // Corrected raw mode 3 to handle multiple argument template/generic declarations.
 //

@@ -98,20 +98,23 @@ public final class SmcJavaGenerator
      * synchronization code.
      * @param genericFlag if {@code true} then use generic
      * collections.
+     * @param accessLevel use this access keyword for the
+     * generated classes.
      */
-    public SmcJavaGenerator(String srcfileBase,
-                            String srcDirectory,
-                            String headerDirectory,
-                            String castType,
-                            int graphLevel,
-                            boolean serialFlag,
-                            boolean debugFlag,
-                            boolean noExceptionFlag,
-                            boolean noCatchFlag,
-                            boolean noStreamsFlag,
-                            boolean reflectFlag,
-                            boolean syncFlag,
-                            boolean genericFlag)
+    public SmcJavaGenerator(final String srcfileBase,
+                            final String srcDirectory,
+                            final String headerDirectory,
+                            final String castType,
+                            final int graphLevel,
+                            final boolean serialFlag,
+                            final boolean debugFlag,
+                            final boolean noExceptionFlag,
+                            final boolean noCatchFlag,
+                            final boolean noStreamsFlag,
+                            final boolean reflectFlag,
+                            final boolean syncFlag,
+                            final boolean genericFlag,
+                            final String accessLevel)
     {
         super (srcfileBase,
                "{0}{1}Context.{2}",
@@ -127,7 +130,11 @@ public final class SmcJavaGenerator
                noStreamsFlag,
                reflectFlag,
                syncFlag,
-               genericFlag);
+               genericFlag,
+               (accessLevel == null ?
+                "public" :
+                (accessLevel.equals(PACKAGE_LEVEL) == true ?
+                 "/* package */" : accessLevel)));
     } // end of SmcJavaGenerator(...)
 
     //
@@ -148,7 +155,6 @@ public final class SmcJavaGenerator
         String packageName = fsm.getPackage();
         String context = fsm.getContext();
         String startState = fsm.getStartState();
-        String accessLevel = fsm.getAccessLevel();
         List<SmcMap> maps = fsm.getMaps();
         List<SmcTransition> transitions;
         Iterator<SmcParameter> pit;
@@ -167,19 +173,6 @@ public final class SmcJavaGenerator
         _source.println(".sm");
         _source.println(" */");
         _source.println();
-
-        // If the access level has not been set, then the default
-        // is "public".
-        if (accessLevel == null || accessLevel.length() == 0)
-        {
-            accessLevel = "public";
-        }
-        // If the access level is package, change it to
-        // /* package */
-        else if (accessLevel.equals("package") == true)
-        {
-            accessLevel = "/* package */";
-        }
 
         // Dump out the raw source code, if any.
         if (rawSource != null && rawSource.length() > 0)
@@ -224,8 +217,7 @@ public final class SmcJavaGenerator
         // The context clas contains all the state classes as
         // inner classes, so generate the context first rather
         // than last.
-        _source.print(accessLevel);
-//         _source.print(" final class ");
+        _source.print(_accessLevel);
         _source.print(" class ");
         _source.print(context);
         _source.println("Context");
@@ -259,7 +251,9 @@ public final class SmcJavaGenerator
         }
 
         // Generate the context class' constructor.
-        _source.print("    public ");
+        _source.print("    ");
+        _source.print(_accessLevel);
+        _source.print(" ");
         _source.print(context);
         _source.print("Context(");
         _source.print(context);
@@ -276,7 +270,9 @@ public final class SmcJavaGenerator
         // Generate the second constructor which allows the
         // initial state to be dynamically set. Overrides the
         // %start specifier.
-        _source.print("    public ");
+        _source.print("    ");
+        _source.print(_accessLevel);
+        _source.print(" ");
         _source.print(context);
         _source.print("Context(");
         _source.print(context);
@@ -564,7 +560,9 @@ public final class SmcJavaGenerator
         _source.println("// Inner classes.");
         _source.println("//");
         _source.println();
-        _source.print("    public static abstract class ");
+        _source.print("    ");
+        _source.print(_accessLevel);
+        _source.print(" static abstract class ");
         _source.print(context);
         _source.println("State");
         _source.println("        extends statemap.State");
@@ -1691,11 +1689,19 @@ public final class SmcJavaGenerator
 //---------------------------------------------------------------
 // Member data
 //
+
+    //-----------------------------------------------------------
+    // Constants.
+    //
+    private static final String PACKAGE_LEVEL = "package";
 } // end of class SmcJavaGenerator
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2009/09/05 15:39:20  cwrapp
+// Checking in fixes for 1944542, 1983929, 2731415, 2803547 and feature 2797126.
+//
 // Revision 1.3  2009/03/27 09:41:47  cwrapp
 // Added F. Perrad changes back in.
 //

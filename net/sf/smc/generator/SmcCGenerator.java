@@ -99,20 +99,23 @@ public final class SmcCGenerator
      * synchronization code.
      * @param genericFlag if {@code true} then use generic
      * collections.
+     * @param accessLevel use this access keyword for the
+     * generated classes.
      */
-    public SmcCGenerator(String srcfileBase,
-                         String srcDirectory,
-                         String headerDirectory,
-                         String castType,
-                         int graphLevel,
-                         boolean serialFlag,
-                         boolean debugFlag,
-                         boolean noExceptionFlag,
-                         boolean noCatchFlag,
-                         boolean noStreamsFlag,
-                         boolean reflectFlag,
-                         boolean syncFlag,
-                         boolean genericFlag)
+    public SmcCGenerator(final String srcfileBase,
+                         final String srcDirectory,
+                         final String headerDirectory,
+                         final String castType,
+                         final int graphLevel,
+                         final boolean serialFlag,
+                         final boolean debugFlag,
+                         final boolean noExceptionFlag,
+                         final boolean noCatchFlag,
+                         final boolean noStreamsFlag,
+                         final boolean reflectFlag,
+                         final boolean syncFlag,
+                         final boolean genericFlag,
+                         final String accessLevel)
     {
         super (srcfileBase,
                "{0}{1}_sm.{2}",
@@ -128,7 +131,8 @@ public final class SmcCGenerator
                noStreamsFlag,
                reflectFlag,
                syncFlag,
-               genericFlag);
+               genericFlag,
+               accessLevel);
     } // end of SmcCGenerator(...)
 
     //
@@ -1339,6 +1343,9 @@ public final class SmcCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2009/09/05 15:39:20  cwrapp
+// Checking in fixes for 1944542, 1983929, 2731415, 2803547 and feature 2797126.
+//
 // Revision 1.3  2009/03/27 15:26:55  fperrad
 // C : the function Context_EnterStartState is generated only if FSM hasEntryActions
 //

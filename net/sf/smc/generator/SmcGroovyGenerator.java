@@ -104,20 +104,23 @@ public final class SmcGroovyGenerator
      * synchronization code.
      * @param genericFlag if {@code true} then use generic
      * collections.
+     * @param accessLevel use this access keyword for the
+     * generated classes.
      */
-    public SmcGroovyGenerator(String srcfileBase,
-                              String srcDirectory,
-                              String headerDirectory,
-                              String castType,
-                              int graphLevel,
-                              boolean serialFlag,
-                              boolean debugFlag,
-                              boolean noExceptionFlag,
-                              boolean noCatchFlag,
-                              boolean noStreamsFlag,
-                              boolean reflectFlag,
-                              boolean syncFlag,
-                              boolean genericFlag)
+    public SmcGroovyGenerator(final String srcfileBase,
+                              final String srcDirectory,
+                              final String headerDirectory,
+                              final String castType,
+                              final int graphLevel,
+                              final boolean serialFlag,
+                              final boolean debugFlag,
+                              final boolean noExceptionFlag,
+                              final boolean noCatchFlag,
+                              final boolean noStreamsFlag,
+                              final boolean reflectFlag,
+                              final boolean syncFlag,
+                              final boolean genericFlag,
+                              final String accessLevel)
     {
         super (srcfileBase,
                "{0}{1}Context.{2}",
@@ -133,7 +136,8 @@ public final class SmcGroovyGenerator
                noStreamsFlag,
                reflectFlag,
                syncFlag,
-               genericFlag);
+               genericFlag,
+               accessLevel);
     } // end of SmcGroovyGenerator(...)
 
     //
@@ -1203,6 +1207,9 @@ public final class SmcGroovyGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2009/09/05 15:39:20  cwrapp
+// Checking in fixes for 1944542, 1983929, 2731415, 2803547 and feature 2797126.
+//
 // Revision 1.3  2009/04/11 13:08:23  cwrapp
 // Pass initial state to FSMContext constructor. Moved calling initial state to enterStartState.
 //

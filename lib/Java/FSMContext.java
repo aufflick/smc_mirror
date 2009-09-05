@@ -35,6 +35,8 @@ package statemap;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.EmptyStackException;
@@ -92,6 +94,26 @@ public abstract class FSMContext
 
     //
     // end of Abstract method declarations.
+    //-----------------------------------------------------------
+
+    //-----------------------------------------------------------
+    // Serializable Interface Implementation.
+    //
+
+    private void readObject(ObjectInputStream istream)
+        throws IOException,
+               ClassNotFoundException
+    {
+        istream.defaultReadObject();
+
+        // Create an empty listeners list.
+        _listeners = new PropertyChangeSupport(this);
+
+        return;
+    } // end of readObject(ObjectInputStream)
+
+    //
+    // end of Serializable Interface Implementation.
     //-----------------------------------------------------------
 
     //-----------------------------------------------------------
@@ -227,7 +249,7 @@ public abstract class FSMContext
         // Inform any and all listeners about this state
         // change.
         _listeners.firePropertyChange(
-            "State", _previousState, _state);
+            STATE_PROPERTY, _previousState, _state);
 
         return;
     } // end of setState(State)
@@ -277,7 +299,7 @@ public abstract class FSMContext
         // Inform any and all listeners about this state
         // change.
         _listeners.firePropertyChange(
-            "State", previousState, _state);
+            STATE_PROPERTY, previousState, _state);
 
         return;
     } // end of pushState(State)
@@ -325,7 +347,7 @@ public abstract class FSMContext
             // Inform any and all listeners about this state
             // change.
             _listeners.firePropertyChange(
-                "State", previousState, _state);
+                STATE_PROPERTY, previousState, _state);
         }
 
         return;
@@ -446,6 +468,9 @@ public abstract class FSMContext
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.13  2009/09/05 15:39:20  cwrapp
+// Checking in fixes for 1944542, 1983929, 2731415, 2803547 and feature 2797126.
+//
 // Revision 1.12  2009/03/27 09:41:07  cwrapp
 // Added F. Perrad changes back in.
 //

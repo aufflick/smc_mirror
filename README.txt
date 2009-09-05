@@ -2,7 +2,7 @@
 
                                SMC
                      The State Machine Compiler
-                         (Version: 6.0.0)
+                         (Version: 6.0.1)
 
                      http://smc.sourceforge.net
 
