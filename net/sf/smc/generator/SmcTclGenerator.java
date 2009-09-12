@@ -149,6 +149,7 @@ public final class SmcTclGenerator
     public void visit(SmcFSM fsm)
     {
         String context = fsm.getContext();
+        String fsmClassName = fsm.getFsmClassName();
         String rawSource = fsm.getSource();
         String packageName = fsm.getPackage();
         String startState = fsm.getStartState();
@@ -206,8 +207,8 @@ public final class SmcTclGenerator
         // Generate the context.
         _source.print(_indent);
         _source.print("class ");
-        _source.print(context);
-        _source.println("Context {");
+        _source.print(fsmClassName);
+        _source.println(" {");
         _source.print(_indent);
         _source.println("    inherit ::statemap::FSMContext;");
         _source.println();
@@ -506,18 +507,18 @@ public final class SmcTclGenerator
             // Output the state deserialization static data.
             _source.print(_indent);
             _source.print("set ");
-            _source.print(context);
-            _source.println("Context::MIN_ID 0;");
+            _source.print(fsmClassName);
+            _source.println("::MIN_ID 0;");
             _source.print(_indent);
             _source.print("set ");
-            _source.print(context);
-            _source.print("Context::MAX_ID ");
+            _source.print(fsmClassName);
+            _source.print("::MAX_ID ");
             _source.print(index - 1);
             _source.println(";");
             _source.print(_indent);
             _source.print("array set ");
-            _source.print(context);
-            _source.print("Context::_States [list");
+            _source.print(fsmClassName);
+            _source.print("::_States [list");
 
             for (SmcMap map: maps)
             {
@@ -1491,6 +1492,16 @@ public final class SmcTclGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2009/09/12 21:44:49  kgreg99
+// Implemented feature req. #2718941 - user defined generated class name.
+// A new statement was added to the syntax: %fsmclass class_name
+// It is optional. If not used, generated class is called as before "XxxContext" where Xxx is context class name as entered via %class statement.
+// If used, generated class is called asrequested.
+// Following language generators are touched:
+// c, c++, java, c#, objc, lua, groovy, scala, tcl, VB
+// This feature is not tested yet !
+// Maybe it will be necessary to modify also the output file name.
+//
 // Revision 1.5  2009/09/05 15:39:20  cwrapp
 // Checking in fixes for 1944542, 1983929, 2731415, 2803547 and feature 2797126.
 //

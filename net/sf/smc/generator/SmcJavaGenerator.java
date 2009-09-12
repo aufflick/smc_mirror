@@ -154,6 +154,7 @@ public final class SmcJavaGenerator
         String rawSource = fsm.getSource();
         String packageName = fsm.getPackage();
         String context = fsm.getContext();
+        String fsmClassName = fsm.getFsmClassName();
         String startState = fsm.getStartState();
         List<SmcMap> maps = fsm.getMaps();
         List<SmcTransition> transitions;
@@ -219,8 +220,8 @@ public final class SmcJavaGenerator
         // than last.
         _source.print(_accessLevel);
         _source.print(" class ");
-        _source.print(context);
-        _source.println("Context");
+        _source.print(fsmClassName);
+        _source.println("");
         _source.println("    extends statemap.FSMContext");
 
         if (_serialFlag == true)
@@ -254,8 +255,8 @@ public final class SmcJavaGenerator
         _source.print("    ");
         _source.print(_accessLevel);
         _source.print(" ");
-        _source.print(context);
-        _source.print("Context(");
+        _source.print(fsmClassName);
+        _source.print("(");
         _source.print(context);
         _source.println(" owner)");
         _source.println("    {");
@@ -273,8 +274,8 @@ public final class SmcJavaGenerator
         _source.print("    ");
         _source.print(_accessLevel);
         _source.print(" ");
-        _source.print(context);
-        _source.print("Context(");
+        _source.print(fsmClassName);
+        _source.print("(");
         _source.print(context);
         _source.print(" owner, ");
         _source.print(context);
@@ -596,11 +597,11 @@ public final class SmcJavaGenerator
         _source.println("        }");
         _source.println();
         _source.print("        protected void Entry(");
-        _source.print(context);
-        _source.println("Context context) {}");
+        _source.print(fsmClassName);
+        _source.println(" context) {}");
         _source.print("        protected void Exit(");
-        _source.print(context);
-        _source.println("Context context) {}");
+        _source.print(fsmClassName);
+        _source.println(" context) {}");
         _source.println();
 
         // Generate the default transition definitions.
@@ -614,8 +615,8 @@ public final class SmcJavaGenerator
                 _source.print("        protected void ");
                 _source.print(transName);
                 _source.print("(");
-                _source.print(context);
-                _source.print("Context context");
+                _source.print(fsmClassName);
+                _source.print(" context");
 
                 for (SmcParameter param: trans.getParameters())
                 {
@@ -639,8 +640,8 @@ public final class SmcJavaGenerator
 
         // Generate the overall Default transition for all maps.
         _source.print("        protected void Default(");
-        _source.print(context);
-        _source.println("Context context)");
+        _source.print(fsmClassName);
+        _source.println(" context)");
         _source.println("        {");
 
         if (_debugFlag == true)
@@ -937,6 +938,7 @@ public final class SmcJavaGenerator
     {
         SmcMap map = state.getMap();
         String context = map.getFSM().getContext();
+        String fsmClassName = map.getFSM().getFsmClassName();
         String mapName = map.getName();
         String stateName = state.getClassName();
         List<SmcAction> actions;
@@ -993,8 +995,8 @@ public final class SmcJavaGenerator
         {
             _source.println();
             _source.print("            protected void Entry(");
-            _source.print(context);
-            _source.println("Context context)");
+            _source.print(fsmClassName);
+            _source.println(" context)");
             _source.println("            {");
 
             // Declare the "ctxt" local variable.
@@ -1023,8 +1025,8 @@ public final class SmcJavaGenerator
         {
             _source.println();
             _source.print("            protected void Exit(");
-            _source.print(context);
-            _source.println("Context context)");
+            _source.print(fsmClassName);
+            _source.println(" context)");
             _source.println("            {");
 
             // Declare the "ctxt" local variable.
@@ -1165,6 +1167,7 @@ public final class SmcJavaGenerator
         SmcState state = transition.getState();
         SmcMap map = state.getMap();
         String context = map.getFSM().getContext();
+        String fsmClassName = map.getFSM().getFsmClassName();
         String mapName = map.getName();
         String stateName = state.getClassName();
         String transName = transition.getName();
@@ -1181,8 +1184,8 @@ public final class SmcJavaGenerator
         _source.print("protected void ");
         _source.print(transName);
         _source.print("(");
-        _source.print(context);
-        _source.print("Context context");
+        _source.print(fsmClassName);
+        _source.print(" context");
 
         // Add user-defined parameters.
         for (SmcParameter parameter: parameters)
@@ -1699,6 +1702,16 @@ public final class SmcJavaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2009/09/12 21:44:49  kgreg99
+// Implemented feature req. #2718941 - user defined generated class name.
+// A new statement was added to the syntax: %fsmclass class_name
+// It is optional. If not used, generated class is called as before "XxxContext" where Xxx is context class name as entered via %class statement.
+// If used, generated class is called asrequested.
+// Following language generators are touched:
+// c, c++, java, c#, objc, lua, groovy, scala, tcl, VB
+// This feature is not tested yet !
+// Maybe it will be necessary to modify also the output file name.
+//
 // Revision 1.4  2009/09/05 15:39:20  cwrapp
 // Checking in fixes for 1944542, 1983929, 2731415, 2803547 and feature 2797126.
 //

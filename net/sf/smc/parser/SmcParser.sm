@@ -39,6 +39,16 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.5  2009/09/12 21:44:49  kgreg99
+ * Implemented feature req. #2718941 - user defined generated class name.
+ * A new statement was added to the syntax: %fsmclass class_name
+ * It is optional. If not used, generated class is called as before "XxxContext" where Xxx is context class name as entered via %class statement.
+ * If used, generated class is called asrequested.
+ * Following language generators are touched:
+ * c, c++, java, c#, objc, lua, groovy, scala, tcl, VB
+ * This feature is not tested yet !
+ * Maybe it will be necessary to modify also the output file name.
+ *
  * Revision 1.4  2009/04/11 13:11:13  cwrapp
  * Corrected raw mode 3 to handle multiple argument template/generic declarations.
  *
@@ -182,6 +192,12 @@ Start
         {
             setHeaderLine(token.getLineNumber());
         }
+
+	FSM_CLASS_NAME(token: SmcLexer.Token)
+		FsmClassName
+		{
+            setHeaderLine(token.getLineNumber());
+		}
 
     HEADER_FILE(token: SmcLexer.Token)
         HeaderFile
@@ -351,6 +367,22 @@ Package
         }
 } // end of state Package
 
+FsmClassName
+{
+    WORD(token: SmcLexer.Token)
+        Start
+        {
+            setFsmClassName(token.getValue());
+        }
+
+    Default
+        StartError
+        {
+            error("Missing name after %FsmClassName.",
+                  ctxt.getLineNumber());
+        }
+} // end of state Context
+
 Import
     Entry
     {
@@ -438,6 +470,12 @@ StartError
             setHeaderLine(token.getLineNumber());
         }
 
+	FSM_CLASS_NAME(token: SmcLexer.Token)
+		FsmClassName
+		{
+            setHeaderLine(token.getLineNumber());
+		}
+
     HEADER_FILE(token: SmcLexer.Token)
         HeaderFile
         {
@@ -448,7 +486,7 @@ StartError
         Package
         {}
 
-    IMPORT(token: SmcLexer.Token)
+	IMPORT(token: SmcLexer.Token)
         Import
         {
             setHeaderLine(token.getLineNumber());

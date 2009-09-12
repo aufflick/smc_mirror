@@ -104,6 +104,7 @@ public final class SmcFSM
         _startState = "";
         _source = "";
         _context = "";
+		_fsmClassName = "";
         _header = "";
         _includeList = new ArrayList<String>();
         _package = null;
@@ -177,6 +178,15 @@ public final class SmcFSM
     {
         return (_context);
     } // end of getContext()
+
+    /**
+     * Returns the fsm class name.
+     * @return the fsm class name.
+     */
+    public String getFsmClassName()
+    {
+        return (_fsmClassName);
+    } // end of getFsmClassName()
 
     /**
      * Returns the context class header file name.
@@ -398,6 +408,16 @@ public final class SmcFSM
     } // end of setContext(String)
 
     /**
+     * Set sthe fsm class name.
+     * @param context class name.
+     */
+    public void setFsmClassName(String fsmName)
+    {
+        _fsmClassName = fsmName;
+        return;
+    } // end of setFsmClassName(String)
+
+    /**
      * Sets the context class header file name.
      * @param header header file name.
      */
@@ -551,6 +571,9 @@ public final class SmcFSM
     // This state map is associated with this class.
     private String _context;
 
+	// This map is implemented in the class with given name
+	private String _fsmClassName;
+	
     // Where the associated class is defined.
     private String _header;
 
@@ -582,6 +605,16 @@ public final class SmcFSM
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2009/09/12 21:44:49  kgreg99
+// Implemented feature req. #2718941 - user defined generated class name.
+// A new statement was added to the syntax: %fsmclass class_name
+// It is optional. If not used, generated class is called as before "XxxContext" where Xxx is context class name as entered via %class statement.
+// If used, generated class is called asrequested.
+// Following language generators are touched:
+// c, c++, java, c#, objc, lua, groovy, scala, tcl, VB
+// This feature is not tested yet !
+// Maybe it will be necessary to modify also the output file name.
+//
 // Revision 1.1  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
 //

@@ -301,6 +301,18 @@ public final class SmcParser
         return (_targetLanguage);
     }
 
+	// THIS METHOD WAS ADDED BY kgreg99 ONLY TO RESOLVE COMPILATION ERROR
+	// IT HAS TO BE EVALUATED
+    // Put the lexer into raw mode.
+    /* package */ void setRawMode(String openChar,
+                                  String closeChar,
+                                  String dummy )
+    {
+        _lexer.setRawMode(openChar.charAt(0),
+                          closeChar.charAt(0) );
+        return;
+    } // end of setRawMode(String, String)
+
     // Put the lexer into raw mode.
     /* package */ void setRawMode(String openChar,
                                   String closeChar)
@@ -398,6 +410,22 @@ public final class SmcParser
         return;
     }
 
+    /* package */ void setFsmClassName(String name)
+    {
+        String fsmName = _fsm.getFsmClassName();
+
+        if (fsmName != null && fsmName.length() > 0)
+        {
+            error("%fsmclass previously specified",
+                    _lineNumber);
+        }
+        else
+        {
+            _fsm.setFsmClassName(name.trim());
+        }
+
+        return;
+    }
     /* package */ void setPackageName(String name)
     {
         String pkg = _fsm.getPackage();
@@ -416,6 +444,7 @@ public final class SmcParser
         return;
     }
 
+	
     /* package */ void addImport(String name)
     {
         _fsm.addImport(name.trim());
@@ -511,6 +540,12 @@ public final class SmcParser
         }
         else
         {
+	    	// check FSM class name
+	    	if ( _fsm.getFsmClassName() == "" )
+	    	{
+	    		// set default FSM class name
+	    		_fsm.setFsmClassName( _fsm.getContext()+"Context" );
+	    	}
             if (_parserFSM.getDebugFlag() == true)
             {
                 PrintStream os = _parserFSM.getDebugStream();
@@ -1517,6 +1552,10 @@ public final class SmcParser
             _TransMethod[SmcLexer.PACKAGE_NAME] =
                 fsmClass.getDeclaredMethod("PACKAGE_NAME",
                                            paramTypes);
+            transName = "FSM_CLASS_NAME";
+            _TransMethod[SmcLexer.FSM_CLASS_NAME] =
+                fsmClass.getDeclaredMethod("FSM_CLASS_NAME",
+                                           paramTypes);
             transName = "IMPORT";
             _TransMethod[SmcLexer.IMPORT] =
                 fsmClass.getDeclaredMethod("IMPORT",
@@ -1605,6 +1644,16 @@ public final class SmcParser
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2009/09/12 21:44:49  kgreg99
+// Implemented feature req. #2718941 - user defined generated class name.
+// A new statement was added to the syntax: %fsmclass class_name
+// It is optional. If not used, generated class is called as before "XxxContext" where Xxx is context class name as entered via %class statement.
+// If used, generated class is called asrequested.
+// Following language generators are touched:
+// c, c++, java, c#, objc, lua, groovy, scala, tcl, VB
+// This feature is not tested yet !
+// Maybe it will be necessary to modify also the output file name.
+//
 // Revision 1.3  2009/09/05 15:39:20  cwrapp
 // Checking in fixes for 1944542, 1983929, 2731415, 2803547 and feature 2797126.
 //

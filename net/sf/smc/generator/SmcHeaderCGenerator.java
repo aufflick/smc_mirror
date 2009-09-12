@@ -150,6 +150,7 @@ public final class SmcHeaderCGenerator
         String srcfileCaps;
         String packageName = fsm.getPackage();
         String context = fsm.getContext();
+        String fsmClassName = fsm.getFsmClassName();
         List<SmcTransition> transList;
         List<SmcParameter> params;
 
@@ -218,8 +219,8 @@ public final class SmcHeaderCGenerator
         _source.print(context);
         _source.println(";");
         _source.print("struct ");
-        _source.print(context);
-        _source.println("Context;");
+        _source.print(fsmClassName);
+        _source.println(";");
 
         // Declare user's base state class.
         _source.println();
@@ -232,14 +233,14 @@ public final class SmcHeaderCGenerator
         if (fsm.hasEntryActions() == true)
         {
             _source.print("    void(*Entry)(struct ");
-            _source.print(context);
-            _source.println("Context*);");
+            _source.print(fsmClassName);
+            _source.println("*);");
         }
         if (fsm.hasExitActions() == true)
         {
             _source.print("    void(*Exit)(struct ");
-            _source.print(context);
-            _source.println("Context*);");
+            _source.print(fsmClassName);
+            _source.println("*);");
         }
         _source.println();
 
@@ -256,8 +257,8 @@ public final class SmcHeaderCGenerator
                 _source.print("    void(*");
                 _source.print(trans.getName());
                 _source.print(")(struct ");
-                _source.print(context);
-                _source.print("Context*");
+                _source.print(fsmClassName);
+                _source.print("*");
 
                 params = trans.getParameters();
                 for (SmcParameter param: params)
@@ -271,8 +272,8 @@ public final class SmcHeaderCGenerator
         }
         _source.println();
         _source.print("    void(*Default)(struct ");
-        _source.print(context);
-        _source.println("Context*);");
+        _source.print(fsmClassName);
+        _source.println("*);");
 
         _source.println();
         _source.println("    STATE_MEMBERS");
@@ -291,8 +292,8 @@ public final class SmcHeaderCGenerator
         // Generate the FSM context class.
         _source.println();
         _source.print("struct ");
-        _source.print(context);
-        _source.println("Context");
+        _source.print(fsmClassName);
+        _source.println("");
         _source.println("{");
         _source.print("    FSM_MEMBERS(");
         _source.print(context);
@@ -307,11 +308,11 @@ public final class SmcHeaderCGenerator
 
         // Constructor
         _source.print("extern void ");
-        _source.print(context);
-        _source.print("Context_Init");
+        _source.print(fsmClassName);
+        _source.print("_Init");
         _source.print("(struct ");
-        _source.print(context);
-        _source.print("Context*, struct ");
+        _source.print(fsmClassName);
+        _source.print("*, struct ");
         _source.print(context);
         _source.println("*);");
 
@@ -319,10 +320,10 @@ public final class SmcHeaderCGenerator
         if (fsm.hasEntryActions() == true)
         {
             _source.print("extern void ");
-            _source.print(context);
-            _source.print("Context_EnterStartState(struct ");
-            _source.print(context);
-            _source.println("Context*);");
+            _source.print(fsmClassName);
+            _source.print("_EnterStartState(struct ");
+            _source.print(fsmClassName);
+            _source.println("*);");
         }
 
         // Generate a method for every transition in every map
@@ -332,12 +333,12 @@ public final class SmcHeaderCGenerator
             if (trans.getName().equals("Default") == false)
             {
                 _source.print("extern void ");
-                _source.print(context);
-                _source.print("Context_");
+                _source.print(fsmClassName);
+                _source.print("_");
                 _source.print(trans.getName());
                 _source.print("(struct ");
-                _source.print(context);
-                _source.print("Context*");
+                _source.print(fsmClassName);
+                _source.print("fsmClassName*");
 
                 params = trans.getParameters();
                 for (SmcParameter param: params)
@@ -409,6 +410,16 @@ public final class SmcHeaderCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2009/09/12 21:44:49  kgreg99
+// Implemented feature req. #2718941 - user defined generated class name.
+// A new statement was added to the syntax: %fsmclass class_name
+// It is optional. If not used, generated class is called as before "XxxContext" where Xxx is context class name as entered via %class statement.
+// If used, generated class is called asrequested.
+// Following language generators are touched:
+// c, c++, java, c#, objc, lua, groovy, scala, tcl, VB
+// This feature is not tested yet !
+// Maybe it will be necessary to modify also the output file name.
+//
 // Revision 1.4  2009/09/05 15:39:20  cwrapp
 // Checking in fixes for 1944542, 1983929, 2731415, 2803547 and feature 2797126.
 //

@@ -151,6 +151,7 @@ public final class SmcVBGenerator
         String rawSource = fsm.getSource();
         String packageName = fsm.getPackage();
         String context = fsm.getContext();
+        String fsmClassName = fsm.getFsmClassName();
         String startState = fsm.getStartState();
         List<SmcMap> maps = fsm.getMaps();
         List<SmcTransition> transitions;
@@ -213,8 +214,8 @@ public final class SmcVBGenerator
         // Now declare the context class.
         _source.print(_indent);
         _source.print("Public NotInheritable Class ");
-        _source.print(context);
-        _source.println("Context");
+        _source.print(fsmClassName);
+        _source.println("");
         _source.print(_indent);
         _source.println("    Inherits statemap.FSMContext");
 
@@ -704,16 +705,16 @@ public final class SmcVBGenerator
         _source.print(_indent);
         _source.print("    Public Overridable Sub Entry(");
         _source.print("ByRef context As ");
-        _source.print(context);
-        _source.println("Context)");
+        _source.print(fsmClassName);
+        _source.println(")");
         _source.print(_indent);
         _source.println("    End Sub");
         _source.println();
         _source.print(_indent);
         _source.print("    Public Overridable Sub Exit_(");
         _source.print("ByRef context As ");
-        _source.print(context);
-        _source.println("Context)");
+        _source.print(fsmClassName);
+        _source.println(")");
         _source.print(_indent);
         _source.println("    End Sub");
         _source.println();
@@ -728,8 +729,8 @@ public final class SmcVBGenerator
                 _source.print("    Public Overridable Sub ");
                 _source.print(trans.getName());
                 _source.print("(ByRef context As ");
-                _source.print(context);
-                _source.print("Context");
+                _source.print(fsmClassName);
+                _source.print("");
 
                 for (SmcParameter param: trans.getParameters())
                 {
@@ -761,8 +762,8 @@ public final class SmcVBGenerator
         _source.print(_indent);
         _source.print("    Public Overridable Sub Default_(");
         _source.print("ByRef context As ");
-        _source.print(context);
-        _source.println("Context)");
+        _source.print(fsmClassName);
+        _source.println(")");
         _source.println();
 
         if (_debugFlag == true)
@@ -1046,6 +1047,7 @@ public final class SmcVBGenerator
     {
         SmcMap map = state.getMap();
         String context = map.getFSM().getContext();
+        String fsmClassName = map.getFSM().getFsmClassName();
         String mapName = map.getName();
         List<SmcAction> actions;
 
@@ -1118,8 +1120,8 @@ public final class SmcVBGenerator
             _source.print(_indent);
             _source.print("    Public Overrides Sub Entry(");
             _source.print("ByRef context As ");
-            _source.print(context);
-            _source.println("Context)");
+            _source.print(fsmClassName);
+            _source.println(")");
             _source.println();
 
             // Declare the "ctxt" local variable.
@@ -1146,8 +1148,8 @@ public final class SmcVBGenerator
             _source.print(_indent);
             _source.print("    Public Overrides Sub Exit(");
             _source.print("ByRef context As ");
-            _source.print(context);
-            _source.println("Context)");
+            _source.print(fsmClassName);
+            _source.println(")");
             _source.println();
 
             // Declare the "ctxt" local variable.
@@ -1274,6 +1276,7 @@ public final class SmcVBGenerator
         SmcState state = transition.getState();
         SmcMap map = state.getMap();
         String context = map.getFSM().getContext();
+        String fsmClassName = map.getFSM().getFsmClassName();
         String mapName = map.getName();
         String stateName = state.getClassName();
         String transName = transition.getName();
@@ -1301,8 +1304,8 @@ public final class SmcVBGenerator
         }
 
         _source.print("(ByRef context As ");
-        _source.print(context);
-        _source.print("Context");
+        _source.print(fsmClassName);
+        _source.print("");
 
         // Add user-defined parameters.
         for (SmcParameter param: parameters)
@@ -1782,6 +1785,16 @@ public final class SmcVBGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2009/09/12 21:44:49  kgreg99
+// Implemented feature req. #2718941 - user defined generated class name.
+// A new statement was added to the syntax: %fsmclass class_name
+// It is optional. If not used, generated class is called as before "XxxContext" where Xxx is context class name as entered via %class statement.
+// If used, generated class is called asrequested.
+// Following language generators are touched:
+// c, c++, java, c#, objc, lua, groovy, scala, tcl, VB
+// This feature is not tested yet !
+// Maybe it will be necessary to modify also the output file name.
+//
 // Revision 1.2  2009/09/05 15:39:20  cwrapp
 // Checking in fixes for 1944542, 1983929, 2731415, 2803547 and feature 2797126.
 //

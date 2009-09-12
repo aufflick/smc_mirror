@@ -157,6 +157,7 @@ public final class SmcScalaGenerator
         String rawSource = fsm.getSource();
         String packageName = fsm.getPackage();
         String context = fsm.getContext();
+        String fsmClassName = fsm.getFsmClassName();
         String startState = fsm.getStartState();
         List<SmcMap> maps = fsm.getMaps();
         List<SmcTransition> transitions;
@@ -215,8 +216,8 @@ public final class SmcScalaGenerator
         // inner classes, so generate the context first rather
         // than last.
         _source.print("class ");
-        _source.print(context);
-        _source.print("Context(owner: ");
+        _source.print(fsmClassName);
+        _source.print("(owner: ");
         _source.print(context);
         _source.print(") extends statemap.FSMContext[");
         _source.print(context);
@@ -338,11 +339,11 @@ public final class SmcScalaGenerator
         _source.println();
 
         _source.print("    def Entry(context: ");
-        _source.print(context);
-        _source.println("Context): Unit = {}");
+        _source.print(fsmClassName);
+        _source.println("): Unit = {}");
         _source.print("    def Exit(context: ");
-        _source.print(context);
-        _source.println("Context): Unit = {}");
+        _source.print(fsmClassName);
+        _source.println("): Unit = {}");
         _source.println();
 
         // Generate the default transition definitions.
@@ -356,8 +357,8 @@ public final class SmcScalaGenerator
                 _source.print("    def ");
                 _source.print(transName);
                 _source.print("(context: ");
-                _source.print(context);
-                _source.print("Context");
+                _source.print(fsmClassName);
+                _source.print("");
 
                 for (SmcParameter param: trans.getParameters())
                 {
@@ -380,8 +381,8 @@ public final class SmcScalaGenerator
 
         // Generate the overall Default transition for all maps.
         _source.print("    def Default(context: ");
-        _source.print(context);
-        _source.println("Context): Unit = {");
+        _source.print(fsmClassName);
+        _source.println("): Unit = {");
 
         if (_debugFlag == true)
         {
@@ -555,6 +556,7 @@ public final class SmcScalaGenerator
     {
         SmcMap map = state.getMap();
         String context = map.getFSM().getContext();
+        String fsmClassName = map.getFSM().getFsmClassName();
         String mapName = map.getName();
         String stateName = state.getClassName();
         List<SmcAction> actions;
@@ -576,8 +578,8 @@ public final class SmcScalaGenerator
         {
             _source.println();
             _source.print("    override def Entry (context: ");
-            _source.print(context);
-            _source.println("Context): Unit = {");
+            _source.print(fsmClassName);
+            _source.println("): Unit = {");
 
             // Declare the "ctxt" local variable.
             _source.println("        val ctxt = context.getOwner()");
@@ -602,8 +604,8 @@ public final class SmcScalaGenerator
         {
             _source.println();
             _source.print("    override def Exit (context: ");
-            _source.print(context);
-            _source.println("Context): Unit = {");
+            _source.print(fsmClassName);
+            _source.println("): Unit = {");
 
             // Declare the "ctxt" local variable.
             _source.print("        val ctxt: ");
@@ -714,6 +716,7 @@ public final class SmcScalaGenerator
     {
         SmcState state = transition.getState();
         SmcMap map = state.getMap();
+        String fsmClassName = map.getFSM().getFsmClassName();
         String context = map.getFSM().getContext();
         String mapName = map.getName();
         String stateName = state.getClassName();
@@ -731,8 +734,8 @@ public final class SmcScalaGenerator
         _source.print("override def ");
         _source.print(transName);
         _source.print("(context: ");
-        _source.print(context);
-        _source.print("Context");
+        _source.print(fsmClassName);
+        _source.print("");
 
         // Add user-defined parameters.
         for (SmcParameter parameter: parameters)
@@ -1215,6 +1218,16 @@ public final class SmcScalaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2009/09/12 21:44:49  kgreg99
+// Implemented feature req. #2718941 - user defined generated class name.
+// A new statement was added to the syntax: %fsmclass class_name
+// It is optional. If not used, generated class is called as before "XxxContext" where Xxx is context class name as entered via %class statement.
+// If used, generated class is called asrequested.
+// Following language generators are touched:
+// c, c++, java, c#, objc, lua, groovy, scala, tcl, VB
+// This feature is not tested yet !
+// Maybe it will be necessary to modify also the output file name.
+//
 // Revision 1.4  2009/09/05 15:39:20  cwrapp
 // Checking in fixes for 1944542, 1983929, 2731415, 2803547 and feature 2797126.
 //

@@ -152,6 +152,7 @@ public final class SmcHeaderGenerator
         String srcfileCaps;
         String packageName = fsm.getPackage();
         String context = fsm.getContext();
+        String fsmClassName = fsm.getFsmClassName();
         String mapName;
         List<SmcTransition> transList;
         String separator;
@@ -287,8 +288,8 @@ public final class SmcHeaderGenerator
         _source.println("State;");
         _source.print(_indent);
         _source.print("class ");
-        _source.print(context);
-        _source.println("Context;");
+        _source.print(fsmClassName);
+        _source.println(";");
 
         // Forward declare the application class.
         _source.print(_indent);
@@ -339,12 +340,12 @@ public final class SmcHeaderGenerator
         // Add the default Entry() and Exit() definitions.
         _source.print(_indent);
         _source.print("    virtual void Entry(");
-        _source.print(context);
-        _source.println("Context&) {};");
+        _source.print(fsmClassName);
+        _source.println("&) {};");
         _source.print(_indent);
         _source.print("    virtual void Exit(");
-        _source.print(context);
-        _source.println("Context&) {};");
+        _source.print(fsmClassName);
+        _source.println("&) {};");
         _source.println();
 
         // Print out the default definitions for all the
@@ -361,8 +362,8 @@ public final class SmcHeaderGenerator
                 _source.print("    virtual void ");
                 _source.print(trans.getName());
                 _source.print("(");
-                _source.print(context);
-                _source.print("Context& context");
+                _source.print(fsmClassName);
+                _source.print("& context");
 
                 params = trans.getParameters();
                 for (SmcParameter param: params)
@@ -382,8 +383,8 @@ public final class SmcHeaderGenerator
         _source.println();
         _source.print(_indent);
         _source.print("    virtual void Default(");
-        _source.print(context);
-        _source.println("Context& context);");
+        _source.print(fsmClassName);
+        _source.println("& context);");
 
         // The base class has been defined.
         _source.print(_indent);
@@ -407,8 +408,8 @@ public final class SmcHeaderGenerator
         //
         _source.print(_indent);
         _source.print("class ");
-        _source.print(context);
-        _source.println("Context :");
+        _source.print(fsmClassName);
+        _source.println(" :");
         _source.print(_indent);
         _source.println("    public statemap::FSMContext");
         _source.print(_indent);
@@ -418,8 +419,8 @@ public final class SmcHeaderGenerator
         _source.println();
         _source.print(_indent);
         _source.print("    ");
-        _source.print(context);
-        _source.print("Context(");
+        _source.print(fsmClassName);
+        _source.print("(");
         _source.print(context);
         _source.println("& owner)");
         _source.print(_indent);
@@ -433,8 +434,8 @@ public final class SmcHeaderGenerator
         _source.println();
         _source.print(_indent);
         _source.print("    ");
-        _source.print(context);
-        _source.print("Context(");
+        _source.print(fsmClassName);
+        _source.print("(");
         _source.print(context);
         _source.println(
             "& owner, const statemap::State& state)");
@@ -789,6 +790,7 @@ public final class SmcHeaderGenerator
     {
         SmcMap map = state.getMap();
         String context = map.getFSM().getContext();
+        String fsmClassName = map.getFSM().getFsmClassName();
         String mapName = map.getName();
         String stateName = state.getClassName();
         List<SmcAction> actions;
@@ -829,8 +831,8 @@ public final class SmcHeaderGenerator
         {
             _source.print(_indent);
             _source.print("    void Entry(");
-            _source.print(context);
-            _source.println("Context&);");
+            _source.print(fsmClassName);
+            _source.println("&);");
         }
 
         actions = state.getExitActions();
@@ -838,8 +840,8 @@ public final class SmcHeaderGenerator
         {
             _source.print(_indent);
             _source.print("    void Exit(");
-            _source.print(context);
-            _source.println("Context&);");
+            _source.print(fsmClassName);
+            _source.println("&);");
         }
 
         // Now generate the transition methods.
@@ -886,8 +888,8 @@ public final class SmcHeaderGenerator
         _source.print(transition.getName());
         _source.print("(");
         _source.print(
-            state.getMap().getFSM().getContext());
-        _source.print("Context& context");
+            state.getMap().getFSM().getFsmClassName());
+        _source.print("& context");
 
         // Add user-defined parameters.
         for (SmcParameter param: transition.getParameters())
@@ -928,6 +930,16 @@ public final class SmcHeaderGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2009/09/12 21:44:49  kgreg99
+// Implemented feature req. #2718941 - user defined generated class name.
+// A new statement was added to the syntax: %fsmclass class_name
+// It is optional. If not used, generated class is called as before "XxxContext" where Xxx is context class name as entered via %class statement.
+// If used, generated class is called asrequested.
+// Following language generators are touched:
+// c, c++, java, c#, objc, lua, groovy, scala, tcl, VB
+// This feature is not tested yet !
+// Maybe it will be necessary to modify also the output file name.
+//
 // Revision 1.3  2009/09/05 15:39:20  cwrapp
 // Checking in fixes for 1944542, 1983929, 2731415, 2803547 and feature 2797126.
 //

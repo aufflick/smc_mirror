@@ -894,7 +894,8 @@ import java.util.Map;
     /* package */ static final int ACCESS        = 28;
     /* package */ static final int DOLLAR        = 29;
     /* package */ static final int JUMP          = 30;
-    /* package */ static final int TOKEN_COUNT   = JUMP + 1;
+    /* package */ static final int FSM_CLASS_NAME  = 31;
+    /* package */ static final int TOKEN_COUNT   = FSM_CLASS_NAME + 1;
 
     // There are four SMC keywords: entry, exit, push and pop.
     private static final int KEYWORD_COUNT = 4;
@@ -933,6 +934,7 @@ import java.util.Map;
         _TypeName[SmcLexer.HEADER_FILE]   = "HEADER_FILE";
         _TypeName[SmcLexer.INCLUDE_FILE]  = "INCLUDE_FILE";
         _TypeName[SmcLexer.PACKAGE_NAME]  = "PACKAGE_NAME";
+        _TypeName[SmcLexer.FSM_CLASS_NAME]  = "FSM_CLASS_NAME";
         _TypeName[SmcLexer.IMPORT]        = "IMPORT";
         _TypeName[SmcLexer.DECLARE]       = "DECLARE";
         _TypeName[SmcLexer.LEFT_BRACE]    = "LEFT_BRACE";
@@ -973,6 +975,8 @@ import java.util.Map;
                                SmcLexer.INCLUDE_FILE);
         _PercentKeywordMap.put("%package",
                                SmcLexer.PACKAGE_NAME);
+        _PercentKeywordMap.put("%fsmclass",
+                               SmcLexer.FSM_CLASS_NAME);
         _PercentKeywordMap.put("%import", SmcLexer.IMPORT);
         _PercentKeywordMap.put("%declare", SmcLexer.DECLARE);
         _PercentKeywordMap.put("%access", SmcLexer.ACCESS);
@@ -1218,6 +1222,16 @@ import java.util.Map;
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2009/09/12 21:44:49  kgreg99
+// Implemented feature req. #2718941 - user defined generated class name.
+// A new statement was added to the syntax: %fsmclass class_name
+// It is optional. If not used, generated class is called as before "XxxContext" where Xxx is context class name as entered via %class statement.
+// If used, generated class is called asrequested.
+// Following language generators are touched:
+// c, c++, java, c#, objc, lua, groovy, scala, tcl, VB
+// This feature is not tested yet !
+// Maybe it will be necessary to modify also the output file name.
+//
 // Revision 1.3  2009/09/05 15:39:20  cwrapp
 // Checking in fixes for 1944542, 1983929, 2731415, 2803547 and feature 2797126.
 //

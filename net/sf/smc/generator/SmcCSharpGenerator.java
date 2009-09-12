@@ -155,6 +155,7 @@ public final class SmcCSharpGenerator
         String rawSource = fsm.getSource();
         String packageName = fsm.getPackage();
         String context = fsm.getContext();
+		String fsmClassName = fsm.getFsmClassName();
         String startState = fsm.getStartState();
         String accessLevel = fsm.getAccessLevel();
         List<SmcMap> maps = fsm.getMaps();
@@ -239,8 +240,8 @@ public final class SmcCSharpGenerator
         _source.print(_indent);
         _source.print(accessLevel);
         _source.print(" sealed class ");
-        _source.print(context);
-        _source.println("Context :");
+        _source.print(fsmClassName);
+        _source.println(" :");
         _source.print(_indent);
         _source.print("    statemap.FSMContext");
         if (_serialFlag == false)
@@ -445,8 +446,8 @@ public final class SmcCSharpGenerator
         // Generate the context class' constructor.
         _source.print(_indent);
         _source.print("    public ");
-        _source.print(context);
-        _source.print("Context(");
+        _source.print(fsmClassName);
+        _source.print("(");
         _source.print(context);
         _source.println(" owner) :");
         _source.print(_indent);
@@ -479,8 +480,8 @@ public final class SmcCSharpGenerator
         {
             _source.print(_indent);
             _source.print("    public ");
-            _source.print(context);
-            _source.print("Context(SerializationInfo info, ");
+            _source.print(fsmClassName);
+            _source.print("(SerializationInfo info, ");
             _source.println("StreamingContext context) :");
             _source.print(_indent);
             _source.println("        base ()");
@@ -842,16 +843,16 @@ public final class SmcCSharpGenerator
         _source.print(_indent);
         _source.print(
             "        protected internal virtual void Entry(");
-        _source.print(context);
-        _source.println("Context context)");
+        _source.print(fsmClassName);
+        _source.println(" context)");
         _source.print(_indent);
         _source.println("        {}");
         _source.println();
         _source.print(_indent);
         _source.print(
             "        protected internal virtual void Exit(");
-        _source.print(context);
-        _source.println("Context context)");
+        _source.print(fsmClassName);
+        _source.println(" context)");
         _source.print(_indent);
         _source.println("        {}");
         _source.println();
@@ -868,8 +869,8 @@ public final class SmcCSharpGenerator
                     "        protected internal virtual void ");
                 _source.print(transName);
                 _source.print("(");
-                _source.print(context);
-                _source.print("Context context");
+                _source.print(fsmClassName);
+                _source.print(" context");
 
                 for (SmcParameter param: trans.getParameters())
                 {
@@ -898,8 +899,8 @@ public final class SmcCSharpGenerator
         _source.print(_indent);
         _source.print(
             "        protected internal virtual void Default(");
-        _source.print(context);
-        _source.println("Context context)");
+        _source.print(fsmClassName);
+        _source.println(" context)");
         _source.print(_indent);
         _source.println("        {");
 
@@ -1259,6 +1260,7 @@ public final class SmcCSharpGenerator
     {
         SmcMap map = state.getMap();
         String context = map.getFSM().getContext();
+		String fsmClassName = map.getFSM().getFsmClassName();
         String mapName = map.getName();
         String stateName = state.getClassName();
         List<SmcAction> actions;
@@ -1340,8 +1342,8 @@ public final class SmcCSharpGenerator
             _source.print("            ");
             _source.print(
                 "protected internal override void Entry(");
-            _source.print(context);
-            _source.println("Context context)");
+            _source.print(fsmClassName);
+            _source.println(" context)");
             _source.print(_indent);
             _source.println("            {");
 
@@ -1376,8 +1378,8 @@ public final class SmcCSharpGenerator
             _source.print("            ");
             _source.print(
                 "protected internal override void Exit(");
-            _source.print(context);
-            _source.println("Context context)");
+            _source.print(fsmClassName);
+            _source.println(" context)");
             _source.print(_indent);
             _source.println("            {");
 
@@ -1537,6 +1539,7 @@ public final class SmcCSharpGenerator
         SmcState state = transition.getState();
         SmcMap map = state.getMap();
         String context = map.getFSM().getContext();
+		String fsmClassName = map.getFSM().getFsmClassName();
         String mapName = map.getName();
         String stateName = state.getClassName();
         String transName = transition.getName();
@@ -1552,8 +1555,8 @@ public final class SmcCSharpGenerator
         _source.print("protected internal override void ");
         _source.print(transName);
         _source.print("(");
-        _source.print(context);
-        _source.print("Context context");
+        _source.print(fsmClassName);
+        _source.print(" context");
 
         // Add user-defined parameters.
         for (SmcParameter param: parameters)
@@ -2072,6 +2075,16 @@ public final class SmcCSharpGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2009/09/12 21:44:49  kgreg99
+// Implemented feature req. #2718941 - user defined generated class name.
+// A new statement was added to the syntax: %fsmclass class_name
+// It is optional. If not used, generated class is called as before "XxxContext" where Xxx is context class name as entered via %class statement.
+// If used, generated class is called asrequested.
+// Following language generators are touched:
+// c, c++, java, c#, objc, lua, groovy, scala, tcl, VB
+// This feature is not tested yet !
+// Maybe it will be necessary to modify also the output file name.
+//
 // Revision 1.4  2009/09/05 15:39:20  cwrapp
 // Checking in fixes for 1944542, 1983929, 2731415, 2803547 and feature 2797126.
 //

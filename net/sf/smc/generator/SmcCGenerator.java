@@ -166,6 +166,7 @@ public final class SmcCGenerator
         String packageName = fsm.getPackage();
         String rawSource = fsm.getSource();
         String context = fsm.getContext();
+        String fsmClassName = fsm.getFsmClassName();
         String mapName;
         String startStateName = fsm.getStartState();
         List<SmcTransition> transList;
@@ -297,8 +298,8 @@ public final class SmcCGenerator
                 _source.print("State_");
                 _source.print(trans.getName());
                 _source.print("(struct ");
-                _source.print(context);
-                _source.print("Context *fsm");
+                _source.print(fsmClassName);
+                _source.print(" *fsm");
 
                 params = trans.getParameters();
                 for (SmcParameter param: params)
@@ -319,8 +320,8 @@ public final class SmcCGenerator
         _source.print("static void ");
         _source.print(context);
         _source.print("State_Default(struct ");
-        _source.print(context);
-        _source.println("Context *fsm)");
+        _source.print(fsmClassName);
+        _source.println(" *fsm)");
         _source.println("{");
 
         // Print the transition out to the verbose log.
@@ -423,11 +424,11 @@ public final class SmcCGenerator
         // Constructor.
         _source.println();
         _source.print("void ");
-        _source.print(context);
-        _source.print("Context_Init");
+        _source.print(fsmClassName);
+        _source.print("_Init");
         _source.print("(struct ");
-        _source.print(context);
-        _source.print("Context* fsm, struct ");
+        _source.print(fsmClassName);
+        _source.print("* fsm, struct ");
         _source.print(context);
         _source.println("* owner)");
         _source.println("{");
@@ -442,10 +443,10 @@ public final class SmcCGenerator
         {
             _source.println();
             _source.print("void ");
-            _source.print(context);
-            _source.print("Context_EnterStartState(struct ");
-            _source.print(context);
-            _source.println("Context* fsm)");
+            _source.print(fsmClassName);
+            _source.print("_EnterStartState(struct ");
+            _source.print(fsmClassName);
+            _source.println("* fsm)");
             _source.println("{");
             _source.println("    ENTRY_STATE(getState(fsm));");
             _source.println("}");
@@ -460,12 +461,12 @@ public final class SmcCGenerator
             {
                 _source.println();
                 _source.print("void ");
-                _source.print(context);
-                _source.print("Context_");
+                _source.print(fsmClassName);
+                _source.print("_");
                 _source.print(trans.getName());
                 _source.print("(struct ");
-                _source.print(context);
-                _source.print("Context* fsm");
+                _source.print(fsmClassName);
+                _source.print("* fsm");
 
                 params = trans.getParameters();
                 for (SmcParameter param: params)
@@ -623,6 +624,7 @@ public final class SmcCGenerator
         SmcMap map = state.getMap();
         String packageName = map.getFSM().getPackage();
         String context = map.getFSM().getContext();
+        String fsmClassName = map.getFSM().getFsmClassName();
         String mapName = map.getName();
         String instanceName = state.getInstanceName();
         String indent2;
@@ -653,8 +655,8 @@ public final class SmcCGenerator
             _source.print("_");
             _source.print(instanceName);
             _source.print("_Entry(struct ");
-            _source.print(context);
-            _source.println("Context *fsm)");
+            _source.print(fsmClassName);
+            _source.println(" *fsm)");
             _source.println("{");
 
             // Declare the "ctxt" local variable.
@@ -690,8 +692,8 @@ public final class SmcCGenerator
             _source.print("_");
             _source.print(instanceName);
             _source.print("_Exit(struct ");
-            _source.print(context);
-            _source.println("Context *fsm)");
+            _source.print(fsmClassName);
+            _source.println(" *fsm)");
             _source.println("{");
 
             // Declare the "ctxt" local variable.
@@ -734,6 +736,7 @@ public final class SmcCGenerator
         SmcMap map = state.getMap();
         String packageName = map.getFSM().getPackage();
         String context = map.getFSM().getContext();
+        String fsmClassName = map.getFSM().getFsmClassName();
         String mapName = map.getName();
         String stateName = state.getInstanceName();
         String transName = transition.getName();
@@ -767,8 +770,8 @@ public final class SmcCGenerator
         _source.print("_");
         _source.print(transName);
         _source.print("(struct ");
-        _source.print(context);
-        _source.print("Context *fsm");
+        _source.print(fsmClassName);
+        _source.print(" *fsm");
 
         // Add user-defined parameters.
         for (SmcParameter parameter: transition.getParameters())
@@ -930,6 +933,7 @@ public final class SmcCGenerator
         SmcMap map = state.getMap();
         String packageName = map.getFSM().getPackage();
         String context = map.getFSM().getContext();
+        String fsmClassName = map.getFSM().getFsmClassName();
         String mapName = map.getName();
         String stateName = state.getInstanceName();
         TransType transType = guard.getTransType();
@@ -1201,8 +1205,8 @@ public final class SmcCGenerator
             String popArgs = guard.getPopArgs();
 
             _source.print(indent2);
-            _source.print(context);
-            _source.print("Context_");
+            _source.print(fsmClassName);
+            _source.print("_");
             _source.print(endStateName);
             _source.print("(fsm");
 
@@ -1343,6 +1347,16 @@ public final class SmcCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2009/09/12 21:44:49  kgreg99
+// Implemented feature req. #2718941 - user defined generated class name.
+// A new statement was added to the syntax: %fsmclass class_name
+// It is optional. If not used, generated class is called as before "XxxContext" where Xxx is context class name as entered via %class statement.
+// If used, generated class is called asrequested.
+// Following language generators are touched:
+// c, c++, java, c#, objc, lua, groovy, scala, tcl, VB
+// This feature is not tested yet !
+// Maybe it will be necessary to modify also the output file name.
+//
 // Revision 1.4  2009/09/05 15:39:20  cwrapp
 // Checking in fixes for 1944542, 1983929, 2731415, 2803547 and feature 2797126.
 //
