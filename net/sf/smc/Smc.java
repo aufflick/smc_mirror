@@ -201,14 +201,16 @@ public final class Smc
                         System.out.println("ms]");
                     }
 
-                    if (fsm == null)
-                    {
-                        retcode = 1;
-
+					if ( parser.getMessages().size() > 0 )
+					{
                         // Output the parser's messages.
                         _outputMessages(_sourceFileName,
                                         System.err,
                                         parser.getMessages());
+					}
+                    if (fsm == null)
+                    {
+                        retcode = 1;
                     }
                     else
                     {
@@ -226,16 +228,16 @@ public final class Smc
 
                         // Second - do the semantic check.
                         fsm.accept(checker);
-                        if (checker.isValid() == false)
+                        if ( checker.getMessages().size() > 0)
                         {
-                            retcode = 1;
-
-                            // Output the syntax checker's
-                            // messages.
                             _outputMessages(
                                 _sourceFileName,
                                 System.err,
                                 checker.getMessages());
+                        }
+                        if (checker.isValid() == false)
+                        {
+                            retcode = 1;
                         }
                         else
                         {
@@ -1912,6 +1914,9 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.34  2009/09/12 21:26:58  kgreg99
+// Bug #2857745 resolved. Messages are printed not in case of an error but if there are any.
+//
 // Revision 1.33  2009/09/05 15:39:20  cwrapp
 // Checking in fixes for 1944542, 1983929, 2731415, 2803547 and feature 2797126.
 //
