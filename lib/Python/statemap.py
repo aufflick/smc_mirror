@@ -101,7 +101,7 @@ class FSMContext(object):
 	def getState(self):
 		"""Returns the current state."""
 		if self._state == None:
-			raise statemap.StateUndefinedException
+			raise StateUndefinedException
 		return self._state
 
 	def isInTransition(self):
