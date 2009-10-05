@@ -596,7 +596,7 @@ public final class SmcCSharpGenerator
                 for (SmcParameter param: params)
                 {
                     _source.print(", ");
-                    _source.print(param.getName());
+                    passParameter(param);
                 }
                 _source.println(");");
                 _source.print(indent2);
@@ -1657,7 +1657,7 @@ public final class SmcCSharpGenerator
             for (SmcParameter param: parameters)
             {
                 _source.print(", ");
-                _source.print(param.getName());
+                passParameter(param);
             }
             _source.println(");");
 
@@ -2063,6 +2063,23 @@ public final class SmcCSharpGenerator
         return;
     } // end of visit(SmcParameter)
 
+
+	/**
+	 * Emits C# code for passing the transition parameter to another method.
+	 */
+	private void passParameter(SmcParameter param)
+	{
+        String paramType=param.getType().trim();
+        
+        if ( paramType.startsWith( "ref " ) )
+        {
+        	_source.print( "ref ");                    	
+        } else if (paramType.startsWith( "out " ) )
+        {
+        	_source.print( "out ");
+        }
+        _source.print(param.getName());
+	}
     //
     // end of SmcVisitor Abstract Method Impelementation.
     //-----------------------------------------------------------
@@ -2075,6 +2092,10 @@ public final class SmcCSharpGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2009/10/05 13:54:45  kgreg99
+// Feature request #2865719 implemented.
+// Added method "passParameter" to SmcCSharpGenerator class. It shall be used to generate C# code if a transaction parameter shall be passed to another method. It preserves "ref" and "out" modifiers.
+//
 // Revision 1.5  2009/09/12 21:44:49  kgreg99
 // Implemented feature req. #2718941 - user defined generated class name.
 // A new statement was added to the syntax: %fsmclass class_name
