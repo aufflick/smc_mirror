@@ -1261,27 +1261,26 @@ public final class SmcObjCGenerator
         // "emptyStateStack", then pass it to the context.
         // Otherwise, let the application class handle it.
         _source.print(_indent);
-        if (name.equals("emptyStateStack") == true)
+        if (action.isEmptyStateStack() == true)
         {
-            _source.print("[context ");
+            _source.println("[context emptyStateStack];");
         }
         else
         {
             _source.print("[ctxt ");
+	        _source.print(name);
+	
+	        for (String arg: action.getArguments())
+	        {
+	            if (arg.trim().length() > 0)
+	            {
+	                _source.print(sep);
+	                _source.print(arg);
+	            }
+	        }
+	
+	        _source.println("];");
         }
-        _source.print(name);
-
-        for (String arg: action.getArguments())
-        {
-            if (arg.trim().length() > 0)
-            {
-                _source.print(sep);
-                _source.print(arg);
-            }
-        }
-
-        _source.println("];");
-
         return;
     } // end of visit(SmcAction)
 
@@ -1324,6 +1323,11 @@ public final class SmcObjCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2009/10/06 15:31:59  kgreg99
+// 1. Started implementation of feature request #2718920.
+//     1.1 Added method boolean isStatic() to SmcAction class. It returns false now, but is handled in following language generators: C#, C++, java, php, VB. Instance identificator is not added in case it is set to true.
+// 2. Resolved confusion in "emtyStateStack" keyword handling. This keyword was not handled in the same way in all the generators. I added method boolean isEmptyStateStack() to SmcAction class. This method is used instead of different string comparisons here and there. Also the generated method name is fixed, not to depend on name supplied in the input sm file.
+//
 // Revision 1.5  2009/09/12 21:44:49  kgreg99
 // Implemented feature req. #2718941 - user defined generated class name.
 // A new statement was added to the syntax: %fsmclass class_name

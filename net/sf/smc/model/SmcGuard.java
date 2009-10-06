@@ -425,9 +425,7 @@ public final class SmcGuard
                 )
             {
                 action = ait.next();
-                retcode =
-                    !(EMPTY_STATE_STACK.equalsIgnoreCase(
-                          action.getName()));
+                retcode = !action.isEmptyStateStack();
             }
         }
 
@@ -446,16 +444,16 @@ public final class SmcGuard
     private String _popArgs;
     private List<SmcAction> _actions;
 
-    //-----------------------------------------------------------
-    // Constants.
-    //
-    private static final String EMPTY_STATE_STACK =
-        "emptystatestack";
 } // end of class SmcGuard
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2009/10/06 15:31:59  kgreg99
+// 1. Started implementation of feature request #2718920.
+//     1.1 Added method boolean isStatic() to SmcAction class. It returns false now, but is handled in following language generators: C#, C++, java, php, VB. Instance identificator is not added in case it is set to true.
+// 2. Resolved confusion in "emtyStateStack" keyword handling. This keyword was not handled in the same way in all the generators. I added method boolean isEmptyStateStack() to SmcAction class. This method is used instead of different string comparisons here and there. Also the generated method name is fixed, not to depend on name supplied in the input sm file.
+//
 // Revision 1.2  2009/09/05 15:39:20  cwrapp
 // Checking in fixes for 1944542, 1983929, 2731415, 2803547 and feature 2797126.
 //

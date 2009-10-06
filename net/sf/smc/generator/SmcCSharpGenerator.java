@@ -2016,36 +2016,40 @@ public final class SmcCSharpGenerator
         // application class actions. If the action is
         // "emptyStateStack", then pass it to the context.
         // Otherwise, let the application class handle it.
-        if (name.equals("EmptyStateStack") == true)
+        if ( action.isEmptyStateStack() == true)
         {
             _source.println("context.EmptyStateStack();");
         }
-        else if (action.isProperty() == true)
-        {
-            String arg = arguments.get(0);
-
-            _source.print("ctxt.");
-            _source.print(name);
-            _source.print(" = ");
-            _source.print(arg);
-            _source.println(";");
-        }
         else
         {
-            _source.print("ctxt.");
+        	if ( action.isStatic() == false )
+        	{
+	            _source.print("ctxt.");
+        	}
             _source.print(name);
-            _source.print("(");
-
-            for (it = arguments.iterator(), sep = "";
-                 it.hasNext() == true;
-                 sep = ", ")
-            {
-                _source.print(sep);
-                _source.print(it.next());
-            }
-
-            _source.println(");");
-        }
+	        if (action.isProperty() == true)
+	        {
+	            String arg = arguments.get(0);
+	
+	            _source.print(" = ");
+	            _source.print(arg);
+	            _source.println(";");
+	        }
+	        else
+	        {
+	            _source.print("(");
+	
+	            for (it = arguments.iterator(), sep = "";
+	                 it.hasNext() == true;
+	                 sep = ", ")
+	            {
+	                _source.print(sep);
+	                _source.print(it.next());
+	            }
+	
+	            _source.println(");");
+	        }
+	        }
 
         return;
     } // end of visit(SmcAction)
@@ -2092,6 +2096,11 @@ public final class SmcCSharpGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2009/10/06 15:31:59  kgreg99
+// 1. Started implementation of feature request #2718920.
+//     1.1 Added method boolean isStatic() to SmcAction class. It returns false now, but is handled in following language generators: C#, C++, java, php, VB. Instance identificator is not added in case it is set to true.
+// 2. Resolved confusion in "emtyStateStack" keyword handling. This keyword was not handled in the same way in all the generators. I added method boolean isEmptyStateStack() to SmcAction class. This method is used instead of different string comparisons here and there. Also the generated method name is fixed, not to depend on name supplied in the input sm file.
+//
 // Revision 1.6  2009/10/05 13:54:45  kgreg99
 // Feature request #2865719 implemented.
 // Added method "passParameter" to SmcCSharpGenerator class. It shall be used to generate C# code if a transaction parameter shall be passed to another method. It preserves "ref" and "out" modifiers.

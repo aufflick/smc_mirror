@@ -94,6 +94,7 @@ public final class SmcAction
 
         _arguments = null;
         _propertyFlag = false;
+        _staticFlag = false;
     } // end of SmcAction(String, int)
 
     /**
@@ -219,7 +220,25 @@ public final class SmcAction
     {
         return (_propertyFlag);
     } // end of isProperty()
-
+    
+    /**
+    * Returns {@code true} if this action is a static member.
+    * Returns {@code false} if this action is an instance member.
+    */
+    public boolean isStatic()
+    {
+    	return (_staticFlag);
+    }// end of isStatic
+    
+    /**
+    * Returns {@code true} if this action is the predefined EmptyStateStack()
+    * Returns {@code false} if this action is not the predefined EmptyStateStack()
+    */
+    public boolean isEmptyStateStack()
+    {
+    	return EMPTY_STATE_STACK.equalsIgnoreCase( this.getName() );
+    } // end of isEmptyStateStack
+    
     /**
      * Returns the action's argument list. May return
      * {@code null}.
@@ -329,11 +348,26 @@ public final class SmcAction
 
     // Is this action a .Net property assignment?
     private boolean _propertyFlag;
+    
+    // Is this action a static member ?
+    private boolean _staticFlag;
+
+    //-----------------------------------------------------------
+    // Constants.
+    //
+    private static final String EMPTY_STATE_STACK =
+        "emptystatestack";
+    
 } // end of class SmcAction
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2009/10/06 15:31:59  kgreg99
+// 1. Started implementation of feature request #2718920.
+//     1.1 Added method boolean isStatic() to SmcAction class. It returns false now, but is handled in following language generators: C#, C++, java, php, VB. Instance identificator is not added in case it is set to true.
+// 2. Resolved confusion in "emtyStateStack" keyword handling. This keyword was not handled in the same way in all the generators. I added method boolean isEmptyStateStack() to SmcAction class. This method is used instead of different string comparisons here and there. Also the generated method name is fixed, not to depend on name supplied in the input sm file.
+//
 // Revision 1.1  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
 //
