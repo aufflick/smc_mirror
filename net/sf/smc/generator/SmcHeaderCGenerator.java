@@ -338,7 +338,7 @@ public final class SmcHeaderCGenerator
                 _source.print(trans.getName());
                 _source.print("(struct ");
                 _source.print(fsmClassName);
-                _source.print("fsmClassName*");
+                _source.print("*");
 
                 params = trans.getParameters();
                 for (SmcParameter param: params)
@@ -410,6 +410,9 @@ public final class SmcHeaderCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2009/11/02 09:57:43  fperrad
+// fix C generation
+//
 // Revision 1.5  2009/09/12 21:44:49  kgreg99
 // Implemented feature req. #2718941 - user defined generated class name.
 // A new statement was added to the syntax: %fsmclass class_name
