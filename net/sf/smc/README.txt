@@ -41,7 +41,10 @@ SMC's command line options are:
 
     -suffix <suffix>
              : Use this suffix on the output file.
-    -g       : Add debugging to generated code.
+    -g, -g0, -g1
+             : Add debugging to generated code. -g0 reports state
+               changes and transitions. -g1 reports entry and
+               exit actions. -g is the same as -g0.
     -nostreams
              : Do not use C++ iostream
                (use with -c++ only).

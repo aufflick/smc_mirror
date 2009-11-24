@@ -27,8 +27,11 @@ None.
     machine's states.
 
 (All)
-    Enhance debugging output by adding command line options -g0,
-    -g1 and -g2 which provide ever greater debug output.
+    Enhance debugging output by adding command line options -g0
+    and -g1 which provide ever greater debug output. -g is the
+    same as -g0. -g0 reports the exiting and entering a state,
+    entering and exiting a transtion. -g1 reports exit and entry
+    action execution.
 
 (C#, VB.Net)
     Added -generic support to these languages.
