@@ -13,134 +13,65 @@
 
 Major changes:
 
-(All)
-    Smc.jar requires Java 6.
-
-(All)
-    Moved source files into three separate directories: model,
-    parser and generator. The model directory contains
-    SmcElement.java and those classes extending SmcElement.
-    The parser directory contains the classes for parsing a .sm
-    file. The generator directory contains SmcCodeGenerator.java
-    and those classes extending SmcCodeGenerator. Only Smc.java
-    and SmcSyntaxChecker.java remains in the original source
-    directory.
-
-    There are four jar files built: the original Smc.jar,
-    model.jar, parser.jar and generator.jar. Smc.jar uses the
-    other three packages to implement the State Machine Compiler.
-    The point of dividing SMC into different packages is to open
-    SMC's capabilities to other applications. For example, if an
-    IDE defines a the finite state machine using the model
-    package then the generator package to emit the FSM in a
-    target programming language. The new jar files are placed
-    in lib/Java.
-
-    This change in source file location does not otherwise affect
-    how SMC works.
-
-(All)
-    The loopback transition is now divided into external and
-    internal loopback transitions. The external loopback is
-    specified by using the current state's name as the
-    transition's next state. The external loopback executes the
-    current state's exit and entry actions. The internal loopback
-    uses "nil" as the next state and does not execute the current
-    state's exit and entry actions. The internal loopback's
-    behavior is the same as the previous loopback transition.
-
-    NOTE: THIS CHANGE MAY BREAK EXISTING CODE.
-    If you implemented loopbacks by placing the current state's
-    name in the transition next state, then the transition's
-    behavior will change. You will need to replace the explicit
-    state name with "nil" to maintain existing behavior.
-    (SF Feature Request 1876271)
-
-(All)
-    The SMC distribution now generates javadocs and places the
-    generated HTML files in docs/javadocs. All SMC source files
-    now have javadoc comments.
+None
 
 
 Minor changes:
 
-None
+(Java)
+    -access keyword to specify the generated class access level.
+    Used with -java only.
+
+(All)
+    Added %fsmclass keyword which allows the generated FSM
+    classes to have a name other than the default
+    <app class>Context. This feature allows an application class
+    to reference multiple finite state machines.
+
+(C#, Groovy, Java, Lua, Perl, PHP, Python, Ruby, Scala, Tcl and VB.Net)
+    Added "getStates" method for retrieving the finite state
+    machine's states.
+
+(All)
+    Enhance debugging output by adding command line options -g0
+    and -g1 which provide ever greater debug output. -g is the
+    same as -g0. -g0 reports the exiting and entering a state,
+    entering and exiting a transtion. -g1 reports exit and entry
+    action execution.
+
+(C#, VB.Net)
+    Added -generic support to these languages.
 
 
 Bug Fixes:
 
-(PHP, Python)
-    Default state fails on transition overloading.
-    (SF bug 1905336)
+(Objective-C)
+    Corrected generated code errors.
 
-(GraphViz)
-    Corrected parser error when code parameter uses "$" as in
-    Perl and PHP.
-    (SF bug 1930388)
+(Php)
+    statemap.php had an assignment in a test condition instead of
+    equality operator.
 
 (All)
-    Changes lib source file layout regular by making sure all
-    source files are stored in a programming language directory.
-    (SF bug 1930423, 1934483)
-
-(All)
-    Changed FSMContext class constructor so that initial state
-    is set in this constructor. Moved call to initial state entry
-    action execution from generated context class constructor to
-    new enterStartState() method.
-    (SF bug 1964266)
-
-(C++)
-    Corrected statemap.h to remove compiler warnings.
-    (SF bug 1970979)
+    Strings using both single and double quotes are handled
+    correctly.
 
 (Java)
-    Corrected passing null previous state to
-    PropertyChangeListener.
-    (SF bug 2060426)
-
-(Ant)
-    Updated ant SmcJarWrapper.java to include all supported
-    target programming languages.
-    (SF bug 2234925)
-
-(C#, VB)
-     Made .Net dll CLS-compliant.
-     (SF bug 2378072)
-
-(All)
-     Checking if a map has multiple default states.
-     (SF bug 2648469)
-
-(All)
-     Checking push transition to see if it contains a valid
-     state.
-     (SF bug 2648472)
-
-(C#)
-     Corrected C# reflection code generated when there is an
-     overloaded transition name.
-     (SF bug 2648516)
-
-(GraphViz)
-     Corrected dot file generated when transition action contains
-     an "=" operator.
-     (SF bug 2657779)
+    Errors due to lower case state names corrected.
 
 (Java)
-     Remove "final" keyword from generated context class
-     declaration.
-     (SF bug 2672508)
+    Serializing the FSM property change listeners is corrected.
+
+(Python)
+    The problem occurring when raising the
+    StateUndefinedException is now fixed.
 
 (All)
-     Normalized -d and -headerd paths to make sure the specified
-     paths use the system file name separator character.
-     (SF bug 2677138)
+    Compiler warnings are now output even when there are no
+    errors.
 
 (All)
-     Corrected compiler to accept templates with multiple types.
-     For example, Map<String, Integer>.
-     (SF feature request 2655248)
+    Normalized the use of emptyStateStack.
 
 
 
