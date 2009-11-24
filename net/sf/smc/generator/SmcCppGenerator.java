@@ -54,6 +54,7 @@ import net.sf.smc.model.SmcVisitor;
  * @see SmcElement
  * @see SmcCodeGenerator
  * @see SmcVisitor
+ * @see SmcOptions
  *
  * @author <a href="mailto:rapp@acm.org">Charles Rapp</a>
  */
@@ -70,69 +71,13 @@ public final class SmcCppGenerator
     //
 
     /**
-     * Creates a C++ code generator for the given parameters.
-     * @param srcfileBase write the emitted code to this target
-     * source file name sans the suffix.
-     * @param srcDirectory place the target source file in this
-     * directory.
-     * @param headerDirectory place the target header file in
-     * this directory. Ignored if there is no generated header
-     * file.
-     * @param castType use this type cast (C++ code generation
-     * only).
-     * @param graphLevel amount of detail in the generated
-     * GraphViz graph (graph code generation only).
-     * @param serialFlag if {@code true}, generate unique
-     * identifiers for persisting the FSM.
-     * @param debugFlag if {@code true} add debug output messages
-     * to code.
-     * @param noExceptionFlag if {@code true} then use asserts
-     * rather than exceptions (C++ only).
-     * @param noCatchFlag if {@code true} then do <i>not</i>
-     * generate try/catch/rethrow code.
-     * @param noStreamsFlag if {@code true} then use TRACE macro
-     * for debug output.
-     * @param reflectFlag if {@code true} then generate
-     * reflection code.
-     * @param syncFlag if {@code true} then generate
-     * synchronization code.
-     * @param genericFlag if {@code true} then use generic
-     * collections.
-     * @param accessLevel use this access keyword for the
-     * generated classes.
+     * Creates a C++ code generator for the given options.
+     * @param options The target code generator options.
      */
-    public SmcCppGenerator(final String srcfileBase,
-                           final String srcDirectory,
-                           final String headerDirectory,
-                           final String castType,
-                           final int graphLevel,
-                           final boolean serialFlag,
-                           final boolean debugFlag,
-                           final boolean noExceptionFlag,
-                           final boolean noCatchFlag,
-                           final boolean noStreamsFlag,
-                           final boolean reflectFlag,
-                           final boolean syncFlag,
-                           final boolean genericFlag,
-                           final String accessLevel)
+    public SmcCppGenerator(final SmcOptions options)
     {
-        super (srcfileBase,
-               "{0}{1}_sm.{2}",
-               "cpp",
-               srcDirectory,
-               headerDirectory,
-               castType,
-               graphLevel,
-               serialFlag,
-               debugFlag,
-               noExceptionFlag,
-               noCatchFlag,
-               noStreamsFlag,
-               reflectFlag,
-               syncFlag,
-               genericFlag,
-               accessLevel);
-    } // end of SmcCppGenerator(...)
+        super (options, "{0}{1}_sm.{2}", "cpp");
+    } // end of SmcCppGenerator(SmcOptions)
 
     //
     // end of Constructors.
@@ -458,7 +403,7 @@ public final class SmcCppGenerator
         _source.println("{");
 
         // Print the transition out to the verbose log.
-        if (_debugFlag == true)
+        if (_debugLevel >= DEBUG_LEVEL_0)
         {
             _source.print(_indent);
             _source.println(
@@ -760,10 +705,8 @@ public final class SmcCppGenerator
         _source.println();
 
         // Print the transition to the verbose log.
-        if (_debugFlag == true)
+        if (_debugLevel >= DEBUG_LEVEL_0)
         {
-            String sep;
-
             _source.print(_indent);
             _source.println(
                 "    if (context.getDebugFlag() == true)");
@@ -773,22 +716,10 @@ public final class SmcCppGenerator
             if (_noStreamsFlag == true)
             {
                 _source.print(_indent);
-                _source.print("        TRACE(\"TRANSITION   : ");
-                _source.print(mapName);
-                _source.print(" ");
-                _source.print(transName);
-                _source.print("(");
-
-                for (pit = transition.getParameters().iterator(),
-                         sep = "";
-                     pit.hasNext() == true;
-                     sep = ", ")
-                {
-                    _source.print(sep);
-                    (pit.next()).accept(this);
-                }
-
-                _source.println(")\\n\\r\");");
+                _source.print(
+                    "        TRACE(\"LEAVING STATE   : ");
+                _source.print(fqStateName);
+                _source.println("\\n\\r\");");
             }
             else
             {
@@ -798,23 +729,9 @@ public final class SmcCppGenerator
                 _source.println();
                 _source.print(_indent);
                 _source.print(
-                    "        str << \"TRANSITION   : ");
-                _source.print(mapName);
-                _source.print(" ");
-                _source.print(transName);
-                _source.print("(");
-
-                for (pit = transition.getParameters().iterator(),
-                         sep = "";
-                     pit.hasNext() == true;
-                     sep = ", ")
-                {
-                    _source.print(sep);
-                    (pit.next()).accept(this);
-                }
-
-                _source.println(")\"");
-                _source.print(_indent);
+                    "        str << \"LEAVING STATE   : ");
+                _source.print(fqStateName);
+                _source.println("\"");
                 _source.println("            << std::endl;");
             }
 
@@ -1054,9 +971,83 @@ public final class SmcCppGenerator
         if (transType == TransType.TRANS_POP ||
             loopbackFlag == false)
         {
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.print(indent2);
+                _source.println(
+                    "if (context.getDebugFlag() == true)");
+                _source.print(indent2);
+                _source.println("{");
+
+                if (_noStreamsFlag == true)
+                {
+                    _source.print(indent2);
+                    _source.print(
+                        "    TRACE(\"BEFORE EXIT     : ");
+                    _source.print(stateName);
+                    _source.println(
+                        "::Exit(context)\\n\\r\");");
+                }
+                else
+                {
+                    _source.print(indent2);
+                    _source.print(
+                        "    std::ostream& str = ");
+                    _source.println("context.getDebugStream();");
+                    _source.println();
+                    _source.print(indent2);
+                    _source.print(
+                        "    str << \"BEFORE EXIT     : ");
+                    _source.print(stateName);
+                    _source.println("::Exit(context)\"");
+                    _source.println("        << std::endl;");
+                }
+
+                _source.print(indent2);
+                _source.println("}");
+                _source.println();
+            }
+
             _source.print(indent2);
             _source.println(
                 "(context.getState()).Exit(context);");
+
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.print(indent2);
+                _source.println(
+                    "if (context.getDebugFlag() == true)");
+                _source.print(indent2);
+                _source.println("{");
+
+                if (_noStreamsFlag == true)
+                {
+                    _source.print(indent2);
+                    _source.print(
+                        "    TRACE(\"AFTER EXIT      : ");
+                    _source.print(stateName);
+                    _source.println(
+                        "::Exit(context)\\n\\r\");");
+                }
+                else
+                {
+                    _source.print(indent2);
+                    _source.print(
+                        "    std::ostream& str = ");
+                    _source.println("context.getDebugStream();");
+                    _source.println();
+                    _source.print(indent2);
+                    _source.print(
+                        "    str << \"AFTER EXIT      : ");
+                    _source.print(stateName);
+                    _source.println("::Exit(context)\"");
+                    _source.println("            << std::endl;");
+                }
+
+                _source.print(indent2);
+                _source.println("}");
+                _source.println();
+            }
         }
 
         if (actions.size() > 0)
@@ -1065,10 +1056,80 @@ public final class SmcCppGenerator
             // current state.
             _source.print(indent2);
             _source.println("context.clearState();");
+
+            // Output transition to debug stream.
+            if (_debugLevel >= DEBUG_LEVEL_0)
+            {
+                String transName = transition.getName();
+                List<SmcParameter> parameters =
+                    transition.getParameters();
+                Iterator<SmcParameter> pit;
+                String sep;
+
+                _source.print(indent2);
+                _source.println(
+                    "if (context.getDebugFlag() == true)");
+                _source.print(indent2);
+                _source.println("{");
+
+                if (_noStreamsFlag == true)
+                {
+                    _source.print(indent2);
+                    _source.print(
+                        "    TRACE(\"ENTER TRANSITION: ");
+                    _source.print(stateName);
+                    _source.print("::");
+                    _source.print(transName);
+                    _source.print("(");
+
+                    for (pit = parameters.iterator(), sep = "";
+                         pit.hasNext() == true;
+                         sep = ", ")
+                    {
+                        _source.print(sep);
+                        (pit.next()).accept(this);
+                    }
+
+                    _source.println(")\\n\\r\");");
+                }
+                else
+                {
+                    _source.print(indent2);
+                    _source.print(
+                        "    std::ostream& str = ");
+                    _source.println("context.getDebugStream();");
+                    _source.println();
+                    _source.print(indent2);
+                    _source.print(indent2);
+                    _source.print(
+                        "    str << \"ENTER TRANSITION: ");
+                    _source.print(stateName);
+                    _source.print("::");
+                    _source.print(transName);
+                    _source.print("(");
+
+                    for (pit = parameters.iterator(), sep = "";
+                         pit.hasNext() == true;
+                         sep = ", ")
+                    {
+                        _source.print(sep);
+                        (pit.next()).accept(this);
+                    }
+
+                    _source.println(")\"");
+                    _source.print(indent2);
+                    _source.println(
+                        "            << std::endl;");
+                }
+
+                _source.print(indent2);
+                _source.println("}");
+                _source.println();
+            }
         }
 
         // Dump out this transition's actions.
-        if (actions.size() == 0)
+        if (actions.isEmpty() == true)
         {
             if (condition.length() > 0)
             {
@@ -1110,6 +1171,74 @@ public final class SmcCppGenerator
             _indent = indent4;
         }
 
+        if (_debugLevel >= DEBUG_LEVEL_0 &&
+            actions.isEmpty() == false)
+        {
+            String transName = transition.getName();
+            List<SmcParameter> parameters =
+                transition.getParameters();
+            Iterator<SmcParameter> pit;
+            String sep;
+
+            _source.print(indent2);
+            _source.println(
+                "    if (context.getDebugFlag() == true)");
+            _source.print(indent2);
+            _source.println("    {");
+
+            if (_noStreamsFlag == true)
+            {
+                _source.print(indent2);
+                _source.print(
+                    "        TRACE(\"EXIT TRANSITION : ");
+                _source.print(stateName);
+                _source.print("::");
+                _source.print(transName);
+                _source.print("(");
+
+                for (pit = parameters.iterator(), sep = "";
+                     pit.hasNext() == true;
+                     sep = ", ")
+                {
+                    _source.print(sep);
+                    (pit.next()).accept(this);
+                }
+
+                _source.println(")\\n\\r\");");
+            }
+            else
+            {
+                _source.print(indent2);
+                _source.print(
+                    "        std::ostream& str = ");
+                _source.println("context.getDebugStream();");
+                _source.println();
+                _source.print(indent2);
+                _source.print(
+                    "        str << \"EXIT TRANSITION : ");
+                _source.print(stateName);
+                _source.print("::");
+                _source.print(transName);
+                _source.print("(");
+
+                for (pit = parameters.iterator(), sep = "";
+                     pit.hasNext() == true;
+                     sep = ", ")
+                {
+                    _source.print(sep);
+                    (pit.next()).accept(this);
+                }
+
+                _source.println(")\"");
+                _source.print(indent2);
+                _source.println("            << std::endl;");
+            }
+
+            _source.print(indent2);
+            _source.println("    }");
+            _source.println();
+        }
+
         // Print the setState() call, if necessary. Do NOT
         // generate the set state if:
         // 1. The transition has no actions AND is a loopback OR
@@ -1143,10 +1272,84 @@ public final class SmcCppGenerator
             // entry actions (if any) if this is not a loopback.
             if (loopbackFlag == false)
             {
+                if (_debugLevel >= DEBUG_LEVEL_1)
+                {
+                    _source.println();
+                    _source.print(indent3);
+                    _source.println(
+                        "if (context.getDebugFlag() == true)");
+                    _source.print(indent3);
+                    _source.println("{");
+
+                    if (_noStreamsFlag == true)
+                    {
+                        _source.print(indent3);
+                        _source.print(
+                            "    TRACE(\"BEFORE ENTRY    : ");
+                        _source.print(stateName);
+                        _source.println(
+                            "::Entry(context)\\n\\r\");");
+                    }
+                    else
+                    {
+                        _source.print(indent3);
+                        _source.print(
+                            "    std::ostream& str = ");
+                        _source.println("context.getDebugStream();");
+                        _source.println();
+                        _source.print(indent3);
+                        _source.print(
+                            "    str << \"BEFORE ENTRY    : ");
+                        _source.print(stateName);
+                        _source.println("::Entry(context)\"");
+                        _source.println("        << std::endl;");
+                    }
+
+                    _source.print(indent3);
+                    _source.println("}");
+                }
+
                 _source.println();
                 _source.print(indent3);
                 _source.println(
                     "(context.getState()).Entry(context);");
+
+                if (_debugLevel >= DEBUG_LEVEL_1)
+                {
+                    _source.println();
+                    _source.print(indent3);
+                    _source.println(
+                        "if (context.getDebugFlag() == true)");
+                    _source.print(indent3);
+                    _source.println("{");
+
+                    if (_noStreamsFlag == true)
+                    {
+                        _source.print(indent3);
+                        _source.print(
+                            "    TRACE(\"AFTER ENTRY     : ");
+                        _source.print(stateName);
+                        _source.println(
+                            "::Entry(context)\\n\\r\");");
+                    }
+                    else
+                    {
+                        _source.print(indent3);
+                        _source.print(
+                            "    std::ostream& str = ");
+                        _source.println("context.getDebugStream();");
+                        _source.println();
+                        _source.print(indent3);
+                        _source.print(
+                            "    str << \"AFTER ENTRY     : ");
+                        _source.print(stateName);
+                        _source.println("::Entry(context)\"");
+                        _source.println("        << std::endl;");
+                    }
+
+                    _source.print(indent3);
+                    _source.println("}");
+                }
             }
 
             _source.print(indent3);
@@ -1198,10 +1401,85 @@ public final class SmcCppGenerator
                 // loopback.
                 if (loopbackFlag == false)
                 {
+                    if (_debugLevel >= DEBUG_LEVEL_1)
+                    {
+                        _source.println();
+                        _source.print(indent3);
+                        _source.println(
+                            "if (context.getDebugFlag() == true)");
+                        _source.print(indent3);
+                        _source.println("{");
+
+                        if (_noStreamsFlag == true)
+                        {
+                            _source.print(indent3);
+                            _source.print(
+                                "    TRACE(\"BEFORE ENTRY    : ");
+                            _source.print(stateName);
+                            _source.println(
+                                "::Entry(context)\\n\\r\");");
+                        }
+                        else
+                        {
+                            _source.print(indent3);
+                            _source.print(
+                                "    std::ostream& str = ");
+                            _source.println("context.getDebugStream();");
+                            _source.println();
+                            _source.print(indent2);
+                            _source.print(
+                                "    str << \"BEFORE ENTRY    : ");
+                            _source.print(stateName);
+                            _source.println("::Entry(context)\"");
+                            _source.println("        << std::endl;");
+                        }
+
+                        _source.print(indent3);
+                        _source.println("}");
+                        _source.println();
+                    }
+
                     _source.println();
                     _source.print(indent3);
                     _source.println(
                         "(context.getState()).Entry(context);");
+
+                    if (_debugLevel >= DEBUG_LEVEL_1)
+                    {
+                        _source.print(indent3);
+                        _source.println(
+                            "    if (context.getDebugFlag() == true)");
+                        _source.print(indent3);
+                        _source.println("    {");
+
+                        if (_noStreamsFlag == true)
+                        {
+                            _source.print(indent3);
+                            _source.print(
+                                "        TRACE(\"AFTER ENTRY     : ");
+                            _source.print(stateName);
+                            _source.println(
+                                "::Entry(context)\\n\\r\");");
+                        }
+                        else
+                        {
+                            _source.print(indent3);
+                            _source.print(
+                                "        std::ostream& str = ");
+                            _source.println("context.getDebugStream();");
+                            _source.println();
+                            _source.print(indent2);
+                            _source.print(
+                                "        str << \"AFTER ENTRY     : ");
+                            _source.print(stateName);
+                            _source.println("::Entry(context)\"");
+                            _source.println("            << std::endl;");
+                        }
+
+                        _source.print(indent3);
+                        _source.println("    }");
+                        _source.println();
+                    }
                 }
 
                 _source.print(indent3);
@@ -1237,9 +1515,82 @@ public final class SmcCppGenerator
              loopbackFlag == false) ||
              transType == TransType.TRANS_PUSH)
         {
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.print(indent2);
+                _source.println(
+                    "if (context.getDebugFlag() == true)");
+                _source.print(indent2);
+                _source.println("{");
+
+                if (_noStreamsFlag == true)
+                {
+                    _source.print(indent2);
+                    _source.print(
+                        "    TRACE(\"BEFORE ENTRY    : ");
+                    _source.print(stateName);
+                    _source.println(
+                        "::Entry(context)\\n\\r\");");
+                }
+                else
+                {
+                    _source.print(indent2);
+                    _source.print(
+                        "    std::ostream& str = ");
+                    _source.println("context.getDebugStream();");
+                    _source.println();
+                    _source.print(indent2);
+                    _source.print(
+                        "    str << \"BEFORE ENTRY    : ");
+                    _source.print(stateName);
+                    _source.println("::Entry(context)\"");
+                    _source.println("        << std::endl;");
+                }
+
+                _source.print(indent2);
+                _source.println("}");
+            }
+
             _source.print(indent2);
             _source.println(
                 "(context.getState()).Entry(context);");
+
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.println();
+                _source.print(indent2);
+                _source.println(
+                    "if (context.getDebugFlag() == true)");
+                _source.print(indent2);
+                _source.println("{");
+
+                if (_noStreamsFlag == true)
+                {
+                    _source.print(indent2);
+                    _source.print(
+                        "    TRACE(\"AFTER ENTRY     : ");
+                    _source.print(stateName);
+                    _source.println(
+                        "::Entry(context)\\n\\r\");");
+                }
+                else
+                {
+                    _source.print(indent2);
+                    _source.print("    std::ostream& str = ");
+                    _source.println("context.getDebugStream();");
+                    _source.println();
+                    _source.print(indent2);
+                    _source.print(
+                        "    str << \"AFTER ENTRY     : ");
+                    _source.print(stateName);
+                    _source.println("::Entry(context)\"");
+                    _source.println("        << std::endl;");
+                }
+
+                _source.print(indent2);
+                _source.println("}");
+                _source.println();
+            }
         }
 
         // If there is a transition associated with the pop, then
@@ -1346,6 +1697,9 @@ public final class SmcCppGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2009/11/24 20:42:39  cwrapp
+// v. 6.0.1 update
+//
 // Revision 1.5  2009/10/06 15:31:59  kgreg99
 // 1. Started implementation of feature request #2718920.
 //     1.1 Added method boolean isStatic() to SmcAction class. It returns false now, but is handled in following language generators: C#, C++, java, php, VB. Instance identificator is not added in case it is set to true.

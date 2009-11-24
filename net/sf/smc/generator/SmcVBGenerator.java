@@ -54,6 +54,7 @@ import net.sf.smc.model.SmcVisitor;
  * @see SmcElement
  * @see SmcCodeGenerator
  * @see SmcVisitor
+ * @see SmcOptions
  *
  * @author <a href="mailto:rapp@acm.org">Charles Rapp</a>
  */
@@ -70,69 +71,13 @@ public final class SmcVBGenerator
     //
 
     /**
-     * Creates a VB code generator for the given parameters.
-     * @param srcfileBase write the emitted code to this target
-     * source file name sans the suffix.
-     * @param srcDirectory place the target source file in this
-     * directory.
-     * @param headerDirectory place the target header file in
-     * this directory. Ignored if there is no generated header
-     * file.
-     * @param castType use this type cast (C++ code generation
-     * only).
-     * @param graphLevel amount of detail in the generated
-     * GraphViz graph (graph code generation only).
-     * @param serialFlag if {@code true}, generate unique
-     * identifiers for persisting the FSM.
-     * @param debugFlag if {@code true} add debug output messages
-     * to code.
-     * @param noExceptionFlag if {@code true} then use asserts
-     * rather than exceptions (C++ only).
-     * @param noCatchFlag if {@code true} then do <i>not</i>
-     * generate try/catch/rethrow code.
-     * @param noStreamsFlag if {@code true} then use TRACE macro
-     * for debug output.
-     * @param reflectFlag if {@code true} then generate
-     * reflection code.
-     * @param syncFlag if {@code true} then generate
-     * synchronization code.
-     * @param genericFlag if {@code true} then use generic
-     * collections.
-     * @param accessLevel use this access keyword for the
-     * generated classes.
+     * Creates a VB code generator for the given options.
+     * @param options The target code generator options.
      */
-    public SmcVBGenerator(final String srcfileBase,
-                          final String srcDirectory,
-                          final String headerDirectory,
-                          final String castType,
-                          final int graphLevel,
-                          final boolean serialFlag,
-                          final boolean debugFlag,
-                          final boolean noExceptionFlag,
-                          final boolean noCatchFlag,
-                          final boolean noStreamsFlag,
-                          final boolean reflectFlag,
-                          final boolean syncFlag,
-                          final boolean genericFlag,
-                          final String accessLevel)
+    public SmcVBGenerator(final SmcOptions options)
     {
-        super (srcfileBase,
-               "{0}{1}_sm.{2}",
-               "vb",
-               srcDirectory,
-               headerDirectory,
-               castType,
-               graphLevel,
-               serialFlag,
-               debugFlag,
-               noExceptionFlag,
-               noCatchFlag,
-               noStreamsFlag,
-               reflectFlag,
-               syncFlag,
-               genericFlag,
-               accessLevel);
-    } // end of SmcVBGenerator(...)
+        super (options, "{0}{1}_sm.{2}", "vb");
+    } // end of SmcVBGenerator(SmcOptions)
 
     //
     // end of Constructors.
@@ -249,7 +194,7 @@ public final class SmcVBGenerator
 
         // If serialization is on, then the shared state array
         // must be generated.
-        if (_serialFlag == true)
+        if (_serialFlag == true || _reflectFlag == true)
         {
             String mapName;
 
@@ -278,6 +223,14 @@ public final class SmcVBGenerator
             {
                 mapName = map.getName();
 
+                _source.println(separator);
+                _source.print(_indent);
+                _source.print("            ");
+                _source.print(mapName);
+                _source.print(".Default");
+
+                separator = ", _";
+
                 // and for each map state, ...
                 for (SmcState state: map.getStates())
                 {
@@ -286,10 +239,8 @@ public final class SmcVBGenerator
                     _source.print(_indent);
                     _source.print("            ");
                     _source.print(mapName);
-                    _source.print(".");
+                    _source.print('.');
                     _source.print(state.getClassName());
-
-                    separator = ", _";
                 }
             }
 
@@ -342,6 +293,8 @@ public final class SmcVBGenerator
         _source.print(_indent);
         _source.println("    End Property");
         _source.println();
+
+        // The Owner property.
         _source.print(_indent);
         _source.print(
             "    Public Property Owner() As ");
@@ -374,6 +327,24 @@ public final class SmcVBGenerator
         _source.print(_indent);
         _source.println("    End Property");
         _source.println();
+
+        // The states property.
+        if (_reflectFlag == true)
+        {
+            _source.print(_indent);
+            _source.print("    Public Property States() As ");
+            _source.print(context);
+            _source.println("State()");
+            _source.print(_indent);
+            _source.println("        Get");
+            _source.print(_indent);
+            _source.println("            Return _States");
+            _source.print(_indent);
+            _source.println("        End Get");
+            _source.print(_indent);
+            _source.println("    End Property");
+            _source.println();
+        }
 
         // The state name "map::state" must be changed to
         // "map.state".
@@ -679,8 +650,13 @@ public final class SmcVBGenerator
             _source.println();
             _source.print(_indent);
             _source.print("    Public MustOverride ReadOnly ");
-            _source.println(
+            _source.print(
                 "Property Transitions() As IDictionary");
+            if (_genericFlag == true)
+            {
+                _source.print("(String, Integer)");
+            }
+            _source.println();
             _source.println();
         }
 
@@ -766,7 +742,7 @@ public final class SmcVBGenerator
         _source.println(")");
         _source.println();
 
-        if (_debugFlag == true)
+        if (_debugLevel >= DEBUG_LEVEL_0)
         {
             _source.println("#If TRACE Then");
             _source.print(_indent);
@@ -925,8 +901,13 @@ public final class SmcVBGenerator
             _source.println();
             _source.print(_indent);
             _source.print("    Public Overrides ReadOnly ");
-            _source.println(
+            _source.print(
                 "Property Transitions() As IDictionary");
+            if (_genericFlag == true)
+            {
+                _source.print("(String, Integer)");
+            }
+            _source.println();
             _source.print(_indent);
             _source.println("        Get");
             _source.println();
@@ -985,15 +966,25 @@ public final class SmcVBGenerator
             _source.println();
             _source.print(_indent);
             _source.print("    ");
-            _source.println(
+            _source.print(
                 "Private Shared _transitions As IDictionary");
+            if (_genericFlag == true)
+            {
+                _source.print("(String, Integer)");
+            }
+            _source.println();
             _source.println();
             _source.print(_indent);
             _source.println("    Shared Sub New()");
             _source.println();
             _source.print(_indent);
             _source.print("        ");
-            _source.println("_transitions = New Hashtable()");
+            _source.print("_transitions = New Dictionary");
+            if (_genericFlag == true)
+            {
+                _source.print("(String, Integer)");
+            }
+            _source.println("()");
 
             // Now place the transition names into the list.
             for (SmcTransition transition: allTransitions)
@@ -1077,8 +1068,13 @@ public final class SmcVBGenerator
             _source.println();
             _source.print(_indent);
             _source.print("    Public Overrides ReadOnly ");
-            _source.println(
+            _source.print(
                 "Property Transitions() As IDictionary");
+            if (_genericFlag == true)
+            {
+                _source.print("(String, Integer)");
+            }
+            _source.println();
             _source.print(_indent);
             _source.println("        Get");
             _source.println();
@@ -1212,15 +1208,25 @@ public final class SmcVBGenerator
             _source.println();
             _source.print(_indent);
             _source.print("    ");
-            _source.println(
+            _source.print(
                 "Private Shared _transitions As IDictionary");
+            if (_genericFlag == true)
+            {
+                _source.print("(String, Integer)");
+            }
+            _source.println();
             _source.println();
             _source.print(_indent);
             _source.println("    Shared Sub New()");
             _source.println();
             _source.print(_indent);
             _source.print("        ");
-            _source.println("_transitions = New Hashtable()");
+            _source.print("_transitions = New Dictionary");
+            if (_genericFlag == true)
+            {
+                _source.print("(String, Integer)");
+            }
+            _source.println("()");
 
             // Now place the transition names into the list.
             for (SmcTransition transition: allTransitions)
@@ -1326,31 +1332,16 @@ public final class SmcVBGenerator
         }
 
         // Output transition to debug stream.
-        if (_debugFlag == true)
+        if (_debugLevel >= DEBUG_LEVEL_0)
         {
-            String sep;
-
             _source.println("#If TRACE Then");
             _source.print(_indent);
             _source.println("        Trace.WriteLine( _");
             _source.print(_indent);
-            _source.print("            \"TRANSITION   : ");
+            _source.print("            \"LEAVING STATE   : ");
             _source.print(mapName);
             _source.print(".");
             _source.print(stateName);
-            _source.print(".");
-            _source.print(transName);
-
-            _source.print("(");
-            for (pit = parameters.iterator(), sep = "";
-                 pit.hasNext() == true;
-                 sep = ", ")
-            {
-                _source.print(sep);
-                (pit.next()).accept(this);
-            }
-            _source.print(")");
-
             _source.println("\")");
             _source.println("#End If");
             _source.println();
@@ -1424,6 +1415,7 @@ public final class SmcVBGenerator
         String context = map.getFSM().getContext();
         String mapName = map.getName();
         String stateName = state.getClassName();
+        String transName = transition.getName();
         TransType transType = guard.getTransType();
         boolean loopbackFlag = false;
         String indent1;
@@ -1558,8 +1550,34 @@ public final class SmcVBGenerator
         if (transType == TransType.TRANS_POP ||
             loopbackFlag == false)
         {
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.println("#If TRACE Then");
+                _source.print(indent1);
+                _source.println("Trace.WriteLine( _");
+                _source.print(indent1);
+                _source.print("    \"BEFORE EXIT     : ");
+                _source.print(stateName);
+                _source.println(".Exit_(context)\")");
+                _source.println("#End If");
+                _source.println();
+            }
+
             _source.print(indent1);
             _source.println("context.State.Exit_(context)");
+
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.println("#If TRACE Then");
+                _source.print(indent1);
+                _source.println("Trace.WriteLine( _");
+                _source.print(indent1);
+                _source.print("    \"AFTER EXIT      : ");
+                _source.print(stateName);
+                _source.println(".Exit_(context)\")");
+                _source.println("#End If");
+                _source.println();
+            }
         }
 
         // Dump out this transition's actions.
@@ -1581,6 +1599,36 @@ public final class SmcVBGenerator
             // current state.
             _source.print(indent1);
             _source.println("context.ClearState()");
+
+            if (_debugLevel >= DEBUG_LEVEL_0)
+            {
+                List<SmcParameter> parameters =
+                    transition.getParameters();
+                Iterator<SmcParameter> pit;
+                String sep;
+
+                _source.println("#If TRACE Then");
+                _source.print(indent1);
+                _source.println("Trace.WriteLine( _");
+                _source.print(indent1);
+                _source.print("    \"ENTER TRANSITION: ");
+                _source.print(stateName);
+                _source.print(".");
+                _source.print(transName);
+                _source.print("(");
+
+                for (pit = parameters.iterator(), sep = "";
+                     pit.hasNext() == true;
+                     sep = ", ")
+                {
+                    _source.print(sep);
+                    (pit.next()).accept(this);
+                }
+
+                _source.println(")\")");
+                _source.println("#End If");
+                _source.println();
+            }
 
             // v. 2.0.0: Place the actions inside a try/finally
             // block. This way the state will be set before an
@@ -1606,6 +1654,36 @@ public final class SmcVBGenerator
                 action.accept(this);
             }
             _indent = tempIndent;
+
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                List<SmcParameter> parameters =
+                    transition.getParameters();
+                Iterator<SmcParameter> pit;
+                String sep;
+
+                _source.println("#If TRACE Then");
+                _source.print(indent1);
+                _source.println("Trace.WriteLine( _");
+                _source.print(indent1);
+                _source.print("    \"EXIT TRANSITION : ");
+                _source.print(stateName);
+                _source.print(".");
+                _source.print(transName);
+                _source.print("(");
+
+                for (pit = parameters.iterator(), sep = "";
+                     pit.hasNext() == true;
+                     sep = ", ")
+                {
+                    _source.print(sep);
+                    (pit.next()).accept(this);
+                }
+
+                _source.println(")\")");
+                _source.println("#End If");
+                _source.println();
+            }
 
             // v. 2.2.0: Check if the user has turned off this
             // feature first.
@@ -1643,8 +1721,34 @@ public final class SmcVBGenerator
             // entry actions (if any) if this is not a loopback.
             if (loopbackFlag == false)
             {
+                if (_debugLevel >= DEBUG_LEVEL_1)
+                {
+                    _source.println("#If TRACE Then");
+                    _source.print(indent1);
+                    _source.println("Trace.WriteLine( _");
+                    _source.print(indent1);
+                    _source.print("    \"BEFORE ENTRY    : ");
+                    _source.print(stateName);
+                    _source.println(".Entry(context)\")");
+                    _source.println("#End If");
+                    _source.println();
+                }
+
                 _source.print(indent2);
                 _source.println("context.State.Entry(context)");
+
+                if (_debugLevel >= DEBUG_LEVEL_1)
+                {
+                    _source.println("#If TRACE Then");
+                    _source.print(indent1);
+                    _source.println("Trace.WriteLine( _");
+                    _source.print(indent1);
+                    _source.print("    \"AFTER ENTRY     : ");
+                    _source.print(stateName);
+                    _source.println(".Entry(context)\")");
+                    _source.println("#End If");
+                    _source.println();
+                }
             }
 
             _source.print(indent2);
@@ -1666,8 +1770,34 @@ public final class SmcVBGenerator
              loopbackFlag == false) ||
              transType == TransType.TRANS_PUSH)
         {
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.println("#If TRACE Then");
+                _source.print(indent2);
+                _source.println("Trace.WriteLine( _");
+                _source.print(indent2);
+                _source.print("    \"BEFORE ENTRY    : ");
+                _source.print(stateName);
+                _source.println(".Entry(context)\")");
+                _source.println("#End If");
+                _source.println();
+            }
+
             _source.print(indent2);
             _source.println("context.State.Entry(context)");
+
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.println("#If TRACE Then");
+                _source.print(indent2);
+                _source.println("Trace.WriteLine( _");
+                _source.print(indent2);
+                _source.print("    \"AFTER ENTRY     : ");
+                _source.print(stateName);
+                _source.println(".Entry(context)\")");
+                _source.println("#End If");
+                _source.println();
+            }
         }
 
         // If there was a try/finally, then put the closing
@@ -1788,6 +1918,9 @@ public final class SmcVBGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2009/11/24 20:42:39  cwrapp
+// v. 6.0.1 update
+//
 // Revision 1.4  2009/10/06 15:31:59  kgreg99
 // 1. Started implementation of feature request #2718920.
 //     1.1 Added method boolean isStatic() to SmcAction class. It returns false now, but is handled in following language generators: C#, C++, java, php, VB. Instance identificator is not added in case it is set to true.

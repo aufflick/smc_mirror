@@ -58,6 +58,7 @@ import net.sf.smc.model.SmcVisitor;
  *
  * @see SmcElement
  * @see SmcVisitor
+ * @see SmcOptions
  *
  * @author <a href="mailto:rapp@acm.org">Charles Rapp</a>
  */
@@ -78,79 +79,36 @@ public abstract class SmcCodeGenerator
      * parameters. All subclass constructors receive the same
      * arguments even though not all arguments apply to every
      * concrete code generator.
-     * @param srcfileBase write the emitted code to this target
-     * source file name sans the suffix.
+     * @param options The target code generator options.
      * @param sourceNameFormat the target source file name
      * format.
      * @param suffix the target source file name suffix.
-     * @param srcDirectory place the target source file in this
-     * directory.
-     * @param headerDirectory place the target header file in
-     * this directory. Ignored if there is no generated header
-     * file.
-     * @param castType use this type cast (C++ code generation
-     * only).
-     * @param graphLevel amount of detail in the generated
-     * GraphViz graph (graph code generation only).
-     * @param serialFlag if {@code true}, generate unique
-     * identifiers for persisting the FSM.
-     * @param debugFlag if {@code true} add debug output messages
-     * to code.
-     * @param noExceptionFlag if {@code true} then use asserts
-     * rather than exceptions (C++ only).
-     * @param noCatchFlag if {@code true} then do <i>not</i>
-     * generate try/catch/rethrow code.
-     * @param noStreamsFlag if {@code true} then use TRACE macro
-     * for debug output.
-     * @param reflectFlag if {@code true} then generate
-     * reflection code.
-     * @param syncFlag if {@code true} then generate
-     * synchronization code.
-     * @param genericFlag if {@code true} then use generic
-     * collections.
-     * @param accessLevel use this access keyword for the
-     * generated classes.
      */
-    protected SmcCodeGenerator(final String srcfileBase,
+    protected SmcCodeGenerator(final SmcOptions options,
                                final String sourceNameFormat,
-                               final String suffix,
-                               final String srcDirectory,
-                               final String headerDirectory,
-                               final String castType,
-                               final int graphLevel,
-                               final boolean serialFlag,
-                               final boolean debugFlag,
-                               final boolean noExceptionFlag,
-                               final boolean noCatchFlag,
-                               final boolean noStreamsFlag,
-                               final boolean reflectFlag,
-                               final boolean syncFlag,
-                               final boolean genericFlag,
-                               final String accessLevel)
+                               final String suffix)
     {
-        super ();
-
-        _srcfileBase = srcfileBase;
+        _srcfileBase = options.srcfileBase();
+        _srcDirectory = options.srcDirectory();
+        _headerDirectory = options.headerDirectory();
+        _castType = options.castType();
+        _graphLevel = options.graphLevel();
+        _serialFlag = options.serialFlag();
+        _debugLevel = options.debugLevel();
+        _noExceptionFlag = options.noExceptionFlag();
+        _noCatchFlag = options.noCatchFlag();
+        _noStreamsFlag = options.noStreamsFlag();
+        _reflectFlag = options.reflectFlag();
+        _syncFlag = options.syncFlag();
+        _genericFlag = options.genericFlag();
+        _accessLevel = options.accessLevel();
         _sourceNameFormat = sourceNameFormat;
-        _headerDirectory = headerDirectory;
-        _castType = castType;
-        _graphLevel = graphLevel;
         _suffix = suffix;
-        _srcDirectory = srcDirectory;
         _source = null;
-        _serialFlag = serialFlag;
-        _debugFlag = debugFlag;
-        _noExceptionFlag = noExceptionFlag;
-        _noCatchFlag = noCatchFlag;
-        _noStreamsFlag = noStreamsFlag;
-        _reflectFlag = reflectFlag;
-        _syncFlag = syncFlag;
-        _genericFlag = genericFlag;
-        _accessLevel = accessLevel;
         _indent = "";
         _guardCount = 0;
         _guardIndex = 0;
-    } // end of SmcCodeGenerator(...)
+    } // end of SmcCodeGenerator(SmcOptions)
 
     //
     // end of Constructors.
@@ -395,7 +353,7 @@ public abstract class SmcCodeGenerator
     /**
      * This flag is true when debug output is to be generated.
      */
-    protected final boolean _debugFlag;
+    protected final int _debugLevel;
 
     /**
      * This flag is true when exceptions are not be thrown.
@@ -445,6 +403,24 @@ public abstract class SmcCodeGenerator
     // Constants.
     //
 
+    // Debug output detail level.
+
+    /**
+     * No debug output.
+     */
+    public static final int NO_DEBUG_OUTPUT = -1;
+
+    /**
+     * Output states and transitions.
+     */
+    public static final int DEBUG_LEVEL_0 = 0;
+
+    /**
+     * Output states, transitions and all transition, entry and
+     * exit actions.
+     */
+    public static final int DEBUG_LEVEL_1 = 1;
+
     // GraphViz detail level.
 
     /**
@@ -474,6 +450,9 @@ public abstract class SmcCodeGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2009/11/24 20:42:39  cwrapp
+// v. 6.0.1 update
+//
 // Revision 1.3  2009/09/05 15:39:20  cwrapp
 // Checking in fixes for 1944542, 1983929, 2731415, 2803547 and feature 2797126.
 //

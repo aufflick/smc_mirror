@@ -67,9 +67,9 @@ public final class SmcMap
      * Creates a state machine map with the given name, line
      * number and finite state machine.
      */
-    public SmcMap(String name,
-                  int lineNumber,
-                  SmcFSM fsm)
+    public SmcMap(final String name,
+                  final int lineNumber,
+                  final SmcFSM fsm)
     {
         super (name, lineNumber);
 
@@ -93,7 +93,7 @@ public final class SmcMap
      * @see SmcVisitor
      */
     @Override
-    public void accept(SmcVisitor visitor)
+    public void accept(final SmcVisitor visitor)
     {
         visitor.visit(this);
         return;
@@ -131,7 +131,7 @@ public final class SmcMap
      * @return {@code true} if the state is in the list and
      * {@code false} otherwise.
      */
-    public boolean findState(SmcState state)
+    public boolean findState(final SmcState state)
     {
         SmcState state2;
         Iterator<SmcState> it;
@@ -158,7 +158,7 @@ public final class SmcMap
      * @return {@code true} if this map contains the nsamed
      * state; {@code false} otherwise.
      */
-    public boolean isKnownState(String stateName)
+    public boolean isKnownState(final String stateName)
     {
         SmcState state;
         Iterator<SmcState> it;
@@ -450,6 +450,9 @@ public final class SmcMap
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2009/11/24 20:42:39  cwrapp
+// v. 6.0.1 update
+//
 // Revision 1.3  2009/03/27 09:41:47  cwrapp
 // Added F. Perrad changes back in.
 //

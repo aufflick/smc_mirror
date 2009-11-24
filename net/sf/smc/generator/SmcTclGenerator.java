@@ -54,6 +54,7 @@ import net.sf.smc.model.SmcVisitor;
  * @see SmcElement
  * @see SmcCodeGenerator
  * @see SmcVisitor
+ * @see SmcOptions
  *
  * @author <a href="mailto:rapp@acm.org">Charles Rapp</a>
  */
@@ -70,69 +71,13 @@ public final class SmcTclGenerator
     //
 
     /**
-     * Creates a Tcl code generator for the given parameters.
-     * @param srcfileBase write the emitted code to this target
-     * source file name sans the suffix.
-     * @param srcDirectory place the target source file in this
-     * directory.
-     * @param headerDirectory place the target header file in
-     * this directory. Ignored if there is no generated header
-     * file.
-     * @param castType use this type cast (C++ code generation
-     * only).
-     * @param graphLevel amount of detail in the generated
-     * GraphViz graph (graph code generation only).
-     * @param serialFlag if {@code true}, generate unique
-     * identifiers for persisting the FSM.
-     * @param debugFlag if {@code true} add debug output messages
-     * to code.
-     * @param noExceptionFlag if {@code true} then use asserts
-     * rather than exceptions (C++ only).
-     * @param noCatchFlag if {@code true} then do <i>not</i>
-     * generate try/catch/rethrow code.
-     * @param noStreamsFlag if {@code true} then use TRACE macro
-     * for debug output.
-     * @param reflectFlag if {@code true} then generate
-     * reflection code.
-     * @param syncFlag if {@code true} then generate
-     * synchronization code.
-     * @param genericFlag if {@code true} then use generic
-     * collections.
-     * @param accessLevel use this access keyword for the
-     * generated classes.
+     * Creates a Tcl code generator for the given options.
+     * @param options The target code generator options.
      */
-    public SmcTclGenerator(final String srcfileBase,
-                           final String srcDirectory,
-                           final String headerDirectory,
-                           final String castType,
-                           final int graphLevel,
-                           final boolean serialFlag,
-                           final boolean debugFlag,
-                           final boolean noExceptionFlag,
-                           final boolean noCatchFlag,
-                           final boolean noStreamsFlag,
-                           final boolean reflectFlag,
-                           final boolean syncFlag,
-                           final boolean genericFlag,
-                           final String accessLevel)
+    public SmcTclGenerator(final SmcOptions options)
     {
-        super (srcfileBase,
-               "{0}{1}_sm.{2}",
-               "tcl",
-               srcDirectory,
-               headerDirectory,
-               castType,
-               graphLevel,
-               serialFlag,
-               debugFlag,
-               noExceptionFlag,
-               noCatchFlag,
-               noStreamsFlag,
-               reflectFlag,
-               syncFlag,
-               genericFlag,
-               accessLevel);
-    } // end of SmcTclGenerator(...)
+        super (options, "{0}{1}_sm.{2}", "tcl");
+    } // end of SmcTclGenerator(SmcOptions)
 
     //
     // end of Constructors.
@@ -315,6 +260,32 @@ public final class SmcTclGenerator
             _source.println("    }");
         }
 
+        // v. 6.0.1: If we are supporting serialization, then
+        // declare the getStates method.
+        if (_reflectFlag == true)
+        {
+            _source.println();
+            _source.print(_indent);
+            _source.println("    public method getStates {} {");
+            _source.print(_indent);
+            _source.println("        set retval [list];");
+            _source.println();
+            _source.print(_indent);
+            _source.println(
+                "         foreach name [array names _States] {");
+            _source.print(_indent);
+            _source.println(
+                "            lappend retval $_States($name);");
+            _source.print(_indent);
+            _source.println("        }");
+            _source.println();
+            _source.print(_indent);
+            _source.println(
+                "        return -code ok ${retval};");
+            _source.print(_indent);
+            _source.println("    }");
+        }
+
         _source.println();
         _source.print(_indent);
         _source.println("# Member data.");
@@ -330,6 +301,12 @@ public final class SmcTclGenerator
             _source.println("    private common MIN_ID;");
             _source.print(_indent);
             _source.println("    private common MAX_ID;");
+        }
+
+        // v. 6.0.1: Generate the states array for both
+        // serialization and reflection.
+        if (_serialFlag == true || _reflectFlag == true)
+        {
             _source.print(_indent);
             _source.println("    private common _States;");
         }
@@ -515,6 +492,12 @@ public final class SmcTclGenerator
             _source.print("::MAX_ID ");
             _source.print(index - 1);
             _source.println(";");
+        }
+
+        // v. 6.0.1: If we are supporting serialization or
+        // reflection, then declare the states array.
+        if (_serialFlag == true || _reflectFlag == true)
+        {
             _source.print(_indent);
             _source.print("array set ");
             _source.print(fsmClassName);
@@ -890,32 +873,18 @@ public final class SmcTclGenerator
         }
 
         // If verbose is turned on, then put the logging code in.
-        if (_debugFlag == true)
+        if (_debugLevel >= DEBUG_LEVEL_0)
         {
-            String sep;
-
             _source.print(_indent);
             _source.println(
                 "        if {[$context getDebugFlag] != 0} {");
             _source.print(_indent);
             _source.print(
                 "            puts [$context getDebugStream] ");
-            _source.print("\"TRANSITION    : ");
+            _source.print("\"LEAVING STATE   : ");
             _source.print(mapName);
             _source.print("::");
             _source.print(stateName);
-            _source.print(" ");
-            _source.print(transName);
-            _source.print("(");
-            for (pit = parameters.iterator(), sep = "";
-                 pit.hasNext() == true;
-                 sep = ", ")
-            {
-                _source.print(sep);
-                (pit.next()).accept(this);
-            }
-            _source.print(")");
-
             _source.println("\";");
             _source.print(_indent);
             _source.println("        }");
@@ -996,6 +965,7 @@ public final class SmcTclGenerator
         String context = map.getFSM().getContext();
         String mapName = map.getName();
         String stateName = state.getClassName();
+        String transName = transition.getName();
         TransType transType = guard.getTransType();
         boolean loopbackFlag = false;
         String indent2;
@@ -1138,9 +1108,42 @@ public final class SmcTclGenerator
         if (transType == TransType.TRANS_POP ||
             loopbackFlag == false)
         {
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.print(indent2);
+                _source.println(
+                    "if {[$context getDebugFlag] != 0} {");
+                _source.print(indent2);
+                _source.print(
+                    "    puts [$context getDebugStream] ");
+                _source.print("\"BEFORE EXIT     : \\[");
+                _source.print(stateName);
+                _source.println("\\] Exit $context\";");
+                _source.print(indent2);
+                _source.println("}");
+                _source.println();
+            }
+
             _source.print(indent2);
             _source.println(
                 "[$context getState] Exit $context;");
+
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.println();
+                _source.print(indent2);
+                _source.println(
+                    "if {[$context getDebugFlag] != 0} {");
+                _source.print(indent2);
+                _source.print(
+                    "    puts [$context getDebugStream] ");
+                _source.print("\"AFTER EXIT      : \\[");
+                _source.print(stateName);
+                _source.println("\\] Exit $context\";");
+                _source.print(indent2);
+                _source.println("}");
+                _source.println();
+            }
         }
 
         // Dump out this transition's actions.
@@ -1160,6 +1163,37 @@ public final class SmcTclGenerator
             // current state since we are no longer in a state.
             _source.print(indent2);
             _source.println("$context clearState;");
+
+            if (_debugLevel >= DEBUG_LEVEL_0)
+            {
+                List<SmcParameter> parameters =
+                    transition.getParameters();
+                Iterator<SmcParameter> pit;
+                String sep;
+
+                _source.print(indent2);
+                _source.println(
+                    "if {[$context getDebugFlag] != 0} {");
+                _source.print(indent2);
+                _source.print(
+                    "    puts [$context getDebugStream] ");
+                _source.print("\"ENTER TRANSITION: ");
+                _source.print(stateName);
+                _source.print(" ");
+                _source.print(transName);
+                _source.print("(");
+                for (pit = parameters.iterator(), sep = "";
+                     pit.hasNext() == true;
+                     sep = ", ")
+                {
+                    _source.print(sep);
+                    (pit.next()).accept(this);
+                }
+                _source.println(")\";");
+                _source.print(indent2);
+                _source.println("}");
+                _source.println();
+            }
 
             // v. 2.0.2: Place the actions inside a catch block.
             // If one of the actions raises an error, the catch
@@ -1186,6 +1220,37 @@ public final class SmcTclGenerator
                 action.accept(this);
             }
             _indent = indent4;
+
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                List<SmcParameter> parameters =
+                    transition.getParameters();
+                Iterator<SmcParameter> pit;
+                String sep;
+
+                _source.print(indent2);
+                _source.println(
+                    "if {[$context getDebugFlag] != 0} {");
+                _source.print(indent2);
+                _source.print(
+                    "    puts [$context getDebugStream] ");
+                _source.print("\"EXIT TRANSITION : ");
+                _source.print(stateName);
+                _source.print(" ");
+                _source.print(transName);
+                _source.print("(");
+                for (pit = parameters.iterator(), sep = "";
+                     pit.hasNext() == true;
+                     sep = ", ")
+                {
+                    _source.print(sep);
+                    (pit.next()).accept(this);
+                }
+                _source.println(")\";");
+                _source.print(indent2);
+                _source.println("}");
+                _source.println();
+            }
 
             // v. 2.2.0: Check if the user has turned off this
             // feature first.
@@ -1216,11 +1281,45 @@ public final class SmcTclGenerator
                     // not a loopback.
                     if (loopbackFlag == false)
                     {
+                        if (_debugLevel >= DEBUG_LEVEL_1)
+                        {
+                            _source.println();
+                            _source.print(indent3);
+                            _source.println(
+                                "if {[$context getDebugFlag] != 0} {");
+                            _source.print(indent3);
+                            _source.print(
+                                "    puts [$context getDebugStream] ");
+                            _source.print("\"BEFORE ENTRY    : \\[");
+                            _source.print(stateName);
+                            _source.println("\\] Entry $context\";");
+                            _source.print(indent3);
+                            _source.println("}");
+                            _source.println();
+                        }
+
                         _source.println();
                         _source.print(indent3);
                         _source.println(
                             "[$context getState] Entry $context;");
                         _source.println();
+
+                        if (_debugLevel >= DEBUG_LEVEL_1)
+                        {
+                            _source.println();
+                            _source.print(indent3);
+                            _source.println(
+                                "if {[$context getDebugFlag] != 0} {");
+                            _source.print(indent3);
+                            _source.print(
+                                "    puts [$context getDebugStream] ");
+                            _source.print("\"AFTER ENTRY     : \\[");
+                            _source.print(stateName);
+                            _source.println("\\] Exit $context\";");
+                            _source.print(indent3);
+                            _source.println("}");
+                            _source.println();
+                        }
                     }
 
                     _source.print(indent3);
@@ -1281,11 +1380,45 @@ public final class SmcTclGenerator
             // entry actions (if any) if this is not a loopback.
             if (loopbackFlag == false)
             {
+                if (_debugLevel >= DEBUG_LEVEL_1)
+                {
+                    _source.println();
+                    _source.print(indent3);
+                    _source.println(
+                        "if {[$context getDebugFlag] != 0} {");
+                    _source.print(indent3);
+                    _source.print(
+                        "    puts [$context getDebugStream] ");
+                    _source.print("\"BEFORE ENTRY    : \\[");
+                    _source.print(stateName);
+                    _source.println("\\] Exit $context\";");
+                    _source.print(indent3);
+                    _source.println("}");
+                    _source.println();
+                }
+
                 _source.println();
                 _source.print(indent3);
                 _source.println(
                     "[$context getState] Entry $context;");
                 _source.println();
+
+                if (_debugLevel >= DEBUG_LEVEL_1)
+                {
+                    _source.println();
+                    _source.print(indent3);
+                    _source.println(
+                        "if {[$context getDebugFlag] != 0} {");
+                    _source.print(indent3);
+                    _source.print(
+                        "    puts [$context getDebugStream] ");
+                    _source.print("\"AFTER ENTRY     : \\[");
+                    _source.print(stateName);
+                    _source.println("\\] Entry $context\";");
+                    _source.print(indent3);
+                    _source.println("}");
+                    _source.println();
+                }
             }
 
             _source.print(indent3);
@@ -1317,9 +1450,43 @@ public final class SmcTclGenerator
              loopbackFlag == false) ||
              transType == TransType.TRANS_PUSH)
         {
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.println();
+                _source.print(indent2);
+                _source.println(
+                    "if {[$context getDebugFlag] != 0} {");
+                _source.print(indent2);
+                _source.print(
+                    "    puts [$context getDebugStream] ");
+                _source.print("\"BEFORE ENTRY    : \\[");
+                _source.print(stateName);
+                _source.println("\\] Entry $context\";");
+                _source.print(indent2);
+                _source.println("}");
+                _source.println();
+            }
+
             _source.print(indent2);
             _source.println(
                 "[$context getState] Entry $context;");
+
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.println();
+                _source.print(indent2);
+                _source.println(
+                    "if {[$context getDebugFlag] != 0} {");
+                _source.print(indent2);
+                _source.print(
+                    "    puts [$context getDebugStream] ");
+                _source.print("\"AFTER ENTRY     : \\[");
+                _source.print(stateName);
+                _source.println("\\] Entry $context\";");
+                _source.print(indent2);
+                _source.println("}");
+                _source.println();
+            }
         }
 
         // If there is a transition associated with the pop, then
@@ -1491,6 +1658,9 @@ public final class SmcTclGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2009/11/24 20:42:39  cwrapp
+// v. 6.0.1 update
+//
 // Revision 1.7  2009/10/06 15:31:59  kgreg99
 // 1. Started implementation of feature request #2718920.
 //     1.1 Added method boolean isStatic() to SmcAction class. It returns false now, but is handled in following language generators: C#, C++, java, php, VB. Instance identificator is not added in case it is set to true.

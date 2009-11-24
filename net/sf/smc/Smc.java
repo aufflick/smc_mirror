@@ -76,6 +76,7 @@ import net.sf.smc.generator.SmcHeaderObjCGenerator;
 import net.sf.smc.generator.SmcJavaGenerator;
 import net.sf.smc.generator.SmcLuaGenerator;
 import net.sf.smc.generator.SmcObjCGenerator;
+import net.sf.smc.generator.SmcOptions;
 import net.sf.smc.generator.SmcPerlGenerator;
 import net.sf.smc.generator.SmcPhpGenerator;
 import net.sf.smc.generator.SmcPythonGenerator;
@@ -123,7 +124,7 @@ public final class Smc
         // The default smc output level is 1.
         _targetLanguage = null;
         _version = VERSION;
-        _debug = false;
+        _debugLevel = SmcCodeGenerator.NO_DEBUG_OUTPUT;
         _nostreams = false;
         _sync = false;
         _noex = false;
@@ -146,7 +147,6 @@ public final class Smc
         {
             retcode = 1;
             System.err.println(APP_NAME + ": " + _errorMsg);
-            // _usage(System.err);
         }
         // Arguments check out - start compiling..
         else
@@ -639,7 +639,41 @@ public final class Smc
                 }
                 else
                 {
-                    _debug = true;
+                    _debugLevel = SmcCodeGenerator.DEBUG_LEVEL_0;
+                    argsConsumed = 1;
+                }
+            }
+            else if (args[i].equals("-g0") == true)
+            {
+                if (_supportsOption(DEBUG_LEVEL0_FLAG) == false)
+                {
+                    retcode = false;
+                    _errorMsg =
+                        _targetLanguage.name() +
+                        " does not support " +
+                        DEBUG_LEVEL0_FLAG +
+                        ".";
+                }
+                else
+                {
+                    _debugLevel = SmcCodeGenerator.DEBUG_LEVEL_0;
+                    argsConsumed = 1;
+                }
+            }
+            else if (args[i].equals("-g1") == true)
+            {
+                if (_supportsOption(DEBUG_LEVEL1_FLAG) == false)
+                {
+                    retcode = false;
+                    _errorMsg =
+                        _targetLanguage.name() +
+                        " does not support " +
+                        DEBUG_LEVEL1_FLAG +
+                        ".";
+                }
+                else
+                {
+                    _debugLevel = SmcCodeGenerator.DEBUG_LEVEL_1;
                     argsConsumed = 1;
                 }
             }
@@ -1031,6 +1065,7 @@ public final class Smc
         stream.println("    where:");
         stream.println(
             "\t-access   Use this access keyword for the generated classes");
+        stream.println("\t          (use with -java only)");
         stream.println(
             "\t-suffix   Add this suffix to output file");
         stream.println(
@@ -1068,7 +1103,7 @@ public final class Smc
         stream.println("-tcl and -vb only)");
         stream.println("\t-generic  Use generic collections");
         stream.print("\t        ");
-        stream.println("(use with -java and -reflect only)");
+        stream.println("(use with -csharp, -java or -vb and -reflect only)");
         stream.println("\t-cast     Use this C++ cast type ");
         stream.print("\t          ");
         stream.println("(use with -c++ only)");
@@ -1137,6 +1172,7 @@ public final class Smc
             "." + System.getProperty("file.separator");
         String srcFileBase =
             _sourceFileName.substring(0, endIndex);
+        String headerPath = srcFilePath;
         String headerFileName = "";
         FileOutputStream headerFileStream = null;
         PrintStream headerStream = null;
@@ -1144,6 +1180,7 @@ public final class Smc
         String srcFileName = "";
         FileOutputStream sourceFileStream = null;
         PrintStream sourceStream = null;
+        SmcOptions options = null;
         SmcCodeGenerator generator = null;
 
         // For some strange reason I get the wrong
@@ -1174,35 +1211,43 @@ public final class Smc
             srcFilePath = _outputDirectory;
         }
 
+        // If -headerd was specified, then place the file
+        // there. -headerd takes precedence over -d.
+        if (_headerDirectory != null)
+        {
+            headerPath = _headerDirectory;
+        }
+
+        if (_accessLevel == null)
+        {
+            _accessLevel = "public";
+        }
+        else if (_accessLevel.equals(PACKAGE_LEVEL) == true)
+        {
+            _accessLevel = "/* package */";
+        }
+
+        options = new SmcOptions(srcFileBase,
+                                 _outputDirectory,
+                                 _headerDirectory,
+                                 _castType,
+                                 _graphLevel,
+                                 _serial,
+                                 _debugLevel,
+                                 _noex,
+                                 _nocatch,
+                                 _nostreams,
+                                 _reflection,
+                                 _sync,
+                                 _generic,
+                                 _accessLevel);
+
         // Create the header file name and generator -
         // if the language uses a header file.
         if (_targetLanguage.hasHeaderFile() == true)
         {
-            String headerPath = srcFilePath;
-
-            // If -headerd was specified, then place the file
-            // there. -headerd takes precedence over -d.
-            if (_headerDirectory != null)
-            {
-                headerPath = _headerDirectory;
-            }
-
             headerGenerator =
-                _targetLanguage.headerGenerator(
-                    srcFileBase,
-                    _outputDirectory,
-                    _headerDirectory,
-                    _castType,
-                    _graphLevel,
-                    _serial,
-                    _debug,
-                    _noex,
-                    _nocatch,
-                    _nostreams,
-                    _reflection,
-                    _sync,
-                    _generic,
-                    _accessLevel);
+                _targetLanguage.headerGenerator(options);
             headerFileName =
                 headerGenerator.sourceFile(
                     headerPath, srcFileBase, null);
@@ -1214,21 +1259,7 @@ public final class Smc
         }
 
         // Create the language-specific source code generator.
-        generator =
-            _targetLanguage.generator(srcFileBase,
-                                      _outputDirectory,
-                                      _headerDirectory,
-                                      _castType,
-                                      _graphLevel,
-                                      _serial,
-                                      _debug,
-                                      _noex,
-                                      _nocatch,
-                                      _nostreams,
-                                      _reflection,
-                                      _sync,
-                                      _generic,
-                                      _accessLevel);
+        generator = _targetLanguage.generator(options);
         srcFileName =
             generator.sourceFile(
                 srcFilePath, srcFileBase, _suffix);
@@ -1328,7 +1359,6 @@ public final class Smc
                         final Class generator,
                         final Class headerGenerator)
         {
-            Class[] params = new Class[14];
             Constructor sourceCtor = null;
             Constructor headerCtor = null;
 
@@ -1336,27 +1366,13 @@ public final class Smc
             _optionFlag = optionFlag;
             _name = name;
 
-            params[0] = String.class;
-            params[1] = String.class;
-            params[2] = String.class;
-            params[3] = String.class;
-            params[4] = int.class;
-            params[5] = boolean.class;
-            params[6] = boolean.class;
-            params[7] = boolean.class;
-            params[8] = boolean.class;
-            params[9] =  boolean.class;
-            params[10] = boolean.class;
-            params[11] = boolean.class;
-            params[12] = boolean.class;
-            params[13] = String.class;
-
             if (generator != null)
             {
                 try
                 {
                     sourceCtor =
-                        generator.getDeclaredConstructor(params);
+                        generator.getDeclaredConstructor(
+                            SmcOptions.class);
                 }
                 catch (NoSuchMethodException methodex)
                 {}
@@ -1368,7 +1384,7 @@ public final class Smc
                 {
                     headerCtor =
                         headerGenerator.getDeclaredConstructor(
-                            params);
+                            SmcOptions.class);
                 }
                 catch (NoSuchMethodException methoex)
                 {}
@@ -1402,49 +1418,19 @@ public final class Smc
         } // end of name()
 
         public SmcCodeGenerator generator(
-            final String basename,
-            final String directory,
-            final String headerDirectory,
-            final String castType,
-            final int graphLevel,
-            final boolean serialFlag,
-            final boolean debugFlag,
-            final boolean noExFlag,
-            final boolean noCatchFlag,
-            final boolean noStreamsFlag,
-            final boolean reflectFlag,
-            final boolean syncFlag,
-            final boolean genericFlag,
-            final String accessLevel)
+            final SmcOptions options)
         {
             SmcCodeGenerator retval = null;
 
             try
             {
-                Object[] args = new Object[14];
-
-                args[0] = basename;
-                args[1] = directory;
-                args[2] = headerDirectory;
-                args[3] = castType;
-                args[4] = graphLevel;
-                args[5] = serialFlag;
-                args[6] = debugFlag;
-                args[7] = noExFlag;
-                args[8] = noCatchFlag;
-                args[9] = noStreamsFlag;
-                args[10] = reflectFlag;
-                args[11] = syncFlag;
-                args[12] = genericFlag;
-                args[13] = accessLevel;
-
                 retval =
                     (SmcCodeGenerator)
-                        _generator.newInstance(args);
+                        _generator.newInstance(options);
             }
             catch (Exception jex)
             {
-                System.err.print(basename);
+                System.err.print(options.srcfileBase());
                 System.err.print(".sm: failed to create ");
                 System.err.print(_language);
                 System.err.println(" generator:");
@@ -1452,7 +1438,7 @@ public final class Smc
             }
 
             return (retval);
-        } // end of generator(...)
+        } // end of generator(SmcOptions)
 
         public boolean hasHeaderFile()
         {
@@ -1460,45 +1446,15 @@ public final class Smc
         } // end of hasHeaderFile()
 
         public SmcCodeGenerator headerGenerator(
-            final String basename,
-            final String directory,
-            final String headerDirectory,
-            final String castType,
-            final int graphLevel,
-            final boolean serialFlag,
-            final boolean debugFlag,
-            final boolean noExFlag,
-            final boolean noCatchFlag,
-            final boolean noStreamsFlag,
-            final boolean reflectFlag,
-            final boolean syncFlag,
-            final boolean genericFlag,
-            final String accessLevel)
+            final SmcOptions options)
         {
             SmcCodeGenerator retval = null;
 
             try
             {
-                Object[] args = new Object[14];
-
-                args[0] = basename;
-                args[1] = directory;
-                args[2] = headerDirectory;
-                args[3] = castType;
-                args[4] = graphLevel;
-                args[5] = serialFlag;
-                args[6] = debugFlag;
-                args[7] = noExFlag;
-                args[8] = noCatchFlag;
-                args[9] = noStreamsFlag;
-                args[10] = reflectFlag;
-                args[11] = syncFlag;
-                args[12] = genericFlag;
-                args[13] = accessLevel;
-
                 retval =
                     (SmcCodeGenerator)
-                        _headerGenerator.newInstance(args);
+                        _headerGenerator.newInstance(options);
             }
             catch (Exception jex)
             {
@@ -1506,7 +1462,7 @@ public final class Smc
             }
 
             return (retval);
-        } // end of headerGenerator(String)
+        } // end of headerGenerator(Options)
 
         //
         // end of Get methods.
@@ -1572,8 +1528,8 @@ public final class Smc
     // Place header files in this directory. May be null.
     private static String _headerDirectory;
 
-    // If true, then generate verbose information.
-    private static boolean _debug;
+    // The debug level.
+    private static int _debugLevel;
 
     // If true, then do not use C++ iostreams for debugging.
     // Application code must provide a TRACE macro to output
@@ -1651,6 +1607,8 @@ public final class Smc
     private static final String CAST_FLAG = "-cast";
     private static final String DIRECTORY_FLAG = "-d";
     private static final String DEBUG_FLAG = "-g";
+    private static final String DEBUG_LEVEL0_FLAG = "-g0";
+    private static final String DEBUG_LEVEL1_FLAG = "-g1";
     private static final String GENERIC_FLAG = "-generic";
     private static final String GLEVEL_FLAG = "-glevel";
     private static final String HEADER_FLAG = "-headerd";
@@ -1666,6 +1624,8 @@ public final class Smc
     private static final String VERBOSE_FLAG = "-verbose";
     private static final String VERSION_FLAG = "-version";
     private static final String VVERBOSE_FLAG = "-vverbose";
+
+    private static final String PACKAGE_LEVEL = "package";
 
     static
     {
@@ -1799,6 +1759,8 @@ public final class Smc
         // +      -cast: C++
         // +         -d: all
         // +         -g: all
+        // +        -g0: all
+        // +        -g1: all
         // +    -glevel: graph
         // +    -header: C, C++, Objective C
         // +      -help: all
@@ -1824,6 +1786,8 @@ public final class Smc
 
         _optionMap.put(DIRECTORY_FLAG, languages);
         _optionMap.put(DEBUG_FLAG, languages);
+        _optionMap.put(DEBUG_LEVEL0_FLAG, languages);
+        _optionMap.put(DEBUG_LEVEL1_FLAG, languages);
         _optionMap.put(HELP_FLAG, languages);
         _optionMap.put(NO_CATCH_FLAG, languages);
         _optionMap.put(RETURN_FLAG, languages);
@@ -1893,7 +1857,9 @@ public final class Smc
 
         // The -generic option.
         languages = new ArrayList<Language>();
+        languages.add(_languages[TargetLanguage.C_SHARP.ordinal()]);
         languages.add(_languages[TargetLanguage.JAVA.ordinal()]);
+        languages.add(_languages[TargetLanguage.VB.ordinal()]);
         _optionMap.put(GENERIC_FLAG, languages);
 
         // Define the allowed access level keywords for each language
@@ -1914,6 +1880,9 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.35  2009/11/24 20:42:39  cwrapp
+// v. 6.0.1 update
+//
 // Revision 1.34  2009/09/12 21:26:58  kgreg99
 // Bug #2857745 resolved. Messages are printed not in case of an error but if there are any.
 //

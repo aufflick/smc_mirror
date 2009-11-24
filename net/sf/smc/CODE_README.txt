@@ -1,6 +1,6 @@
                               SMC -
                   The State Machine Compiler
-                        Version 6.0.0
+                        Version 6.0.1
 
 
 + Major changes
@@ -12,12 +12,58 @@ None.
 + Minor changes
 ---------------
 
-None.
+(Java)
+    -access keyword to specify the generated class access level.
+    Used with -java only.
+
+(All)
+    Added %fsmclass keyword which allows the generated FSM
+    classes to have a name other than the default
+    <app class>Context. This feature allows an application class
+    to reference multiple finite state machines.
+
+(C#, Groovy, Java, Lua, Perl, PHP, Python, Ruby, Scala, Tcl and VB.Net)
+    Added "getStates" method for retrieving the finite state
+    machine's states.
+
+(All)
+    Enhance debugging output by adding command line options -g0,
+    -g1 and -g2 which provide ever greater debug output.
+
+(C#, VB.Net)
+    Added -generic support to these languages.
 
 
 + Bug fixes
 -----------
 
+(Objective-C)
+    Corrected generated code errors.
+
+(Php)
+    statemap.php had an assignment in a test condition instead of
+    equality operator.
+
+(All)
+    Strings using both single and double quotes are handled
+    correctly.
+
+(Java)
+    Errors due to lower case state names corrected.
+
+(Java)
+    Serializing the FSM property change listeners is corrected.
+
+(Python)
+    The problem occurring when raising the
+    StateUndefinedException is now fixed.
+
+(All)
+    Compiler warnings are now output even when there are no
+    errors.
+
+(All)
+    Normalized the use of emptyStateStack.
 
 
 

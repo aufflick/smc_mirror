@@ -54,6 +54,7 @@ import net.sf.smc.model.SmcVisitor;
  * @see SmcElement
  * @see SmcCodeGenerator
  * @see SmcVisitor
+ * @see SmcOptions
  *
  * @author Chris Liscio
  */
@@ -71,69 +72,13 @@ public final class SmcObjCGenerator
 
     /**
      * Creates a Objective C code generator for the given
-     * parameters.
-     * @param srcfileBase write the emitted code to this target
-     * source file name sans the suffix.
-     * @param srcDirectory place the target source file in this
-     * directory.
-     * @param headerDirectory place the target header file in
-     * this directory. Ignored if there is no generated header
-     * file.
-     * @param castType use this type cast (C++ code generation
-     * only).
-     * @param graphLevel amount of detail in the generated
-     * GraphViz graph (graph code generation only).
-     * @param serialFlag if {@code true}, generate unique
-     * identifiers for persisting the FSM.
-     * @param debugFlag if {@code true} add debug output messages
-     * to code.
-     * @param noExceptionFlag if {@code true} then use asserts
-     * rather than exceptions (C++ only).
-     * @param noCatchFlag if {@code true} then do <i>not</i>
-     * generate try/catch/rethrow code.
-     * @param noStreamsFlag if {@code true} then use TRACE macro
-     * for debug output.
-     * @param reflectFlag if {@code true} then generate
-     * reflection code.
-     * @param syncFlag if {@code true} then generate
-     * synchronization code.
-     * @param genericFlag if {@code true} then use generic
-     * collections.
-     * @param accessLevel use this access keyword for the
-     * generated classes.
+     * options.
+     * @param options The target code generator options.
      */
-    public SmcObjCGenerator(final String srcfileBase,
-                            final String srcDirectory,
-                            final String headerDirectory,
-                            final String castType,
-                            final int graphLevel,
-                            final boolean serialFlag,
-                            final boolean debugFlag,
-                            final boolean noExceptionFlag,
-                            final boolean noCatchFlag,
-                            final boolean noStreamsFlag,
-                            final boolean reflectFlag,
-                            final boolean syncFlag,
-                            final boolean genericFlag,
-                            final String accessLevel)
+    public SmcObjCGenerator(final SmcOptions options)
     {
-        super (srcfileBase,
-               "{0}{1}_sm.{2}",
-               "m",
-               srcDirectory,
-               headerDirectory,
-               castType,
-               graphLevel,
-               serialFlag,
-               debugFlag,
-               noExceptionFlag,
-               noCatchFlag,
-               noStreamsFlag,
-               reflectFlag,
-               syncFlag,
-               genericFlag,
-               accessLevel);
-    } // end of SmcObjCGenerator(...)
+        super (options, "{0}{1}_sm.{2}", "m");
+    } // end of SmcObjCGenerator(SmcOptions)
 
     //
     // end of Constructors.
@@ -363,7 +308,7 @@ public final class SmcObjCGenerator
         _source.println("{");
 
         // Print the transition out to the verbose log.
-        if (_debugFlag == true)
+        if (_debugLevel >= DEBUG_LEVEL_0)
         {
             _source.print(_indent);
             _source.println("    if ( [context debugFlag] )");
@@ -578,7 +523,7 @@ public final class SmcObjCGenerator
 
                 // If -g was specified, then set the transition
                 // name so it can be printed out.
-                if (_debugFlag == true)
+                if (_debugLevel >= DEBUG_LEVEL_0)
                 {
                     _source.print(_indent);
                     _source.print("    [self setTransition:@\"");
@@ -599,7 +544,7 @@ public final class SmcObjCGenerator
                 }
                 _source.println("];");
 
-                if (_debugFlag == true)
+                if (_debugLevel >= DEBUG_LEVEL_0)
                 {
                     _source.print(_indent);
                     _source.println(
@@ -819,34 +764,19 @@ public final class SmcObjCGenerator
         }
 
         // Print the transition to the verbose log.
-        if (_debugFlag == true)
+        if (_debugLevel >= DEBUG_LEVEL_0)
         {
-            Iterator<SmcParameter> pit;
-            String sep;
-
             _source.print(_indent);
             _source.println("    if ( [context debugFlag] )");
             _source.print(_indent);
             _source.println("    {");
-
             _source.print(_indent);
-            _source.print("        TRACE(@\"TRANSITION   : ");
+            _source.print(
+                    "        TRACE(@\"LEAVING STATE   : ");
             _source.print(mapName);
-            _source.print(" ");
-            _source.print(transName);
-            _source.print("(");
-
-            for (pit = transition.getParameters().iterator(),
-                     sep = "";
-                 pit.hasNext() == true;
-                 sep = " ")
-            {
-                _source.print(sep);
-                (pit.next()).accept(this);
-            }
-
-            _source.println(")\\n\\r\");");
-
+            _source.print("::");
+            _source.print(stateName);
+            _source.println("\\n\\r\");");
             _source.print(_indent);
             _source.println("    }");
         }
@@ -930,6 +860,7 @@ public final class SmcObjCGenerator
         String context = map.getFSM().getContext();
         String mapName = map.getName();
         String stateName = state.getClassName();
+        String transName = transition.getName();
         TransType transType = guard.getTransType();
         boolean loopbackFlag = false;
         String indent2;
@@ -1096,16 +1027,36 @@ public final class SmcObjCGenerator
         if (transType == TransType.TRANS_POP ||
             loopbackFlag == false)
         {
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.print(indent2);
+                _source.println("if ( [context debugFlag] )");
+                _source.print(indent2);
+                _source.print("{");
+                _source.print(indent2);
+                _source.print("    TRACE(@\"BEFORE EXIT     : ");
+                _source.print(stateName);
+                _source.println("\\n\\r\");");
+                _source.print(indent2);
+                _source.print("}");
+            }
+
             _source.print(indent2);
             _source.println("[[context state] Exit:context];");
-        }
 
-        if (actions.isEmpty() == false)
-        {
-            // Now that we are in the transition, clear the
-            // current state.
-            _source.print(indent2);
-            _source.println("[context clearState];");
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.print(indent2);
+                _source.println("if ( [context debugFlag] )");
+                _source.print(indent2);
+                _source.print("{");
+                _source.print(indent2);
+                _source.print("    TRACE(@\"AFTER EXIT      : ");
+                _source.print(stateName);
+                _source.println("\\n\\r\");");
+                _source.print(indent2);
+                _source.print("}");
+            }
         }
 
         // Dump out this transition's actions.
@@ -1121,6 +1072,42 @@ public final class SmcObjCGenerator
         }
         else
         {
+            // Now that we are in the transition, clear the
+            // current state.
+            _source.print(indent2);
+            _source.println("[context clearState];");
+
+            if (_debugLevel >= DEBUG_LEVEL_0)
+            {
+                Iterator<SmcParameter> pit;
+                String sep;
+
+                _source.print(indent2);
+                _source.println("if ( [context debugFlag] )");
+                _source.print(indent2);
+                _source.println("{");
+                _source.print(indent2);
+                _source.print("    TRACE(@\"ENTER TRANSITION: ");
+                _source.print(mapName);
+                _source.print(" ");
+                _source.print(transName);
+                _source.print("(");
+
+                for (pit = transition.getParameters().iterator(),
+                     sep = "";
+                     pit.hasNext() == true;
+                     sep = " ")
+                {
+                    _source.print(sep);
+                    (pit.next()).accept(this);
+                }
+
+                _source.println(")\\n\\r\");");
+
+                _source.print(indent2);
+                _source.println("}");
+            }
+
             indent3 = indent2;
             indent4 = _indent;
             _indent = indent3;
@@ -1131,6 +1118,37 @@ public final class SmcObjCGenerator
             }
 
             _indent = indent4;
+
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                Iterator<SmcParameter> pit;
+                String sep;
+
+                _source.print(indent2);
+                _source.println("if ( [context debugFlag] )");
+                _source.print(indent2);
+                _source.println("{");
+                _source.print(indent2);
+                _source.print("    TRACE(@\"EXIT TRANSITION : ");
+                _source.print(mapName);
+                _source.print(" ");
+                _source.print(transName);
+                _source.print("(");
+
+                for (pit = transition.getParameters().iterator(),
+                     sep = "";
+                     pit.hasNext() == true;
+                     sep = " ")
+                {
+                    _source.print(sep);
+                    (pit.next()).accept(this);
+                }
+
+                _source.println(")\\n\\r\");");
+
+                _source.print(indent2);
+                _source.println("}");
+            }
         }
 
         // Print the setState() call, if necessary. Do NOT
@@ -1167,10 +1185,42 @@ public final class SmcObjCGenerator
             // entry actions (if any) if this is not a loopback.
             if (loopbackFlag == false)
             {
+                if (_debugLevel >= DEBUG_LEVEL_1)
+                {
+                    _source.print(indent3);
+                    _source.println(
+                        "if ( [context debugFlag] )");
+                    _source.print(indent3);
+                    _source.print("{");
+                    _source.print(indent3);
+                    _source.print(
+                        "    TRACE(@\"BEFORE ENTRY    : ");
+                    _source.print(stateName);
+                    _source.println("\\n\\r\");");
+                    _source.print(indent3);
+                    _source.print("}");
+                }
+
                 _source.println();
                 _source.print(indent3);
                 _source.println(
                     "[[context state] Entry:context];");
+
+                if (_debugLevel >= DEBUG_LEVEL_1)
+                {
+                    _source.print(indent3);
+                    _source.println(
+                        "if ( [context debugFlag] )");
+                    _source.print(indent3);
+                    _source.print("{");
+                    _source.print(indent3);
+                    _source.print(
+                        "    TRACE(@\"AFTER ENTRY     : ");
+                    _source.print(stateName);
+                    _source.println("\\n\\r\");");
+                    _source.print(indent3);
+                    _source.print("}");
+                }
             }
 
             _source.print(indent3);
@@ -1192,8 +1242,36 @@ public final class SmcObjCGenerator
              loopbackFlag == false) ||
              transType == TransType.TRANS_PUSH)
         {
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.print(indent2);
+                _source.println("if ( [context debugFlag] )");
+                _source.print(indent2);
+                _source.print("{");
+                _source.print(indent2);
+                _source.print("    TRACE(@\"BEFORE ENTRY    : ");
+                _source.print(stateName);
+                _source.println("\\n\\r\");");
+                _source.print(indent2);
+                _source.print("}");
+            }
+
             _source.print(indent2);
             _source.println("[[context state] Entry:context];");
+
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.print(indent2);
+                _source.println("if ( [context debugFlag] )");
+                _source.print(indent2);
+                _source.print("{");
+                _source.print(indent2);
+                _source.print("    TRACE(@\"AFTER ENTRY     : ");
+                _source.print(stateName);
+                _source.println("\\n\\r\");");
+                _source.print(indent2);
+                _source.print("}");
+            }
         }
 
         // If there is a transition associated with the pop, then
@@ -1323,6 +1401,9 @@ public final class SmcObjCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2009/11/24 20:42:39  cwrapp
+// v. 6.0.1 update
+//
 // Revision 1.6  2009/10/06 15:31:59  kgreg99
 // 1. Started implementation of feature request #2718920.
 //     1.1 Added method boolean isStatic() to SmcAction class. It returns false now, but is handled in following language generators: C#, C++, java, php, VB. Instance identificator is not added in case it is set to true.

@@ -55,6 +55,7 @@ import net.sf.smc.model.SmcVisitor;
  * @see SmcElement
  * @see SmcCodeGenerator
  * @see SmcVisitor
+ * @see SmcOptions
  *
  * @author Francois Perrad
  */
@@ -71,69 +72,13 @@ public final class SmcCGenerator
     //
 
     /**
-     * Creates a C code generator for the given parameters.
-     * @param srcfileBase write the emitted code to this target
-     * source file name sans the suffix.
-     * @param srcDirectory place the target source file in this
-     * directory.
-     * @param headerDirectory place the target header file in
-     * this directory. Ignored if there is no generated header
-     * file.
-     * @param castType use this type cast (C++ code generation
-     * only).
-     * @param graphLevel amount of detail in the generated
-     * GraphViz graph (graph code generation only).
-     * @param serialFlag if {@code true}, generate unique
-     * identifiers for persisting the FSM.
-     * @param debugFlag if {@code true} add debug output messages
-     * to code.
-     * @param noExceptionFlag if {@code true} then use asserts
-     * rather than exceptions (C++ only).
-     * @param noCatchFlag if {@code true} then do <i>not</i>
-     * generate try/catch/rethrow code.
-     * @param noStreamsFlag if {@code true} then use TRACE macro
-     * for debug output.
-     * @param reflectFlag if {@code true} then generate
-     * reflection code.
-     * @param syncFlag if {@code true} then generate
-     * synchronization code.
-     * @param genericFlag if {@code true} then use generic
-     * collections.
-     * @param accessLevel use this access keyword for the
-     * generated classes.
+     * Creates a C code generator for the given options.
+     * @param options The target code generator options.
      */
-    public SmcCGenerator(final String srcfileBase,
-                         final String srcDirectory,
-                         final String headerDirectory,
-                         final String castType,
-                         final int graphLevel,
-                         final boolean serialFlag,
-                         final boolean debugFlag,
-                         final boolean noExceptionFlag,
-                         final boolean noCatchFlag,
-                         final boolean noStreamsFlag,
-                         final boolean reflectFlag,
-                         final boolean syncFlag,
-                         final boolean genericFlag,
-                         final String accessLevel)
+    public SmcCGenerator(final SmcOptions options)
     {
-        super (srcfileBase,
-               "{0}{1}_sm.{2}",
-               "c",
-               srcDirectory,
-               headerDirectory,
-               castType,
-               graphLevel,
-               serialFlag,
-               debugFlag,
-               noExceptionFlag,
-               noCatchFlag,
-               noStreamsFlag,
-               reflectFlag,
-               syncFlag,
-               genericFlag,
-               accessLevel);
-    } // end of SmcCGenerator(...)
+        super (options, "{0}{1}_sm.{2}", "c");
+    } // end of SmcCGenerator(SmcOptions)
 
     //
     // end of Constructors.
@@ -325,7 +270,7 @@ public final class SmcCGenerator
         _source.println("{");
 
         // Print the transition out to the verbose log.
-        if (_debugFlag == true)
+        if (_debugLevel >= DEBUG_LEVEL_0)
         {
             _source.println("    if (getDebugFlag(fsm) != 0) {");
 
@@ -829,33 +774,14 @@ public final class SmcCGenerator
         _source.println();
 
         // Print the transition to the verbose log.
-        if (_debugFlag == true)
+        if (_debugLevel >= DEBUG_LEVEL_0)
         {
-            Iterator<SmcParameter> pit;
-            SmcParameter param;
-            String sep;
-
             _source.println("    if (getDebugFlag(fsm) != 0) {");
-            _source.print("        TRACE(\"TRANSITION   : ");
+            _source.print("        TRACE(\"LEAVING STATE   : ");
             _source.print(mapName);
             _source.print("_");
             _source.print(stateName);
-            _source.print(".");
-            _source.print(transName);
-            _source.print("(");
-
-            for (pit = transition.getParameters().iterator(),
-                     sep = "";
-                 pit.hasNext() == true;
-                 sep = ", ")
-            {
-                param = pit.next();
-                _source.print(sep);
-                _source.print(param.getName());
-            }
-
             _source.println(")\\n\\r\");");
-
             _source.println("    }");
         }
 
@@ -936,6 +862,7 @@ public final class SmcCGenerator
         String fsmClassName = map.getFSM().getFsmClassName();
         String mapName = map.getName();
         String stateName = state.getInstanceName();
+        String transName = transition.getName();
         TransType transType = guard.getTransType();
         boolean loopbackFlag = false;
         String indent2;
@@ -1104,16 +1031,32 @@ public final class SmcCGenerator
         if (transType == TransType.TRANS_POP ||
             loopbackFlag == false)
         {
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.print(indent2);
+                _source.println("if (getDebugFlag(fsm) != 0) {");
+                _source.print(indent2);
+                _source.print("    TRACE(\"BEFORE EXIT     : ");
+                _source.println(
+                    "EXIT_STATE(getState(fsm))\\n\\r\");");
+                _source.print(indent2);
+                _source.println("}");
+            }
+
             _source.print(indent2);
             _source.println("EXIT_STATE(getState(fsm));");
-        }
 
-        if (actions.isEmpty() == false)
-        {
-            // Now that we are in the transition, clear the
-            // current state.
-            _source.print(indent2);
-            _source.println("clearState(fsm);");
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.print(indent2);
+                _source.println("if (getDebugFlag(fsm) != 0) {");
+                _source.print(indent2);
+                _source.print("    TRACE(\"AFTER EXIT      : ");
+                _source.println(
+                    "EXIT_STATE(getState(fsm))\\n\\r\");");
+                _source.print(indent2);
+                _source.println("}");
+            }
         }
 
         // Dump out this transition's actions.
@@ -1127,6 +1070,43 @@ public final class SmcCGenerator
         }
         else
         {
+            // Now that we are in the transition, clear the
+            // current state.
+            _source.print(indent2);
+            _source.println("clearState(fsm);");
+
+            if (_debugLevel >= DEBUG_LEVEL_0)
+            {
+                Iterator<SmcParameter> pit;
+                SmcParameter param;
+                String sep;
+
+                _source.print(indent2);
+                _source.println("if (getDebugFlag(fsm) != 0) {");
+                _source.print(indent2);
+                _source.print("    TRACE(\"ENTER TRANSITION: ");
+                _source.print(mapName);
+                _source.print("_");
+                _source.print(stateName);
+                _source.print(".");
+                _source.print(transName);
+                _source.print("(");
+
+                for (pit = transition.getParameters().iterator(),
+                     sep = "";
+                     pit.hasNext() == true;
+                     sep = ", ")
+                {
+                    param = pit.next();
+                    _source.print(sep);
+                    _source.print(param.getName());
+                }
+
+                _source.println(")\\n\\r\");");
+                _source.print(indent2);
+                _source.println("}");
+            }
+
             indent4 = _indent;
             _indent = indent2;
             for (SmcAction action: actions)
@@ -1134,6 +1114,38 @@ public final class SmcCGenerator
                 action.accept(this);
             }
             _indent = indent4;
+
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                Iterator<SmcParameter> pit;
+                SmcParameter param;
+                String sep;
+
+                _source.print(indent2);
+                _source.println("if (getDebugFlag(fsm) != 0) {");
+                _source.print(indent2);
+                _source.print("    TRACE(\"EXIT TRANSITION : ");
+                _source.print(mapName);
+                _source.print("_");
+                _source.print(stateName);
+                _source.print(".");
+                _source.print(transName);
+                _source.print("(");
+
+                for (pit = transition.getParameters().iterator(),
+                     sep = "";
+                     pit.hasNext() == true;
+                     sep = ", ")
+                {
+                    param = pit.next();
+                    _source.print(sep);
+                    _source.print(param.getName());
+                }
+
+                _source.println(")\\n\\r\");");
+                _source.print(indent2);
+                _source.println("}");
+            }
         }
         indent3 = indent2;
 
@@ -1168,8 +1180,36 @@ public final class SmcCGenerator
             // entry actions (if any) if this is not a loopback.
             if (loopbackFlag == false)
             {
+                if (_debugLevel >= DEBUG_LEVEL_1)
+                {
+                    _source.print(indent3);
+                    _source.println(
+                        "if (getDebugFlag(fsm) != 0) {");
+                    _source.print(indent3);
+                    _source.print(
+                        "    TRACE(\"BEFORE ENTRY    : ");
+                    _source.println(
+                        "ENTRY_STATE(getState(fsm))\\n\\r\");");
+                    _source.print(indent3);
+                    _source.println("}");
+                }
+
                 _source.print(indent3);
                 _source.println("ENTRY_STATE(getState(fsm));");
+
+                if (_debugLevel >= DEBUG_LEVEL_1)
+                {
+                    _source.print(indent3);
+                    _source.println(
+                        "if (getDebugFlag(fsm) != 0) {");
+                    _source.print(indent3);
+                    _source.print(
+                        "    TRACE(\"AFTER ENTRY     : ");
+                    _source.println(
+                        "ENTRY_STATE(getState(fsm))\\n\\r\");");
+                    _source.print(indent3);
+                    _source.println("}");
+                }
             }
 
             _source.print(indent3);
@@ -1191,8 +1231,32 @@ public final class SmcCGenerator
              loopbackFlag == false) ||
              transType == TransType.TRANS_PUSH)
         {
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.print(indent2);
+                _source.println("if (getDebugFlag(fsm) != 0) {");
+                _source.print(indent2);
+                _source.print("    TRACE(\"BEFORE ENTRY    : ");
+                _source.println(
+                    "ENTRY_STATE(getState(fsm))\\n\\r\");");
+                _source.print(indent2);
+                _source.println("}");
+            }
+
             _source.print(indent2);
             _source.println("ENTRY_STATE(getState(fsm));");
+
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.print(indent2);
+                _source.println("if (getDebugFlag(fsm) != 0) {");
+                _source.print(indent2);
+                _source.print("    TRACE(\"AFTER ENTRY     : ");
+                _source.println(
+                    "ENTRY_STATE(getState(fsm))\\n\\r\");");
+                _source.print(indent2);
+                _source.println("}");
+            }
         }
 
         // If there is a transition associated with the pop, then
@@ -1345,6 +1409,9 @@ public final class SmcCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2009/11/24 20:42:39  cwrapp
+// v. 6.0.1 update
+//
 // Revision 1.6  2009/10/06 15:31:59  kgreg99
 // 1. Started implementation of feature request #2718920.
 //     1.1 Added method boolean isStatic() to SmcAction class. It returns false now, but is handled in following language generators: C#, C++, java, php, VB. Instance identificator is not added in case it is set to true.

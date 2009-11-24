@@ -240,7 +240,7 @@ public abstract class FSMContext
     {
         if (getDebugFlag() == true)
         {
-            getDebugStream().println("NEW STATE    : " +
+            getDebugStream().println("ENTER STATE     : " +
                                      state.getName());
         }
 
@@ -284,7 +284,7 @@ public abstract class FSMContext
 
         if (getDebugFlag() == true)
         {
-            getDebugStream().println("PUSH TO STATE: " +
+            getDebugStream().println("PUSH TO STATE   : " +
                                      state.getName());
         }
 
@@ -340,7 +340,7 @@ public abstract class FSMContext
 
             if (getDebugFlag() == true)
             {
-                getDebugStream().println("POP TO STATE : " +
+                getDebugStream().println("POP TO STATE    : " +
                                       _state.getName());
             }
 
@@ -468,6 +468,9 @@ public abstract class FSMContext
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.14  2009/11/24 20:42:39  cwrapp
+// v. 6.0.1 update
+//
 // Revision 1.13  2009/09/05 15:39:20  cwrapp
 // Checking in fixes for 1944542, 1983929, 2731415, 2803547 and feature 2797126.
 //

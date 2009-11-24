@@ -637,11 +637,11 @@ namespace statemap
             if (_debug_flag == true)
             {
 #ifdef SMC_USES_IOSTREAMS
-                *_debug_stream << "NEW STATE    : "
+                *_debug_stream << "ENTER STATE     : "
                                << _state->getName()
                                << std::endl;
 #else
-                TRACE("NEW STATE    : %s\n\r",
+                TRACE("ENTER STATE     : %s\n\r",
                       _state->getName());
 #endif // SMC_USES_IOSTREAMS
             }
@@ -687,11 +687,11 @@ namespace statemap
             if (_debug_flag == true)
             {
 #ifdef SMC_USES_IOSTREAMS
-                *_debug_stream << "PUSH TO STATE: "
+                *_debug_stream << "PUSH TO STATE   : "
                                << _state->getName()
                                << std::endl;
 #else
-                TRACE("PUSH TO STATE: %s\n\r",
+                TRACE("PUSH TO STATE   : %s\n\r",
                       _state->getName());
 #endif // SMC_USES_IOSTREAMS
             }
@@ -721,11 +721,11 @@ namespace statemap
             if (_debug_flag == true)
             {
 #ifdef SMC_USES_IOSTREAMS
-                *_debug_stream << "POP TO STATE : "
+                *_debug_stream << "POP TO STATE    : "
                                << _state->getName()
                                << std::endl;
 #else
-                TRACE("POP TO STATE : %s\n\r",
+                TRACE("POP TO STATE    : %s\n\r",
                       _state->getName());
 #endif // SMC_USES_IOSTREAMS
             }
@@ -815,6 +815,9 @@ namespace statemap
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.15  2009/11/24 20:42:39  cwrapp
+// v. 6.0.1 update
+//
 // Revision 1.14  2009/03/01 18:20:40  cwrapp
 // Preliminary v. 6.0.0 commit.
 //

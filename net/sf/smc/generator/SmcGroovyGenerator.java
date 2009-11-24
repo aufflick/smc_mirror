@@ -60,6 +60,7 @@ import net.sf.smc.model.SmcVisitor;
  * @see SmcElement
  * @see SmcCodeGenerator
  * @see SmcVisitor
+ * @see SmcOptions
  *
  * @author Francois Perrad
  */
@@ -76,69 +77,13 @@ public final class SmcGroovyGenerator
     //
 
     /**
-     * Creates a Groovy code generator for the given parameters.
-     * @param srcfileBase write the emitted code to this target
-     * source file name sans the suffix.
-     * @param srcDirectory place the target source file in this
-     * directory.
-     * @param headerDirectory place the target header file in
-     * this directory. Ignored if there is no generated header
-     * file.
-     * @param castType use this type cast (C++ code generation
-     * only).
-     * @param graphLevel amount of detail in the generated
-     * GraphViz graph (graph code generation only).
-     * @param serialFlag if {@code true}, generate unique
-     * identifiers for persisting the FSM.
-     * @param debugFlag if {@code true} add debug output messages
-     * to code.
-     * @param noExceptionFlag if {@code true} then use asserts
-     * rather than exceptions (C++ only).
-     * @param noCatchFlag if {@code true} then do <i>not</i>
-     * generate try/catch/rethrow code.
-     * @param noStreamsFlag if {@code true} then use TRACE macro
-     * for debug output.
-     * @param reflectFlag if {@code true} then generate
-     * reflection code.
-     * @param syncFlag if {@code true} then generate
-     * synchronization code.
-     * @param genericFlag if {@code true} then use generic
-     * collections.
-     * @param accessLevel use this access keyword for the
-     * generated classes.
+     * Creates a Groovy code generator for the given options.
+     * @param options The target code generator options.
      */
-    public SmcGroovyGenerator(final String srcfileBase,
-                              final String srcDirectory,
-                              final String headerDirectory,
-                              final String castType,
-                              final int graphLevel,
-                              final boolean serialFlag,
-                              final boolean debugFlag,
-                              final boolean noExceptionFlag,
-                              final boolean noCatchFlag,
-                              final boolean noStreamsFlag,
-                              final boolean reflectFlag,
-                              final boolean syncFlag,
-                              final boolean genericFlag,
-                              final String accessLevel)
+    public SmcGroovyGenerator(final SmcOptions options)
     {
-        super (srcfileBase,
-               "{0}{1}Context.{2}",
-               "groovy",
-               srcDirectory,
-               headerDirectory,
-               castType,
-               graphLevel,
-               serialFlag,
-               debugFlag,
-               noExceptionFlag,
-               noCatchFlag,
-               noStreamsFlag,
-               reflectFlag,
-               syncFlag,
-               genericFlag,
-               accessLevel);
-    } // end of SmcGroovyGenerator(...)
+        super (options, "{0}{1}Context.{2}", "groovy");
+    } // end of SmcGroovyGenerator(SmcOptions)
 
     //
     // end of Constructors.
@@ -323,6 +268,39 @@ public final class SmcGroovyGenerator
             }
         }
 
+        // If reflecting, then define the states list.
+        if (_reflectFlag == true)
+        {
+            String mapName;
+            boolean firstFlag = true;
+
+            _source.println("    static final States = [");
+
+            for (SmcMap map: maps)
+            {
+                mapName = map.getName();
+
+                for (SmcState state: map.getStates())
+                {
+                    if (firstFlag == true)
+                    {
+                        firstFlag = false;
+                    }
+                    else
+                    {
+                        _source.println(",");
+                    }
+                    _source.print("        ");
+                    _source.print(mapName);
+                    _source.print(".");
+                    _source.print(state.getClassName());
+                }
+            }
+
+            _source.println();
+            _source.println("    ]");
+        }
+
         // End of context class.
         _source.println("}");
 
@@ -372,7 +350,7 @@ public final class SmcGroovyGenerator
         // Generate the overall Default transition for all maps.
         _source.println("    def Default (context) {");
 
-        if (_debugFlag == true)
+        if (_debugLevel >= DEBUG_LEVEL_0)
         {
             _source.println(
                 "        if (context.debugFlag)");
@@ -741,31 +719,17 @@ public final class SmcGroovyGenerator
         }
 
         // Output transition to debug stream.
-        if (_debugFlag == true)
+        if (_debugLevel >= DEBUG_LEVEL_0)
         {
-            String sep;
-
             _source.print(_indent);
             _source.println("    if (context.debugFlag)");
             _source.print(_indent);
-            _source.print("        context.debugStream.println(");
-            _source.print("'TRANSITION   : ");
+            _source.print(
+                "        context.debugStream.println(");
+            _source.print("'LEAVING STATE   : ");
             _source.print(mapName);
             _source.print('.');
             _source.print(stateName);
-            _source.print('.');
-            _source.print(transName);
-
-            _source.print('(');
-            for (pit = parameters.iterator(), sep = "";
-                 pit.hasNext() == true;
-                 sep = ", ")
-            {
-                _source.print(sep);
-                (pit.next()).accept(this);
-            }
-            _source.print(')');
-
             _source.println("')");
         }
 
@@ -845,6 +809,7 @@ public final class SmcGroovyGenerator
         String context = map.getFSM().getContext();
         String mapName = map.getName();
         String stateName = state.getClassName();
+        String transName = transition.getName();
         TransType transType = guard.getTransType();
         boolean loopbackFlag = false;
         String indent2;
@@ -972,8 +937,34 @@ public final class SmcGroovyGenerator
         if (transType == TransType.TRANS_POP ||
             loopbackFlag == false)
         {
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.print(indent2);
+                _source.println("if (context.debugFlag)");
+                _source.print(indent2);
+                _source.print(
+                    "    context.debugStream.println('");
+                _source.print("BEFORE EXIT     : ");
+                _source.print(stateName);
+                _source.println(".Exit(context)')");
+                _source.println();
+            }
+
             _source.print(indent2);
             _source.println("context.state.Exit(context)");
+
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.print(indent2);
+                _source.println("if (context.debugFlag)");
+                _source.print(indent2);
+                _source.print(
+                    "    context.debugStream.println('");
+                _source.print("AFTER EXIT      : ");
+                _source.print(stateName);
+                _source.println(".Exit(context)')");
+                _source.println();
+            }
         }
 
         // Dump out this transition's actions.
@@ -1014,9 +1005,69 @@ public final class SmcGroovyGenerator
             indent4 = _indent;
             _indent = indent3;
 
+            if (_debugLevel >= DEBUG_LEVEL_0)
+            {
+                List<SmcParameter> parameters =
+                    transition.getParameters();
+                Iterator<SmcParameter> pit;
+                String sep;
+
+                _source.print(_indent);
+                _source.println("    if (context.debugFlag)");
+                _source.print(_indent);
+                _source.print("        context.debugStream.println(");
+                _source.print("'ENTER TRANSITION: ");
+                _source.print(stateName);
+                _source.print('.');
+                _source.print(transName);
+
+                _source.print('(');
+                for (pit = parameters.iterator(), sep = "";
+                     pit.hasNext() == true;
+                     sep = ", ")
+                {
+                    _source.print(sep);
+                    (pit.next()).accept(this);
+                }
+                _source.print(')');
+
+                _source.println("')");
+                _source.println();
+            }
+
             for (SmcAction action: actions)
             {
                 action.accept(this);
+            }
+
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                List<SmcParameter> parameters =
+                    transition.getParameters();
+                Iterator<SmcParameter> pit;
+                String sep;
+
+                _source.print(_indent);
+                _source.println("    if (context.debugFlag)");
+                _source.print(_indent);
+                _source.print("        context.debugStream.println(");
+                _source.print("'EXIT TRANSITION : ");
+                _source.print(stateName);
+                _source.print('.');
+                _source.print(transName);
+
+                _source.print('(');
+                for (pit = parameters.iterator(), sep = "";
+                     pit.hasNext() == true;
+                     sep = ", ")
+                {
+                    _source.print(sep);
+                    (pit.next()).accept(this);
+                }
+                _source.print(')');
+
+                _source.println("')");
+                _source.println();
             }
 
             _indent = indent4;
@@ -1061,8 +1112,34 @@ public final class SmcGroovyGenerator
             // entry actions (if any) if this is not a loopback.
             if (loopbackFlag == false)
             {
+                if (_debugLevel >= DEBUG_LEVEL_1)
+                {
+                    _source.print(indent3);
+                    _source.println("if (context.debugFlag)");
+                    _source.print(indent3);
+                    _source.print(
+                        "    context.debugStream.println('");
+                    _source.print("BEFORE ENTRY    : ");
+                    _source.print(stateName);
+                    _source.println(".Entry(context)')");
+                    _source.println();
+                }
+
                 _source.print(indent3);
                 _source.println("context.state.Entry(context)");
+
+                if (_debugLevel >= DEBUG_LEVEL_1)
+                {
+                    _source.print(indent3);
+                    _source.println("if (context.debugFlag)");
+                    _source.print(indent3);
+                    _source.print(
+                        "    context.debugStream.println('");
+                    _source.print("AFTER ENTRY     : ");
+                    _source.print(stateName);
+                    _source.println(".Entry(context)')");
+                    _source.println();
+                }
             }
 
             _source.print(indent3);
@@ -1084,8 +1161,34 @@ public final class SmcGroovyGenerator
              loopbackFlag == false) ||
              transType == TransType.TRANS_PUSH)
         {
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.print(indent3);
+                _source.println("if (context.debugFlag)");
+                _source.print(indent3);
+                _source.print(
+                    "    context.debugStream.println('");
+                _source.print("BEFORE ENTRY    : ");
+                _source.print(stateName);
+                _source.println(".Entry(context)')");
+                _source.println();
+            }
+
             _source.print(indent3);
             _source.println("context.state.Entry(context)");
+
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.print(indent3);
+                _source.println("if (context.debugFlag)");
+                _source.print(indent3);
+                _source.print(
+                    "    context.debugStream.println('");
+                _source.print("AFTER ENTRY     : ");
+                _source.print(stateName);
+                _source.println(".Entry(context)')");
+                _source.println();
+            }
         }
 
         // If there was a try/finally, then put the closing
@@ -1208,6 +1311,9 @@ public final class SmcGroovyGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2009/11/24 20:42:39  cwrapp
+// v. 6.0.1 update
+//
 // Revision 1.6  2009/10/06 15:31:59  kgreg99
 // 1. Started implementation of feature request #2718920.
 //     1.1 Added method boolean isStatic() to SmcAction class. It returns false now, but is handled in following language generators: C#, C++, java, php, VB. Instance identificator is not added in case it is set to true.

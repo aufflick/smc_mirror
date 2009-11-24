@@ -29,6 +29,9 @@
 
  CHANGE LOG
  $Log$
+ Revision 1.5  2009/11/24 20:42:39  cwrapp
+ v. 6.0.1 update
+
  Revision 1.4  2009/04/25 14:29:10  cwrapp
  Corrected isInTransition.
 
@@ -189,7 +192,7 @@ class FSMContext {
             throw new Exception('$state should be of class State');
         $this->_state = $state;
         if ($this->_debug_flag)
-            fwrite($this->_debug_stream, "NEW STATE    : {$this->_state->getName()}\n");
+            fwrite($this->_debug_stream, "ENTER STATE     : {$this->_state->getName()}\n");
     }
 
     // Returns True if the state stack is empty and False otherwise.
@@ -211,7 +214,7 @@ class FSMContext {
             array_push($this->_state_stack, $this->_state);
         $this->_state = $state;
         if ($this->_debug_flag)
-            fwrite($this->_debug_stream, "PUSH TO STATE: {$this->_state->getName()}\n");
+            fwrite($this->_debug_stream, "PUSH TO STATE   : {$this->_state->getName()}\n");
     }
 
     // Make the state on top of the state stack the current state.
@@ -223,7 +226,7 @@ class FSMContext {
         } else {
             $this->_state = array_pop($this->_state_stack);
             if ($this->_debug_flag)
-                fwrite($this->_debug_stream, "POP TO STATE : {$this->_state->getName()}\n");
+                fwrite($this->_debug_stream, "POP TO STATE    : {$this->_state->getName()}\n");
         }
     }
 

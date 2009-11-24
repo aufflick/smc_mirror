@@ -156,7 +156,7 @@ function FSMContext:setState (state)
     assert(type(state) == 'table') -- "state should be a State"
     self._state = state
     if self._debug_flag then
-        self._debug_stream:write("NEW STATE    : ", self._state:getName(), "\n")
+        self._debug_stream:write("ENTER STATE     : ", self._state:getName(), "\n")
     end
 end
 
@@ -180,7 +180,7 @@ function FSMContext:pushState (state)
     end
     self._state = state
     if self._debug_flag then
-        self._debug_stream:write("PUSH TO STATE: ", self._state:getName(), "\n")
+        self._debug_stream:write("PUSH TO STATE   : ", self._state:getName(), "\n")
     end
 end
 
@@ -194,7 +194,7 @@ function FSMContext:popState ()
     else
         self._state = table.remove(self._state_stack)
         if self._debug_flag then
-            self._debug_stream:write("POP TO STATE: ", self._state:getName(), "\n")
+            self._debug_stream:write("POP TO STATE    : ", self._state:getName(), "\n")
         end
     end
 end

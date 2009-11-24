@@ -182,7 +182,7 @@
 {
     _state = state;
     if ([self debugFlag]) {
-        TRACE( @"NEW STATE    : %@\n\r", [_state name] );
+        TRACE( @"ENTER STATE     : %@\n\r", [_state name] );
     }
 }
 
@@ -222,7 +222,7 @@
     _state = state;
 
     if ([self debugFlag]) {
-        TRACE(@"PUSH TO STATE: %@\n\r", [_state name]);
+        TRACE(@"PUSH TO STATE   : %@\n\r", [_state name]);
     }
 }
 
@@ -241,7 +241,7 @@
     [entry release];
 
     if ([self debugFlag]) {
-        TRACE(@"POP TO STATE : %@\n\r", [_state name]);
+        TRACE(@"POP TO STATE    : %@\n\r", [_state name]);
     }
 }
 
@@ -276,6 +276,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2009/11/24 20:42:39  cwrapp
+// v. 6.0.1 update
+//
 // Revision 1.2  2009/04/10 14:02:10  cwrapp
 // Set initial state via initializer.
 //

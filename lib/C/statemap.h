@@ -29,6 +29,9 @@
  *
  * Change Log
  * $Log$
+ * Revision 1.5  2009/11/24 20:42:39  cwrapp
+ * v. 6.0.1 update
+ *
  * Revision 1.4  2009/03/01 18:20:40  cwrapp
  * Preliminary v. 6.0.0 commit.
  *
@@ -104,7 +107,7 @@ struct FSMContext
 #define setState(fsm, state) \
     (fsm)->_state = (state); \
     if ((fsm)->_debug_flag != 0) { \
-        TRACE("NEW STATE    : %s\n", getName(state)); \
+        TRACE("ENTER STATE     : %s\n\r", getName(state)); \
     }
 #define pushState(fsm, state) \
     if ((fsm)->_stack_curr >= (fsm)->_stack_max) { \
@@ -114,13 +117,13 @@ struct FSMContext
     (fsm)->_stack_curr ++; \
     (fsm)->_state = state; \
     if ((fsm)->_debug_flag != 0) { \
-        TRACE("PUSH TO STATE: %s\n", getName(state)); \
+        TRACE("PUSH TO STATE   : %s\n\r", getName(state)); \
     }
 #define popState(fsm) \
     (fsm)->_stack_curr --; \
     (fsm)->_state = *((fsm)->_stack_curr); \
     if ((fsm)->_debug_flag != 0) { \
-        TRACE("POP TO STATE : %s\n", getName((fsm)->_state)); \
+        TRACE("POP TO STATE    : %s\n\r", getName((fsm)->_state)); \
     }
 #define emptyStateStack(fsm) \
     (fsm)->_stack_curr = (fsm)->_stack_start

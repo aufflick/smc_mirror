@@ -77,7 +77,7 @@ abstract class FSMContext implements Serializable {
         if (! (state instanceof State))
             throw new IllegalArgumentException('state should be a statemap.State')
         if (debugFlag)
-            debugStream.println('NEW STATE    : ' + state.name)
+            debugStream.println('ENTER STATE     : ' + state.name)
         _state = state
         // Inform all listeners about this state change
         _listeners.firePropertyChange('State', previousState, _state)
@@ -101,7 +101,7 @@ abstract class FSMContext implements Serializable {
         if (_state == null)
             throw new NullPointerException('uninitialized state')
         if (debugFlag)
-            debugStream.println('PUSH TO STATE: ' + state.name)
+            debugStream.println('PUSH TO STATE   : ' + state.name)
         _stateStack << _state   // push
         _state = state
         // Inform all listeners about this state change
@@ -118,7 +118,7 @@ abstract class FSMContext implements Serializable {
             def previousState = _state
             _state = _stateStack.pop()
             if (debugFlag)
-                debugStream.println('POP TO STATE : ' + _state.name)
+                debugStream.println('POP TO STATE    : ' + _state.name)
             // Inform all listeners about this state change
             _listeners.firePropertyChange('State', previousState, _state)
         }
@@ -141,6 +141,9 @@ abstract class FSMContext implements Serializable {
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2009/11/24 20:42:39  cwrapp
+// v. 6.0.1 update
+//
 // Revision 1.4  2009/04/11 13:07:23  cwrapp
 // Added FSMContext initial state constructor.
 //

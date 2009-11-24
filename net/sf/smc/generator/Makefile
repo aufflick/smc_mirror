@@ -40,6 +40,7 @@
 #
 
 SOURCES= \
+	SmcOptions.java \
 	SmcCGenerator.java \
 	SmcCodeGenerator.java \
 	SmcCppGenerator.java \
@@ -108,6 +109,9 @@ realclean :	clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2009/11/24 20:42:39  cwrapp
+# v. 6.0.1 update
+#
 # Revision 1.1  2009/03/01 18:20:42  cwrapp
 # Preliminary v. 6.0.0 commit.
 #

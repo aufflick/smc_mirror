@@ -409,7 +409,7 @@ public final class SmcFSM
 
     /**
      * Set sthe fsm class name.
-     * @param context class name.
+     * @param fsmName The finite state machine's class name.
      */
     public void setFsmClassName(String fsmName)
     {
@@ -605,6 +605,9 @@ public final class SmcFSM
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2009/11/24 20:42:39  cwrapp
+// v. 6.0.1 update
+//
 // Revision 1.2  2009/09/12 21:44:49  kgreg99
 // Implemented feature req. #2718941 - user defined generated class name.
 // A new statement was added to the syntax: %fsmclass class_name

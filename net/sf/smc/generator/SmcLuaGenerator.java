@@ -57,6 +57,7 @@ import net.sf.smc.model.SmcVisitor;
  * @see SmcElement
  * @see SmcCodeGenerator
  * @see SmcVisitor
+ * @see SmcOptions
  *
  * @author Francois Perrad
  */
@@ -73,69 +74,12 @@ public final class SmcLuaGenerator
     //
 
     /**
-     * Creates a Lua code generator for the given parameters.
-     * @param srcfileBase write the emitted code to this target
-     * source file name sans the suffix.
-     * @param srcDirectory place the target source file in this
-     * directory.
-     * @param headerDirectory place the target header file in
-     * this directory. Ignored if there is no generated header
-     * file.
-     * @param castType use this type cast (C++ code generation
-     * only).
-     * @param graphLevel amount of detail in the generated
-     * GraphViz graph (graph code generation only).
-     * @param serialFlag if {@code true}, generate unique
-     * identifiers for persisting the FSM.
-     * @param debugFlag if {@code true} add debug output messages
-     * to code.
-     * @param noExceptionFlag if {@code true} then use asserts
-     * rather than exceptions (C++ only).
-     * @param noCatchFlag if {@code true} then do <i>not</i>
-     * generate try/catch/rethrow code.
-     * @param noStreamsFlag if {@code true} then use TRACE macro
-     * for debug output.
-     * @param reflectFlag if {@code true} then generate
-     * reflection code.
-     * @param syncFlag if {@code true} then generate
-     * synchronization code.
-     * @param genericFlag if {@code true} then use generic
-     * collections.
-     * @param accessLevel use this access keyword for the
-     * generated classes.
+     * Creates a Lua code generator for the given options.
      */
-    public SmcLuaGenerator(final String srcfileBase,
-                           final String srcDirectory,
-                           final String headerDirectory,
-                           final String castType,
-                           final int graphLevel,
-                           final boolean serialFlag,
-                           final boolean debugFlag,
-                           final boolean noExceptionFlag,
-                           final boolean noCatchFlag,
-                           final boolean noStreamsFlag,
-                           final boolean reflectFlag,
-                           final boolean syncFlag,
-                           final boolean genericFlag,
-                           final String accessLevel)
+    public SmcLuaGenerator(final SmcOptions options)
     {
-        super (srcfileBase,
-               "{0}{1}_sm.{2}",
-               "lua",
-               srcDirectory,
-               headerDirectory,
-               castType,
-               graphLevel,
-               serialFlag,
-               debugFlag,
-               noExceptionFlag,
-               noCatchFlag,
-               noStreamsFlag,
-               reflectFlag,
-               syncFlag,
-               genericFlag,
-               accessLevel);
-    } // end of SmcLuaGenerator(...)
+        super (options, "{0}{1}_sm.{2}", "lua");
+    } // end of SmcLuaGenerator(SmcOptions)
 
     //
     // end of Constructors.
@@ -248,7 +192,7 @@ public final class SmcLuaGenerator
         _source.print(context);
         _source.println("State:Default (fsm)");
 
-        if (_debugFlag == true)
+        if (_debugLevel >= DEBUG_LEVEL_0)
         {
             _source.println(
                 "    if fsm:getDebugFlag() then");
@@ -693,39 +637,16 @@ public final class SmcLuaGenerator
         }
 
         // Output transition to debug stream.
-        if (_debugFlag == true)
+        if (_debugLevel >= DEBUG_LEVEL_0)
         {
-            String sep;
-
             _source.println(
                 "    if fsm:getDebugFlag() then");
             _source.print(
-                "        fsm:getDebugStream():write(\"TRANSITION   : ");
-            if (packageName != null && packageName.length() > 0)
-            {
-                _source.print(packageName);
-                _source.print(".");
-            }
+                "        fsm:getDebugStream():write(");
+            _source.print("\"LEAVING STATE   : ");
             _source.print(mapName);
             _source.print(".");
             _source.print(stateName);
-            _source.print(":");
-            _source.print(transName);
-
-            _source.print("(");
-            for (pit = parameters.iterator(), sep = "";
-                 pit.hasNext() == true;
-                 sep = ", ")
-            {
-                String trArgName =(pit.next()).getName();
-                _source.print(sep);
-                _source.print(trArgName);
-                _source.print("=\" .. tostring(");
-                _source.print(trArgName);
-                _source.print(") .. \"");
-            }
-            _source.print(")");
-
             _source.println("\\n\")");
             _source.println("    end");
         }
@@ -803,6 +724,7 @@ public final class SmcLuaGenerator
         String context = map.getFSM().getContext();
         String mapName = map.getName();
         String stateName = state.getClassName();
+        String transName = transition.getName();
         TransType transType = guard.getTransType();
         boolean loopbackFlag = false;
         String indent2;
@@ -928,8 +850,48 @@ public final class SmcLuaGenerator
         if (transType == TransType.TRANS_POP ||
             loopbackFlag == false)
         {
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.print(indent2);
+                _source.println("if fsm:getDebugFlag() then");
+                _source.print(indent2);
+                _source.print(
+                    "    fsm:getDebugStream():write(\"");
+                _source.print("BEFORE EXIT     : ");
+                if (packageName != null &&
+                    packageName.length() > 0)
+                {
+                    _source.print(packageName);
+                    _source.print(".");
+                }
+                _source.print(stateName);
+                _source.println(".Exit(fsm)\\n\")");
+                _source.print(indent2);
+                _source.println("end");
+            }
+
             _source.print(indent2);
             _source.println("fsm:getState():Exit(fsm)");
+
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.print(indent2);
+                _source.println("if fsm:getDebugFlag() then");
+                _source.print(indent2);
+                _source.print(
+                    "    fsm:getDebugStream():write(\"");
+                _source.print("AFTER EXIT      : ");
+                if (packageName != null &&
+                    packageName.length() > 0)
+                {
+                    _source.print(packageName);
+                    _source.print(".");
+                }
+                _source.print(stateName);
+                _source.println(".Exit(fsm)\\n\")");
+                _source.print(indent2);
+                _source.println("end");
+            }
         }
 
         // Dump out this transition's actions.
@@ -949,6 +911,50 @@ public final class SmcLuaGenerator
             // current state.
             _source.print(indent2);
             _source.println("fsm:clearState()");
+
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                List<SmcParameter> parameters =
+                    transition.getParameters();
+                Iterator<SmcParameter> pit;
+                String trArgName;
+                String sep;
+
+                _source.print(indent2);
+                _source.println("if fsm:getDebugFlag() then");
+                _source.print(indent2);
+                _source.print(
+                    "    fsm:getDebugStream():write(\"");
+                _source.print("ENTER TRANSITION: ");
+                if (packageName != null &&
+                    packageName.length() > 0)
+                {
+                    _source.print(packageName);
+                    _source.print(".");
+                }
+                _source.print(stateName);
+                _source.print(":");
+                _source.print(transName);
+
+                _source.print("(");
+                for (pit = parameters.iterator(), sep = "";
+                     pit.hasNext() == true;
+                     sep = ", ")
+                {
+                    trArgName = (pit.next()).getName();
+
+                    _source.print(sep);
+                    _source.print(trArgName);
+                    _source.print("=\" .. tostring(");
+                    _source.print(trArgName);
+                    _source.print(") .. \"");
+                }
+                _source.print(")");
+
+                _source.println("\\n\")");
+                _source.print(indent2);
+                _source.println("end");
+            }
 
             // v. 2.0.0: Place the actions inside a try/finally
             // block. This way the state will be set before an
@@ -988,7 +994,7 @@ public final class SmcLuaGenerator
                 _source.print(indent2);
                 _source.println(")");
 
-                if (_debugFlag == true)
+                if (_debugLevel >= DEBUG_LEVEL_1)
                 {
                     _source.print(indent2);
                     _source.println("if not r then");
@@ -997,6 +1003,50 @@ public final class SmcLuaGenerator
                     _source.print(indent2);
                     _source.println("end");
                 }
+            }
+
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                List<SmcParameter> parameters =
+                    transition.getParameters();
+                Iterator<SmcParameter> pit;
+                String trArgName;
+                String sep;
+
+                _source.print(indent2);
+                _source.println("if fsm:getDebugFlag() then");
+                _source.print(indent2);
+                _source.print(
+                    "    fsm:getDebugStream():write(\"");
+                _source.print("EXIT TRANSITION : ");
+                if (packageName != null &&
+                    packageName.length() > 0)
+                {
+                    _source.print(packageName);
+                    _source.print(".");
+                }
+                _source.print(stateName);
+                _source.print(":");
+                _source.print(transName);
+
+                _source.print("(");
+                for (pit = parameters.iterator(), sep = "";
+                     pit.hasNext() == true;
+                     sep = ", ")
+                {
+                    trArgName = (pit.next()).getName();
+
+                    _source.print(sep);
+                    _source.print(trArgName);
+                    _source.print("=\" .. tostring(");
+                    _source.print(trArgName);
+                    _source.print(") .. \"");
+                }
+                _source.print(")");
+
+                _source.println("\\n\")");
+                _source.print(indent2);
+                _source.println("end");
             }
         }
 
@@ -1029,8 +1079,50 @@ public final class SmcLuaGenerator
             // entry actions (if any) if this is not a loopback.
             if (loopbackFlag == false)
             {
+                if (_debugLevel >= DEBUG_LEVEL_1)
+                {
+                    _source.print(indent2);
+                    _source.println(
+                        "if fsm:getDebugFlag() then");
+                    _source.print(indent2);
+                    _source.print(
+                        "    fsm:getDebugStream():write(\"");
+                    _source.print("BEFORE ENTRY    : ");
+                    if (packageName != null &&
+                        packageName.length() > 0)
+                    {
+                        _source.print(packageName);
+                        _source.print(".");
+                    }
+                    _source.print(stateName);
+                    _source.println(":Entry(fsm)\\n\")");
+                    _source.print(indent2);
+                    _source.println("end");
+                }
+
                 _source.print(indent2);
                 _source.println("fsm:getState():Entry(fsm)");
+
+                if (_debugLevel >= DEBUG_LEVEL_1)
+                {
+                    _source.print(indent2);
+                    _source.println(
+                        "if fsm:getDebugFlag() then");
+                    _source.print(indent2);
+                    _source.print(
+                        "    fsm:getDebugStream():write(\"");
+                    _source.print("AFTER ENTRY     : ");
+                    if (packageName != null &&
+                        packageName.length() > 0)
+                    {
+                        _source.print(packageName);
+                        _source.print(".");
+                    }
+                    _source.print(stateName);
+                    _source.println(":Entry(fsm)\\n\")");
+                    _source.print(indent2);
+                    _source.println("end");
+                }
             }
 
             _source.print(indent2);
@@ -1052,8 +1144,46 @@ public final class SmcLuaGenerator
              loopbackFlag == false) ||
              transType == TransType.TRANS_PUSH)
         {
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.print(indent2);
+                _source.println("if fsm:getDebugFlag() then");
+                _source.print(indent2);
+                _source.print("    fsm:getDebugStream():write(\"");
+                _source.print("BEFORE ENTRY    : ");
+                if (packageName != null &&
+                    packageName.length() > 0)
+                {
+                    _source.print(packageName);
+                    _source.print(".");
+                }
+                _source.print(stateName);
+                _source.println(":Entry(fsm)\\n\")");
+                _source.print(indent2);
+                _source.println("end");
+            }
+
             _source.print(indent2);
             _source.println("fsm:getState():Entry(fsm)");
+
+            if (_debugLevel >= DEBUG_LEVEL_1)
+            {
+                _source.print(indent2);
+                _source.println("if fsm:getDebugFlag() then");
+                _source.print(indent2);
+                _source.print("    fsm:getDebugStream():write(\"");
+                _source.print("AFTER ENTRY     : ");
+                if (packageName != null &&
+                    packageName.length() > 0)
+                {
+                    _source.print(packageName);
+                    _source.print(".");
+                }
+                _source.print(stateName);
+                _source.println(":Entry(fsm)\\n\")");
+                _source.print(indent2);
+                _source.println("end");
+            }
         }
 
         // If there is a transition associated with the pop, then
@@ -1138,6 +1268,9 @@ public final class SmcLuaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2009/11/24 20:42:39  cwrapp
+// v. 6.0.1 update
+//
 // Revision 1.6  2009/10/06 15:31:59  kgreg99
 // 1. Started implementation of feature request #2718920.
 //     1.1 Added method boolean isStatic() to SmcAction class. It returns false now, but is handled in following language generators: C#, C++, java, php, VB. Instance identificator is not added in case it is set to true.

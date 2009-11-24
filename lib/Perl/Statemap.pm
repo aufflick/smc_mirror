@@ -249,7 +249,7 @@ sub setState {
     $self->{_state} = $state;
     if ($self->{_debug_flag}) {
         my $fh = $self->{_debug_stream};
-        print $fh "NEW STATE    : ", $self->{_state}->getName(), "\n";
+        print $fh "ENTER STATE     : ", $self->{_state}->getName(), "\n";
     }
 }
 
@@ -303,7 +303,7 @@ sub pushState {
     $self->{_state} = $state;
     if ($self->{_debug_flag}) {
         my $fh = $self->{_debug_stream};
-        print $fh "PUSH TO STATE: ", $self->{_state}->getName(), "\n";
+        print $fh "PUSH TO STATE   : ", $self->{_state}->getName(), "\n";
     }
 }
 
@@ -329,7 +329,7 @@ sub popState {
         $self->{_state} = pop @{$self->{_state_stack}};
         if ($self->{_debug_flag}) {
             my $fh = $self->{_debug_stream};
-            print $fh "POP TO STATE : ", $self->{_state}->getName(), "\n";
+            print $fh "POP TO STATE    : ", $self->{_state}->getName(), "\n";
         }
     }
 }

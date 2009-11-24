@@ -53,6 +53,7 @@ import net.sf.smc.model.SmcVisitor;
  * @see SmcElement
  * @see SmcVisitor
  * @see SmcCppGenerator
+ * @see SmcOptions
  *
  * @author <a href="mailto:rapp@acm.org">Charles Rapp</a>
  */
@@ -69,70 +70,12 @@ public final class SmcHeaderGenerator
     //
 
     /**
-     * Creates a C++ header code generator for the given
-     * parameters.
-     * @param srcfileBase write the emitted code to this target
-     * source file name sans the suffix.
-     * @param srcDirectory place the target source file in this
-     * directory.
-     * @param headerDirectory place the target header file in
-     * this directory. Ignored if there is no generated header
-     * file.
-     * @param castType use this type cast (C++ code generation
-     * only).
-     * @param graphLevel amount of detail in the generated
-     * GraphViz graph (graph code generation only).
-     * @param serialFlag if {@code true}, generate unique
-     * identifiers for persisting the FSM.
-     * @param debugFlag if {@code true} add debug output messages
-     * to code.
-     * @param noExceptionFlag if {@code true} then use asserts
-     * rather than exceptions (C++ only).
-     * @param noCatchFlag if {@code true} then do <i>not</i>
-     * generate try/catch/rethrow code.
-     * @param noStreamsFlag if {@code true} then use TRACE macro
-     * for debug output.
-     * @param reflectFlag if {@code true} then generate
-     * reflection code.
-     * @param syncFlag if {@code true} then generate
-     * synchronization code.
-     * @param genericFlag if {@code true} then use generic
-     * collections.
-     * @param accessLevel use this access keyword for the
-     * generated classes.
+     * Creates a C++ header code generator for the given options.
      */
-    public SmcHeaderGenerator(String srcfileBase,
-                              String srcDirectory,
-                              String headerDirectory,
-                              String castType,
-                              int graphLevel,
-                              boolean serialFlag,
-                              boolean debugFlag,
-                              boolean noExceptionFlag,
-                              boolean noCatchFlag,
-                              boolean noStreamsFlag,
-                              boolean reflectFlag,
-                              boolean syncFlag,
-                              boolean genericFlag,
-                              String accessLevel)
+    public SmcHeaderGenerator(final SmcOptions options)
     {
-        super (srcfileBase,
-               "{0}{1}_sm.{2}",
-               "h",
-               srcDirectory,
-               headerDirectory,
-               castType,
-               graphLevel,
-               serialFlag,
-               debugFlag,
-               noExceptionFlag,
-               noCatchFlag,
-               noStreamsFlag,
-               reflectFlag,
-               syncFlag,
-               genericFlag,
-               accessLevel);
-    } // end of SmcHeaderGenerator(...)
+        super (options, "{0}{1}_sm.{2}", "h");
+    } // end of SmcHeaderGenerator(SmcOptions)
 
     //
     // end of Constructors.
@@ -533,7 +476,7 @@ public final class SmcHeaderGenerator
 
                 // If -g was specified, then set the transition
                 // name so it can be printed out.
-                if (_debugFlag == true)
+                if (_debugLevel >= DEBUG_LEVEL_0)
                 {
                     _source.print(_indent);
                     _source.print("        setTransition(\"");
@@ -552,7 +495,7 @@ public final class SmcHeaderGenerator
                 }
                 _source.println(");");
 
-                if (_debugFlag == true)
+                if (_debugLevel >= DEBUG_LEVEL_0)
                 {
                     _source.print(_indent);
                     _source.println(
@@ -930,6 +873,9 @@ public final class SmcHeaderGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2009/11/24 20:42:39  cwrapp
+// v. 6.0.1 update
+//
 // Revision 1.4  2009/09/12 21:44:49  kgreg99
 // Implemented feature req. #2718941 - user defined generated class name.
 // A new statement was added to the syntax: %fsmclass class_name

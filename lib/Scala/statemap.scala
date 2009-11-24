@@ -75,7 +75,7 @@ abstract class FSMContext[State] {
     def setState(state: State): Unit = {
         val previousState = _state
         if (_debugFlag)
-            _debugStream.println("NEW STATE    : " + state)
+            _debugStream.println("NEW STATE       : " + state)
         _state = state
         _isInTransaction = false
         // Inform all listeners about this state change
@@ -99,7 +99,7 @@ abstract class FSMContext[State] {
         if (_isInTransaction)
             throw new StateUndefinedException()
         if (_debugFlag)
-            _debugStream.println("PUSH TO STATE: " + state)
+            _debugStream.println("PUSH TO STATE   : " + state)
         _stateStack.push(_state)
         _state = state
         // Inform all listeners about this state change
@@ -115,7 +115,7 @@ abstract class FSMContext[State] {
         val previousState = _state
         _state = _stateStack.pop()
         if (_debugFlag)
-            _debugStream.println("POP TO STATE : " + _state)
+            _debugStream.println("POP TO STATE    : " + _state)
         // Inform all listeners about this state change
         _listeners.firePropertyChange("State", previousState, _state)
     }
@@ -136,6 +136,9 @@ abstract class FSMContext[State] {
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2009/11/24 20:42:39  cwrapp
+// v. 6.0.1 update
+//
 // Revision 1.5  2009/04/23 13:12:08  fperrad
 // Added enterStartState method
 //

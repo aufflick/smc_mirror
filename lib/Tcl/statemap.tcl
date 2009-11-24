@@ -29,6 +29,9 @@
 #
 # Change Log
 # $Log$
+# Revision 1.9  2009/11/24 20:42:39  cwrapp
+# v. 6.0.1 update
+#
 # Revision 1.8  2009/03/01 18:20:41  cwrapp
 # Preliminary v. 6.0.0 commit.
 #
@@ -149,7 +152,7 @@ namespace eval ::statemap:: {
 
     public method setState {state_name} {
         if {$_debug_flag == 1} {
-            puts $_debug_stream "NEW STATE     : [$state_name getName]";
+            puts $_debug_stream "NEW STATE       : [$state_name getName]";
         }
 
         set _state $state_name;
@@ -174,7 +177,7 @@ namespace eval ::statemap:: {
 
     public method pushState {state_name} {
         if {$_debug_flag == 1} {
-            puts $_debug_stream "PUSH TO STATE : [$state_name getName]";
+            puts $_debug_stream "PUSH TO STATE   : [$state_name getName]";
         }
 
         if {[string compare $_state ""] != 0} {
@@ -195,7 +198,7 @@ namespace eval ::statemap:: {
             set Retval "";
 
             if {$_debug_flag == 1} {
-                puts $_debug_stream "POP TO STATE  : [$_state getName]";
+                puts $_debug_stream "POP TO STATE    : [$_state getName]";
             }
         } else {
             # Tried to pop on an empty state stack.

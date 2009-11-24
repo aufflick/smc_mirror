@@ -135,7 +135,7 @@ class FSMContext(object):
 			raise ValueError("state should be a statemap.State")
 		self._state = state
 		if self._debug_flag:
-			self._debug_stream.write("NEW STATE    : %s\n" % self._state.getName())
+			self._debug_stream.write("NEW STATE       : %s\n" % self._state.getName())
 
 	def isStateStackEmpty(self):
 		"""Returns True if the state stack is empty and False otherwise."""
@@ -154,7 +154,7 @@ class FSMContext(object):
 			self._state_stack.append(self._state)
 		self._state = state
 		if self._debug_flag:
-			self._debug_stream.write("PUSH TO STATE: %s\n" % self._state.getName())
+			self._debug_stream.write("PUSH TO STATE   : %s\n" % self._state.getName())
 
 	def popState(self):
 		"""Make the state on top of the state stack the current state."""
@@ -165,7 +165,7 @@ class FSMContext(object):
 		else:
 			self._state = self._state_stack.pop()
 			if self._debug_flag:
-				self._debug_stream.write("POP TO STATE : %s\n" % self._state.getName())
+				self._debug_stream.write("POP TO STATE    : %s\n" % self._state.getName())
 
 	def emptyStateStack(self):
 		"""Remove all states from the state stack."""
