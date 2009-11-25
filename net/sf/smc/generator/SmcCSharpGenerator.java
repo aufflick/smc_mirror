@@ -379,7 +379,7 @@ public final class SmcCSharpGenerator
             _source.print(_indent);
             _source.print("    public ");
             _source.print(context);
-            _source.println("[] States");
+            _source.println("State[] States");
             _source.print(_indent);
             _source.println("    {");
 
@@ -2239,6 +2239,9 @@ public final class SmcCSharpGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2009/11/25 15:09:45  cwrapp
+// Corrected getStates.
+//
 // Revision 1.8  2009/11/24 20:42:39  cwrapp
 // v. 6.0.1 update
 //
