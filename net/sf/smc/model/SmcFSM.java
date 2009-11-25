@@ -96,7 +96,7 @@ public final class SmcFSM
      * members are set to default values.
      * @param name The finite state machine name.
      */
-    public SmcFSM(String name)
+    public SmcFSM(final String name, final String sourceFile)
     {
         // The abstract syntax tree always starts on line 1.
         super (name, 1);
@@ -104,7 +104,8 @@ public final class SmcFSM
         _startState = "";
         _source = "";
         _context = "";
-		_fsmClassName = "";
+        _sourceFileName = sourceFile;
+        _fsmClassName = name + "Context";
         _header = "";
         _includeList = new ArrayList<String>();
         _package = null;
@@ -178,6 +179,15 @@ public final class SmcFSM
     {
         return (_context);
     } // end of getContext()
+
+    /**
+     * Returns the source file name.
+     * @return the source file name.
+     */
+    public String getSourceFileName()
+    {
+        return (_sourceFileName);
+    } // end of getSourceFileName()
 
     /**
      * Returns the fsm class name.
@@ -408,12 +418,14 @@ public final class SmcFSM
     } // end of setContext(String)
 
     /**
-     * Set sthe fsm class name.
+     * Set sthe fsm class name and source file name.
      * @param fsmName The finite state machine's class name.
      */
     public void setFsmClassName(String fsmName)
     {
         _fsmClassName = fsmName;
+        _sourceFileName = fsmName;
+
         return;
     } // end of setFsmClassName(String)
 
@@ -571,6 +583,9 @@ public final class SmcFSM
     // This state map is associated with this class.
     private String _context;
 
+    // The FSM is written to this file.
+    private String _sourceFileName;
+
 	// This map is implemented in the class with given name
 	private String _fsmClassName;
 	
@@ -605,6 +620,9 @@ public final class SmcFSM
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2009/11/25 22:30:19  cwrapp
+// Fixed problem between %fsmclass and sm file names.
+//
 // Revision 1.3  2009/11/24 20:42:39  cwrapp
 // v. 6.0.1 update
 //

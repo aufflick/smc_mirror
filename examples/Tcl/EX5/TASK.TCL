@@ -27,6 +27,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.6  2009/11/25 22:30:19  cwrapp
+# Fixed problem between %fsmclass and sm file names.
+#
 # Revision 1.5  2008/02/04 12:39:02  fperrad
 # fix filename case on linux
 #
@@ -84,7 +87,7 @@ class Task {
         set _runStartTime 0;
         set _updateTimerID -1;
 
-        set _fsm [TaskContext #auto $this];
+        set _fsm [TASKContext #auto $this];
 
         # Uncomment to see debug output.
         # _fsm setDebugFlag 1;

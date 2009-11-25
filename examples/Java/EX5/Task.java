@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2009/11/25 22:30:18  cwrapp
+// Fixed problem between %fsmclass and sm file names.
+//
 // Revision 1.8  2009/03/27 09:41:46  cwrapp
 // Added F. Perrad changes back in.
 //
@@ -57,7 +60,9 @@ import javax.swing.Timer;
 public final class Task
     implements TaskEventListener
 {
-// Member Methods
+//---------------------------------------------------------------
+// Member methods.
+//
 
     public Task(String name, int priority, int time)
     {
@@ -70,7 +75,7 @@ public final class Task
         _runStartTime = null;
         _timerTable = new HashMap<String, Timer>();
 
-        _fsm = new TaskContext(this);
+        _fsm = new TaskFSM(this);
 
         // Uncomment to see debug output.
         // _fsm.setDebugFlag(true);
@@ -390,9 +395,11 @@ public final class Task
         return;
     }
 
-// Member Data
+//---------------------------------------------------------------
+// Member data.
+//
 
-    private TaskContext _fsm;
+    private TaskFSM _fsm;
 
     // The task's human readable name.
     private String _name;

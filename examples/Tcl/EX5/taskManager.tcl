@@ -29,6 +29,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.5  2009/11/25 22:30:19  cwrapp
+# Fixed problem between %fsmclass and sm file names.
+#
 # Revision 1.4  2005/05/28 18:02:56  cwrapp
 # Updated Tcl examples, removed EX6.
 #
@@ -74,7 +77,7 @@ class TaskManager {
         set _garbageTimerID -1;
         set _exitCode 0;
 
-        set _fsm [TaskManagerContext #auto $this];
+        set _fsm [taskManagerContext #auto $this];
 
         # Uncomment to see debug output.
         # _fsm setDebugFlag 1;

@@ -1170,8 +1170,7 @@ public final class Smc
             _sourceFileName.length() - 3;
         String srcFilePath =
             "." + System.getProperty("file.separator");
-        String srcFileBase =
-            _sourceFileName.substring(0, endIndex);
+        String srcFileBase = fsm.getSourceFileName();
         String headerPath = srcFilePath;
         String headerFileName = "";
         FileOutputStream headerFileStream = null;
@@ -1191,17 +1190,12 @@ public final class Smc
 
         // Strip away any preceding directories from
         // the source file name.
-        endIndex = srcFileBase.lastIndexOf(File.separatorChar);
+        endIndex = _sourceFileName.lastIndexOf(File.separatorChar);
         if (endIndex >= 0)
         {
             srcFilePath =
-                srcFileBase.substring(
+                _sourceFileName.substring(
                     0, (endIndex + 1));
-
-            // Strip the ".sm" from the source file's name.
-            srcFileBase =
-                srcFileBase.substring(
-                    endIndex + 1);
         }
 
         // If -d was specified, then use place generated file
@@ -1880,6 +1874,9 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.36  2009/11/25 22:30:19  cwrapp
+// Fixed problem between %fsmclass and sm file names.
+//
 // Revision 1.35  2009/11/24 20:42:39  cwrapp
 // v. 6.0.1 update
 //

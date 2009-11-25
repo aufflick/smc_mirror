@@ -77,7 +77,7 @@ public final class SmcCGenerator
      */
     public SmcCGenerator(final SmcOptions options)
     {
-        super (options, "{0}{1}_sm.{2}", "c");
+        super (options, "c");
     } // end of SmcCGenerator(SmcOptions)
 
     //
@@ -95,13 +95,13 @@ public final class SmcCGenerator
      * %{ %} raw source code - if any
      *
      * #include &lt;%include header file&gt;
-     * #include "<i>context</i>_sm.h"
+     * #include "<i>context</i>.h"
      *   </pre>
      * </code>
      * If the -headerd option is used, then this is generated:
      * <code>
      *   <pre>
-     * #include "<i>header dir</i>/<i>context</i>_sm.h")
+     * #include "<i>header dir</i>/<i>context</i>.h")
      *   </pre>
      * </code>
      * @param fsm Emit code for this finite state machine.
@@ -175,7 +175,7 @@ public final class SmcCGenerator
             _source.print(_srcDirectory);
         }
         _source.print(_srcfileBase);
-        _source.println("_sm.h\"");
+        _source.println(".h\"");
 
         // Print out the default definitions for all the
         // transitions. First, get the transitions list.
@@ -1409,6 +1409,9 @@ public final class SmcCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2009/11/25 22:30:19  cwrapp
+// Fixed problem between %fsmclass and sm file names.
+//
 // Revision 1.7  2009/11/24 20:42:39  cwrapp
 // v. 6.0.1 update
 //

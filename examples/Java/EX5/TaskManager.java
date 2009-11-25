@@ -30,6 +30,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2009/11/25 22:30:18  cwrapp
+// Fixed problem between %fsmclass and sm file names.
+//
 // Revision 1.8  2009/03/27 09:41:46  cwrapp
 // Added F. Perrad changes back in.
 //
@@ -61,7 +64,9 @@ import java.util.Set;
 public final class TaskManager
     implements TaskEventListener
 {
-// Member Methods.
+//---------------------------------------------------------------
+// Member methods.
+//
 
     public TaskManager()
     {
@@ -73,7 +78,7 @@ public final class TaskManager
         _timerTable = new HashMap<String, Timer>();
         _exitCode = 0;
 
-        _fsm = new TaskManagerContext(this);
+        _fsm = new TaskManagerFSM(this);
 
         // Uncomment to see debug output.
         // _fsm.setDebugFlag(true);
@@ -711,9 +716,11 @@ public final class TaskManager
         return;
     }
 
-// Member Data.
+//---------------------------------------------------------------
+// Member data.
+//
 
-    private TaskManagerContext _fsm;
+    private TaskManagerFSM _fsm;
 
     // Runnable task queue, sorted by priority.
     private List<Task> _runnableTaskQueue;

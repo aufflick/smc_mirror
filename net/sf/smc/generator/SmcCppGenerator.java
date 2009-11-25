@@ -76,7 +76,7 @@ public final class SmcCppGenerator
      */
     public SmcCppGenerator(final SmcOptions options)
     {
-        super (options, "{0}{1}_sm.{2}", "cpp");
+        super (options, "cpp");
     } // end of SmcCppGenerator(SmcOptions)
 
     //
@@ -97,7 +97,7 @@ public final class SmcCppGenerator
      * #include <i>%include header file</i>
     // #include "<i>context</i>_sm.h"
     // (If the -headerd option is used, then this is generated:
-    // #include "<i>header dir</i>/<i>context</i>_sm.h")
+    // #include "<i>header dir</i>/<i>context</i>.h")
     //
     // using namespace statemap;
     // using namespace <i>%import namespace</i>
@@ -172,7 +172,7 @@ public final class SmcCppGenerator
             _source.print(_srcDirectory);
         }
         _source.print(_srcfileBase);
-        _source.println("_sm.h\"");
+        _source.println(".h\"");
 
         // Import the statemap namespace symbols into the main
         // namespace.
@@ -1697,6 +1697,9 @@ public final class SmcCppGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2009/11/25 22:30:19  cwrapp
+// Fixed problem between %fsmclass and sm file names.
+//
 // Revision 1.6  2009/11/24 20:42:39  cwrapp
 // v. 6.0.1 update
 //

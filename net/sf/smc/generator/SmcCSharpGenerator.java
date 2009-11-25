@@ -77,7 +77,7 @@ public final class SmcCSharpGenerator
      */
     public SmcCSharpGenerator(final SmcOptions options)
     {
-        super (options, "{0}{1}_sm.{2}", "cs");
+        super (options, "cs");
     } // end of SmcCSharpGenerator(SmcOptions)
 
     //
@@ -2239,6 +2239,9 @@ public final class SmcCSharpGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2009/11/25 22:30:19  cwrapp
+// Fixed problem between %fsmclass and sm file names.
+//
 // Revision 1.9  2009/11/25 15:09:45  cwrapp
 // Corrected getStates.
 //

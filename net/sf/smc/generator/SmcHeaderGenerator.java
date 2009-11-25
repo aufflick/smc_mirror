@@ -74,7 +74,7 @@ public final class SmcHeaderGenerator
      */
     public SmcHeaderGenerator(final SmcOptions options)
     {
-        super (options, "{0}{1}_sm.{2}", "h");
+        super (options, "h");
     } // end of SmcHeaderGenerator(SmcOptions)
 
     //
@@ -105,8 +105,8 @@ public final class SmcHeaderGenerator
 
         // The first two lines in the header file should be:
         //
-        //    #ifndef _H_<source file name>_SM
-        //    #define _H_<source file name>_SM
+        //    #ifndef _H_<source file name>
+        //    #define _H_<source file name>
         //
         // where the source file name is all in caps.
         // The last line is:
@@ -120,11 +120,9 @@ public final class SmcHeaderGenerator
         srcfileCaps = srcfileCaps.replace('/', '_');
         srcfileCaps = srcfileCaps.toUpperCase();
         _source.print("#ifndef _H_");
-        _source.print(srcfileCaps);
-        _source.println("_SM");
+        _source.println(srcfileCaps);
         _source.print("#define _H_");
-        _source.print(srcfileCaps);
-        _source.println("_SM");
+        _source.println(srcfileCaps);
 
         _source.println();
         _source.println("/*");
@@ -582,8 +580,7 @@ public final class SmcHeaderGenerator
         _source.println();
 
         _source.print("#endif // _H_");
-        _source.print(srcfileCaps);
-        _source.println("_SM");
+        _source.println(srcfileCaps);
 
         return;
     } // end of visit(SmcFSM)
@@ -873,6 +870,9 @@ public final class SmcHeaderGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2009/11/25 22:30:19  cwrapp
+// Fixed problem between %fsmclass and sm file names.
+//
 // Revision 1.5  2009/11/24 20:42:39  cwrapp
 // v. 6.0.1 update
 //

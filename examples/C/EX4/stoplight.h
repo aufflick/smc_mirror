@@ -34,6 +34,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.3  2009/11/25 22:30:18  cwrapp
+ * Fixed problem between %fsmclass and sm file names.
+ *
  * Revision 1.2  2007/08/05 13:43:36  cwrapp
  * Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more information.
  *
@@ -65,7 +68,7 @@ enum Directions
 
 struct smc_ex4_Stoplight
 {
-    struct smc_ex4_StoplightContext _fsm;
+    struct stoplightContext _fsm;
 };
 
 extern void smc_ex4_Stoplight_Init(struct smc_ex4_Stoplight*, enum Directions);

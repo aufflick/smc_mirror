@@ -33,6 +33,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2009/11/25 22:30:18  cwrapp
+// Fixed problem between %fsmclass and sm file names.
+//
 // Revision 1.7  2009/03/27 09:41:45  cwrapp
 // Added F. Perrad changes back in.
 //
@@ -57,7 +60,7 @@ namespace cpp_ex4
     public:
     protected:
     private:
-        StoplightContext _fsm;
+        stoplightContext _fsm;
 
     // Member functions.
     public:

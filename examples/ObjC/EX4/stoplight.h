@@ -31,7 +31,7 @@
 
 @interface Stoplight : NSObject
 {
-    StoplightContext *_fsm;    
+    stoplightContext *_fsm;    
 }
 - (id)initWithDirection:(Directions)dir;
 - (void)TurnLight:(StopLights)light :(LightColors)color;
@@ -43,6 +43,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2009/11/25 22:30:18  cwrapp
+// Fixed problem between %fsmclass and sm file names.
+//
 // Revision 1.1  2007/01/15 00:23:49  cwrapp
 // Release 4.4.0 initial commit.
 //

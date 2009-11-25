@@ -82,7 +82,7 @@ public final class SmcScalaGenerator
      */
     public SmcScalaGenerator(final SmcOptions options)
     {
-        super (options, "{0}{1}Context.{2}", "scala");
+        super (options, "scala");
     } // end of SmcScalaGenerator(SmcOptions)
 
     //
@@ -1279,6 +1279,9 @@ public final class SmcScalaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2009/11/25 22:30:19  cwrapp
+// Fixed problem between %fsmclass and sm file names.
+//
 // Revision 1.7  2009/11/24 20:42:39  cwrapp
 // v. 6.0.1 update
 //

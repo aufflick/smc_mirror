@@ -34,6 +34,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.5  2009/11/25 22:30:18  cwrapp
+ * Fixed problem between %fsmclass and sm file names.
+ *
  * Revision 1.4  2009/03/27 15:26:55  fperrad
  * C : the function Context_EnterStartState is generated only if FSM hasEntryActions
  *
@@ -63,7 +66,7 @@ extern long Gtimeout;
 
 void smc_ex4_Stoplight_Init(struct smc_ex4_Stoplight* this, enum Directions direction)
 {
-    smc_ex4_StoplightContext_Init(&this->_fsm, this);
+    stoplightContext_Init(&this->_fsm, this);
 
     switch(direction)
     {
@@ -126,7 +129,7 @@ void smc_ex4_Stoplight_SetTimer(struct smc_ex4_Stoplight* this, int seconds)
 
 void smc_ex4_Stoplight_Timeout(struct smc_ex4_Stoplight* this)
 {
-    smc_ex4_StoplightContext_Timeout(&this->_fsm);
+    stoplightContext_Timeout(&this->_fsm);
 }
 
 

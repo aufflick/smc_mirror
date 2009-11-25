@@ -34,7 +34,8 @@ TARGET=         taskdemo.jar
 SM_SOURCES=     Task.sm \
                 TaskManager.sm
 
-SOURCES=        $(SM_SOURCES:%.sm=%Context.java) \
+SOURCES=        TaskFSM.java \
+	      TaskManagerFSM.java \
                 Task.java \
                 TaskManager.java \
                 TaskController.java \
@@ -87,8 +88,11 @@ RM_RF=          rm -rf
 
 all :           $(TARGET)
 
-$(SM_SOURCES:%.sm=%Context.java) : $(SM_SOURCES)
-		$(SMC) $(SMC_FLAGS) $(SM_SOURCES)
+TaskFSM.java :	Task.sm
+		$(SMC) $(SMC_FLAGS) Task.sm
+
+TaskManagerFSM.java :	Task.sm
+		$(SMC) $(SMC_FLAGS) TaskManager.sm
 
 %_sm.dot :      %.sm
 		$(SMC) -graph -glevel 1 $<
@@ -126,6 +130,9 @@ clean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.15  2009/11/25 22:30:18  cwrapp
+# Fixed problem between %fsmclass and sm file names.
+#
 # Revision 1.14  2009/03/01 18:20:39  cwrapp
 # Preliminary v. 6.0.0 commit.
 #

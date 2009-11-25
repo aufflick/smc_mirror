@@ -74,7 +74,7 @@ public final class SmcHeaderCGenerator
      */
     public SmcHeaderCGenerator(final SmcOptions options)
     {
-        super (options, "{0}{1}_sm.{2}", "h");
+        super (options, "h");
     } // end of SmcHeaderCGenerator(SmcOptions)
 
     //
@@ -116,8 +116,8 @@ public final class SmcHeaderCGenerator
 
         // The first two lines in the header file should be:
         //
-        //    #ifndef _H_<source file name>_SM
-        //    #define _H_<source file name>_SM
+        //    #ifndef _H_<source file name>
+        //    #define _H_<source file name>
         //
         // where the source file name is all in caps.
         // The last line is:
@@ -131,11 +131,9 @@ public final class SmcHeaderCGenerator
         srcfileCaps = srcfileCaps.replace('/', '_');
         srcfileCaps = srcfileCaps.toUpperCase();
         _source.print("#ifndef _H_");
-        _source.print(srcfileCaps);
-        _source.println("_SM");
+        _source.println(srcfileCaps);
         _source.print("#define _H_");
-        _source.print(srcfileCaps);
-        _source.println("_SM");
+        _source.println(srcfileCaps);
 
         // Include required standard .h files.
         _source.println();
@@ -354,6 +352,9 @@ public final class SmcHeaderCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2009/11/25 22:30:19  cwrapp
+// Fixed problem between %fsmclass and sm file names.
+//
 // Revision 1.7  2009/11/24 20:42:39  cwrapp
 // v. 6.0.1 update
 //

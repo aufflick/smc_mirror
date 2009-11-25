@@ -28,6 +28,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.8  2009/11/25 22:30:18  cwrapp
+# Fixed problem between %fsmclass and sm file names.
+#
 # Revision 1.7  2008/02/04 12:38:37  fperrad
 # fix filename case on linux
 #
@@ -74,7 +77,7 @@ namespace eval tcl_ex4 {
 
     # Member functions.
         constructor {canvas} {
-            set _fsm [::tcl_ex4::StoplightContext #auto $this];
+            set _fsm [::tcl_ex4::stoplightContext #auto $this];
 
             set _canvas $canvas;
             

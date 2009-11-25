@@ -80,12 +80,9 @@ public abstract class SmcCodeGenerator
      * arguments even though not all arguments apply to every
      * concrete code generator.
      * @param options The target code generator options.
-     * @param sourceNameFormat the target source file name
-     * format.
      * @param suffix the target source file name suffix.
      */
     protected SmcCodeGenerator(final SmcOptions options,
-                               final String sourceNameFormat,
                                final String suffix)
     {
         _srcfileBase = options.srcfileBase();
@@ -102,7 +99,6 @@ public abstract class SmcCodeGenerator
         _syncFlag = options.syncFlag();
         _genericFlag = options.genericFlag();
         _accessLevel = options.accessLevel();
-        _sourceNameFormat = sourceNameFormat;
         _suffix = suffix;
         _source = null;
         _indent = "";
@@ -136,22 +132,24 @@ public abstract class SmcCodeGenerator
      * @param basename The file's basename sans suffix.
      * @param suffix Append this suffix to the file.
      */
-    public String sourceFile(String path,
-                             String basename,
-                             String suffix)
+    public String sourceFile(final String path,
+                             final String basename,
+                             final String suffix)
     {
-        if (suffix == null)
-        {
-            suffix = _suffix;
-        }
-
         MessageFormat formatter =
-            new MessageFormat(_sourceNameFormat);
+            new MessageFormat(SOURCE_PATH_FORMAT);
         Object[] args = new Object[3];
 
         args[0] = path;
         args[1] = basename;
-        args[2] = suffix;
+        if (suffix == null)
+        {
+            args[2] = _suffix;
+        }
+        else
+        {
+            args[2] = suffix;
+        }
 
         return (formatter.format(args));
     } // end of sourceFile(String, String, String)
@@ -292,11 +290,6 @@ public abstract class SmcCodeGenerator
 //---------------------------------------------------------------
 // Member data
 //
-
-    /**
-     * Use this format to generate the source file name.
-     */
-    protected final String _sourceNameFormat;
 
     /**
      * Emit the target source code to this output stream.
@@ -445,11 +438,18 @@ public abstract class SmcCodeGenerator
      * parameters and pop transition arguments.
      */
     public static final int GRAPH_LEVEL_2 = 2;
+
+    // The source file name path format.
+    private static final String SOURCE_PATH_FORMAT =
+        "{0}{1}.{2}";
 } // end of class SmcCodeGenerator
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2009/11/25 22:30:19  cwrapp
+// Fixed problem between %fsmclass and sm file names.
+//
 // Revision 1.4  2009/11/24 20:42:39  cwrapp
 // v. 6.0.1 update
 //

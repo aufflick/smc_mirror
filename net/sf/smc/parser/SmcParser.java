@@ -39,6 +39,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -141,7 +142,8 @@ public final class SmcParser
         _parseStatus = true;
         _quitFlag = false;
 
-        _fsm = new SmcFSM(_name);
+        _fsm = new SmcFSM(_name,
+                          _targetLanguage.sourceFileName(_name));
 
         // Start lexing in cooked mode.
         _lexer.setCookedMode();
@@ -412,18 +414,7 @@ public final class SmcParser
 
     /* package */ void setFsmClassName(String name)
     {
-        String fsmName = _fsm.getFsmClassName();
-
-        if (fsmName != null && fsmName.length() > 0)
-        {
-            error("%fsmclass previously specified",
-                    _lineNumber);
-        }
-        else
-        {
-            _fsm.setFsmClassName(name.trim());
-        }
-
+        _fsm.setFsmClassName(name.trim());
         return;
     }
     /* package */ void setPackageName(String name)
@@ -1323,87 +1314,119 @@ public final class SmcParser
         /**
          * The target language is undefined.
          */
-        LANG_NOT_SET,
+        LANG_NOT_SET (""),
 
         /**
          * <a href="http://www.research.att.com/~bs/C++.html">C++</a>
          */
-        C_PLUS_PLUS,
+        C_PLUS_PLUS ("{0}_sm"),
 
         /**
          * <a href="http://java.sun.com">Java</a>
          */
-        JAVA,
+        JAVA ("{0}Context"),
 
         /**
          * <a href="http://www.tcl.tk">Tcl</a>
          */
-        TCL,
+        TCL ("{0}_sm"),
 
         /**
          * <a href="http://msdn.microsoft.com/en-us/vbasic/default.aspx">VB.net</a>
          */
-        VB,
+        VB ("{0}_sm"),
 
         /**
          * .<a href="http://msdn.microsoft.com/en-us/vcsharp/default.aspx">net C#</a>
          */
-        C_SHARP,
+        C_SHARP ("{0}_sm"),
 
         /**
          * <a href="http://www.python.org">Python</a>
          */
-        PYTHON,
+        PYTHON ("{0}_sm"),
 
         /**
          * An HTML table
          */
-        TABLE,
+        TABLE ("{0}_sm"),
 
         /**
          * <a href="http://www.graphviz.org">GraphViz</a>
          */
-        GRAPH,
+        GRAPH (""),
 
         /**
          * <a href="http://www.perl.org">Perl</a>
          */
-        PERL,
+        PERL ("{0}_sm"),
 
         /**
          * <a href="http://ruby-lang.org">Ruby</a>
          */
-        RUBY,
+        RUBY ("{0}_sm"),
 
         /**
          * C
          */
-        C,
+        C ("{0}_sm"),
 
         /**
          * Objective C
          */
-        OBJECTIVE_C,
+        OBJECTIVE_C ("{0}_sm"),
 
         /**
          * <a href="http://www.lua.org">Lua</a>
          */
-        LUA,
+        LUA ("{0}_sm"),
 
         /**
          * <a href="http://groovy.codehaus.org">Groovy</a>
          */
-        GROOVY,
+        GROOVY ("{0}Context"),
 
         /**
          * <a href="http://www.scala-lang.org">Scala</a>
          */
-        SCALA,
+        SCALA ("{0}Context"),
 
         /**
          * <a href="http://www.php.net">PHP</a>
          */
-        PHP
+        PHP ("{0}_sm");
+
+    //-----------------------------------------------------------
+    // Member methods.
+    //
+
+        //-------------------------------------------------------
+        // Constructors.
+        //
+
+        private TargetLanguage(final String format)
+        {
+            _sourceNameFormat = format;
+        } // end of TargetLanguage(String)
+
+        //
+        // end of Constructors.
+        //-------------------------------------------------------
+
+        // Returns the source file name based on the class name.
+        public String sourceFileName(final String className)
+        {
+            return (
+                MessageFormat.format(
+                    _sourceNameFormat, className));
+        } // end of sourceFileName(String)
+
+    //-----------------------------------------------------------
+    // Member data.
+    //
+
+        // The default source file name pattern.
+        private final String _sourceNameFormat;
     } // end of enum TargetLanguage
 
     /**
@@ -1644,6 +1667,9 @@ public final class SmcParser
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2009/11/25 22:30:19  cwrapp
+// Fixed problem between %fsmclass and sm file names.
+//
 // Revision 1.4  2009/09/12 21:44:49  kgreg99
 // Implemented feature req. #2718941 - user defined generated class name.
 // A new statement was added to the syntax: %fsmclass class_name

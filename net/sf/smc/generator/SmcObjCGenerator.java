@@ -77,7 +77,7 @@ public final class SmcObjCGenerator
      */
     public SmcObjCGenerator(final SmcOptions options)
     {
-        super (options, "{0}{1}_sm.{2}", "m");
+        super (options, "m");
     } // end of SmcObjCGenerator(SmcOptions)
 
     //
@@ -96,7 +96,7 @@ public final class SmcObjCGenerator
      * %{ %} raw source code - if any
      *
      * #import <i>%include header file</i>
-     * #import "<i>context</i>_sm.h"
+     * #import "<i>context</i>.h"
      *   </pre>
      * </code>
      * @param fsm emit Objective C code for this finite state
@@ -149,7 +149,7 @@ public final class SmcObjCGenerator
         // Include the context file last.
         _source.print("#import \"");
         _source.print(_srcfileBase);
-        _source.println("_sm.h\"");
+        _source.println(".h\"");
 
         // Statically declare all derive state classes.
         _source.print(_indent);
@@ -1401,6 +1401,9 @@ public final class SmcObjCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2009/11/25 22:30:19  cwrapp
+// Fixed problem between %fsmclass and sm file names.
+//
 // Revision 1.7  2009/11/24 20:42:39  cwrapp
 // v. 6.0.1 update
 //

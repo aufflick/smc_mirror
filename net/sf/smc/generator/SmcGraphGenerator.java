@@ -77,7 +77,7 @@ public final class SmcGraphGenerator
      */
     public SmcGraphGenerator(final SmcOptions options)
     {
-        super (options, "{0}{1}_sm.{2}", "dot");
+        super (options, "dot");
 
         _indent_action = "&nbsp;&nbsp;&nbsp;";
     } // end of SmcGraphGenerator(SmcOptions)
@@ -856,6 +856,9 @@ public final class SmcGraphGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2009/11/25 22:30:19  cwrapp
+// Fixed problem between %fsmclass and sm file names.
+//
 // Revision 1.4  2009/11/24 20:42:39  cwrapp
 // v. 6.0.1 update
 //

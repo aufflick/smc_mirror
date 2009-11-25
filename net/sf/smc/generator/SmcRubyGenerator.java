@@ -81,7 +81,7 @@ public final class SmcRubyGenerator
      */
     public SmcRubyGenerator(final SmcOptions options)
     {
-        super (options, "{0}{1}_sm.{2}", "rb");
+        super (options, "rb");
     } // end of SmcRubyGenerator(SmcOptions)
 
     //
@@ -1272,6 +1272,9 @@ public final class SmcRubyGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2009/11/25 22:30:19  cwrapp
+// Fixed problem between %fsmclass and sm file names.
+//
 // Revision 1.6  2009/11/24 20:42:39  cwrapp
 // v. 6.0.1 update
 //

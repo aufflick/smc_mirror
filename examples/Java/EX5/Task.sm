@@ -34,6 +34,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2009/11/25 22:30:18  cwrapp
+// Fixed problem between %fsmclass and sm file names.
+//
 // Revision 1.5  2005/05/28 13:51:24  cwrapp
 // Update Java examples 1 - 7.
 //
@@ -45,6 +48,7 @@
 %start ExecuteMap::Suspended
 %class Task
 %package smc_ex5
+%fsmclass TaskFSM
 
 %map ExecuteMap
 %%
