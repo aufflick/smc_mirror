@@ -17,7 +17,7 @@
 // All Rights Reserved.
 //
 // Port to Python by Francois Perrad, francois.perrad@gadz.org
-// Copyright 2004, Francois Perrad.
+// Copyright 2004-2009, Francois Perrad.
 // All Rights Reserved.
 //
 // Contributor(s):
@@ -262,6 +262,47 @@ public final class SmcPythonGenerator
         _source.println("    def getOwner(self):");
         _source.println("        return self._owner");
         _source.println();
+
+        if (_reflectFlag == true)
+        {
+            // getStates() method.
+            _source.println("    _States = (");
+            for (SmcMap map: maps)
+            {
+                String mapName = map.getName();
+
+                _source.print("        ");
+                _source.print(mapName);
+                _source.print(".Default");
+                _source.println(",");
+
+                for (SmcState state: map.getStates())
+                {
+                    _source.print("        ");
+                    _source.print(mapName);
+                    _source.print(".");
+                    _source.print(state.getClassName());
+                    _source.println(",");
+                }
+            }
+            _source.println("    )");
+            _source.println("    def getStates(self):");
+            _source.println("        return _States");
+            _source.println();
+
+            // getTransitions() method.
+            _source.println("    _transitions = (");
+             for (SmcTransition trans: transitions)
+             {
+                _source.print("        '");
+                _source.print(trans.getName());
+                _source.println("',");
+            }
+            _source.println("    )");
+            _source.println("    def getTransitions(self):");
+            _source.println("        return _transitions");
+            _source.println();
+        }
 
         _source.println("# Local variables:");
         _source.println("#  buffer-read-only: t");
@@ -1199,6 +1240,9 @@ public final class SmcPythonGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2009/11/27 17:19:21  fperrad
+// Implemented feature req. #2718892 for Lua, Perl, PHP, Python, Ruby &Scala
+//
 // Revision 1.7  2009/11/25 22:30:19  cwrapp
 // Fixed problem between %fsmclass and sm file names.
 //
@@ -1222,88 +1266,4 @@ public final class SmcPythonGenerator
 // Revision 1.1  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
 //
-// Revision 1.15  2008/07/26 07:56:09  fperrad
-// + revert some magic (don't mix inheritance & automatic delegation)
-//
-// Revision 1.14  2008/07/15 14:48:16  fperrad
-// + fix : confidition of "pass" generation
-//
-// Revision 1.13  2008/07/14 09:31:25  fperrad
-// + Added the generation of read-only macro for Vi & Emacs
-//
-// Revision 1.12  2008/07/08 16:47:25  fperrad
-// + automatic delegation (more pythonic)
-//  needs 'new' object model
-//
-// Revision 1.11  2008/03/21 14:03:17  fperrad
-// refactor : move from the main file Smc.java to each language generator the following data :
-//  - the default file name suffix,
-//  - the file name format for the generated SMC files
-//
-// Revision 1.10  2007/08/05 14:36:12  cwrapp
-// Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more informaiton.
-//
-// Revision 1.9  2007/02/21 13:56:27  cwrapp
-// Moved Java code to release 1.5.0
-//
-// Revision 1.8  2007/01/15 00:23:52  cwrapp
-// Release 4.4.0 initial commit.
-//
-// Revision 1.7  2007/01/03 14:34:16  fperrad
-// + Added -reflect option for Perl, Python and Ruby code generation
-//
-// Revision 1.6  2006/09/16 15:04:29  cwrapp
-// Initial v. 4.3.3 check-in.
-//
-// Revision 1.5  2006/07/11 18:17:53  cwrapp
-// Corrected indentation.
-//
-// Revision 1.4  2006/06/03 19:39:25  cwrapp
-// Final v. 4.3.1 check in.
-//
-// Revision 1.3  2005/11/07 19:34:54  cwrapp
-// Changes in release 4.3.0:
-// New features:
-//
-// + Added -reflect option for Java, C#, VB.Net and Tcl code
-//   generation. When used, allows applications to query a state
-//   about its supported transitions. Returns a list of transition
-//   names. This feature is useful to GUI developers who want to
-//   enable/disable features based on the current state. See
-//   Programmer's Manual section 11: On Reflection for more
-//   information.
-//
-// + Updated LICENSE.txt with a missing final paragraph which allows
-//   MPL 1.1 covered code to work with the GNU GPL.
-//
-// + Added a Maven plug-in and an ant task to a new tools directory.
-//   Added Eiten Suez's SMC tutorial (in PDF) to a new docs
-//   directory.
-//
-// Fixed the following bugs:
-//
-// + (GraphViz) DOT file generation did not properly escape
-//   double quotes appearing in transition guards. This has been
-//   corrected.
-//
-// + A note: the SMC FAQ incorrectly stated that C/C++ generated
-//   code is thread safe. This is wrong. C/C++ generated is
-//   certainly *not* thread safe. Multi-threaded C/C++ applications
-//   are required to synchronize access to the FSM to allow for
-//   correct performance.
-//
-// + (Java) The generated getState() method is now public.
-//
-// Revision 1.2  2005/06/08 11:09:15  cwrapp
-// + Updated Python code generator to place "pass" in methods with empty
-//   bodies.
-// + Corrected FSM errors in Python example 7.
-// + Removed unnecessary includes from C++ examples.
-// + Corrected errors in top-level makefile's distribution build.
-//
-// Revision 1.1  2005/05/28 19:28:42  cwrapp
-// Moved to visitor pattern.
-//
-// Revision 1.0  2005/02/21 15:40:31  charlesr
-// Initial revision
 //

@@ -17,7 +17,7 @@
 // All Rights Reserved.
 //
 // Port to Lua by Francois Perrad, francois.perrad@gadz.org
-// Copyright 2007, Francois Perrad.
+// Copyright 2007-2009, Francois Perrad.
 // All Rights Reserved.
 //
 // Contributor(s):
@@ -331,6 +331,49 @@ public final class SmcLuaGenerator
         _source.println("    return self._owner");
         _source.println("end");
         _source.println();
+
+        if (_reflectFlag == true)
+        {
+            // getStates() method.
+            _source.println("AppClassContext._States = {");
+            for (SmcMap map: maps)
+            {
+                mapName = map.getName();
+
+                _source.print("    ");
+                _source.print(mapName);
+                _source.print(".Default");
+                _source.println(",");
+
+                for (SmcState state: map.getStates())
+                {
+                    _source.print("    ");
+                    _source.print(mapName);
+                    _source.print(".");
+                    _source.print(state.getClassName());
+                    _source.println(",");
+                }
+            }
+            _source.println("}");
+            _source.println("function AppClassContext:getStates ()");
+            _source.println("    return self._States");
+            _source.println("end");
+            _source.println();
+
+            // getTransitions() method.
+            _source.println("AppClassContext._transitions = {");
+             for (SmcTransition trans: transitions)
+             {
+                _source.print("    '");
+                _source.print(trans.getName());
+                _source.println("',");
+            }
+            _source.println("}");
+            _source.println("function AppClassContext:getTransitions ()");
+            _source.println("    return self._transitions");
+            _source.println("end");
+            _source.println();
+        }
 
         _source.println("-- Local variables:");
         _source.println("--  buffer-read-only: t");
@@ -1268,6 +1311,9 @@ public final class SmcLuaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2009/11/27 17:19:20  fperrad
+// Implemented feature req. #2718892 for Lua, Perl, PHP, Python, Ruby &Scala
+//
 // Revision 1.8  2009/11/25 22:30:19  cwrapp
 // Fixed problem between %fsmclass and sm file names.
 //

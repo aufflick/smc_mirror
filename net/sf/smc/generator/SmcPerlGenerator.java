@@ -17,7 +17,7 @@
 // All Rights Reserved.
 //
 // Port to Python by Francois Perrad, francois.perrad@gadz.org
-// Copyright 2004, Francois Perrad.
+// Copyright 2004-2009, Francois Perrad.
 // All Rights Reserved.
 //
 // Contributor(s):
@@ -280,6 +280,49 @@ public final class SmcPerlGenerator
         _source.println("        return $self->{_owner};");
         _source.println("    }");
         _source.println();
+
+        if (_reflectFlag == true)
+        {
+            // getStates() method.
+            _source.println("    sub getStates {");
+            _source.println("        my $self = shift;");
+            _source.println("        return (");
+            for (SmcMap map: maps)
+            {
+                String mapName = map.getName();
+
+                _source.print("            $");
+                _source.print(mapName);
+                _source.print("::Default");
+                _source.println(",");
+
+                for (SmcState state: map.getStates())
+                {
+                    _source.print("            $");
+                    _source.print(mapName);
+                    _source.print("::");
+                    _source.print(state.getClassName());
+                    _source.println(",");
+                }
+            }
+            _source.println("        );");
+            _source.println("    }");
+            _source.println();
+
+            // getTransitions() method.
+            _source.println("    sub getTransitions {");
+            _source.println("        my $self = shift;");
+            _source.println("        return (");
+            for (SmcTransition trans: transitions)
+            {
+                _source.print("            '");
+                _source.print(trans.getName());
+                _source.println("',");
+            }
+            _source.println("        );");
+            _source.println("    }");
+            _source.println();
+        }
 
         _source.println("1;");
         _source.println();
@@ -1307,6 +1350,9 @@ public final class SmcPerlGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2009/11/27 17:19:21  fperrad
+// Implemented feature req. #2718892 for Lua, Perl, PHP, Python, Ruby &Scala
+//
 // Revision 1.7  2009/11/25 22:30:19  cwrapp
 // Fixed problem between %fsmclass and sm file names.
 //
