@@ -1354,7 +1354,7 @@ public final class SmcParser
         /**
          * <a href="http://www.graphviz.org">GraphViz</a>
          */
-        GRAPH (""),
+        GRAPH ("{0}_sm"),
 
         /**
          * <a href="http://www.perl.org">Perl</a>
@@ -1667,6 +1667,9 @@ public final class SmcParser
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2009/11/27 19:44:39  cwrapp
+// Correct TargetLanguage.GRAPH source file name definition.
+//
 // Revision 1.5  2009/11/25 22:30:19  cwrapp
 // Fixed problem between %fsmclass and sm file names.
 //
