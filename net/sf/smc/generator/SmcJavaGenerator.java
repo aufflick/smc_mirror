@@ -400,9 +400,9 @@ public final class SmcJavaGenerator
             _source.print("    public Set");
             if (_genericFlag == true)
             {
-                _source.print("<String> ");
+                _source.print("<String>");
             }
-            _source.println("getTransitions()");
+            _source.println(" getTransitions()");
             _source.println("    {");
             _source.println("        return (_transitions);");
             _source.println("    }");
@@ -1885,6 +1885,9 @@ public final class SmcJavaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2009/11/27 19:45:39  cwrapp
+// Corrected getTransitions method generation.
+//
 // Revision 1.8  2009/11/25 22:30:19  cwrapp
 // Fixed problem between %fsmclass and sm file names.
 //
