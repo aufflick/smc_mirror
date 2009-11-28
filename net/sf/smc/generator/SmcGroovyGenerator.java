@@ -17,7 +17,7 @@
 // All Rights Reserved.
 //
 // Port to Groovy by Francois Perrad, francois.perrad@gadz.org
-// Copyright 2007, Francois Perrad.
+// Copyright 2007-2009, Francois Perrad.
 // All Rights Reserved.
 //
 // Contributor(s):
@@ -271,14 +271,13 @@ public final class SmcGroovyGenerator
         // If reflecting, then define the states list.
         if (_reflectFlag == true)
         {
-            String mapName;
             boolean firstFlag = true;
 
-            _source.println("    static final States = [");
-
+            // getStates() method.
+            _source.println("    final states = [");
             for (SmcMap map: maps)
             {
-                mapName = map.getName();
+                String mapName = map.getName();
 
                 for (SmcState state: map.getStates())
                 {
@@ -296,7 +295,27 @@ public final class SmcGroovyGenerator
                     _source.print(state.getClassName());
                 }
             }
+            _source.println();
+            _source.println("    ]");
+            _source.println();
 
+            // getTransitions() method.
+            _source.println("    final transitions = [");
+            firstFlag = true;
+            for (SmcTransition trans: transitions)
+            {
+                if (firstFlag == true)
+                {
+                    firstFlag = false;
+                }
+                else
+                {
+                    _source.println(",");
+                }
+                _source.print("        '");
+                _source.print(trans.getName());
+                _source.print("'");
+            }
             _source.println();
             _source.println("    ]");
         }
@@ -1311,6 +1330,9 @@ public final class SmcGroovyGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2009/11/28 10:02:57  fperrad
+// rework on 2718892
+//
 // Revision 1.8  2009/11/25 22:30:19  cwrapp
 // Fixed problem between %fsmclass and sm file names.
 //
