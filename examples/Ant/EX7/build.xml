@@ -41,7 +41,7 @@
 
   <target name="gen-one">
      <java dir="${gen.dir}" jar="${smc.jar}" fork="true">
-       <arg line="-java -d ${src.dir} -return ${smfile}" />
+       <arg line="-java -d ${gen.dir} -return ${smfile}" />
      </java>
   </target>
 

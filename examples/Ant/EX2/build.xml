@@ -35,7 +35,7 @@
 
   <target name="gen" description="Generate state support code (smc)" depends="init">
      <java dir="${gen.dir}" jar="${smc.jar}" fork="true">
-     <arg line="-java -d ${src.dir} -return ${sm.file}" />
+     <arg line="-java -d ${gen.dir} -return ${sm.file}" />
     </java>
   </target>
 
