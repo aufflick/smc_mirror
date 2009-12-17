@@ -190,7 +190,7 @@ namespace statemap
                     name_, "SET", state_, state);
 
 #if TRACE
-            Trace.WriteLine("NEW STATE    : " +    state.Name);
+            Trace.WriteLine("ENTER STATE     : " +    state.Name);
 #endif
 
             state_ = state;
@@ -230,7 +230,7 @@ namespace statemap
                     name_, "PUSH", state_, state);
 
 #if TRACE
-            Trace.WriteLine("PUSH TO STATE: " +    state.Name);
+            Trace.WriteLine("PUSH TO STATE   : " +    state.Name);
 #endif
 
             if (state_ != null)
@@ -270,7 +270,7 @@ namespace statemap
                 state_ = nextState;
 
 #if TRACE
-                Trace.WriteLine("POP TO STATE : " + state_.Name);
+                Trace.WriteLine("POP TO STATE    : " + state_.Name);
 #endif
 
                 OnStateChange(e);
@@ -354,6 +354,9 @@ namespace statemap
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2009/12/17 19:51:43  cwrapp
+// Testing complete.
+//
 // Revision 1.7  2009/03/30 19:05:44  kgreg99
 // 1. Patch for bug  #2722356. Variable stateStack_ is initialized in the constructor and not by the first "push". This prevents an unhandled exception in EmptyStateStack() without pushing a state.
 //

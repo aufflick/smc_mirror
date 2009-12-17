@@ -1059,6 +1059,38 @@ public final class SmcCGenerator
             }
         }
 
+        if (_debugLevel >= DEBUG_LEVEL_0)
+        {
+            Iterator<SmcParameter> pit;
+            SmcParameter param;
+            String sep;
+
+            _source.print(indent2);
+            _source.println("if (getDebugFlag(fsm) != 0) {");
+            _source.print(indent2);
+            _source.print("    TRACE(\"ENTER TRANSITION: ");
+            _source.print(mapName);
+            _source.print("_");
+            _source.print(stateName);
+            _source.print(".");
+            _source.print(transName);
+            _source.print("(");
+
+            for (pit = transition.getParameters().iterator(),
+                 sep = "";
+                 pit.hasNext() == true;
+                 sep = ", ")
+            {
+                param = pit.next();
+                _source.print(sep);
+                _source.print(param.getName());
+            }
+
+            _source.println(")\\n\\r\");");
+            _source.print(indent2);
+            _source.println("}");
+        }
+
         // Dump out this transition's actions.
         if (actions.isEmpty() == true)
         {
@@ -1075,38 +1107,6 @@ public final class SmcCGenerator
             _source.print(indent2);
             _source.println("clearState(fsm);");
 
-            if (_debugLevel >= DEBUG_LEVEL_0)
-            {
-                Iterator<SmcParameter> pit;
-                SmcParameter param;
-                String sep;
-
-                _source.print(indent2);
-                _source.println("if (getDebugFlag(fsm) != 0) {");
-                _source.print(indent2);
-                _source.print("    TRACE(\"ENTER TRANSITION: ");
-                _source.print(mapName);
-                _source.print("_");
-                _source.print(stateName);
-                _source.print(".");
-                _source.print(transName);
-                _source.print("(");
-
-                for (pit = transition.getParameters().iterator(),
-                     sep = "";
-                     pit.hasNext() == true;
-                     sep = ", ")
-                {
-                    param = pit.next();
-                    _source.print(sep);
-                    _source.print(param.getName());
-                }
-
-                _source.println(")\\n\\r\");");
-                _source.print(indent2);
-                _source.println("}");
-            }
-
             indent4 = _indent;
             _indent = indent2;
             for (SmcAction action: actions)
@@ -1114,40 +1114,40 @@ public final class SmcCGenerator
                 action.accept(this);
             }
             _indent = indent4;
-
-            if (_debugLevel >= DEBUG_LEVEL_1)
-            {
-                Iterator<SmcParameter> pit;
-                SmcParameter param;
-                String sep;
-
-                _source.print(indent2);
-                _source.println("if (getDebugFlag(fsm) != 0) {");
-                _source.print(indent2);
-                _source.print("    TRACE(\"EXIT TRANSITION : ");
-                _source.print(mapName);
-                _source.print("_");
-                _source.print(stateName);
-                _source.print(".");
-                _source.print(transName);
-                _source.print("(");
-
-                for (pit = transition.getParameters().iterator(),
-                     sep = "";
-                     pit.hasNext() == true;
-                     sep = ", ")
-                {
-                    param = pit.next();
-                    _source.print(sep);
-                    _source.print(param.getName());
-                }
-
-                _source.println(")\\n\\r\");");
-                _source.print(indent2);
-                _source.println("}");
-            }
         }
         indent3 = indent2;
+
+        if (_debugLevel >= DEBUG_LEVEL_0)
+        {
+            Iterator<SmcParameter> pit;
+            SmcParameter param;
+            String sep;
+
+            _source.print(indent2);
+            _source.println("if (getDebugFlag(fsm) != 0) {");
+            _source.print(indent2);
+            _source.print("    TRACE(\"EXIT TRANSITION : ");
+            _source.print(mapName);
+            _source.print("_");
+            _source.print(stateName);
+            _source.print(".");
+            _source.print(transName);
+            _source.print("(");
+
+            for (pit = transition.getParameters().iterator(),
+                 sep = "";
+                 pit.hasNext() == true;
+                 sep = ", ")
+            {
+                param = pit.next();
+                _source.print(sep);
+                _source.print(param.getName());
+            }
+
+            _source.println(")\\n\\r\");");
+            _source.print(indent2);
+            _source.println("}");
+        }
 
         // Print the setState() call, if necessary. Do NOT
         // generate the set state if:
@@ -1409,6 +1409,9 @@ public final class SmcCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2009/12/17 19:51:43  cwrapp
+// Testing complete.
+//
 // Revision 1.8  2009/11/25 22:30:19  cwrapp
 // Fixed problem between %fsmclass and sm file names.
 //

@@ -960,6 +960,37 @@ public final class SmcPhpGenerator
             }
         }
 
+        if (_debugLevel >= DEBUG_LEVEL_0)
+        {
+            List<SmcParameter> parameters =
+                transition.getParameters();
+            Iterator<SmcParameter> pit;
+            String sep;
+
+            _source.print(indent2);
+            _source.println("if ($fsm->getDebugFlag()) {");
+            _source.print(indent2);
+            _source.print(
+                "    fwrite($fsm->getDebugStream(), \"");
+            _source.print("ENTER TRANSITION: ");
+            _source.print(stateName);
+            _source.print("->");
+            _source.print(transName);
+            _source.print("(");
+            for (pit = parameters.iterator(), sep = "";
+                 pit.hasNext() == true;
+                 sep = ", ")
+            {
+                _source.print(sep);
+                (pit.next()).accept(this);
+            }
+            _source.print(");");
+
+            _source.println("\\n\");");
+            _source.print(indent2);
+            _source.println("}");
+        }
+
         // Dump out this transition's actions.
         if (actions.isEmpty() == true)
         {
@@ -1008,37 +1039,6 @@ public final class SmcPhpGenerator
             _source.print(indent2);
             _source.println("$fsm->clearState();");
 
-            if (_debugLevel >= DEBUG_LEVEL_0)
-            {
-                List<SmcParameter> parameters =
-                    transition.getParameters();
-                Iterator<SmcParameter> pit;
-                String sep;
-
-                _source.print(indent2);
-                _source.println("if ($fsm->getDebugFlag()) {");
-                _source.print(indent2);
-                _source.print(
-                    "    fwrite($fsm->getDebugStream(), \"");
-                _source.print("ENTER TRANSITION: ");
-                _source.print(stateName);
-                _source.print("->");
-                _source.print(transName);
-                _source.print("(");
-                for (pit = parameters.iterator(), sep = "";
-                     pit.hasNext() == true;
-                     sep = ", ")
-                {
-                    _source.print(sep);
-                    (pit.next()).accept(this);
-                }
-                _source.print(");");
-
-                _source.println("\\n\");");
-                _source.print(indent2);
-                _source.print("}");
-            }
-
             // v. 2.0.0: Place the actions inside a try/finally
             // block. This way the state will be set before an
             // exception leaves the transition method.
@@ -1068,37 +1068,6 @@ public final class SmcPhpGenerator
 
             _indent = indent4;
 
-            if (_debugLevel >= DEBUG_LEVEL_1)
-            {
-                List<SmcParameter> parameters =
-                    transition.getParameters();
-                Iterator<SmcParameter> pit;
-                String sep;
-
-                _source.print(indent2);
-                _source.println("if ($fsm->getDebugFlag()) {");
-                _source.print(indent2);
-                _source.print(
-                    "    fwrite($fsm->getDebugStream(), \"");
-                _source.print("EXIT TRANSITION : ");
-                _source.print(stateName);
-                _source.print("->");
-                _source.print(transName);
-                _source.print("(");
-                for (pit = parameters.iterator(), sep = "";
-                     pit.hasNext() == true;
-                     sep = ", ")
-                {
-                    _source.print(sep);
-                    (pit.next()).accept(this);
-                }
-                _source.print(");");
-
-                _source.println("\\n\");");
-                _source.print(indent2);
-                _source.print("}");
-            }
-
             // v. 2.2.0: Check if the user has turned off this
             // feature first.
             // PHP has no 'finally', thus emulate it with catch
@@ -1111,6 +1080,37 @@ public final class SmcPhpGenerator
                 _source.print(indent2);
                 _source.println("catch (Exception $exception) {}");
             }
+        }
+
+        if (_debugLevel >= DEBUG_LEVEL_0)
+        {
+            List<SmcParameter> parameters =
+                transition.getParameters();
+            Iterator<SmcParameter> pit;
+            String sep;
+
+            _source.print(indent2);
+            _source.println("if ($fsm->getDebugFlag()) {");
+            _source.print(indent2);
+            _source.print(
+                "    fwrite($fsm->getDebugStream(), \"");
+            _source.print("EXIT TRANSITION : ");
+            _source.print(stateName);
+            _source.print("->");
+            _source.print(transName);
+            _source.print("(");
+            for (pit = parameters.iterator(), sep = "";
+                 pit.hasNext() == true;
+                 sep = ", ")
+            {
+                _source.print(sep);
+                (pit.next()).accept(this);
+            }
+            _source.print(");");
+
+            _source.println("\\n\");");
+            _source.print(indent2);
+            _source.println("}");
         }
 
         // Print the setState() call, if necessary. Do NOT
@@ -1397,6 +1397,9 @@ public final class SmcPhpGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2009/12/17 19:51:43  cwrapp
+// Testing complete.
+//
 // Revision 1.8  2009/11/27 17:19:21  fperrad
 // Implemented feature req. #2718892 for Lua, Perl, PHP, Python, Ruby &Scala
 //

@@ -1059,6 +1059,37 @@ public final class SmcObjCGenerator
             }
         }
 
+        if (_debugLevel >= DEBUG_LEVEL_0)
+        {
+            Iterator<SmcParameter> pit;
+            String sep;
+
+            _source.print(indent2);
+            _source.println("if ( [context debugFlag] )");
+            _source.print(indent2);
+            _source.println("{");
+            _source.print(indent2);
+            _source.print("    TRACE(@\"ENTER TRANSITION: ");
+            _source.print(mapName);
+            _source.print(" ");
+            _source.print(transName);
+            _source.print("(");
+
+            for (pit = transition.getParameters().iterator(),
+                 sep = "";
+                 pit.hasNext() == true;
+                 sep = " ")
+            {
+                _source.print(sep);
+                (pit.next()).accept(this);
+            }
+
+            _source.println(")\\n\\r\");");
+
+            _source.print(indent2);
+            _source.println("}");
+        }
+
         // Dump out this transition's actions.
         if (actions.isEmpty() == true)
         {
@@ -1077,37 +1108,6 @@ public final class SmcObjCGenerator
             _source.print(indent2);
             _source.println("[context clearState];");
 
-            if (_debugLevel >= DEBUG_LEVEL_0)
-            {
-                Iterator<SmcParameter> pit;
-                String sep;
-
-                _source.print(indent2);
-                _source.println("if ( [context debugFlag] )");
-                _source.print(indent2);
-                _source.println("{");
-                _source.print(indent2);
-                _source.print("    TRACE(@\"ENTER TRANSITION: ");
-                _source.print(mapName);
-                _source.print(" ");
-                _source.print(transName);
-                _source.print("(");
-
-                for (pit = transition.getParameters().iterator(),
-                     sep = "";
-                     pit.hasNext() == true;
-                     sep = " ")
-                {
-                    _source.print(sep);
-                    (pit.next()).accept(this);
-                }
-
-                _source.println(")\\n\\r\");");
-
-                _source.print(indent2);
-                _source.println("}");
-            }
-
             indent3 = indent2;
             indent4 = _indent;
             _indent = indent3;
@@ -1118,37 +1118,37 @@ public final class SmcObjCGenerator
             }
 
             _indent = indent4;
+        }
 
-            if (_debugLevel >= DEBUG_LEVEL_1)
+        if (_debugLevel >= DEBUG_LEVEL_0)
+        {
+            Iterator<SmcParameter> pit;
+            String sep;
+
+            _source.print(indent3);
+            _source.println("if ( [context debugFlag] )");
+            _source.print(indent3);
+            _source.println("{");
+            _source.print(indent3);
+            _source.print("    TRACE(@\"EXIT TRANSITION : ");
+            _source.print(mapName);
+            _source.print(" ");
+            _source.print(transName);
+            _source.print("(");
+
+            for (pit = transition.getParameters().iterator(),
+                 sep = "";
+                 pit.hasNext() == true;
+                 sep = " ")
             {
-                Iterator<SmcParameter> pit;
-                String sep;
-
-                _source.print(indent2);
-                _source.println("if ( [context debugFlag] )");
-                _source.print(indent2);
-                _source.println("{");
-                _source.print(indent2);
-                _source.print("    TRACE(@\"EXIT TRANSITION : ");
-                _source.print(mapName);
-                _source.print(" ");
-                _source.print(transName);
-                _source.print("(");
-
-                for (pit = transition.getParameters().iterator(),
-                     sep = "";
-                     pit.hasNext() == true;
-                     sep = " ")
-                {
-                    _source.print(sep);
-                    (pit.next()).accept(this);
-                }
-
-                _source.println(")\\n\\r\");");
-
-                _source.print(indent2);
-                _source.println("}");
+                _source.print(sep);
+                (pit.next()).accept(this);
             }
+
+            _source.println(")\\n\\r\");");
+
+            _source.print(indent3);
+            _source.println("}");
         }
 
         // Print the setState() call, if necessary. Do NOT
@@ -1401,6 +1401,9 @@ public final class SmcObjCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2009/12/17 19:51:43  cwrapp
+// Testing complete.
+//
 // Revision 1.8  2009/11/25 22:30:19  cwrapp
 // Fixed problem between %fsmclass and sm file names.
 //

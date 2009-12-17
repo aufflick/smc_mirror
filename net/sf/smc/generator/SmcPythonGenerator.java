@@ -271,11 +271,6 @@ public final class SmcPythonGenerator
             {
                 String mapName = map.getName();
 
-                _source.print("        ");
-                _source.print(mapName);
-                _source.print(".Default");
-                _source.println(",");
-
                 for (SmcState state: map.getStates())
                 {
                     _source.print("        ");
@@ -865,6 +860,35 @@ public final class SmcPythonGenerator
             }
         }
 
+        if (_debugLevel >= DEBUG_LEVEL_0)
+        {
+            List<SmcParameter> parameters =
+                transition.getParameters();
+            Iterator<SmcParameter> pit;
+            String sep;
+
+            _source.print(indent2);
+            _source.println(
+                "if fsm.getDebugFlag() == True:");
+            _source.print(indent2);
+            _source.print(
+                "    fsm.getDebugStream().write(\"");
+            _source.print("ENTER TRANSITION: ");
+            _source.print(stateName);
+            _source.print(".");
+            _source.print(transName);
+            _source.print("(");
+            for (pit = parameters.iterator(), sep = "";
+                 pit.hasNext() == true;
+                 sep = ", ")
+            {
+                _source.print(sep);
+                (pit.next()).accept(this);
+            }
+            _source.println(")\\n\")");
+            _source.println();
+        }
+
         // Dump out this transition's actions.
         if (actions.isEmpty() == true)
         {
@@ -916,35 +940,6 @@ public final class SmcPythonGenerator
             _source.print(indent2);
             _source.println("fsm.clearState()");
 
-            if (_debugLevel >= DEBUG_LEVEL_0)
-            {
-                List<SmcParameter> parameters =
-                    transition.getParameters();
-                Iterator<SmcParameter> pit;
-                String sep;
-
-                _source.print(indent2);
-                _source.println(
-                    "if fsm.getDebugFlag() == True:");
-                _source.print(indent2);
-                _source.print(
-                    "    fsm.getDebugStream().write(\"");
-                _source.print("ENTER TRANSITION: ");
-                _source.print(stateName);
-                _source.print(".");
-                _source.print(transName);
-                _source.print("(");
-                for (pit = parameters.iterator(), sep = "";
-                     pit.hasNext() == true;
-                     sep = ", ")
-                {
-                    _source.print(sep);
-                    (pit.next()).accept(this);
-                }
-                _source.println(")\\n\")");
-                _source.println();
-            }
-
             // v. 2.0.0: Place the actions inside a try/finally
             // block. This way the state will be set before an
             // exception leaves the transition method.
@@ -972,35 +967,6 @@ public final class SmcPythonGenerator
 
             _indent = indent4;
 
-            if (_debugLevel >= DEBUG_LEVEL_1)
-            {
-                List<SmcParameter> parameters =
-                    transition.getParameters();
-                Iterator<SmcParameter> pit;
-                String sep;
-
-                _source.print(indent2);
-                _source.println(
-                    "if fsm.getDebugFlag() == True:");
-                _source.print(indent2);
-                _source.print(
-                    "    fsm.getDebugStream().write(\"");
-                _source.print("EXIT TRANSITION : ");
-                _source.print(stateName);
-                _source.print(".");
-                _source.print(transName);
-                _source.print("(");
-                for (pit = parameters.iterator(), sep = "";
-                     pit.hasNext() == true;
-                     sep = ", ")
-                {
-                    _source.print(sep);
-                    (pit.next()).accept(this);
-                }
-                _source.println(")\\n\")");
-                _source.println();
-            }
-
             // v. 2.2.0: Check if the user has turned off this
             // feature first.
             if (_noCatchFlag == false)
@@ -1018,10 +984,12 @@ public final class SmcPythonGenerator
             String sep;
 
             _source.print(indent3);
-            _source.println("if fsm.getDebugFlag() == True:");
+            _source.println(
+                "if fsm.getDebugFlag() == True:");
             _source.print(indent3);
-            _source.print("    fsm.getDebugStream().write(\"");
-            _source.print("ENTER TRANSITION: ");
+            _source.print(
+                "    fsm.getDebugStream().write(\"");
+            _source.print("EXIT TRANSITION : ");
             _source.print(stateName);
             _source.print(".");
             _source.print(transName);
@@ -1240,6 +1208,9 @@ public final class SmcPythonGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2009/12/17 19:51:43  cwrapp
+// Testing complete.
+//
 // Revision 1.8  2009/11/27 17:19:21  fperrad
 // Implemented feature req. #2718892 for Lua, Perl, PHP, Python, Ruby &Scala
 //

@@ -291,11 +291,6 @@ public final class SmcPerlGenerator
             {
                 String mapName = map.getName();
 
-                _source.print("            $");
-                _source.print(mapName);
-                _source.print("::Default");
-                _source.println(",");
-
                 for (SmcState state: map.getStates())
                 {
                     _source.print("            $");
@@ -974,6 +969,40 @@ public final class SmcPerlGenerator
             }
         }
 
+        if (_debugLevel >= DEBUG_LEVEL_0)
+        {
+            List<SmcParameter> parameters =
+                transition.getParameters();
+            Iterator<SmcParameter> pit;
+            String sep;
+
+            _source.print(indent2);
+            _source.println("if ($fsm->getDebugFlag()) {");
+            _source.print(indent2);
+            _source.println(
+                "    my $fh = $fsm->getDebugStream();");
+            _source.print(indent2);
+            _source.print("    print $fh \"");
+            _source.print("ENTER TRANSITION: ");
+            _source.print(stateName);
+            _source.print("->");
+            _source.print(transName);
+
+            _source.print("(");
+            for (pit = parameters.iterator(), sep = "";
+                 pit.hasNext() == true;
+                 sep = ", ")
+            {
+                _source.print(sep);
+                _source.print((pit.next()).getName());
+            }
+            _source.print(")");
+
+            _source.println("\\n\";");
+            _source.print(indent2);
+            _source.println("}");
+        }
+
         // Dump out this transition's actions.
         if (actions.isEmpty() == true)
         {
@@ -995,40 +1024,6 @@ public final class SmcPerlGenerator
             // current state.
             _source.print(indent2);
             _source.println("$fsm->clearState();");
-
-            if (_debugLevel >= DEBUG_LEVEL_0)
-            {
-                List<SmcParameter> parameters =
-                    transition.getParameters();
-                Iterator<SmcParameter> pit;
-                String sep;
-
-                _source.print(indent2);
-                _source.println("if ($fsm->getDebugFlag()) {");
-                _source.print(indent2);
-                _source.println(
-                    "    my $fh = $fsm->getDebugStream();");
-                _source.print(indent2);
-                _source.print("    print $fh \"");
-                _source.print("ENTER TRANSITION: ");
-                _source.print(stateName);
-                _source.print("->");
-                _source.print(transName);
-
-                _source.print("(");
-                for (pit = parameters.iterator(), sep = "";
-                     pit.hasNext() == true;
-                     sep = ", ")
-                {
-                    _source.print(sep);
-                    _source.print((pit.next()).getName());
-                }
-                _source.print(")");
-
-                _source.println("\\n\";");
-                _source.print(indent2);
-                _source.println("}");
-            }
 
             // v. 2.0.0: Place the actions inside a try/finally
             // block. This way the state will be set before an
@@ -1057,7 +1052,7 @@ public final class SmcPerlGenerator
 
             _indent = indent4;
 
-            if (_debugLevel >= DEBUG_LEVEL_1)
+            if (_debugLevel >= DEBUG_LEVEL_0)
             {
                 List<SmcParameter> parameters =
                     transition.getParameters();
@@ -1100,40 +1095,40 @@ public final class SmcPerlGenerator
                 _source.print(indent2);
                 _source.println("warn $@ if ($@);");
             }
+        }
 
-            if (_debugLevel >= DEBUG_LEVEL_1)
+        if (_debugLevel >= DEBUG_LEVEL_0)
+        {
+            List<SmcParameter> parameters =
+                transition.getParameters();
+            Iterator<SmcParameter> pit;
+            String sep;
+
+            _source.print(indent3);
+            _source.println("if ($fsm->getDebugFlag()) {");
+            _source.print(indent3);
+            _source.println(
+                "    my $fh = $fsm->getDebugStream();");
+            _source.print(indent2);
+            _source.print("    print $fh \"");
+            _source.print("EXIT TRANSITION : ");
+            _source.print(stateName);
+            _source.print("->");
+            _source.print(transName);
+
+            _source.print("(");
+            for (pit = parameters.iterator(), sep = "";
+                 pit.hasNext() == true;
+                 sep = ", ")
             {
-                List<SmcParameter> parameters =
-                    transition.getParameters();
-                Iterator<SmcParameter> pit;
-                String sep;
-
-                _source.print(indent2);
-                _source.println("if ($fsm->getDebugFlag()) {");
-                _source.print(indent2);
-                _source.println(
-                    "    my $fh = $fsm->getDebugStream();");
-                _source.print(indent2);
-                _source.print("    print $fh \"");
-                _source.print("EXIT TRANSITION : ");
-                _source.print(stateName);
-                _source.print("->");
-                _source.print(transName);
-
-                _source.print("(");
-                for (pit = parameters.iterator(), sep = "";
-                     pit.hasNext() == true;
-                     sep = ", ")
-                {
-                    _source.print(sep);
-                    _source.print((pit.next()).getName());
-                }
-                _source.print(")");
-
-                _source.println("\\n\";");
-                _source.print(indent2);
-                _source.println("}");
+                _source.print(sep);
+                _source.print((pit.next()).getName());
             }
+            _source.print(")");
+
+            _source.println("\\n\";");
+            _source.print(indent3);
+            _source.println("}");
         }
 
         // Print the setState() call, if necessary. Do NOT
@@ -1350,6 +1345,9 @@ public final class SmcPerlGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2009/12/17 19:51:43  cwrapp
+// Testing complete.
+//
 // Revision 1.8  2009/11/27 17:19:21  fperrad
 // Implemented feature req. #2718892 for Lua, Perl, PHP, Python, Ruby &Scala
 //

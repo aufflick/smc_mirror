@@ -30,6 +30,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2009/12/17 19:51:43  cwrapp
+// Testing complete.
+//
 // Revision 1.6  2009/03/27 09:41:46  cwrapp
 // Added F. Perrad changes back in.
 //
@@ -55,6 +58,24 @@ public class AppClass
 
         // Uncomment to see debug output.
         // _fsm.setDebugFlag(true);
+
+        // Uncomment to output -reflect information.
+        // Be sure to uncomment REFLECT and GENERIC macros in
+        // Makefile.
+//         System.out.println("States:");
+//         for (AppClassContext.AppClassState state: _fsm.getStates())
+//         {
+//             System.out.print("  ");
+//             System.out.println(state);
+
+//             System.out.println("    Transitions:");
+//             for (String transition:
+//                      (state.getTransitions()).keySet())
+//             {
+//                 System.out.print("      ");
+//                 System.out.println(transition);
+//             }
+//         }
     }
 
     public boolean CheckString(String string)
@@ -81,6 +102,27 @@ public class AppClass
 
                 case 'c':
                 case 'C':
+                    // Uncomment to test serialization.
+//                     try
+//                     {
+//                         final String filename =
+//                             "./fsm_serial.bin";
+
+//                         serialize(
+//                             new java.io.FileOutputStream(
+//                                 filename));
+//                         _fsm =
+//                             deserialize(
+//                                 new java.io.FileInputStream(
+//                                     filename));
+//                     }
+//                     catch (Exception jex)
+//                     {
+//                         System.err.println(
+//                             "FSM serialization failure:");
+//                         jex.printStackTrace();
+//                     }
+
                     _fsm.C();
                     break;
 
@@ -104,4 +146,35 @@ public class AppClass
 	{
         _is_acceptable = false;
     }
+
+    // Uncomment to test serialization.
+//     public void serialize(final java.io.OutputStream s)
+//         throws java.io.IOException
+//     {
+//         final java.io.ObjectOutputStream oos =
+//             new java.io.ObjectOutputStream(s);
+
+//         oos.writeObject(_fsm);
+
+//         return;
+//     } // end of serialize(OutputStream)
+
+//     public AppClassContext deserialize(
+//         final java.io.InputStream s)
+//         throws java.io.IOException,
+//                ClassNotFoundException
+//     {
+//         final java.io.ObjectInputStream ois =
+//             new java.io.ObjectInputStream(s);
+//         AppClassContext retval = null;
+
+//         retval = (AppClassContext) ois.readObject();
+//         retval.setOwner(this);
+
+//         // Uncomment to see debug output.
+//         // retval.setDebugFlag(true);
+//         // retval.setDebugStream(System.err);
+
+//         return (retval);
+//     } // end of deserialize(InputStream))
 }

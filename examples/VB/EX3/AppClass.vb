@@ -29,6 +29,9 @@
 '
 ' CHANGE LOG
 ' $Log$
+' Revision 1.3  2009/12/17 19:51:43  cwrapp
+' Testing complete.
+'
 ' Revision 1.2  2009/03/01 18:20:40  cwrapp
 ' Preliminary v. 6.0.0 commit.
 '
@@ -38,6 +41,13 @@
 ' Revision 1.0  2004/05/30 21:35:43  charlesr
 ' Initial revision
 '
+
+#If Serial Then
+Imports System
+Imports System.IO
+Imports System.Runtime.Serialization
+Imports System.Runtime.Serialization.Formatters.Binary
+#End If
 
 Public NotInheritable Class AppClass
 
@@ -60,9 +70,6 @@ Public NotInheritable Class AppClass
 
         _isAcceptable = False
         _fsm = New AppClassContext(Me)
-
-        ' Uncomment to turn on debug output.
-        ' _fsm.DebugFlag = True
     End Sub
 
     Public Function CheckString(ByVal s As String) As Boolean
@@ -84,6 +91,20 @@ Public NotInheritable Class AppClass
                 _fsm.One()
             ElseIf c = "c"c _
             Then
+#If SERIAL Then
+                Try
+                    Dim filename As String = "fsm_serial.dat"
+
+                    Console.WriteLine()
+
+                    Serialize(filename)
+                    _fsm = Deserialize(filename)
+                Catch ex As Exception
+
+                    Console.WriteLine("FSM serialization failure.")
+                    Console.WriteLine(ex)
+                End Try
+#End If
                 _fsm.C()
             Else
                 _fsm.Unknown()
@@ -107,4 +128,42 @@ Public NotInheritable Class AppClass
         _isAcceptable = False
     End Sub
 
+
+#If SERIAL Then
+    Public Sub Serialize(ByVal filename As String)
+        Dim fstream As FileStream = _
+            New FileStream(filename, FileMode.Create)
+        Dim formatter As BinaryFormatter = New BinaryFormatter()
+
+        Console.WriteLine("Serializing FSM.")
+
+        Try
+
+            formatter.Serialize(fstream, _fsm)
+        Finally
+
+            fstream.Close()
+        End Try
+    End Sub
+
+    Public Function Deserialize(ByVal filename As String) As AppClassContext
+        Dim fstream As FileStream = _
+            New FileStream(filename, FileMode.Open)
+        Dim formatter As BinaryFormatter = New BinaryFormatter()
+        Dim retval As AppClassContext = Nothing
+
+        Console.WriteLine("Deserializing FSM.")
+
+        Try
+
+            retval = formatter.Deserialize(fstream)
+            retval.Owner = Me
+        Finally
+
+            fstream.Close()
+        End Try
+
+        Return retval
+    End Function
+#End If
 End Class

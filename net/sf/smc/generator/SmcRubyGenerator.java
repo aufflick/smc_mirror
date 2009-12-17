@@ -302,11 +302,6 @@ public final class SmcRubyGenerator
             {
                 String mapName = map.getName();
 
-                _source.print("            ");
-                _source.print(mapName);
-                _source.print("::Default");
-                _source.println(",");
-
                 for (SmcState state: map.getStates())
                 {
                     _source.print("            ");
@@ -973,6 +968,44 @@ public final class SmcRubyGenerator
             }
         }
 
+        if (_debugLevel >= DEBUG_LEVEL_0)
+        {
+            List<SmcParameter> parameters =
+                transition.getParameters();
+            Iterator<SmcParameter> pit;
+            String sep;
+
+            _source.print(indent2);
+            _source.println("if fsm.getDebugFlag then");
+            _source.print(indent2);
+            _source.print("    fsm.getDebugStream.write(\"");
+            _source.print("ENTER TRANSITION: ");
+            if (packageName != null && packageName.length() > 0)
+            {
+                _source.print(packageName);
+                _source.print("::");
+            }
+            _source.print(stateName);
+            _source.print(".");
+            _source.print(transName);
+
+            if (parameters.size() != 0)
+            {
+                _source.print("(");
+                for (pit = parameters.iterator(), sep = "";
+                     pit.hasNext() == true;
+                     sep = ", ")
+                {
+                    _source.print(sep);
+                    _source.print((pit.next()).getName());
+                }
+                _source.print(")");
+            }
+            _source.println("\\n\")");
+            _source.print(indent2);
+            _source.println("    end");
+        }
+
         // Dump out this transition's actions.
         if (actions.size() == 0)
         {
@@ -994,44 +1027,6 @@ public final class SmcRubyGenerator
             // current state.
             _source.print(indent2);
             _source.println("fsm.clearState");
-
-            if (_debugLevel >= DEBUG_LEVEL_0)
-            {
-                List<SmcParameter> parameters =
-                    transition.getParameters();
-                Iterator<SmcParameter> pit;
-                String sep;
-
-                _source.print(indent2);
-                _source.println("if fsm.getDebugFlag then");
-                _source.print(indent2);
-                _source.print("    fsm.getDebugStream.write(\"");
-                _source.print("ENTER TRANSITION: ");
-                if (packageName != null && packageName.length() > 0)
-                {
-                    _source.print(packageName);
-                    _source.print("::");
-                }
-                _source.print(stateName);
-                _source.print(".");
-                _source.print(transName);
-
-                if (parameters.size() != 0)
-                {
-                    _source.print("(");
-                    for (pit = parameters.iterator(), sep = "";
-                         pit.hasNext() == true;
-                         sep = ", ")
-                    {
-                        _source.print(sep);
-                        _source.print((pit.next()).getName());
-                    }
-                    _source.print(")");
-                }
-                _source.println("\\n\")");
-                _source.print(indent2);
-                _source.println("    end");
-            }
 
             // v. 2.0.0: Place the actions inside a try/finally
             // block. This way the state will be set before an
@@ -1060,44 +1055,6 @@ public final class SmcRubyGenerator
 
             _indent = indent4;
 
-            if (_debugLevel >= DEBUG_LEVEL_1)
-            {
-                List<SmcParameter> parameters =
-                    transition.getParameters();
-                Iterator<SmcParameter> pit;
-                String sep;
-
-                _source.print(indent2);
-                _source.println("if fsm.getDebugFlag then");
-                _source.print(indent2);
-                _source.print("    fsm.getDebugStream.write(\"");
-                _source.print("EXIT TRANSITION : ");
-                if (packageName != null && packageName.length() > 0)
-                {
-                    _source.print(packageName);
-                    _source.print("::");
-                }
-                _source.print(stateName);
-                _source.print(".");
-                _source.print(transName);
-
-                if (parameters.size() != 0)
-                {
-                    _source.print("(");
-                    for (pit = parameters.iterator(), sep = "";
-                         pit.hasNext() == true;
-                         sep = ", ")
-                    {
-                        _source.print(sep);
-                        _source.print((pit.next()).getName());
-                    }
-                    _source.print(")");
-                }
-                _source.println("\\n\")");
-                _source.print(indent2);
-                _source.println("    end");
-            }
-
             // v. 2.2.0: Check if the user has turned off this
             // feature first.
             if (_noCatchFlag == false)
@@ -1114,6 +1071,44 @@ public final class SmcRubyGenerator
                 _source.print(indent2);
                 _source.println("ensure");
             }
+        }
+
+        if (_debugLevel >= DEBUG_LEVEL_0)
+        {
+            List<SmcParameter> parameters =
+                transition.getParameters();
+            Iterator<SmcParameter> pit;
+            String sep;
+
+            _source.print(indent3);
+            _source.println("if fsm.getDebugFlag then");
+            _source.print(indent3);
+            _source.print("    fsm.getDebugStream.write(\"");
+            _source.print("EXIT TRANSITION : ");
+            if (packageName != null && packageName.length() > 0)
+            {
+                _source.print(packageName);
+                _source.print("::");
+            }
+            _source.print(stateName);
+            _source.print(".");
+            _source.print(transName);
+
+            if (parameters.size() != 0)
+            {
+                _source.print("(");
+                for (pit = parameters.iterator(), sep = "";
+                     pit.hasNext() == true;
+                     sep = ", ")
+                {
+                    _source.print(sep);
+                    _source.print((pit.next()).getName());
+                }
+                _source.print(")");
+            }
+            _source.println("\\n\")");
+            _source.print(indent3);
+            _source.println("    end");
         }
 
         // Print the setState() call, if necessary. Do NOT
@@ -1314,6 +1309,9 @@ public final class SmcRubyGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2009/12/17 19:51:43  cwrapp
+// Testing complete.
+//
 // Revision 1.8  2009/11/27 17:19:21  fperrad
 // Implemented feature req. #2718892 for Lua, Perl, PHP, Python, Ruby &Scala
 //

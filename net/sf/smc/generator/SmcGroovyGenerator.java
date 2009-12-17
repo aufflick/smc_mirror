@@ -986,6 +986,36 @@ public final class SmcGroovyGenerator
             }
         }
 
+        if (_debugLevel >= DEBUG_LEVEL_0)
+        {
+            List<SmcParameter> parameters =
+                transition.getParameters();
+            Iterator<SmcParameter> pit;
+            String sep;
+
+            _source.print(_indent);
+            _source.println("    if (context.debugFlag)");
+            _source.print(_indent);
+            _source.print("        context.debugStream.println(");
+            _source.print("'ENTER TRANSITION: ");
+            _source.print(stateName);
+            _source.print('.');
+            _source.print(transName);
+
+            _source.print('(');
+            for (pit = parameters.iterator(), sep = "";
+                 pit.hasNext() == true;
+                 sep = ", ")
+            {
+                _source.print(sep);
+                (pit.next()).accept(this);
+            }
+            _source.print(')');
+
+            _source.println("')");
+            _source.println();
+        }
+
         // Dump out this transition's actions.
         if (hasActions == false)
         {
@@ -1024,69 +1054,9 @@ public final class SmcGroovyGenerator
             indent4 = _indent;
             _indent = indent3;
 
-            if (_debugLevel >= DEBUG_LEVEL_0)
-            {
-                List<SmcParameter> parameters =
-                    transition.getParameters();
-                Iterator<SmcParameter> pit;
-                String sep;
-
-                _source.print(_indent);
-                _source.println("    if (context.debugFlag)");
-                _source.print(_indent);
-                _source.print("        context.debugStream.println(");
-                _source.print("'ENTER TRANSITION: ");
-                _source.print(stateName);
-                _source.print('.');
-                _source.print(transName);
-
-                _source.print('(');
-                for (pit = parameters.iterator(), sep = "";
-                     pit.hasNext() == true;
-                     sep = ", ")
-                {
-                    _source.print(sep);
-                    (pit.next()).accept(this);
-                }
-                _source.print(')');
-
-                _source.println("')");
-                _source.println();
-            }
-
             for (SmcAction action: actions)
             {
                 action.accept(this);
-            }
-
-            if (_debugLevel >= DEBUG_LEVEL_1)
-            {
-                List<SmcParameter> parameters =
-                    transition.getParameters();
-                Iterator<SmcParameter> pit;
-                String sep;
-
-                _source.print(_indent);
-                _source.println("    if (context.debugFlag)");
-                _source.print(_indent);
-                _source.print("        context.debugStream.println(");
-                _source.print("'EXIT TRANSITION : ");
-                _source.print(stateName);
-                _source.print('.');
-                _source.print(transName);
-
-                _source.print('(');
-                for (pit = parameters.iterator(), sep = "";
-                     pit.hasNext() == true;
-                     sep = ", ")
-                {
-                    _source.print(sep);
-                    (pit.next()).accept(this);
-                }
-                _source.print(')');
-
-                _source.println("')");
-                _source.println();
             }
 
             _indent = indent4;
@@ -1100,6 +1070,41 @@ public final class SmcGroovyGenerator
                 _source.print(indent2);
                 _source.println("finally {");
             }
+        }
+
+        if (_debugLevel >= DEBUG_LEVEL_0)
+        {
+            List<SmcParameter> parameters =
+                transition.getParameters();
+            Iterator<SmcParameter> pit;
+            String sep;
+
+            indent4 = _indent;
+            _indent = indent3;
+
+            _source.print(_indent);
+            _source.println("if (context.debugFlag)");
+            _source.print(_indent);
+            _source.print("    context.debugStream.println(");
+            _source.print("'EXIT TRANSITION : ");
+            _source.print(stateName);
+            _source.print('.');
+            _source.print(transName);
+
+            _source.print('(');
+            for (pit = parameters.iterator(), sep = "";
+                 pit.hasNext() == true;
+                 sep = ", ")
+            {
+                _source.print(sep);
+                (pit.next()).accept(this);
+            }
+            _source.print(')');
+
+            _source.println("')");
+            _source.println();
+
+            _indent = indent4;
         }
 
         // Print the setState() call, if necessary. Do NOT
@@ -1330,6 +1335,9 @@ public final class SmcGroovyGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2009/12/17 19:51:43  cwrapp
+// Testing complete.
+//
 // Revision 1.9  2009/11/28 10:02:57  fperrad
 // rework on 2718892
 //

@@ -33,6 +33,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2009/12/17 19:51:42  cwrapp
+// Testing complete.
+//
 // Revision 1.2  2009/03/01 18:20:38  cwrapp
 // Preliminary v. 6.0.0 commit.
 //
@@ -54,16 +57,13 @@ public class AppClass
         _fsm = new AppClassContext(this);
         _is_acceptable = false;
         _abort = false;
-
-        // Uncomment to see debug output.
-        // _fsm.setDebugFlag(true);
     }
 
     public bool CheckString(string inputString)
     {
         int i, Length;
 
-        _fsm.enterStartState();
+        _fsm.EnterStartState();
 
         for (i = 0, Length = inputString.Length ; i < Length ; ++i)
         {

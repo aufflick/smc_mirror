@@ -284,7 +284,7 @@ public final class SmcCSharpGenerator
         if (_syncFlag == true)
         {
             _source.print(_indent);
-            _source.println("            lock(this)");
+            _source.println("            lock (this)");
             _source.print(_indent);
             _source.println("            {");
 
@@ -343,7 +343,7 @@ public final class SmcCSharpGenerator
         if (_syncFlag == true)
         {
             _source.print(_indent);
-            _source.println("            lock(this)");
+            _source.println("            lock (this)");
             _source.print(_indent);
             _source.println("            {");
 
@@ -544,7 +544,7 @@ public final class SmcCSharpGenerator
                 _source.println("    {");
 
                 // If the -sync flag was specified, then output
-                // "lock(this)" to prevent multiple threads from
+                // "lock (this)" to prevent multiple threads from
                 // access this state machine simultaneously.
                 if (_syncFlag == true)
                 {
@@ -731,14 +731,6 @@ public final class SmcCSharpGenerator
             {
                 mapName = map.getName();
 
-                // Add the default states in.
-                _source.println(separator);
-                _source.print(_indent);
-                _source.print("        ");
-                _source.print(mapName);
-                _source.print(".Default");
-                separator = ",";
-
                 for (SmcState state: map.getStates())
                 {
                     _source.println(separator);
@@ -747,6 +739,8 @@ public final class SmcCSharpGenerator
                     _source.print(mapName);
                     _source.print(".");
                     _source.print(state.getClassName());
+
+                    separator = ",";
                 }
             }
 
@@ -1192,10 +1186,14 @@ public final class SmcCSharpGenerator
             _source.println("        {");
             _source.print(_indent);
             _source.print("            ");
-            _source.print("_transitions = new Dictionary");
+            _source.print("_transitions = new ");
             if (_genericFlag == true)
             {
-                _source.print("<string, int>");
+                _source.print("Dictionary<string, int>");
+            }
+            else
+            {
+                _source.print("Hashtable");
             }
             _source.println("();");
 
@@ -1475,10 +1473,14 @@ public final class SmcCSharpGenerator
             _source.println("            {");
             _source.print(_indent);
             _source.print("                ");
-            _source.print("_transitions = new Dictionary");
+            _source.print("_transitions = new ");
             if (_genericFlag == true)
             {
-                _source.print("<string, int>");
+                _source.print("Dictionary<string, int>");
+            }
+            else
+            {
+                _source.print("Hashtable");
             }
             _source.println("();");
 
@@ -1856,6 +1858,36 @@ public final class SmcCSharpGenerator
             }
         }
 
+        if (_debugLevel >= DEBUG_LEVEL_0)
+        {
+            List<SmcParameter> parameters =
+                transition.getParameters();
+            String sep;
+
+            _source.println("#if TRACE");
+            _source.print(indent2);
+            _source.println("Trace.WriteLine(");
+            _source.print(indent2);
+            _source.print("    \"ENTER TRANSITION: ");
+            _source.print(mapName);
+            _source.print('.');
+            _source.print(stateName);
+            _source.print(".");
+            _source.print(transName);
+
+            // Output the transition parameters.
+            _source.print("(");
+            for (SmcParameter param: parameters)
+            {
+                _source.print(", ");
+                param.accept(this);
+            }
+            _source.print(")");
+            _source.println("\");");
+            _source.println("#endif");
+            _source.println();
+        }
+
         // Dump out this transition's actions.
         if (hasActions == false)
         {
@@ -1894,37 +1926,6 @@ public final class SmcCSharpGenerator
                 indent3 = indent2;
             }
 
-            if (_debugLevel >= DEBUG_LEVEL_0)
-            {
-                List<SmcParameter> parameters =
-                    transition.getParameters();
-                String sep;
-
-                _source.println("#if TRACE");
-                _source.print(indent3);
-                _source.println("Trace.WriteLine(");
-                _source.print(indent3);
-                _source.print(
-                    "    \"ENTER TRANSITION: ");
-                _source.print(mapName);
-                _source.print('.');
-                _source.print(stateName);
-                _source.print(".");
-                _source.print(transName);
-
-                // Output the transition parameters.
-                _source.print("(");
-                for (SmcParameter param: parameters)
-                {
-                    _source.print(", ");
-                    param.accept(this);
-                }
-                _source.print(")");
-                _source.println("\");");
-                _source.println("#endif");
-                _source.println();
-            }
-
             indent4 = _indent;
             _indent = indent3;
             for (SmcAction action: actions)
@@ -1932,37 +1933,6 @@ public final class SmcCSharpGenerator
                 action.accept(this);
             }
             _indent = indent4;
-
-            if (_debugLevel >= DEBUG_LEVEL_1)
-            {
-                List<SmcParameter> parameters =
-                    transition.getParameters();
-                String sep;
-
-                _source.println("#if TRACE");
-                _source.print(indent3);
-                _source.println("Trace.WriteLine(");
-                _source.print(indent3);
-                _source.print(
-                    "    \"EXIT TRANSITION : ");
-                _source.print(mapName);
-                _source.print('.');
-                _source.print(stateName);
-                _source.print(".");
-                _source.print(transName);
-
-                // Output the transition parameters.
-                _source.print("(");
-                for (SmcParameter param: parameters)
-                {
-                    _source.print(", ");
-                    param.accept(this);
-                }
-                _source.print(")");
-                _source.println("\");");
-                _source.println("#endif");
-                _source.println();
-            }
 
             // v. 2.2.0: Check if the user has turned off this
             // feature first.
@@ -1975,6 +1945,36 @@ public final class SmcCSharpGenerator
                 _source.print(indent2);
                 _source.println("{");
             }
+        }
+
+        if (_debugLevel >= DEBUG_LEVEL_0)
+        {
+            List<SmcParameter> parameters =
+                transition.getParameters();
+            String sep;
+
+            _source.println("#if TRACE");
+            _source.print(indent3);
+            _source.println("Trace.WriteLine(");
+            _source.print(indent3);
+            _source.print("    \"EXIT TRANSITION : ");
+            _source.print(mapName);
+            _source.print('.');
+            _source.print(stateName);
+            _source.print(".");
+            _source.print(transName);
+
+            // Output the transition parameters.
+            _source.print("(");
+            for (SmcParameter param: parameters)
+            {
+                _source.print(", ");
+                param.accept(this);
+            }
+            _source.print(")");
+            _source.println("\");");
+            _source.println("#endif");
+            _source.println();
         }
 
         // Print the state assignment if necessary. Do NOT
@@ -2239,6 +2239,9 @@ public final class SmcCSharpGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2009/12/17 19:51:43  cwrapp
+// Testing complete.
+//
 // Revision 1.10  2009/11/25 22:30:19  cwrapp
 // Fixed problem between %fsmclass and sm file names.
 //

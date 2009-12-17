@@ -1040,7 +1040,7 @@ public final class Smc
         stream.print(APP_NAME);
         stream.print(" [-access level]");
         stream.print(" [-suffix suffix]");
-        stream.print(" [-g]");
+        stream.print(" [-g | -g0 | -g1]");
         stream.print(" [-nostreams]");
         stream.print(" [-version]");
         stream.print(" [-verbose]");
@@ -1069,7 +1069,13 @@ public final class Smc
         stream.println(
             "\t-suffix   Add this suffix to output file");
         stream.println(
-            "\t-g        Add debugging to generated code");
+            "\t-g, -g0   Add level 0 debugging output to generated code");
+        stream.println(
+            "\t          (output for entering, exiting states and transitions)");
+        stream.println(
+            "\t-g1       Add level 1 debugging output to generated code");
+        stream.println(
+            "\t          (level 0 output plus state Entry and Exit actions)");
         stream.println("\t-nostreams Do not use C++ iostreams ");
         stream.print("\t          ");
         stream.println("(use with -c++ only)");
@@ -1080,7 +1086,7 @@ public final class Smc
         stream.print("\t-help     Print this message to ");
         stream.println("standard out and exit");
         stream.println(
-            "\t-sync     Synchronize generated Java code ");
+            "\t-sync     Synchronize access to transition methods");
         stream.print("\t          ");
         stream.println("(use with -csharep, -java, -groovy, -scala and -vb only)");
         stream.println(
@@ -1102,7 +1108,7 @@ public final class Smc
         stream.print(" -perl, -php, -python, -ruby, -scala, ");
         stream.println("-tcl and -vb only)");
         stream.println("\t-generic  Use generic collections");
-        stream.print("\t        ");
+        stream.print("\t          ");
         stream.println("(use with -csharp, -java or -vb and -reflect only)");
         stream.println("\t-cast     Use this C++ cast type ");
         stream.print("\t          ");
@@ -1874,6 +1880,9 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.37  2009/12/17 19:51:43  cwrapp
+// Testing complete.
+//
 // Revision 1.36  2009/11/25 22:30:19  cwrapp
 // Fixed problem between %fsmclass and sm file names.
 //

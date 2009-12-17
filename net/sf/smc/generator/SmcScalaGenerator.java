@@ -273,12 +273,6 @@ public final class SmcScalaGenerator
             {
                 String mapName = map.getName();
 
-                _source.print(separator);
-                _source.print("        ");
-                _source.print(mapName);
-                _source.print(".Default");
-                separator = ",\n";
-
                 for (SmcState state: map.getStates())
                 {
                     _source.print(separator);
@@ -286,6 +280,7 @@ public final class SmcScalaGenerator
                     _source.print(mapName);
                     _source.print(".");
                     _source.print(state.getClassName());
+                    separator = ",\n";
                 }
             }
             _source.println();
@@ -996,6 +991,34 @@ public final class SmcScalaGenerator
             }
         }
 
+        if (_debugLevel >= DEBUG_LEVEL_0)
+        {
+            List<SmcParameter> parameters =
+                transition.getParameters();
+            Iterator<SmcParameter> pit;
+            String sep;
+
+            _source.print(indent2);
+            _source.println("if (context.getDebugFlag())");
+            _source.print(indent2);
+            _source.print(
+                "    context.getDebugStream().println(");
+            _source.print("\"ENTER TRANSITION: ");
+            _source.print(stateName);
+            _source.print('.');
+            _source.print(transName);
+
+            _source.print('(');
+            for (pit = parameters.iterator(), sep = "";
+                 pit.hasNext() == true;
+                 sep = ", ")
+            {
+                _source.print(sep);
+                (pit.next()).accept(this);
+            }
+            _source.println(")\")");
+        }
+
         // Dump out this transition's actions.
         if (hasActions == false)
         {
@@ -1013,34 +1036,6 @@ public final class SmcScalaGenerator
             // current state.
             _source.print(indent2);
             _source.println("context.clearState()");
-
-            if (_debugLevel >= DEBUG_LEVEL_0)
-            {
-                List<SmcParameter> parameters =
-                    transition.getParameters();
-                Iterator<SmcParameter> pit;
-                String sep;
-
-                _source.print(indent2);
-                _source.println("if (context.getDebugFlag())");
-                _source.print(indent2);
-                _source.print(
-                    "    context.getDebugStream().println(");
-                _source.print("\"ENTER TRANSITION: ");
-                _source.print(stateName);
-                _source.print('.');
-                _source.print(transName);
-
-                _source.print('(');
-                for (pit = parameters.iterator(), sep = "";
-                     pit.hasNext() == true;
-                     sep = ", ")
-                {
-                    _source.print(sep);
-                    (pit.next()).accept(this);
-                }
-                _source.println(")\")");
-            }
 
             // v. 2.0.0: Place the actions inside a try/finally
             // block. This way the state will be set before an
@@ -1069,34 +1064,6 @@ public final class SmcScalaGenerator
 
             _indent = indent4;
 
-            if (_debugLevel >= DEBUG_LEVEL_1)
-            {
-                List<SmcParameter> parameters =
-                    transition.getParameters();
-                Iterator<SmcParameter> pit;
-                String sep;
-
-                _source.print(indent2);
-                _source.println("if (context.getDebugFlag())");
-                _source.print(indent2);
-                _source.print(
-                    "    context.getDebugStream().println(");
-                _source.print("\"EXIT TRANSITION : ");
-                _source.print(stateName);
-                _source.print('.');
-                _source.print(transName);
-
-                _source.print('(');
-                for (pit = parameters.iterator(), sep = "";
-                     pit.hasNext() == true;
-                     sep = ", ")
-                {
-                    _source.print(sep);
-                    (pit.next()).accept(this);
-                }
-                _source.println(")\")");
-            }
-
             // v. 2.2.0: Check if the user has turned off this
             // feature first.
             if (_noCatchFlag == false)
@@ -1106,6 +1073,34 @@ public final class SmcScalaGenerator
                 _source.print(indent2);
                 _source.println("finally {");
             }
+        }
+
+        if (_debugLevel >= DEBUG_LEVEL_0)
+        {
+            List<SmcParameter> parameters =
+                transition.getParameters();
+            Iterator<SmcParameter> pit;
+            String sep;
+
+            _source.print(indent3);
+            _source.println("if (context.getDebugFlag())");
+            _source.print(indent3);
+            _source.print(
+                "    context.getDebugStream().println(");
+            _source.print("\"EXIT TRANSITION : ");
+            _source.print(stateName);
+            _source.print('.');
+            _source.print(transName);
+
+            _source.print('(');
+            for (pit = parameters.iterator(), sep = "";
+                 pit.hasNext() == true;
+                 sep = ", ")
+            {
+                _source.print(sep);
+                (pit.next()).accept(this);
+            }
+            _source.println(")\")");
         }
 
         // Print the setState() call, if necessary. Do NOT
@@ -1325,6 +1320,9 @@ public final class SmcScalaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2009/12/17 19:51:43  cwrapp
+// Testing complete.
+//
 // Revision 1.9  2009/11/27 17:19:21  fperrad
 // Implemented feature req. #2718892 for Lua, Perl, PHP, Python, Ruby &Scala
 //

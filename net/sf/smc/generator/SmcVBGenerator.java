@@ -119,7 +119,14 @@ public final class SmcVBGenerator
         // package.
         if (_reflectFlag == true)
         {
-            _source.println("Imports System.Collections");
+            if (_genericFlag == false)
+            {
+                _source.println("Imports System.Collections");
+            }
+            else
+            {
+                _source.println("Imports System.Collections.Generic");
+            }
         }
 
         // Do user-specified imports now.
@@ -223,14 +230,6 @@ public final class SmcVBGenerator
             {
                 mapName = map.getName();
 
-                _source.println(separator);
-                _source.print(_indent);
-                _source.print("            ");
-                _source.print(mapName);
-                _source.print(".Default");
-
-                separator = ", _";
-
                 // and for each map state, ...
                 for (SmcState state: map.getStates())
                 {
@@ -241,6 +240,8 @@ public final class SmcVBGenerator
                     _source.print(mapName);
                     _source.print('.');
                     _source.print(state.getClassName());
+
+                    separator = ", _";
                 }
             }
 
@@ -332,7 +333,8 @@ public final class SmcVBGenerator
         if (_reflectFlag == true)
         {
             _source.print(_indent);
-            _source.print("    Public Property States() As ");
+            _source.print(
+                "    Public ReadOnly Property States() As ");
             _source.print(context);
             _source.println("State()");
             _source.print(_indent);
@@ -532,6 +534,8 @@ public final class SmcVBGenerator
             _source.print(_indent);
             _source.println("        While index < stackSize");
             _source.print(_indent);
+            _source.println("            it.MoveNext()");
+            _source.print(_indent);
             _source.println("            info.AddValue( _");
             _source.print(_indent);
             _source.print("                ");
@@ -541,11 +545,7 @@ public final class SmcVBGenerator
             _source.println(
                 "                              it.Current.Id)");
             _source.print(_indent);
-            _source.println(
-                "                it.MoveNext()");
-            _source.print(_indent);
-            _source.println(
-                "                index += 1");
+            _source.println("            index += 1");
             _source.print(_indent);
             _source.println("        End While");
             _source.println();
@@ -563,6 +563,9 @@ public final class SmcVBGenerator
             _source.print("                    ");
             _source.println(
                 "ByVal context As StreamingContext)");
+            _source.println();
+            _source.print(_indent);
+            _source.println("        MyBase.New(Nothing)");
             _source.println();
             _source.print(_indent);
             _source.println("        Dim stackSize As Integer");
@@ -654,7 +657,7 @@ public final class SmcVBGenerator
                 "Property Transitions() As IDictionary");
             if (_genericFlag == true)
             {
-                _source.print("(String, Integer)");
+                _source.print("(Of String, Integer)");
             }
             _source.println();
             _source.println();
@@ -905,7 +908,7 @@ public final class SmcVBGenerator
                 "Property Transitions() As IDictionary");
             if (_genericFlag == true)
             {
-                _source.print("(String, Integer)");
+                _source.print("(of String, Integer)");
             }
             _source.println();
             _source.print(_indent);
@@ -970,7 +973,7 @@ public final class SmcVBGenerator
                 "Private Shared _transitions As IDictionary");
             if (_genericFlag == true)
             {
-                _source.print("(String, Integer)");
+                _source.print("(Of String, Integer)");
             }
             _source.println();
             _source.println();
@@ -979,10 +982,14 @@ public final class SmcVBGenerator
             _source.println();
             _source.print(_indent);
             _source.print("        ");
-            _source.print("_transitions = New Dictionary");
-            if (_genericFlag == true)
+            _source.print("_transitions = New ");
+            if (_genericFlag == false)
             {
-                _source.print("(String, Integer)");
+                _source.print("Hashtable");
+            }
+            else
+            {
+                _source.print("Dictionary(Of String, Integer)");
             }
             _source.println("()");
 
@@ -1072,7 +1079,7 @@ public final class SmcVBGenerator
                 "Property Transitions() As IDictionary");
             if (_genericFlag == true)
             {
-                _source.print("(String, Integer)");
+                _source.print("(Of String, Integer)");
             }
             _source.println();
             _source.print(_indent);
@@ -1212,7 +1219,7 @@ public final class SmcVBGenerator
                 "Private Shared _transitions As IDictionary");
             if (_genericFlag == true)
             {
-                _source.print("(String, Integer)");
+                _source.print("(Of String, Integer)");
             }
             _source.println();
             _source.println();
@@ -1221,10 +1228,14 @@ public final class SmcVBGenerator
             _source.println();
             _source.print(_indent);
             _source.print("        ");
-            _source.print("_transitions = New Dictionary");
-            if (_genericFlag == true)
+            _source.print("_transitions = New ");
+            if (_genericFlag == false)
             {
-                _source.print("(String, Integer)");
+                _source.print("Hashtable");
+            }
+            else
+            {
+                _source.print("Dictionary(Of String, Integer)");
             }
             _source.println("()");
 
@@ -1580,6 +1591,36 @@ public final class SmcVBGenerator
             }
         }
 
+        if (_debugLevel >= DEBUG_LEVEL_0)
+        {
+            List<SmcParameter> parameters =
+                transition.getParameters();
+            Iterator<SmcParameter> pit;
+            String sep;
+
+            _source.println("#If TRACE Then");
+            _source.print(indent1);
+            _source.println("Trace.WriteLine( _");
+            _source.print(indent1);
+            _source.print("    \"ENTER TRANSITION: ");
+            _source.print(stateName);
+            _source.print(".");
+            _source.print(transName);
+            _source.print("(");
+
+            for (pit = parameters.iterator(), sep = "";
+                 pit.hasNext() == true;
+                 sep = ", ")
+            {
+                _source.print(sep);
+                (pit.next()).accept(this);
+            }
+
+            _source.println(")\")");
+            _source.println("#End If");
+            _source.println();
+        }
+
         // Dump out this transition's actions.
         if (actions.size() == 0)
         {
@@ -1599,36 +1640,6 @@ public final class SmcVBGenerator
             // current state.
             _source.print(indent1);
             _source.println("context.ClearState()");
-
-            if (_debugLevel >= DEBUG_LEVEL_0)
-            {
-                List<SmcParameter> parameters =
-                    transition.getParameters();
-                Iterator<SmcParameter> pit;
-                String sep;
-
-                _source.println("#If TRACE Then");
-                _source.print(indent1);
-                _source.println("Trace.WriteLine( _");
-                _source.print(indent1);
-                _source.print("    \"ENTER TRANSITION: ");
-                _source.print(stateName);
-                _source.print(".");
-                _source.print(transName);
-                _source.print("(");
-
-                for (pit = parameters.iterator(), sep = "";
-                     pit.hasNext() == true;
-                     sep = ", ")
-                {
-                    _source.print(sep);
-                    (pit.next()).accept(this);
-                }
-
-                _source.println(")\")");
-                _source.println("#End If");
-                _source.println();
-            }
 
             // v. 2.0.0: Place the actions inside a try/finally
             // block. This way the state will be set before an
@@ -1655,36 +1666,6 @@ public final class SmcVBGenerator
             }
             _indent = tempIndent;
 
-            if (_debugLevel >= DEBUG_LEVEL_1)
-            {
-                List<SmcParameter> parameters =
-                    transition.getParameters();
-                Iterator<SmcParameter> pit;
-                String sep;
-
-                _source.println("#If TRACE Then");
-                _source.print(indent1);
-                _source.println("Trace.WriteLine( _");
-                _source.print(indent1);
-                _source.print("    \"EXIT TRANSITION : ");
-                _source.print(stateName);
-                _source.print(".");
-                _source.print(transName);
-                _source.print("(");
-
-                for (pit = parameters.iterator(), sep = "";
-                     pit.hasNext() == true;
-                     sep = ", ")
-                {
-                    _source.print(sep);
-                    (pit.next()).accept(this);
-                }
-
-                _source.println(")\")");
-                _source.println("#End If");
-                _source.println();
-            }
-
             // v. 2.2.0: Check if the user has turned off this
             // feature first.
             if (_noCatchFlag == false)
@@ -1692,6 +1673,36 @@ public final class SmcVBGenerator
                 _source.print(indent1);
                 _source.println("Finally");
             }
+        }
+
+        if (_debugLevel >= DEBUG_LEVEL_0)
+        {
+            List<SmcParameter> parameters =
+                transition.getParameters();
+            Iterator<SmcParameter> pit;
+            String sep;
+
+            _source.println("#If TRACE Then");
+            _source.print(indent2);
+            _source.println("Trace.WriteLine( _");
+            _source.print(indent2);
+            _source.print("    \"EXIT TRANSITION : ");
+            _source.print(stateName);
+            _source.print(".");
+            _source.print(transName);
+            _source.print("(");
+
+            for (pit = parameters.iterator(), sep = "";
+                 pit.hasNext() == true;
+                 sep = ", ")
+            {
+                _source.print(sep);
+                (pit.next()).accept(this);
+            }
+
+            _source.println(")\")");
+            _source.println("#End If");
+            _source.println();
         }
 
         // Print the setState() call, if necessary. Do NOT
@@ -1918,6 +1929,9 @@ public final class SmcVBGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2009/12/17 19:51:43  cwrapp
+// Testing complete.
+//
 // Revision 1.6  2009/11/25 22:30:19  cwrapp
 // Fixed problem between %fsmclass and sm file names.
 //

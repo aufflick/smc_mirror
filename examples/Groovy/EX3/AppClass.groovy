@@ -34,6 +34,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2009/12/17 19:51:43  cwrapp
+// Testing complete.
+//
 // Revision 1.2  2009/04/11 14:28:12  cwrapp
 // Added called to enterStartState.
 //
@@ -51,7 +54,7 @@ class AppClass {
         _is_acceptable = false
 
         // Uncomment to see debug output.
-        // _fsm.setDebugFlag(true)
+        _fsm.setDebugFlag(true)
     }
 
     def CheckString (String string) {

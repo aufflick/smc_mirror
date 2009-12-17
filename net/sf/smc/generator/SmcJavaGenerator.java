@@ -522,12 +522,6 @@ public final class SmcJavaGenerator
             {
                 mapName = map.getName();
 
-                _source.print(separator);
-                _source.print("        ");
-                _source.print(mapName);
-                _source.print(".Default");
-                separator = ",\n";
-
                 for (SmcState state: map.getStates())
                 {
                     _source.print(separator);
@@ -535,6 +529,8 @@ public final class SmcJavaGenerator
                     _source.print(mapName);
                     _source.print(".");
                     _source.print(state.getClassName());
+
+                    separator = ",\n";
                 }
             }
 
@@ -1490,6 +1486,56 @@ public final class SmcJavaGenerator
 
         }
 
+        // Output transition to debug stream.
+        if (_debugLevel >= DEBUG_LEVEL_0)
+        {
+            List<SmcParameter> parameters =
+                transition.getParameters();
+            Iterator<SmcParameter> pit;
+            String sep;
+
+            indent4 = _indent;
+            if (_noCatchFlag == false)
+            {
+                _indent = indent2;
+            }
+
+            _source.print(_indent);
+            _source.println(
+                "if (context.getDebugFlag() == true)");
+            _source.print(_indent);
+            _source.println("{");
+            _source.print(_indent);
+            _source.print("    PrintStream str = ");
+            _source.println("context.getDebugStream();");
+            _source.println();
+            _source.print(_indent);
+            _source.print(
+                "    str.println(\"ENTER TRANSITION: ");
+            _source.print(mapName);
+            _source.print('.');
+            _source.print(stateName);
+            _source.print('.');
+            _source.print(transName);
+
+            _source.print('(');
+            for (pit = parameters.iterator(), sep = "";
+                 pit.hasNext() == true;
+                 sep = ", ")
+            {
+                _source.print(sep);
+                (pit.next()).accept(this);
+            }
+            _source.print(')');
+
+            _source.println("\");");
+            _source.print(_indent);
+            _source.println("}");
+            _source.println();
+
+            _indent = indent4;
+        }
+
         // Dump out this transition's actions.
         if (hasActions == false)
         {
@@ -1530,93 +1576,9 @@ public final class SmcJavaGenerator
             indent4 = _indent;
             _indent = indent3;
 
-            // Output transition to debug stream.
-            if (_debugLevel >= DEBUG_LEVEL_0)
-            {
-                List<SmcParameter> parameters =
-                    transition.getParameters();
-                Iterator<SmcParameter> pit;
-                String sep;
-
-                _source.print(_indent);
-                _source.println(
-                    "if (context.getDebugFlag() == true)");
-                _source.print(_indent);
-                _source.println("{");
-                _source.print(_indent);
-                _source.print("    PrintStream str = ");
-                _source.println("context.getDebugStream();");
-                _source.println();
-                _source.print(_indent);
-                _source.print(
-                    "    str.println(\"ENTER TRANSITION: ");
-                _source.print(mapName);
-                _source.print('.');
-                _source.print(stateName);
-                _source.print('.');
-                _source.print(transName);
-
-                _source.print('(');
-                for (pit = parameters.iterator(), sep = "";
-                     pit.hasNext() == true;
-                     sep = ", ")
-                {
-                    _source.print(sep);
-                    (pit.next()).accept(this);
-                }
-                _source.print(')');
-
-                _source.println("\");");
-                _source.print(_indent);
-                _source.println("}");
-                _source.println();
-            }
-
             for (SmcAction action: actions)
             {
                 action.accept(this);
-            }
-
-            // Output transition to debug stream.
-            if (_debugLevel >= DEBUG_LEVEL_1)
-            {
-                List<SmcParameter> parameters =
-                    transition.getParameters();
-                Iterator<SmcParameter> pit;
-                String sep;
-
-                _source.print(_indent);
-                _source.println(
-                    "if (context.getDebugFlag() == true)");
-                _source.print(_indent);
-                _source.println("{");
-                _source.print(_indent);
-                _source.print("    PrintStream str = ");
-                _source.println("context.getDebugStream();");
-                _source.println();
-                _source.print(_indent);
-                _source.print(
-                    "    str.println(\"EXIT TRANSITION : ");
-                _source.print(mapName);
-                _source.print('.');
-                _source.print(stateName);
-                _source.print('.');
-                _source.print(transName);
-
-                _source.print('(');
-                for (pit = parameters.iterator(), sep = "";
-                     pit.hasNext() == true;
-                     sep = ", ")
-                {
-                    _source.print(sep);
-                    (pit.next()).accept(this);
-                }
-                _source.print(')');
-
-                _source.println("\");");
-                _source.print(_indent);
-                _source.println("}");
-                _source.println();
             }
 
             _indent = indent4;
@@ -1632,6 +1594,53 @@ public final class SmcJavaGenerator
                 _source.print(indent2);
                 _source.println('{');
             }
+        }
+
+        // Output transition to debug stream.
+        if (_debugLevel >= DEBUG_LEVEL_0)
+        {
+            List<SmcParameter> parameters =
+                transition.getParameters();
+            Iterator<SmcParameter> pit;
+            String sep;
+
+            indent4 = _indent;
+            _indent = indent3;
+
+            _source.print(_indent);
+            _source.println(
+                "if (context.getDebugFlag() == true)");
+            _source.print(_indent);
+            _source.println("{");
+            _source.print(_indent);
+            _source.print("    PrintStream str = ");
+            _source.println("context.getDebugStream();");
+            _source.println();
+            _source.print(_indent);
+            _source.print(
+                "    str.println(\"EXIT TRANSITION : ");
+            _source.print(mapName);
+            _source.print('.');
+            _source.print(stateName);
+            _source.print('.');
+            _source.print(transName);
+
+            _source.print('(');
+            for (pit = parameters.iterator(), sep = "";
+                 pit.hasNext() == true;
+                 sep = ", ")
+            {
+                _source.print(sep);
+                (pit.next()).accept(this);
+            }
+            _source.print(')');
+
+            _source.println("\");");
+            _source.print(_indent);
+            _source.println("}");
+            _source.println();
+
+            _indent = indent4;
         }
 
         // Print the setState() call, if necessary. Do NOT
@@ -1885,6 +1894,9 @@ public final class SmcJavaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2009/12/17 19:51:43  cwrapp
+// Testing complete.
+//
 // Revision 1.9  2009/11/27 19:45:39  cwrapp
 // Corrected getTransitions method generation.
 //

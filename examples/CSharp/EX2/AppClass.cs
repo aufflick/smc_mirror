@@ -33,6 +33,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2009/12/17 19:51:43  cwrapp
+// Testing complete.
+//
 // Revision 1.1  2005/05/28 13:05:17  cwrapp
 // Added CSharp examples 1 - 3.
 //
@@ -51,14 +54,13 @@ public class AppClass
         _fsm = new AppClassContext(this);
         _is_acceptable = false;
         _abort = false;
-
-        // Uncomment to see debug output.
-        // _fsm.setDebugFlag(true);
     }
 
     public bool CheckString(string inputString)
     {
         int i, Length;
+
+        _fsm.EnterStartState();
 
         for (i = 0, Length = inputString.Length ; i < Length ; ++i)
         {

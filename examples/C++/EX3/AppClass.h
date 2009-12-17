@@ -33,6 +33,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2009/12/17 19:51:42  cwrapp
+// Testing complete.
+//
 // Revision 1.4  2005/05/28 13:31:18  cwrapp
 // Updated C++ examples.
 //
@@ -67,6 +70,10 @@ public:
 	inline void Unacceptable()
 	{ isAcceptable = false; };
 		// State machine actions.
+
+// Uncomment to test serialization.
+//     int serialize(const std::string& filename);
+//     int deserialize(const std::string& filename);
 };
 
 #endif

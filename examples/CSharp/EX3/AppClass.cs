@@ -33,6 +33,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2009/12/17 19:51:43  cwrapp
+// Testing complete.
+//
 // Revision 1.2  2005/11/07 19:34:54  cwrapp
 // Changes in release 4.3.0:
 // New features:
@@ -74,6 +77,11 @@
 //
 
 using System;
+#if SERIAL
+using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
+#endif
 
 public class AppClass
 {
@@ -84,15 +92,32 @@ public class AppClass
         _fsm = new AppClassContext(this);
         _is_acceptable = false;
 
-        // Uncomment to see debug output.
-        // _fsm.Debug = true;
+        // Define -REFLECT to output the states and
+        // state transitions.
+#if REFLECT
+        System.Console.WriteLine();
+        System.Console.WriteLine("States:");
+        foreach (AppClassContext.AppClassState state in _fsm.States)
+        {
+            System.Console.Write("  ");
+            System.Console.WriteLine(state);
+
+            System.Console.WriteLine("    Transitions:");
+            foreach (string transition in state.Transitions.Keys)
+            {
+                System.Console.Write("      ");
+                System.Console.WriteLine(transition);
+            }
+        }
+#endif
     }
 
     public bool CheckString(string str)
     {
         int i,
             Length;
-      
+
+        _fsm.EnterStartState();      
 
         for (i = 0, Length = str.Length;
              i < Length;
@@ -110,6 +135,21 @@ public class AppClass
 
                 case 'c':
                 case 'C':
+                    // Define SERIAL to test FSM serialization.
+#if SERIAL
+                    try
+                    {
+                        string filename = "fsm_serial.dat";
+
+                        Serialize(filename);
+                        _fsm = Deserialize(filename);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Console.WriteLine("FSM serialization failure.");
+                        System.Console.WriteLine(ex.StackTrace);
+                    }
+#endif
                     _fsm.C();
                     break;
 
@@ -133,6 +173,53 @@ public class AppClass
     {
         _is_acceptable = false;
     }
+
+#if SERIAL
+    private void Serialize(string filename)
+    {
+        FileStream fstream =
+            new FileStream(filename, FileMode.Create);
+        BinaryFormatter formatter = new BinaryFormatter();
+
+        System.Console.WriteLine();
+        System.Console.WriteLine("Serializing FSM.");
+
+        try
+        {
+            formatter.Serialize(fstream, _fsm);
+        }
+        finally
+        {
+            fstream.Close();
+        }
+
+        return;
+    } // end of Serialize()
+
+    private AppClassContext Deserialize(string filename)
+    {
+        FileStream fstream =
+            new FileStream(filename, FileMode.Open);
+        BinaryFormatter formatter = new BinaryFormatter();
+        AppClassContext retval = null;
+
+        System.Console.WriteLine("Deserializing FSM.");
+
+        try
+        {
+            retval =
+                (AppClassContext)
+                    formatter.Deserialize(fstream);
+            retval.Owner = this;
+        }
+        finally
+        {
+            fstream.Close();
+        }
+
+        return (retval);
+    } // end of Deserialize(string)
+#endif
 
 // Member data.
 

@@ -29,6 +29,9 @@
 '
 ' CHANGE LOG
 ' $Log$
+' Revision 1.3  2009/12/17 19:51:43  cwrapp
+' Testing complete.
+'
 ' Revision 1.2  2009/03/01 18:20:40  cwrapp
 ' Preliminary v. 6.0.0 commit.
 '
@@ -60,9 +63,6 @@ Public NotInheritable Class AppClass
 
         _isAcceptable = False
         _fsm = New AppClassContext(Me)
-
-        ' Uncomment to turn on debug output.
-        ' _fsm.DebugFlag = True
     End Sub
 
     Public Function CheckString(ByVal s As String) As Boolean

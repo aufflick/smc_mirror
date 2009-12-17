@@ -1050,82 +1050,77 @@ public final class SmcCppGenerator
             }
         }
 
+        // Output transition to debug stream.
+        if (_debugLevel >= DEBUG_LEVEL_0)
+        {
+            String transName = transition.getName();
+            List<SmcParameter> parameters =
+                transition.getParameters();
+            Iterator<SmcParameter> pit;
+            String sep;
+
+            _source.print(indent2);
+            _source.println(
+                "if (context.getDebugFlag() == true)");
+            _source.print(indent2);
+            _source.println("{");
+
+            if (_noStreamsFlag == true)
+            {
+                _source.print(indent2);
+                _source.print("    TRACE(\"ENTER TRANSITION: ");
+                _source.print(stateName);
+                _source.print("::");
+                _source.print(transName);
+                _source.print("(");
+
+                for (pit = parameters.iterator(), sep = "";
+                     pit.hasNext() == true;
+                     sep = ", ")
+                {
+                    _source.print(sep);
+                    (pit.next()).accept(this);
+                }
+
+                _source.println(")\\n\\r\");");
+            }
+            else
+            {
+                _source.print(indent2);
+                _source.print("    std::ostream& str = ");
+                _source.println("context.getDebugStream();");
+                _source.println();
+                _source.print(indent2);
+                _source.print("    str << \"ENTER TRANSITION: ");
+                _source.print(stateName);
+                _source.print("::");
+                _source.print(transName);
+                _source.print("(");
+
+                for (pit = parameters.iterator(), sep = "";
+                     pit.hasNext() == true;
+                     sep = ", ")
+                {
+                    _source.print(sep);
+                    (pit.next()).accept(this);
+                }
+
+                _source.println(")\"");
+                _source.print(indent2);
+                _source.println("        << std::endl;");
+            }
+
+            _source.print(indent2);
+            _source.println("}");
+            _source.println();
+        }
+
         if (actions.size() > 0)
         {
             // Now that we are in the transition, clear the
             // current state.
             _source.print(indent2);
             _source.println("context.clearState();");
-
-            // Output transition to debug stream.
-            if (_debugLevel >= DEBUG_LEVEL_0)
-            {
-                String transName = transition.getName();
-                List<SmcParameter> parameters =
-                    transition.getParameters();
-                Iterator<SmcParameter> pit;
-                String sep;
-
-                _source.print(indent2);
-                _source.println(
-                    "if (context.getDebugFlag() == true)");
-                _source.print(indent2);
-                _source.println("{");
-
-                if (_noStreamsFlag == true)
-                {
-                    _source.print(indent2);
-                    _source.print(
-                        "    TRACE(\"ENTER TRANSITION: ");
-                    _source.print(stateName);
-                    _source.print("::");
-                    _source.print(transName);
-                    _source.print("(");
-
-                    for (pit = parameters.iterator(), sep = "";
-                         pit.hasNext() == true;
-                         sep = ", ")
-                    {
-                        _source.print(sep);
-                        (pit.next()).accept(this);
-                    }
-
-                    _source.println(")\\n\\r\");");
-                }
-                else
-                {
-                    _source.print(indent2);
-                    _source.print(
-                        "    std::ostream& str = ");
-                    _source.println("context.getDebugStream();");
-                    _source.println();
-                    _source.print(indent2);
-                    _source.print(indent2);
-                    _source.print(
-                        "    str << \"ENTER TRANSITION: ");
-                    _source.print(stateName);
-                    _source.print("::");
-                    _source.print(transName);
-                    _source.print("(");
-
-                    for (pit = parameters.iterator(), sep = "";
-                         pit.hasNext() == true;
-                         sep = ", ")
-                    {
-                        _source.print(sep);
-                        (pit.next()).accept(this);
-                    }
-
-                    _source.println(")\"");
-                    _source.print(indent2);
-                    _source.println(
-                        "            << std::endl;");
-                }
-
-                _source.print(indent2);
-                _source.println("}");
-                _source.println();
-            }
         }
 
         // Dump out this transition's actions.
@@ -1171,8 +1166,7 @@ public final class SmcCppGenerator
             _indent = indent4;
         }
 
-        if (_debugLevel >= DEBUG_LEVEL_0 &&
-            actions.isEmpty() == false)
+        if (_debugLevel >= DEBUG_LEVEL_0)
         {
             String transName = transition.getName();
             List<SmcParameter> parameters =
@@ -1180,17 +1174,27 @@ public final class SmcCppGenerator
             Iterator<SmcParameter> pit;
             String sep;
 
-            _source.print(indent2);
+            if (_noCatchFlag == false &&
+                actions.isEmpty() == false)
+            {
+                indent3 = indent2 + "    ";
+            }
+            else
+            {
+                indent3 = indent2;
+            }
+
+            _source.print(indent3);
             _source.println(
-                "    if (context.getDebugFlag() == true)");
-            _source.print(indent2);
-            _source.println("    {");
+                "if (context.getDebugFlag() == true)");
+            _source.print(indent3);
+            _source.println("{");
 
             if (_noStreamsFlag == true)
             {
-                _source.print(indent2);
+                _source.print(indent3);
                 _source.print(
-                    "        TRACE(\"EXIT TRANSITION : ");
+                    "    TRACE(\"EXIT TRANSITION : ");
                 _source.print(stateName);
                 _source.print("::");
                 _source.print(transName);
@@ -1208,14 +1212,14 @@ public final class SmcCppGenerator
             }
             else
             {
-                _source.print(indent2);
+                _source.print(indent3);
                 _source.print(
-                    "        std::ostream& str = ");
+                    "    std::ostream& str = ");
                 _source.println("context.getDebugStream();");
                 _source.println();
-                _source.print(indent2);
+                _source.print(indent3);
                 _source.print(
-                    "        str << \"EXIT TRANSITION : ");
+                    "    str << \"EXIT TRANSITION : ");
                 _source.print(stateName);
                 _source.print("::");
                 _source.print(transName);
@@ -1230,12 +1234,12 @@ public final class SmcCppGenerator
                 }
 
                 _source.println(")\"");
-                _source.print(indent2);
-                _source.println("            << std::endl;");
+                _source.print(indent3);
+                _source.println("        << std::endl;");
             }
 
-            _source.print(indent2);
-            _source.println("    }");
+            _source.print(indent3);
+            _source.println("}");
             _source.println();
         }
 
@@ -1697,6 +1701,9 @@ public final class SmcCppGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2009/12/17 19:51:43  cwrapp
+// Testing complete.
+//
 // Revision 1.7  2009/11/25 22:30:19  cwrapp
 // Fixed problem between %fsmclass and sm file names.
 //

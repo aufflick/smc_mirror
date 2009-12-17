@@ -503,6 +503,7 @@ public final class SmcTclGenerator
             _source.print(fsmClassName);
             _source.print("::_States [list");
 
+            index = 0;
             for (SmcMap map: maps)
             {
                 mapName = map.getName();
@@ -1146,6 +1147,37 @@ public final class SmcTclGenerator
             }
         }
 
+        if (_debugLevel >= DEBUG_LEVEL_0)
+        {
+            List<SmcParameter> parameters =
+                transition.getParameters();
+            Iterator<SmcParameter> pit;
+            String sep;
+
+            _source.print(indent2);
+            _source.println(
+                "if {[$context getDebugFlag] != 0} {");
+            _source.print(indent2);
+            _source.print(
+                "    puts [$context getDebugStream] ");
+            _source.print("\"ENTER TRANSITION: ");
+            _source.print(stateName);
+            _source.print(" ");
+            _source.print(transName);
+            _source.print("(");
+            for (pit = parameters.iterator(), sep = "";
+                 pit.hasNext() == true;
+                 sep = ", ")
+            {
+                _source.print(sep);
+                (pit.next()).accept(this);
+            }
+            _source.println(")\";");
+            _source.print(indent2);
+            _source.println("}");
+            _source.println();
+        }
+
         // Dump out this transition's actions.
         if (actions.size() == 0)
         {
@@ -1163,37 +1195,6 @@ public final class SmcTclGenerator
             // current state since we are no longer in a state.
             _source.print(indent2);
             _source.println("$context clearState;");
-
-            if (_debugLevel >= DEBUG_LEVEL_0)
-            {
-                List<SmcParameter> parameters =
-                    transition.getParameters();
-                Iterator<SmcParameter> pit;
-                String sep;
-
-                _source.print(indent2);
-                _source.println(
-                    "if {[$context getDebugFlag] != 0} {");
-                _source.print(indent2);
-                _source.print(
-                    "    puts [$context getDebugStream] ");
-                _source.print("\"ENTER TRANSITION: ");
-                _source.print(stateName);
-                _source.print(" ");
-                _source.print(transName);
-                _source.print("(");
-                for (pit = parameters.iterator(), sep = "";
-                     pit.hasNext() == true;
-                     sep = ", ")
-                {
-                    _source.print(sep);
-                    (pit.next()).accept(this);
-                }
-                _source.println(")\";");
-                _source.print(indent2);
-                _source.println("}");
-                _source.println();
-            }
 
             // v. 2.0.2: Place the actions inside a catch block.
             // If one of the actions raises an error, the catch
@@ -1221,17 +1222,17 @@ public final class SmcTclGenerator
             }
             _indent = indent4;
 
-            if (_debugLevel >= DEBUG_LEVEL_1)
+            if (_debugLevel >= DEBUG_LEVEL_0)
             {
                 List<SmcParameter> parameters =
                     transition.getParameters();
                 Iterator<SmcParameter> pit;
                 String sep;
 
-                _source.print(indent2);
+                _source.print(indent3);
                 _source.println(
                     "if {[$context getDebugFlag] != 0} {");
-                _source.print(indent2);
+                _source.print(indent3);
                 _source.print(
                     "    puts [$context getDebugStream] ");
                 _source.print("\"EXIT TRANSITION : ");
@@ -1247,7 +1248,7 @@ public final class SmcTclGenerator
                     (pit.next()).accept(this);
                 }
                 _source.println(")\";");
-                _source.print(indent2);
+                _source.print(indent3);
                 _source.println("}");
                 _source.println();
             }
@@ -1658,6 +1659,9 @@ public final class SmcTclGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2009/12/17 19:51:43  cwrapp
+// Testing complete.
+//
 // Revision 1.9  2009/11/25 22:30:19  cwrapp
 // Fixed problem between %fsmclass and sm file names.
 //

@@ -28,6 +28,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.6  2009/12/17 19:51:43  cwrapp
+# Testing complete.
+#
 # Revision 1.5  2009/03/01 18:20:40  cwrapp
 # Preliminary v. 6.0.0 commit.
 #
@@ -54,6 +57,17 @@ class AppClass {
 
         # Uncomment to see debug output;
         # $_fsm setDebugFlag 1;
+
+        # Uncomment to see reflection output.
+        # Be sure to compile with -reflect flag.
+        # foreach state [$_fsm getStates] {
+        #     puts stdout "State $state";
+        #     puts stdout "  Transitions:";
+        # 
+        #     foreach transition [$state getTransitions] {
+        #         puts stdout "    $transition";
+        #     }
+        # }
     }
 
     public method CheckString {astring} {
@@ -66,7 +80,21 @@ class AppClass {
                 0 { set Transition Zero; }
                 1 { set Transition One; }
                 C -
-                c { set Transition C; }
+                c {
+                    set Transition C;
+
+                    # Uncomment to see serialization output.
+                    # Be sure to compile FSM with -serial flag.
+                    # set filename "./fsm_serial.dat";
+                    # 
+                    # if [catch {
+                    #     puts stdout "";
+                    #     serialize $filename;
+                    #     deserialize $filename;
+                    # } result] {
+                    #     puts stdout "FSM serialization error, reason ${result}.";
+                    # }
+                }
                 default { set Transition Unknown; }
             }
 
@@ -88,4 +116,64 @@ class AppClass {
     public method Unacceptable {} {
         set _is_acceptable 0;
     }
+
+    # Uncomment to see serialization output.
+    # Be sure to compile FSM with -serial flag.
+    # private method serialize {filename} {
+    #     puts stdout "Serializing FSM.";
+    # 
+    #     if [catch {open $filename w 0644} fileId] {
+    #         set retcode error;
+    #         set retval "${filename} open failed.";
+    #     } else {
+    #         set state [$_fsm getState];
+    #         set states {};
+    # 
+    #         lappend states [$state getId];
+    # 
+    #         while {[catch {$_fsm popState} retcode] == 0} {
+    #             set state [$_fsm getState];
+    #             set states [linsert $states 0 [$state getId]];
+    #         }
+    # 
+    #         set size [llength $states];
+    #         puts $fileId $size;
+    # 
+    #         foreach stateId $states {
+    #             puts $fileId $stateId;
+    #         }
+    # 
+    #         close $fileId;
+    # 
+    #         set retcode ok;
+    #         set retval "";
+    #     }
+    # 
+    #     return -code ${retcode} ${retval};
+    # }
+    # 
+    # private method deserialize {filename} {
+    #     puts stdout "Deserializing FSM.";
+    # 
+    #     if [catch {open $filename r} fileId] {
+    #         set retcode error;
+    #         set retval "${filename} open failed.";
+    #     } else {
+    #         $_fsm clearState;
+    # 
+    #         gets $fileId size;
+    # 
+    #         for {set i 0} {$i < $size} {incr i} {
+    #             gets $fileId stateId;
+    #             set state [$_fsm valueOf $stateId];
+    # 
+    #             $_fsm pushState $state;
+    #         }
+    # 
+    #         set retcode ok;
+    #         set retval "";
+    #     }
+    # 
+    #     return -code ${retcode} ${retval}
+    # }
 }

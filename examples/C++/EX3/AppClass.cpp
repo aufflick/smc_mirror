@@ -30,6 +30,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2009/12/17 19:51:42  cwrapp
+// Testing complete.
+//
 // Revision 1.5  2009/03/01 18:20:37  cwrapp
 // Preliminary v. 6.0.0 commit.
 //
@@ -73,6 +76,19 @@ bool AppClass::CheckString(const char *theString)
 
 		case 'c':
 		case 'C':
+// Uncomment to test serialization.
+//               if (serialize("foobar.txt") < 0)
+//               {
+//                   std::cerr << "FSM serialization failed." << std::endl;
+//               }
+//               else if (deserialize("foobar.txt") < 0)
+//               {
+//                   std::cerr << "FSM deserialization failed." << std::endl;
+//               }
+//               else
+//               {
+//                   _fsm.C();
+//               }
 			_fsm.C();
 			break;
 
@@ -88,3 +104,71 @@ bool AppClass::CheckString(const char *theString)
 
 	return(isAcceptable);
 }
+
+// Uncomment to test serialization.
+// int AppClass::serialize(const std::string& filename)
+// {
+//     int fd(open(filename.c_str(),
+//                 (O_WRONLY | O_CREAT | O_TRUNC),
+//                 (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)));
+//     int retval(-1);
+
+//     if (fd >= 0)
+//     {
+//         int size(_fsm.getStateStackDepth() + 1);
+//         int bufferSize(size * sizeof(int));
+//         int buffer[size + 1];
+//         int i;
+
+//         buffer[0] = size;
+//         buffer[size] = (_fsm.getState()).getId();
+//         for (i = (size - 1); i > 0; --i)
+//         {
+//             _fsm.popState();
+//             buffer[i] = (_fsm.getState()).getId();
+//         }
+
+//         retval = write(fd, buffer, (bufferSize + sizeof(int)));
+
+//         (void) close(fd);
+//         fd = -1;
+//     }
+
+//     return (retval);
+// } // end of AppClass::serialize(const std::string&)
+
+// Uncomment to test serialization.
+// int AppClass::deserialize(const std::string& filename)
+// {
+//     int fd(open(filename.c_str(), O_RDONLY));
+//     int size;
+//     int retval(-1);
+
+//     _fsm.clearState();
+
+//     if (fd >= 0 && read(fd, &size, sizeof(int)) == sizeof(int))
+//     {
+//         int bufferSize(size * sizeof(int));
+//         int buffer[size];
+
+//         if (read(fd, buffer, bufferSize) == bufferSize)
+//         {
+//             int i;
+
+//             retval = (bufferSize + sizeof(int));
+
+//             for (i = 0; i < size; i++)
+//             {
+//                 _fsm.pushState(_fsm.valueOf(buffer[i]));
+//             }
+//         }
+//     }
+
+//     if (fd >= 0)
+//     {
+//         (void) close(fd);
+//         fd = -1;
+//     }
+
+//     return (retval);
+// } // end of AppClass::deserialize(const std::string&)
