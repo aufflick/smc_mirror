@@ -53,6 +53,7 @@ SRC_TAR_GZ_FILE=	$(SRC_TAR_FILE:.tar=.tar.gz)
 SRC_GZIP_FILE=	$(SRC_TAR_FILE:.tar=.tgz)
 SRC_ZIP_FILE=	./staging/Releases/SmcSrc_$(VERSION).zip
 SRC_TAR_LIST=	./smc/tar_list.txt
+SRC_ZIP_LIST=	./smc/zip_list.txt
 
 #################################################################
 # Rules.
@@ -115,7 +116,7 @@ src_dist :	$(SMC_RELEASE_DIR)
 		    tar cvmpfT $(SRC_TAR_FILE) $(SRC_TAR_LIST); \
 		    gzip $(SRC_TAR_FILE); \
 		    $(MV) $(SRC_TAR_GZ_FILE) $(SRC_GZIP_FILE); \
-		    zip -b . -r $(SRC_ZIP_FILE) ./smc -i@$(SRC_TAR_LIST))
+		    zip -b . -r $(SRC_ZIP_FILE) ./smc -i@$(SRC_ZIP_LIST))
 
 dist : 		install smc_dist src_dist
 
@@ -139,6 +140,9 @@ realclean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.15  2009/12/18 15:51:33  cwrapp
+# Created separate tar and zip file lists.
+#
 # Revision 1.14  2009/03/27 09:41:44  cwrapp
 # Added F. Perrad changes back in.
 #

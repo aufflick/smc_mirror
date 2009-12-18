@@ -69,7 +69,7 @@
 ./smc/bin/Smc.jar
 ./smc/docs/SMC_Tutorial.pdf
 ./smc/docs/smc.pdf
-./smc/docs/javadocs/
+./smc/docs/javadocs/*
 ./smc/examples/Ant/EX1/README.txt
 ./smc/examples/Ant/EX1/build.xml
 ./smc/examples/Ant/EX1/etc/AppClass.sm
@@ -885,7 +885,7 @@
 ./smc/tools/smc-anttask/smc-anttask.iml
 ./smc/tools/smc-anttask/smc-anttask.ipr
 ./smc/tools/smc-anttask/smc-anttask.iws
-./smc/tools/smc-anttask/build/classes/
+./smc/tools/smc-anttask/build/classes/*
 ./smc/tools/smc-anttask/dist/smc-ant.jar
 ./smc/tools/smc-anttask/lib/ant.jar
 ./smc/tools/smc-anttask/src/net/sf/smc/ant/SmcJarWrapper.java
