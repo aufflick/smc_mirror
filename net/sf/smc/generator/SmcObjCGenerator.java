@@ -148,7 +148,7 @@ public final class SmcObjCGenerator
 
         // Include the context file last.
         _source.print("#import \"");
-        _source.print(_srcfileBase);
+        _source.print(_targetfileBase);
         _source.println(".h\"");
 
         // Statically declare all derive state classes.
@@ -1401,6 +1401,9 @@ public final class SmcObjCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2010/02/15 18:05:43  fperrad
+// fix 2950619 : make distinction between source filename (*.sm) and target filename.
+//
 // Revision 1.9  2009/12/17 19:51:43  cwrapp
 // Testing complete.
 //
@@ -1436,19 +1439,5 @@ public final class SmcObjCGenerator
 //
 // Revision 1.1  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
-//
-// Revision 1.4  2008/03/21 14:03:16  fperrad
-// refactor : move from the main file Smc.java to each language generator the following data :
-//  - the default file name suffix,
-//  - the file name format for the generated SMC files
-//
-// Revision 1.3  2007/08/05 14:36:12  cwrapp
-// Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more informaiton.
-//
-// Revision 1.2  2007/02/21 13:55:59  cwrapp
-// Moved Java code to release 1.5.0
-//
-// Revision 1.1  2007/01/15 00:23:51  cwrapp
-// Release 4.4.0 initial commit.
 //
 //

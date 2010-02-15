@@ -171,7 +171,7 @@ public final class SmcCppGenerator
         {
             _source.print(_srcDirectory);
         }
-        _source.print(_srcfileBase);
+        _source.print(_targetfileBase);
         _source.println(".h\"");
 
         // Import the statemap namespace symbols into the main
@@ -1701,6 +1701,9 @@ public final class SmcCppGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2010/02/15 18:05:43  fperrad
+// fix 2950619 : make distinction between source filename (*.sm) and target filename.
+//
 // Revision 1.8  2009/12/17 19:51:43  cwrapp
 // Testing complete.
 //
@@ -1734,76 +1737,4 @@ public final class SmcCppGenerator
 // Revision 1.1  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
 //
-// Revision 1.10  2008/03/21 14:03:16  fperrad
-// refactor : move from the main file Smc.java to each language generator the following data :
-//  - the default file name suffix,
-//  - the file name format for the generated SMC files
-//
-// Revision 1.9  2007/12/28 12:34:41  cwrapp
-// Version 5.0.1 check-in.
-//
-// Revision 1.8  2007/08/05 14:36:11  cwrapp
-// Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more informaiton.
-//
-// Revision 1.7  2007/02/21 13:54:27  cwrapp
-// Moved Java code to release 1.5.0
-//
-// Revision 1.6  2007/01/15 00:23:50  cwrapp
-// Release 4.4.0 initial commit.
-//
-// Revision 1.5  2006/09/16 15:04:28  cwrapp
-// Initial v. 4.3.3 check-in.
-//
-// Revision 1.4  2006/07/11 18:12:16  cwrapp
-// Added support for new -headerd command line option.
-//
-// Revision 1.3  2006/04/22 12:45:26  cwrapp
-// Version 4.3.1
-//
-// Revision 1.2  2005/11/07 19:34:54  cwrapp
-// Changes in release 4.3.0:
-// New features:
-//
-// + Added -reflect option for Java, C#, VB.Net and Tcl code
-//   generation. When used, allows applications to query a state
-//   about its supported transitions. Returns a list of
-//   transition names. This feature is useful to GUI developers
-//   who want to enable/disable features based on the current
-//   state. See Programmer's Manual section 11: On Reflection
-//   for more information.
-//
-// + Updated LICENSE.txt with a missing final paragraph which
-//   allows MPL 1.1 covered code to work with the GNU GPL.
-//
-// + Added a Maven plug-in and an ant task to a new tools
-//   directory.
-//   Added Eiten Suez's SMC tutorial (in PDF) to a new docs
-//   directory.
-//
-// Fixed the following bugs:
-//
-// + (GraphViz) DOT file generation did not properly escape
-//   double quotes appearing in transition guards. This has been
-//   corrected.
-//
-// + A note: the SMC FAQ incorrectly stated that C/C++ generated
-//   code is thread safe. This is wrong. C/C++ generated is
-//   certainly *not* thread safe. Multi-threaded C/C++
-//   applications are required to synchronize access to the FSM
-//   to allow for correct performance.
-//
-// + (Java) The generated getState() method is now public.
-//
-// Revision 1.1  2005/05/28 19:28:42  cwrapp
-// Moved to visitor pattern.
-//
-// Revision 1.2  2005/02/21 15:34:59  charlesr
-// Added Francois Perrad to Contributors section for Python work.
-//
-// Revision 1.1  2005/02/21 15:13:03  charlesr
-// Modified isLoopback() to new signature due to moving method
-// from SmcGuard to SmcCodeGenerator.
-//
-// Revision 1.0  2005/02/03 17:10:26  charlesr
-// Initial revision
 //

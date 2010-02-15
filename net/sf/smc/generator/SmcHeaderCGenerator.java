@@ -91,7 +91,7 @@ public final class SmcHeaderCGenerator
      */
     public void visit(SmcFSM fsm)
     {
-        String srcfileCaps;
+        String targetfileCaps;
         String packageName = fsm.getPackage();
         String context = fsm.getContext();
         String fsmClassName = fsm.getFsmClassName();
@@ -127,13 +127,13 @@ public final class SmcHeaderCGenerator
 
         // Make the file name upper case and replace
         // slashes with underscores.
-        srcfileCaps = _srcfileBase.replace('\\', '_');
-        srcfileCaps = srcfileCaps.replace('/', '_');
-        srcfileCaps = srcfileCaps.toUpperCase();
+        targetfileCaps = _targetfileBase.replace('\\', '_');
+        targetfileCaps = targetfileCaps.replace('/', '_');
+        targetfileCaps = targetfileCaps.toUpperCase();
         _source.print("#ifndef _H_");
-        _source.println(srcfileCaps);
+        _source.println(targetfileCaps);
         _source.print("#define _H_");
-        _source.println(srcfileCaps);
+        _source.println(targetfileCaps);
 
         // Include required standard .h files.
         _source.println();
@@ -352,6 +352,9 @@ public final class SmcHeaderCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2010/02/15 18:05:43  fperrad
+// fix 2950619 : make distinction between source filename (*.sm) and target filename.
+//
 // Revision 1.8  2009/11/25 22:30:19  cwrapp
 // Fixed problem between %fsmclass and sm file names.
 //
@@ -382,73 +385,5 @@ public final class SmcHeaderCGenerator
 //
 // Revision 1.1  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
-//
-// Revision 1.12  2008/07/14 09:31:24  fperrad
-// + Added the generation of read-only macro for Vi & Emacs
-//
-// Revision 1.11  2008/03/21 14:03:16  fperrad
-// refactor : move from the main file Smc.java to each language generator the following data :
-//  - the default file name suffix,
-//  - the file name format for the generated SMC files
-//
-// Revision 1.10  2008/02/08 08:46:02  fperrad
-// C : optimize footprint when no Entry action or no Exit action
-//
-// Revision 1.9  2007/08/05 14:50:54  cwrapp
-// Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more information.
-//
-// Revision 1.8  2007/08/05 14:29:44  cwrapp
-// Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more informaiton.
-//
-// Revision 1.7  2007/07/16 06:13:21  fperrad
-// + Added the generation of a DO NOT EDIT comment
-//
-// Revision 1.6  2007/02/21 13:55:02  cwrapp
-// Moved Java code to release 1.5.0
-//
-// Revision 1.5  2007/01/15 00:23:51  cwrapp
-// Release 4.4.0 initial commit.
-//
-// Revision 1.4  2006/09/16 15:04:29  cwrapp
-// Initial v. 4.3.3 check-in.
-//
-// Revision 1.3  2005/11/07 19:34:54  cwrapp
-// Changes in release 4.3.0:
-// New features:
-//
-// + Added -reflect option for Java, C#, VB.Net and Tcl code
-//   generation. When used, allows applications to query a state
-//   about its supported transitions. Returns a list of transition
-//   names. This feature is useful to GUI developers who want to
-//   enable/disable features based on the current state. See
-//   Programmer's Manual section 11: On Reflection for more
-//   information.
-//
-// + Updated LICENSE.txt with a missing final paragraph which allows
-//   MPL 1.1 covered code to work with the GNU GPL.
-//
-// + Added a Maven plug-in and an ant task to a new tools directory.
-//   Added Eiten Suez's SMC tutorial (in PDF) to a new docs
-//   directory.
-//
-// Fixed the following bugs:
-//
-// + (GraphViz) DOT file generation did not properly escape
-//   double quotes appearing in transition guards. This has been
-//   corrected.
-//
-// + A note: the SMC FAQ incorrectly stated that C/C++ generated
-//   code is thread safe. This is wrong. C/C++ generated is
-//   certainly *not* thread safe. Multi-threaded C/C++ applications
-//   are required to synchronize access to the FSM to allow for
-//   correct performance.
-//
-// + (Java) The generated getState() method is now public.
-//
-// Revision 1.2  2005/07/07 12:07:28  fperrad
-// When the .sm is in a subdirectory the forward- or backslashes in the file name are kept in the "#ifndef" in the generated header file. This is syntactically wrong. SMC nowreplaces the slashes with underscores.
-//
-// Revision 1.1  2005/06/16 18:11:01  fperrad
-// Added C, Perl & Ruby generators.
 //
 //

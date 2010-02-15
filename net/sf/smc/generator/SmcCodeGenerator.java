@@ -86,6 +86,7 @@ public abstract class SmcCodeGenerator
                                final String suffix)
     {
         _srcfileBase = options.srcfileBase();
+        _targetfileBase = options.targetfileBase();
         _srcDirectory = options.srcDirectory();
         _headerDirectory = options.headerDirectory();
         _castType = options.castType();
@@ -302,6 +303,11 @@ public abstract class SmcCodeGenerator
     protected final String _srcfileBase;
 
     /**
+     * The target file's base name.
+     */
+    protected final String _targetfileBase;
+
+    /**
      * Write the target source file to this directory.
      */
     protected final String _srcDirectory;
@@ -447,6 +453,9 @@ public abstract class SmcCodeGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2010/02/15 18:05:43  fperrad
+// fix 2950619 : make distinction between source filename (*.sm) and target filename.
+//
 // Revision 1.5  2009/11/25 22:30:19  cwrapp
 // Fixed problem between %fsmclass and sm file names.
 //
@@ -462,36 +471,4 @@ public abstract class SmcCodeGenerator
 // Revision 1.1  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
 //
-// Revision 1.7  2008/04/24 15:41:12  fperrad
-// + new feature #1876271 : SMC Loopback
-//
-// Revision 1.6  2008/03/21 14:03:16  fperrad
-// refactor : move from the main file Smc.java to each language generator the following data :
-//  - the default file name suffix,
-//  - the file name format for the generated SMC files
-//
-// Revision 1.5  2007/12/28 12:34:41  cwrapp
-// Version 5.0.1 check-in.
-//
-// Revision 1.4  2007/02/21 13:54:20  cwrapp
-// Moved Java code to release 1.5.0
-//
-// Revision 1.3  2007/01/15 00:23:50  cwrapp
-// Release 4.4.0 initial commit.
-//
-// Revision 1.2  2006/09/16 15:04:28  cwrapp
-// Initial v. 4.3.3 check-in.
-//
-// Revision 1.1  2005/05/28 19:28:42  cwrapp
-// Moved to visitor pattern.
-//
-// Revision 1.2  2005/02/21 15:34:54  charlesr
-// Added Francois Perrad to Contributors section for Python work.
-//
-// Revision 1.1  2005/02/21 15:11:47  charlesr
-// Moved isLoopback() method from SmcGuard to this class.
-// Added additional parameters.
-//
-// Revision 1.0  2005/02/03 17:09:49  charlesr
-// Initial revision
 //

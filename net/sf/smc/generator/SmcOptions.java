@@ -53,7 +53,8 @@ public final class SmcOptions
 
     /**
      * Stores the target code generator options.
-     * @param srcfileBase write the emitted code to this target
+     * @param srcfileBase basename of source file (*.sm).
+     * @param targetfileBase write the emitted code to this target
      * source file name sans the suffix.
      * @param srcDirectory place the target source file in this
      * directory.
@@ -84,6 +85,7 @@ public final class SmcOptions
      * generated classes.
      */
     public SmcOptions(final String srcfileBase,
+                      final String targetfileBase,
                       final String srcDirectory,
                       final String headerDirectory,
                       final String castType,
@@ -99,6 +101,7 @@ public final class SmcOptions
                       final String accessLevel)
     {
         _srcfileBase = srcfileBase;
+        _targetfileBase = targetfileBase;
         _headerDirectory = headerDirectory;
         _castType = castType;
         _graphLevel = graphLevel;
@@ -123,13 +126,22 @@ public final class SmcOptions
     //
 
     /**
-     * Returns the target source file name's base.
-     * @return the target source file name's base.
+     * Returns the source file name's base.
+     * @return the source file name's base.
      */
     public String srcfileBase()
     {
         return (_srcfileBase);
     } // end of srcfileBase()
+
+    /**
+     * Returns the target source file name's base.
+     * @return the target source file name's base.
+     */
+    public String targetfileBase()
+    {
+        return (_targetfileBase);
+    } // end of targetfileBase()
 
     /**
      * Returns the target source file's directory.
@@ -259,6 +271,9 @@ public final class SmcOptions
     // The .sm file's base name.
     private final String _srcfileBase;
 
+    // The target file's base name.
+    private final String _targetfileBase;
+
     // Write the target source file to this directory.
     private final String _srcDirectory;
 
@@ -304,6 +319,9 @@ public final class SmcOptions
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2010/02/15 18:05:43  fperrad
+// fix 2950619 : make distinction between source filename (*.sm) and target filename.
+//
 // Revision 1.1  2009/11/24 20:46:50  cwrapp
 // Initial check in.
 //

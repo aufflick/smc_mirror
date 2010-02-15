@@ -1176,7 +1176,7 @@ public final class Smc
             _sourceFileName.length() - 3;
         String srcFilePath =
             "." + System.getProperty("file.separator");
-        String srcFileBase = fsm.getSourceFileName();
+        String srcFileBase = fsm.getTargetFileName();
         String headerPath = srcFilePath;
         String headerFileName = "";
         FileOutputStream headerFileStream = null;
@@ -1227,7 +1227,8 @@ public final class Smc
             _accessLevel = "/* package */";
         }
 
-        options = new SmcOptions(srcFileBase,
+        options = new SmcOptions(fsm.getSourceFileName(),
+                                 srcFileBase,
                                  _outputDirectory,
                                  _headerDirectory,
                                  _castType,
@@ -1880,6 +1881,9 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.38  2010/02/15 18:03:17  fperrad
+// fix 2950619 : make distinction between source filename (*.sm) and target filename.
+//
 // Revision 1.37  2009/12/17 19:51:43  cwrapp
 // Testing complete.
 //

@@ -95,8 +95,9 @@ public final class SmcFSM
      * Creates a finite state machine of the given name. Data
      * members are set to default values.
      * @param name The finite state machine name.
+     * @param targetFile The target filename with suffix.
      */
-    public SmcFSM(final String name, final String sourceFile)
+    public SmcFSM(final String name, final String targetFile)
     {
         // The abstract syntax tree always starts on line 1.
         super (name, 1);
@@ -104,7 +105,8 @@ public final class SmcFSM
         _startState = "";
         _source = "";
         _context = "";
-        _sourceFileName = sourceFile;
+        _sourceFileName = name;
+        _targetFileName = targetFile;
         _fsmClassName = name + "Context";
         _header = "";
         _includeList = new ArrayList<String>();
@@ -188,6 +190,15 @@ public final class SmcFSM
     {
         return (_sourceFileName);
     } // end of getSourceFileName()
+
+    /**
+     * Returns the target file name.
+     * @return the target file name.
+     */
+    public String getTargetFileName()
+    {
+        return (_targetFileName);
+    } // end of getTargetFileName()
 
     /**
      * Returns the fsm class name.
@@ -418,13 +429,13 @@ public final class SmcFSM
     } // end of setContext(String)
 
     /**
-     * Set sthe fsm class name and source file name.
+     * Set the fsm class name and source file name.
      * @param fsmName The finite state machine's class name.
      */
     public void setFsmClassName(String fsmName)
     {
         _fsmClassName = fsmName;
-        _sourceFileName = fsmName;
+        _targetFileName = fsmName;
 
         return;
     } // end of setFsmClassName(String)
@@ -583,12 +594,15 @@ public final class SmcFSM
     // This state map is associated with this class.
     private String _context;
 
-    // The FSM is written to this file.
+    // The FSM is readen to this file.
     private String _sourceFileName;
 
-	// This map is implemented in the class with given name
-	private String _fsmClassName;
-	
+    // The FSM is written to this file.
+    private String _targetFileName;
+
+    // This map is implemented in the class with given name
+    private String _fsmClassName;
+
     // Where the associated class is defined.
     private String _header;
 
@@ -620,6 +634,9 @@ public final class SmcFSM
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2010/02/15 18:05:43  fperrad
+// fix 2950619 : make distinction between source filename (*.sm) and target filename.
+//
 // Revision 1.4  2009/11/25 22:30:19  cwrapp
 // Fixed problem between %fsmclass and sm file names.
 //

@@ -143,7 +143,7 @@ public final class SmcParser
         _quitFlag = false;
 
         _fsm = new SmcFSM(_name,
-                          _targetLanguage.sourceFileName(_name));
+                          _targetLanguage.targetFileName(_name));
 
         // Start lexing in cooked mode.
         _lexer.setCookedMode();
@@ -1414,12 +1414,12 @@ public final class SmcParser
         //-------------------------------------------------------
 
         // Returns the source file name based on the class name.
-        public String sourceFileName(final String className)
+        public String targetFileName(final String className)
         {
             return (
                 MessageFormat.format(
                     _sourceNameFormat, className));
-        } // end of sourceFileName(String)
+        } // end of targetFileName(String)
 
     //-----------------------------------------------------------
     // Member data.
@@ -1667,6 +1667,9 @@ public final class SmcParser
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2010/02/15 18:05:44  fperrad
+// fix 2950619 : make distinction between source filename (*.sm) and target filename.
+//
 // Revision 1.6  2009/11/27 19:44:39  cwrapp
 // Correct TargetLanguage.GRAPH source file name definition.
 //
