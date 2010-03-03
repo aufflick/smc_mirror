@@ -39,6 +39,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.6  2010/03/03 19:18:41  fperrad
+ * fix property with Graph & Table
+ *
  * Revision 1.5  2009/09/12 21:44:49  kgreg99
  * Implemented feature req. #2718941 - user defined generated class name.
  * A new statement was added to the syntax: %fsmclass class_name
@@ -1775,9 +1778,10 @@ ActionName
     // Either way, it is part of .Net languages and SMC must
     // allow .Net users to access this capability.
     EQUAL(token: SmcLexer.Token)
-      [ctxt.getTargetLanguage() != TargetLanguage.VB &&
-       ctxt.getTargetLanguage() != TargetLanguage.GRAPH &&
-       ctxt.getTargetLanguage() != TargetLanguage.C_SHARP]
+      [ctxt.getTargetLanguage() != TargetLanguage.GRAPH &&
+       ctxt.getTargetLanguage() != TargetLanguage.C_SHARP &&
+       ctxt.getTargetLanguage() != TargetLanguage.VB &&
+       ctxt.getTargetLanguage() != TargetLanguage.TABLE]
         ActionError
         {
             clearActions();

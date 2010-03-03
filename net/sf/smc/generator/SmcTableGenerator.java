@@ -483,17 +483,27 @@ public final class SmcTableGenerator
 
         _source.print(_indent);
         _source.print(action.getName());
-        _source.print("(");
-
-        for (it = action.getArguments().iterator(), sep = "";
-             it.hasNext() == true;
-             sep = ", ")
+        if (action.isProperty() == true)
         {
-            _source.print(sep);
+            _source.print(" = ");
+            it = action.getArguments().iterator();
             _source.print((it.next()).trim());
         }
+        else
+        {
+            _source.print("(");
 
-        _source.println(");");
+            for (it = action.getArguments().iterator(), sep = "";
+                 it.hasNext() == true;
+                 sep = ", ")
+            {
+                _source.print(sep);
+                _source.print((it.next()).trim());
+            }
+
+            _source.print(")");
+        }
+        _source.println(";");
 
         return;
     } // end of visit(SmcAction)
@@ -521,6 +531,9 @@ public final class SmcTableGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2010/03/03 19:18:40  fperrad
+// fix property with Graph & Table
+//
 // Revision 1.4  2009/11/25 22:30:19  cwrapp
 // Fixed problem between %fsmclass and sm file names.
 //

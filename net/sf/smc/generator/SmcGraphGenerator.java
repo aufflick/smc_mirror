@@ -721,19 +721,13 @@ public final class SmcGraphGenerator
             {
                 Iterator<String> it;
                 String arg;
-                String sep;
 
-                _source.print("(");
-
-                // Now output the arguments.
-                for (it = action.getArguments().iterator(),
-                         sep = "";
-                     it.hasNext() == true;
-                     sep = ", ")
+                if (action.isProperty() == true)
                 {
-                    arg = (it.next()).trim();
+                    _source.print(" = ");
 
-                    _source.print(sep);
+                    it = action.getArguments().iterator();
+                    arg = (it.next()).trim();
 
                     // If the argument is a quoted string, then
                     // the quotes must be escaped.
@@ -746,8 +740,36 @@ public final class SmcGraphGenerator
                     _source.print(
                         arg.replaceAll("\"", "\\\\\""));
                 }
+                else
+                {
+                    String sep;
 
-                _source.print(")");
+                    _source.print("(");
+
+                    // Now output the arguments.
+                    for (it = action.getArguments().iterator(),
+                             sep = "";
+                         it.hasNext() == true;
+                         sep = ", ")
+                    {
+                        arg = (it.next()).trim();
+
+                        _source.print(sep);
+
+                        // If the argument is a quoted string, then
+                        // the quotes must be escaped.
+                        // First, replace all backslashes with two
+                        // backslashes.
+                        arg = arg.replaceAll("\\\\", "\\\\\\\\");
+
+                        // Then replace all double quotes with
+                        // a backslash double qoute.
+                        _source.print(
+                            arg.replaceAll("\"", "\\\\\""));
+                    }
+
+                    _source.print(")");
+                }
             }
 
             _source.print(";\\l");
@@ -856,6 +878,9 @@ public final class SmcGraphGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2010/03/03 19:18:40  fperrad
+// fix property with Graph & Table
+//
 // Revision 1.5  2009/11/25 22:30:19  cwrapp
 // Fixed problem between %fsmclass and sm file names.
 //
