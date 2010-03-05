@@ -1268,25 +1268,37 @@ public final class SmcGroovyGenerator
     public void visit(SmcAction action)
     {
         String name = action.getName();
-        Iterator<String> it;
-        String sep;
+        List<String> arguments = action.getArguments();
 
-        // Need to distinguish between FSMContext actions and
-        // application class actions. If the action is
-        // "emptyStateStack", then pass it to the context.
-        // Otherwise, let the application class handle it.
-        _source.print(_indent);
-        if (action.isEmptyStateStack() == true)
+        if (action.isProperty() == true)
         {
-            _source.println("context.emptyStateStack()");
+            _source.print(_indent);
+            _source.print("ctxt.");
+            _source.print(name);
+            _source.print(" = ");
+            _source.println(arguments.get(0));
         }
         else
         {
-            _source.print("ctxt.");
+            // Need to distinguish between FSMContext actions and
+            // application class actions. If the action is
+            // "emptyStateStack", then pass it to the context.
+            // Otherwise, let the application class handle it.
+            _source.print(_indent);
+            if (action.isEmptyStateStack() == true)
+            {
+                _source.println("context.emptyStateStack()");
+            }
+            else
+            {
+                Iterator<String> it;
+                String sep;
+
+                _source.print("ctxt.");
 	        _source.print(name);
 	        _source.print("(");
 	
-	        for (it = action.getArguments().iterator(), sep = "";
+	        for (it = arguments.iterator(), sep = "";
 	             it.hasNext() == true;
 	             sep = ", ")
 	        {
@@ -1295,8 +1307,9 @@ public final class SmcGroovyGenerator
 	        }
 	
 	        _source.println(")");
-
+            }
         }
+
         return;
     } // end of visit(SmcAction)
 
@@ -1335,6 +1348,9 @@ public final class SmcGroovyGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2010/03/05 21:29:53  fperrad
+// Allows property with Groovy, Lua, Perl, Python, Ruby & Scala
+//
 // Revision 1.10  2009/12/17 19:51:43  cwrapp
 // Testing complete.
 //
@@ -1373,13 +1389,5 @@ public final class SmcGroovyGenerator
 //
 // Revision 1.1  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
-//
-// Revision 1.2  2008/03/21 14:03:16  fperrad
-// refactor : move from the main file Smc.java to each language generator the following data :
-//  - the default file name suffix,
-//  - the file name format for the generated SMC files
-//
-// Revision 1.1  2007/07/16 06:28:06  fperrad
-// + Added Groovy generator.
 //
 //

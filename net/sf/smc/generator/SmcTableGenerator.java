@@ -478,22 +478,23 @@ public final class SmcTableGenerator
      */
     public void visit(SmcAction action)
     {
-        Iterator<String> it;
-        String sep;
+        List<String> arguments = action.getArguments();
 
         _source.print(_indent);
         _source.print(action.getName());
         if (action.isProperty() == true)
         {
             _source.print(" = ");
-            it = action.getArguments().iterator();
-            _source.print((it.next()).trim());
+            _source.print(arguments.get(0).trim());
         }
         else
         {
+            Iterator<String> it;
+            String sep;
+
             _source.print("(");
 
-            for (it = action.getArguments().iterator(), sep = "";
+            for (it = arguments.iterator(), sep = "";
                  it.hasNext() == true;
                  sep = ", ")
             {
@@ -531,6 +532,9 @@ public final class SmcTableGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2010/03/05 21:29:53  fperrad
+// Allows property with Groovy, Lua, Perl, Python, Ruby & Scala
+//
 // Revision 1.5  2010/03/03 19:18:40  fperrad
 // fix property with Graph & Table
 //
@@ -546,59 +550,4 @@ public final class SmcTableGenerator
 // Revision 1.1  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
 //
-// Revision 1.6  2008/03/21 14:03:17  fperrad
-// refactor : move from the main file Smc.java to each language generator the following data :
-//  - the default file name suffix,
-//  - the file name format for the generated SMC files
-//
-// Revision 1.5  2007/02/21 13:56:51  cwrapp
-// Moved Java code to release 1.5.0
-//
-// Revision 1.4  2007/01/15 00:23:52  cwrapp
-// Release 4.4.0 initial commit.
-//
-// Revision 1.3  2006/09/16 15:04:29  cwrapp
-// Initial v. 4.3.3 check-in.
-//
-// Revision 1.2  2005/11/07 19:34:54  cwrapp
-// Changes in release 4.3.0:
-// New features:
-//
-// + Added -reflect option for Java, C#, VB.Net and Tcl code
-//   generation. When used, allows applications to query a state
-//   about its supported transitions. Returns a list of transition
-//   names. This feature is useful to GUI developers who want to
-//   enable/disable features based on the current state. See
-//   Programmer's Manual section 11: On Reflection for more
-//   information.
-//
-// + Updated LICENSE.txt with a missing final paragraph which allows
-//   MPL 1.1 covered code to work with the GNU GPL.
-//
-// + Added a Maven plug-in and an ant task to a new tools directory.
-//   Added Eiten Suez's SMC tutorial (in PDF) to a new docs
-//   directory.
-//
-// Fixed the following bugs:
-//
-// + (GraphViz) DOT file generation did not properly escape
-//   double quotes appearing in transition guards. This has been
-//   corrected.
-//
-// + A note: the SMC FAQ incorrectly stated that C/C++ generated
-//   code is thread safe. This is wrong. C/C++ generated is
-//   certainly *not* thread safe. Multi-threaded C/C++ applications
-//   are required to synchronize access to the FSM to allow for
-//   correct performance.
-//
-// + (Java) The generated getState() method is now public.
-//
-// Revision 1.1  2005/05/28 19:28:42  cwrapp
-// Moved to visitor pattern.
-//
-// Revision 1.1  2005/02/21 15:38:24  charlesr
-// Added Francois Perrad to Contributors section for Python work.
-//
-// Revision 1.0  2005/02/03 17:12:24  charlesr
-// Initial revision
 //

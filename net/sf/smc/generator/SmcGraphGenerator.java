@@ -719,15 +719,14 @@ public final class SmcGraphGenerator
 
             if (_graphLevel == GRAPH_LEVEL_2)
             {
-                Iterator<String> it;
+                List<String> arguments = action.getArguments();
                 String arg;
 
                 if (action.isProperty() == true)
                 {
                     _source.print(" = ");
 
-                    it = action.getArguments().iterator();
-                    arg = (it.next()).trim();
+                    arg = arguments.get(0).trim();
 
                     // If the argument is a quoted string, then
                     // the quotes must be escaped.
@@ -742,12 +741,13 @@ public final class SmcGraphGenerator
                 }
                 else
                 {
+                    Iterator<String> it;
                     String sep;
 
                     _source.print("(");
 
                     // Now output the arguments.
-                    for (it = action.getArguments().iterator(),
+                    for (it = arguments.iterator(),
                              sep = "";
                          it.hasNext() == true;
                          sep = ", ")
@@ -878,6 +878,9 @@ public final class SmcGraphGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2010/03/05 21:29:53  fperrad
+// Allows property with Groovy, Lua, Perl, Python, Ruby & Scala
+//
 // Revision 1.6  2010/03/03 19:18:40  fperrad
 // fix property with Graph & Table
 //
@@ -896,119 +899,4 @@ public final class SmcGraphGenerator
 // Revision 1.1  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
 //
-// Revision 1.23  2008/08/21 11:21:56  fperrad
-// + draw a composite state when 'push' loopback
-//
-// Revision 1.22  2008/08/20 08:18:21  fperrad
-// + draw a composite state when 'push' transition
-//
-// Revision 1.21  2008/08/19 08:59:24  fperrad
-// + draw 'pop' transition with UML artifacts
-//
-// Revision 1.20  2008/08/15 23:33:02  fperrad
-// + fix : unique push entry transition
-//
-// Revision 1.19  2008/08/15 22:24:38  fperrad
-// + draw push entry transition
-// + don't draw namespace
-//
-// Revision 1.18  2008/08/14 09:16:18  fperrad
-// + internal actions : more indentation
-// + split entry/exit & internal events in two compartments
-//
-// Revision 1.17  2008/08/06 07:45:16  fperrad
-// + refactor : don't need optimization for speed
-//
-// Revision 1.16  2008/08/02 09:28:49  fperrad
-// + fix : push when internal event
-// + drawing close to UML
-//   - state with Mrecord
-//   - pop with invhouse
-//   - initial state with filled circle
-//
-// Revision 1.15  2008/07/31 12:03:17  fperrad
-// + draw the start transition
-// + add emphasis to Default state
-//
-// Revision 1.14  2008/07/31 06:20:59  fperrad
-// + fix : default state name in edge
-// + fix : escape newline in pop argument (level 2)
-//
-// Revision 1.13  2008/07/30 07:07:23  fperrad
-// + fix : escape condition guard in loopback
-//
-// Revision 1.12  2008/07/27 15:54:37  fperrad
-// + refactor with isLoopback()
-//
-// Revision 1.11  2008/07/26 07:42:35  fperrad
-// + draw loopback (internal event) in state instead as transition
-//
-// Revision 1.10  2008/07/25 11:22:20  fperrad
-// + in level 2, don't draw entry/exit when no action
-// + in level 1, draw entry & exit
-//
-// Revision 1.9  2008/07/24 06:24:31  fperrad
-// + don't draw loopback (internal event) in level 0
-//
-// Revision 1.8  2008/03/21 14:03:16  fperrad
-// refactor : move from the main file Smc.java to each language generator the following data :
-//  - the default file name suffix,
-//  - the file name format for the generated SMC files
-//
-// Revision 1.7  2007/12/28 12:34:41  cwrapp
-// Version 5.0.1 check-in.
-//
-// Revision 1.6  2007/02/21 13:54:51  cwrapp
-// Moved Java code to release 1.5.0
-//
-// Revision 1.5  2007/01/15 00:23:51  cwrapp
-// Release 4.4.0 initial commit.
-//
-// Revision 1.4  2006/09/16 15:04:29  cwrapp
-// Initial v. 4.3.3 check-in.
-//
-// Revision 1.3  2006/07/11 18:13:33  cwrapp
-// Changed method getGraphLevel() to graphLevel().
-//
-// Revision 1.2  2005/11/07 19:34:54  cwrapp
-// Changes in release 4.3.0:
-// New features:
-//
-// + Added -reflect option for Java, C#, VB.Net and Tcl code
-//   generation. When used, allows applications to query a state
-//   about its supported transitions. Returns a list of transition
-//   names. This feature is useful to GUI developers who want to
-//   enable/disable features based on the current state. See
-//   Programmer's Manual section 11: On Reflection for more
-//   information.
-//
-// + Updated LICENSE.txt with a missing final paragraph which allows
-//   MPL 1.1 covered code to work with the GNU GPL.
-//
-// + Added a Maven plug-in and an ant task to a new tools directory.
-//   Added Eiten Suez's SMC tutorial (in PDF) to a new docs
-//   directory.
-//
-// Fixed the following bugs:
-//
-// + (GraphViz) DOT file generation did not properly escape
-//   double quotes appearing in transition guards. This has been
-//   corrected.
-//
-// + A note: the SMC FAQ incorrectly stated that C/C++ generated
-//   code is thread safe. This is wrong. C/C++ generated is
-//   certainly *not* thread safe. Multi-threaded C/C++ applications
-//   are required to synchronize access to the FSM to allow for
-//   correct performance.
-//
-// + (Java) The generated getState() method is now public.
-//
-// Revision 1.1  2005/05/28 19:28:42  cwrapp
-// Moved to visitor pattern.
-//
-// Revision 1.1  2005/02/21 15:35:19  charlesr
-// Added Francois Perrad to Contributors section for Python work.
-//
-// Revision 1.0  2005/02/03 17:10:52  charlesr
-// Initial revision
 //

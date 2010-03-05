@@ -39,6 +39,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.7  2010/03/05 21:29:54  fperrad
+ * Allows property with Groovy, Lua, Perl, Python, Ruby & Scala
+ *
  * Revision 1.6  2010/03/03 19:18:41  fperrad
  * fix property with Graph & Table
  *
@@ -1780,6 +1783,12 @@ ActionName
     EQUAL(token: SmcLexer.Token)
       [ctxt.getTargetLanguage() != TargetLanguage.GRAPH &&
        ctxt.getTargetLanguage() != TargetLanguage.C_SHARP &&
+       ctxt.getTargetLanguage() != TargetLanguage.GROOVY &&
+       ctxt.getTargetLanguage() != TargetLanguage.LUA &&
+       ctxt.getTargetLanguage() != TargetLanguage.PERL &&
+       ctxt.getTargetLanguage() != TargetLanguage.PYTHON &&
+       ctxt.getTargetLanguage() != TargetLanguage.RUBY &&
+       ctxt.getTargetLanguage() != TargetLanguage.SCALA &&
        ctxt.getTargetLanguage() != TargetLanguage.VB &&
        ctxt.getTargetLanguage() != TargetLanguage.TABLE]
         ActionError

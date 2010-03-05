@@ -1265,25 +1265,38 @@ public final class SmcRubyGenerator
     public void visit(SmcAction action)
     {
         String name = action.getName();
-        Iterator<String> it;
-        String sep;
 
-        // Need to distinguish between FSMContext actions and
-        // application class actions. If the action is
-        // "emptyStateStack", then pass it to the context.
-        // Otherwise, let the application class handle it.
-        _source.print(_indent);
-        if (action.isEmptyStateStack() == true)
+        List<String> arguments = action.getArguments();
+
+        if (action.isProperty() == true)
         {
-            _source.println("fsm.emptyStateStack()");
+            _source.print(_indent);
+            _source.print("ctxt.");
+            _source.print(name);
+            _source.print(" = ");
+            _source.println(arguments.get(0));
         }
         else
         {
-            _source.print("ctxt.");
+            // Need to distinguish between FSMContext actions and
+            // application class actions. If the action is
+            // "emptyStateStack", then pass it to the context.
+            // Otherwise, let the application class handle it.
+            _source.print(_indent);
+            if (action.isEmptyStateStack() == true)
+            {
+                _source.println("fsm.emptyStateStack()");
+            }
+            else
+            {
+                Iterator<String> it;
+                String sep;
+
+                _source.print("ctxt.");
 	        _source.print(name);
 	        _source.print("(");
 	
-	        for (it = action.getArguments().iterator(), sep = "";
+	        for (it = arguments.iterator(), sep = "";
 	             it.hasNext() == true;
 	             sep = ", ")
 	        {
@@ -1292,8 +1305,9 @@ public final class SmcRubyGenerator
 	        }
 	
 	        _source.println(")");
+            }
         }
-        
+
         return;
     } // end of visit(SmcAction)
 
@@ -1309,6 +1323,9 @@ public final class SmcRubyGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2010/03/05 21:29:53  fperrad
+// Allows property with Groovy, Lua, Perl, Python, Ruby & Scala
+//
 // Revision 1.9  2009/12/17 19:51:43  cwrapp
 // Testing complete.
 //
