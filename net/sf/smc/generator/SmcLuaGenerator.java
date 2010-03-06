@@ -335,7 +335,8 @@ public final class SmcLuaGenerator
         if (_reflectFlag == true)
         {
             // getStates() method.
-            _source.println("AppClassContext._States = {");
+            _source.print(fsmClassName);
+            _source.println("._States = {");
             for (SmcMap map: maps)
             {
                 mapName = map.getName();
@@ -350,13 +351,16 @@ public final class SmcLuaGenerator
                 }
             }
             _source.println("}");
-            _source.println("function AppClassContext:getStates ()");
+            _source.print("function ");
+            _source.print(fsmClassName);
+            _source.println(":getStates ()");
             _source.println("    return self._States");
             _source.println("end");
             _source.println();
 
             // getTransitions() method.
-            _source.println("AppClassContext._transitions = {");
+            _source.print(fsmClassName);
+            _source.println("._transitions = {");
              for (SmcTransition trans: transitions)
              {
                 _source.print("    '");
@@ -364,7 +368,9 @@ public final class SmcLuaGenerator
                 _source.println("',");
             }
             _source.println("}");
-            _source.println("function AppClassContext:getTransitions ()");
+            _source.print("function ");
+            _source.print(fsmClassName);
+            _source.println(":getTransitions ()");
             _source.println("    return self._transitions");
             _source.println("end");
             _source.println();
@@ -1317,6 +1323,9 @@ public final class SmcLuaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.12  2010/03/06 13:30:34  fperrad
+// fix reflect
+//
 // Revision 1.11  2010/03/05 21:29:53  fperrad
 // Allows property with Groovy, Lua, Perl, Python, Ruby & Scala
 //
