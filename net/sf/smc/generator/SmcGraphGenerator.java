@@ -158,15 +158,7 @@ public final class SmcGraphGenerator
             state.accept(this);
         }
 
-        // Output the default state - if there is one and it
-        // has some transitions.
-        if (defaultState != null &&
-            defaultState.getTransitions().isEmpty() == false)
-        {
-            defaultState.accept(this);
-        }
-
-        for (SmcState state: map.getAllStates())
+        for (SmcState state: map.getStates())
         {
             for (SmcTransition transition: state.getTransitions())
             {
@@ -221,7 +213,71 @@ public final class SmcGraphGenerator
                     }
                 }
             }
+            if (defaultState != null)
+            {
+                for (SmcTransition transition: defaultState.getTransitions())
+                {
+                    String transName = transition.getName();
+                    if (state.callDefault(transName) == true)
+                    {
+                        for (SmcGuard guard: transition.getGuards())
+                        {
+                            if (state.findGuard(transName, guard.getCondition()) == null)
+                            {
+                                String endStateName = guard.getEndState();
+                                TransType transType = guard.getTransType();
+
+                                if (transType == TransType.TRANS_PUSH)
+                                {
+                                    String pushStateName = guard.getPushState();
+                                    String pushMapName;
+                                    int index;
+
+                                    if (endStateName.equals(SmcElement.NIL_STATE) == true)
+                                    {
+                                        endStateName = state.getInstanceName();
+                                    }
+
+                                    if ((index = pushStateName.indexOf("::")) >= 0)
+                                    {
+                                        pushMapName = pushStateName.substring(0, index);
+                                    }
+                                    else
+                                    {
+                                        pushMapName = mapName;
+                                    }
+
+                                    pushStateMap.put(mapName + "::" + endStateName + "::" + pushMapName, pushMapName);
+                                }
+                                else if (transType == TransType.TRANS_POP)
+                                {
+                                    String popKey = endStateName;
+                                    String popVal = endStateName;
+                                    String popArgs;
+
+                                    if (_graphLevel == GRAPH_LEVEL_2 &&
+                                        (popArgs = guard.getPopArgs()) != null &&
+                                         popArgs.length() > 0)
+                                    {
+                                        popKey += ", ";
+                                        popVal += ", ";
+                                        popKey += _escape(_normalize(popArgs));
+                                        // If the argument contains line separators,
+                                        // then replace them with a "\n" so Graphviz knows
+                                        // about the line separation.
+                                        popVal += _escape(popArgs).replaceAll(
+                                            "\\n", "\\\\\\l");
+                                    }
+                                    popTransMap.put(popKey, popVal);
+                                    needEnd = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
+
         // Now output the pop transitions as "nodes".
         for (String pname: popTransMap.keySet())
         {
@@ -304,20 +360,28 @@ public final class SmcGraphGenerator
         // For each state, output its transitions.
         for (SmcState state: map.getStates())
         {
+            _state = state;
             for (SmcTransition transition:
                      state.getTransitions())
             {
                 transition.accept(this);
             }
-        }
-
-        // Have the default state output its transitions last.
-        if (defaultState != null)
-        {
-            for (SmcTransition transition:
-                     defaultState.getTransitions())
+            if (defaultState != null)
             {
-                transition.accept(this);
+                for (SmcTransition transition: defaultState.getTransitions())
+                {
+                    String transName = transition.getName();
+                    if (state.callDefault(transName) == true)
+                    {
+                        for (SmcGuard guard: transition.getGuards())
+                        {
+                            if (state.findGuard(transName, guard.getCondition()) == null)
+                            {
+                                guard.accept(this);
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -379,7 +443,9 @@ public final class SmcGraphGenerator
      */
     public void visit(SmcState state)
     {
-        String mapName = state.getMap().getName();
+        SmcMap map = state.getMap();
+        SmcState defaultState = map.getDefaultState();
+        String mapName = map.getName();
         String instanceName = state.getInstanceName();
 
         // The state name must be fully-qualified because
@@ -392,15 +458,7 @@ public final class SmcGraphGenerator
         _source.println("\"");
 
         _source.print("            [label=\"{");
-        // Output the state name.
-        if (instanceName.equals("DefaultState") == true)
-        {
-            _source.print("&laquo; Default &raquo;");
-        }
-        else
-        {
-            _source.print(instanceName);
-        }
+        _source.print(instanceName);
 
         // For graph level 1 & 2, output entry and exit actions.
         if (_graphLevel >= GRAPH_LEVEL_1)
@@ -410,6 +468,10 @@ public final class SmcGraphGenerator
             boolean empty = true;
 
             actions = state.getEntryActions();
+            if (actions == null && defaultState != null)
+            {
+                actions = defaultState.getEntryActions();
+            }
             if (actions != null)
             {
                 if (empty == true)
@@ -428,6 +490,10 @@ public final class SmcGraphGenerator
             }
 
             actions = state.getExitActions();
+            if (actions == null && defaultState != null)
+            {
+                actions = defaultState.getExitActions();
+            }
             if (actions != null)
             {
                 if (empty == true)
@@ -529,6 +595,98 @@ public final class SmcGraphGenerator
                     }
                 }
             }
+            if (defaultState != null)
+            {
+                for (SmcTransition transition: defaultState.getTransitions())
+                {
+                    String transName = transition.getName();
+                    if (state.callDefault(transName) == true)
+                    {
+                        for (SmcGuard guard: transition.getGuards())
+                        {
+                            if (state.findGuard(transName, guard.getCondition()) == null)
+                            {
+                                String endStateName = guard.getEndState();
+                                TransType transType = guard.getTransType();
+
+                                if (isLoopback(transType, endStateName) &&
+                                    transType != TransType.TRANS_PUSH)
+                                {
+                                    transName = transition.getName();
+                                    String condition = guard.getCondition();
+                                    String pushStateName = guard.getPushState();
+                                    actions = guard.getActions();
+
+                                    if (empty == true)
+                                    {
+                                        _source.print("|");
+                                        empty = false;
+                                    }
+                                    _source.print(transName);
+
+                                    // Graph Level 2: Output the transition parameters.
+                                    if (_graphLevel == GRAPH_LEVEL_2)
+                                    {
+                                        List<SmcParameter> parameters = transition.getParameters();
+                                        Iterator<SmcParameter> pit;
+                                        String sep;
+
+                                        _source.print("(");
+                                        for (pit = parameters.iterator(), sep = "";
+                                             pit.hasNext() == true;
+                                             sep = ", ")
+                                        {
+                                            _source.print(sep);
+                                            (pit.next()).accept(this);
+                                        }
+                                        _source.print(")");
+                                    }
+
+                                    // Output the guard.
+                                    if (condition != null && condition.length() > 0)
+                                    {
+                                        String tmp = _escape(condition);
+
+                                        // If the condition contains line separators,
+                                        // then replace them with a "\n" so Graphviz knows
+                                        // about the line separation.
+                                        tmp = tmp.replaceAll("\\n", "\\\\\\l");
+
+                                        // Not needed when label in edge !!
+                                        tmp = tmp.replaceAll(">", "\\\\>");
+                                        tmp = tmp.replaceAll("<", "\\\\<");
+                                        tmp = tmp.replaceAll("\\|", "\\\\|");
+
+                                        _source.print("\\l\\[");
+                                        _source.print(tmp);
+                                        _source.print("\\]");
+                                    }
+
+                                    _source.print("/\\l");
+
+                                    if (actions != null)
+                                    {
+                                        // Output the actions, one per line.
+                                        for (SmcAction action: actions)
+                                        {
+                                            _source.print(_indent_action);
+                                            action.accept(this);
+                                        }
+                                    }
+
+                                    if (transType == TransType.TRANS_PUSH)
+                                    {
+                                        _source.print(_indent_action);
+                                        _source.print("push(");
+                                        _source.print(pushStateName);
+                                        _source.print(")\\l");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         _source.println("}\"];");
@@ -558,10 +716,9 @@ public final class SmcGraphGenerator
     public void visit(SmcGuard guard)
     {
         SmcTransition transition = guard.getTransition();
-        SmcState state = transition.getState();
-        SmcMap map = state.getMap();
+        SmcMap map = _state.getMap();
         String mapName = map.getName();
-        String stateName = state.getInstanceName();
+        String stateName = _state.getInstanceName();
         String transName = transition.getName();
         TransType transType = guard.getTransType();
         String endStateName = guard.getEndState();
@@ -873,11 +1030,16 @@ public final class SmcGraphGenerator
 //
 
     String _indent_action;
+
+    SmcState _state;
 } // end of class SmcGraphGenerator
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2010/03/08 17:02:40  fperrad
+// New representation of the Default state. The result is full UML.
+//
 // Revision 1.7  2010/03/05 21:29:53  fperrad
 // Allows property with Groovy, Lua, Perl, Python, Ruby & Scala
 //

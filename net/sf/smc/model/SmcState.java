@@ -219,6 +219,65 @@ public final class SmcState
         return (retval);
     } // end of findTransition(String, List<SmcParameter>)
 
+    /**
+     * Returns the guard with the specified name and
+     * condition. May return {@code null}.
+     * @param name the transition name.
+     * @param condition the condition guard
+     * @return the guard with the specified name and
+     * condition.
+     */
+    public SmcGuard
+        findGuard(String name,
+                  String condition)
+    {
+        for (SmcTransition transition: _transitions)
+        {
+            if (name.equals(transition.getName()) == true)
+            {
+                for (SmcGuard guard: transition.getGuards())
+                {
+                    if (condition.equals(guard.getCondition()) == true)
+                    {
+                        return guard;
+                    }
+                }
+            }
+        }
+        return null;
+    } // end of findGuard(String, String)
+
+    /**
+     * @param name the transition name.
+     * @return true or false
+     */
+    public boolean
+        callDefault(String name)
+    {
+        for (SmcTransition transition: _transitions)
+        {
+            if (name.equals(transition.getName()) == true)
+            {
+                for (SmcGuard guard: transition.getGuards())
+                {
+                    if (guard.getCondition().equals("") == true)
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+        for (SmcTransition transition: _transitions)
+        {
+            if (transition.getName().equals("Default") == true)
+            {
+                return false;
+            }
+        }
+        return true;
+    } // end of callDefault(String)
+
     //
     // end of Get methods.
     //-----------------------------------------------------------
@@ -324,6 +383,9 @@ public final class SmcState
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2010/03/08 17:02:41  fperrad
+// New representation of the Default state. The result is full UML.
+//
 // Revision 1.1  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
 //
