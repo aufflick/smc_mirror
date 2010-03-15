@@ -1038,10 +1038,10 @@ public final class SmcPythonGenerator
             {
                 if (_debugLevel >= DEBUG_LEVEL_1)
                 {
-                    _source.print(indent2);
+                    _source.print(indent3);
                     _source.println(
                         "if fsm.getDebugFlag() == True:");
-                    _source.print(indent2);
+                    _source.print(indent3);
                     _source.print(
                         "    fsm.getDebugStream().write(\"");
                     _source.print("BEFORE ENTRY    : ");
@@ -1055,10 +1055,10 @@ public final class SmcPythonGenerator
 
                 if (_debugLevel >= DEBUG_LEVEL_1)
                 {
-                    _source.print(indent2);
+                    _source.print(indent3);
                     _source.println(
                         "if fsm.getDebugFlag() == True:");
-                    _source.print(indent2);
+                    _source.print(indent3);
                     _source.print(
                         "    fsm.getDebugStream().write(");
                     _source.print("\"AFTER ENTRY     : ");
@@ -1089,10 +1089,10 @@ public final class SmcPythonGenerator
         {
             if (_debugLevel >= DEBUG_LEVEL_1)
             {
-                _source.print(indent2);
+                _source.print(indent3);
                 _source.println(
                     "if fsm.getDebugFlag() == True:");
-                _source.print(indent2);
+                _source.print(indent3);
                 _source.print("    fsm.getDebugStream().write(");
                 _source.print("\"BEFORE ENTRY    : ");
                 _source.print(stateName);
@@ -1105,10 +1105,10 @@ public final class SmcPythonGenerator
 
             if (_debugLevel >= DEBUG_LEVEL_1)
             {
-                _source.print(indent2);
+                _source.print(indent3);
                 _source.println(
                     "if fsm.getDebugFlag() == True:");
-                _source.print(indent2);
+                _source.print(indent3);
                 _source.print("    fsm.getDebugStream().write(");
                 _source.print("\"AFTER ENTRY     : ");
                 _source.print(stateName);
@@ -1183,7 +1183,7 @@ public final class SmcPythonGenerator
                 _source.print("ctxt.");
 	        _source.print(name);
 	        _source.print("(");
-	
+
 	        for (it = arguments.iterator(), sep = "";
 	             it.hasNext() == true;
 	             sep = ", ")
@@ -1191,7 +1191,7 @@ public final class SmcPythonGenerator
 	            _source.print(sep);
 	            _source.print(it.next());
 	        }
-	
+
 	        _source.println(")");
 	    }
         }
@@ -1222,6 +1222,9 @@ public final class SmcPythonGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2010/03/15 16:46:11  fperrad
+// fix indent with -g1
+//
 // Revision 1.10  2010/03/05 21:29:53  fperrad
 // Allows property with Groovy, Lua, Perl, Python, Ruby & Scala
 //
