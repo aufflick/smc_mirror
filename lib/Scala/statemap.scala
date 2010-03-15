@@ -114,6 +114,7 @@ abstract class FSMContext[State] {
         }
         val previousState = _state
         _state = _stateStack.pop()
+        _isInTransaction = false
         if (_debugFlag)
             _debugStream.println("POP TO STATE    : " + _state)
         // Inform all listeners about this state change
@@ -136,6 +137,9 @@ abstract class FSMContext[State] {
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2010/03/15 21:18:01  fperrad
+// fix Scala runtime library
+//
 // Revision 1.6  2009/11/24 20:42:39  cwrapp
 // v. 6.0.1 update
 //
