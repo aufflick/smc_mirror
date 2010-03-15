@@ -1057,9 +1057,9 @@ public final class SmcLuaGenerator
             String trArgName;
             String sep;
 
-            _source.print(indent3);
+            _source.print(indent2);
             _source.println("if fsm:getDebugFlag() then");
-            _source.print(indent3);
+            _source.print(indent2);
             _source.print("    fsm:getDebugStream():write(\"");
             _source.print("EXIT TRANSITION : ");
             if (packageName != null &&
@@ -1088,7 +1088,7 @@ public final class SmcLuaGenerator
             _source.print(")");
 
             _source.println("\\n\")");
-            _source.print(indent3);
+            _source.print(indent2);
             _source.println("end");
         }
 
@@ -1323,6 +1323,9 @@ public final class SmcLuaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.13  2010/03/15 13:15:54  fperrad
+// fix indentation
+//
 // Revision 1.12  2010/03/06 13:30:34  fperrad
 // fix reflect
 //
