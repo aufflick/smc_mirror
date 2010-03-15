@@ -3,14 +3,14 @@
 // License Version 1.1 (the "License"); you may not use this file
 // except in compliance with the License. You may obtain a copy
 // of the License at http://www.mozilla.org/MPL/
-// 
+//
 // Software distributed under the License is distributed on an
 // "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
-// 
+//
 // The Original Code is State Machine Compiler (SMC).
-// 
+//
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
 // Copyright (C) 2005 - 2009. Charles W. Rapp.
@@ -743,7 +743,12 @@ public final class SmcPhpGenerator
         // transition.
         if (_guardIndex > 0 && nullCondition == false)
         {
-            _source.println("        } else {");
+            if (_guardCount == 1)
+            {
+                _source.println("        }");
+            }
+
+            _source.println("        else {");
 
             // Call the super class' transition method using
             // the "parent" keyword and not the class name.
@@ -767,7 +772,7 @@ public final class SmcPhpGenerator
             _source.println();
         }
 
-        _source.print("    }");
+        _source.println("    }");
 
         return;
     } // end of visit(SmcTransition)
@@ -855,8 +860,9 @@ public final class SmcPhpGenerator
             {
                 // No, this is not the first transition but it
                 // does have a condition. Use an "else if".
+                _source.println();
                 _source.print(_indent);
-                _source.print("} elseif (");
+                _source.print("elseif (");
                 _source.print(condition);
                 _source.println(") {");
             }
@@ -864,6 +870,8 @@ public final class SmcPhpGenerator
             {
                 // This is not the first transition and it has
                 // no condition.
+                _source.println();
+                _source.print(_indent);
                 _source.println("else {");
             }
         }
@@ -1267,7 +1275,7 @@ public final class SmcPhpGenerator
                 _source.print(indent2);
                 _source.println(");");
             }
-            else 
+            else
             {
                 _source.println(");");
             }
@@ -1314,7 +1322,7 @@ public final class SmcPhpGenerator
         	}
 	        _source.print(name);
 	        _source.print("(");
-	
+
 	        for (it = action.getArguments().iterator(), sep = "";
 	             it.hasNext() == true;
 	             sep = ", ")
@@ -1322,10 +1330,10 @@ public final class SmcPhpGenerator
 	            _source.print(sep);
 	            _source.print(it.next());
 	        }
-	
+
 	        _source.println(");");
         }
-        
+
         return;
     } // end of visit(SmcAction)
 
@@ -1397,6 +1405,9 @@ public final class SmcPhpGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2010/03/15 13:15:03  fperrad
+// fix multi guard
+//
 // Revision 1.9  2009/12/17 19:51:43  cwrapp
 // Testing complete.
 //
