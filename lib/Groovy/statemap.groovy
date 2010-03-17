@@ -53,6 +53,10 @@ class TransitionUndefinedException extends RuntimeException {
         super()
         this.msg = msg
     }
+
+    String toString () {
+        return 'statemap.TransitionUndefinedException: ' + msg
+    }
 }
 
 abstract class FSMContext implements Serializable {
@@ -147,6 +151,9 @@ abstract class FSMContext implements Serializable {
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2010/03/17 13:13:29  fperrad
+// add TransitionUndefinedException toString
+//
 // Revision 1.6  2010/03/16 16:43:58  fperrad
 // add TransitionUndefinedException constructor
 //
