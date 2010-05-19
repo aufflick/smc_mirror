@@ -282,7 +282,7 @@ public final class SmcPythonGenerator
             }
             _source.println("    )");
             _source.println("    def getStates(self):");
-            _source.println("        return _States");
+            _source.println("        return self._States");
             _source.println();
 
             // getTransitions() method.
@@ -295,7 +295,7 @@ public final class SmcPythonGenerator
             }
             _source.println("    )");
             _source.println("    def getTransitions(self):");
-            _source.println("        return _transitions");
+            _source.println("        return self._transitions");
             _source.println();
         }
 
@@ -1222,6 +1222,9 @@ public final class SmcPythonGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.12  2010/05/19 09:08:17  fperrad
+// fix #3003558
+//
 // Revision 1.11  2010/03/15 16:46:11  fperrad
 // fix indent with -g1
 //
