@@ -146,6 +146,7 @@ public final class SmcGraphGenerator
         Map<String, String> popTransMap = new HashMap<String, String>();
         Map<String, String> pushStateMap = new HashMap<String, String>();
         boolean needEnd = false;
+        String startMapName = startStateName.substring(0, startStateName.indexOf(":"));
 
         _source.println("        //");
         _source.println("        // States (Nodes)");
@@ -313,7 +314,7 @@ public final class SmcGraphGenerator
             _source.println();
         }
 
-        if (startStateName.indexOf(mapName) == 0)
+        if (startMapName.equals(mapName) == true)
         {
             // Output the start node only in the right map
             _source.println("        \"%start\"");
@@ -413,7 +414,7 @@ public final class SmcGraphGenerator
             _source.println("            [label=\"pop/\"]");
         }
 
-        if (startStateName.indexOf(mapName) == 0)
+        if (startMapName.equals(mapName) == true)
         {
             // Output the start transition only in the right map
             _source.println();
@@ -1037,6 +1038,9 @@ public final class SmcGraphGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2010/05/27 10:15:36  fperrad
+// fix #3007678
+//
 // Revision 1.8  2010/03/08 17:02:40  fperrad
 // New representation of the Default state. The result is full UML.
 //
