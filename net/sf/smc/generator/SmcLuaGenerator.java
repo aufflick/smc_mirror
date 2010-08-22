@@ -117,9 +117,18 @@ public final class SmcLuaGenerator
         _source.println(".sm");
         _source.println();
 
-        _source.println("module(..., package.seeall)");
+        _source.println("local error = error");
+        if (_noCatchFlag == false)
+        {
+            _source.println("local pcall = pcall");
+        }
+        if (_debugLevel >= DEBUG_LEVEL_0)
+        {
+            _source.println("local tostring = tostring");
+        }
+        _source.println("local strformat = require 'string'.format");
         _source.println();
-        _source.println("require 'statemap'");
+        _source.println("local statemap = require 'statemap'");
 
         // Dump out the raw source code, if any.
         if (rawSource != null && rawSource.length () > 0)
@@ -135,6 +144,9 @@ public final class SmcLuaGenerator
             _source.print(imp);
             _source.println("'");
         }
+
+        _source.println();
+        _source.println("module(...)");
 
         // Declare the inner state class.
         _source.println();
@@ -202,11 +214,11 @@ public final class SmcLuaGenerator
         }
 
         _source.println(
-            "    local msg = string.format(\"Undefined Transition\\nState: %s\\nTransition: %s\\n\",");
+            "    local msg = strformat(\"Undefined Transition\\nState: %s\\nTransition: %s\\n\",");
         _source.println(
-            "                              fsm:getState():getName(),");
+            "                          fsm:getState():getName(),");
         _source.println(
-            "                              fsm:getTransition())");
+            "                          fsm:getTransition())");
         _source.println("    error(msg)");
         _source.println("end");
 
@@ -1295,7 +1307,7 @@ public final class SmcLuaGenerator
                 _source.print("ctxt:");
 	        _source.print(name);
 	        _source.print("(");
-	
+
 	        for (it = arguments.iterator(), sep = "";
 	             it.hasNext() == true;
 	             sep = ", ")
@@ -1303,7 +1315,7 @@ public final class SmcLuaGenerator
 	            _source.print(sep);
 	            _source.print(it.next());
 	        }
-	
+
 	        _source.println(")");
             }
         }
@@ -1323,6 +1335,9 @@ public final class SmcLuaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.14  2010/08/22 21:12:09  fperrad
+// Lua: refactor without package.seeall
+//
 // Revision 1.13  2010/03/15 13:15:54  fperrad
 // fix indentation
 //

@@ -32,7 +32,13 @@
 -- See: http://smc.sourceforge.net/
 --
 
-module(..., package.seeall)
+local assert = assert
+local error = error
+local setmetatable = setmetatable
+local type = type
+local stderr = require 'io'.stderr
+
+module(...)
 
 -- base State class
 State = {}
@@ -82,7 +88,7 @@ end
 function FSMContext:new (o)
     o = o or {}
     o._state_stack = {}
-    o._debug_stream = io.stderr
+    o._debug_stream = stderr
     setmetatable(o, self)
     self.__index = self
     o:_init()
@@ -176,7 +182,7 @@ function FSMContext:pushState (state)
     assert(state ~= nil, "undefined state.")
     assert(type(state) == 'table') -- "state should be a State"
     if self._state then
-        table.insert(self._state_stack, self._state)
+        local t = self._state_stack; t[#t+1] = self._state -- push
     end
     self._state = state
     if self._debug_flag then
@@ -186,13 +192,14 @@ end
 
 function FSMContext:popState ()
     -- Make the state on top of the state stack the current state.
-    if #self._state_stack == 0 then
+    local t = self._state_stack
+    if #t == 0 then
         if self._debug_flag then
             self._debug_stream:write("POPPING ON EMPTY STATE STACK.\n")
         end
         error("empty state stack.")
     else
-        self._state = table.remove(self._state_stack)
+        self._state = t[#t]; t[#t] = nil -- pop
         if self._debug_flag then
             self._debug_stream:write("POP TO STATE    : ", self._state:getName(), "\n")
         end
