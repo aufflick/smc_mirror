@@ -452,11 +452,11 @@ public final class SmcPerlGenerator
         {
             _source.print("    $");
             _source.print(state.getInstanceName());
-            _source.print(" = new ");
+            _source.print(" = ");
             _source.print(mapName);
             _source.print('_');
             _source.print(state.getClassName());
-            _source.print("('");
+            _source.print("->new('");
             _source.print(mapName);
             _source.print('.');
             _source.print(state.getClassName());
@@ -466,9 +466,9 @@ public final class SmcPerlGenerator
         }
 
         // Instantiate a default state as well.
-        _source.print("    $Default = new ");
+        _source.print("    $Default = ");
         _source.print(mapName);
-        _source.print("_Default('");
+        _source.print("_Default->new('");
         _source.print(mapName);
         _source.println(".Default', -1);");
         _source.println("}");
@@ -1332,7 +1332,7 @@ public final class SmcPerlGenerator
                 _source.print("$ctxt->");
 	        _source.print(name);
 	        _source.print("(");
-	
+
 	        for (it = arguments.iterator(), sep = "";
 	             it.hasNext() == true;
 	             sep = ", ")
@@ -1340,7 +1340,7 @@ public final class SmcPerlGenerator
 	            _source.print(sep);
 	            _source.print(it.next());
 	        }
-	
+
 	        _source.println(");");
             }
         }
@@ -1360,6 +1360,9 @@ public final class SmcPerlGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2010/08/30 13:39:37  fperrad
+// Perl: better form of new
+//
 // Revision 1.10  2010/03/05 21:29:53  fperrad
 // Allows property with Groovy, Lua, Perl, Python, Ruby & Scala
 //
