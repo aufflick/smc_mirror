@@ -419,7 +419,7 @@ public final class SmcCppGenerator
                 _source.print(_indent);
                 _source.print("        TRACE(");
                 _source.println(
-                    "\"TRANSITION   : Default\\n\\r\");");
+                    "\"TRANSITION   : Default\\n\");");
             }
             else
             {
@@ -719,7 +719,7 @@ public final class SmcCppGenerator
                 _source.print(
                     "        TRACE(\"LEAVING STATE   : ");
                 _source.print(fqStateName);
-                _source.println("\\n\\r\");");
+                _source.println("\\n\");");
             }
             else
             {
@@ -986,7 +986,7 @@ public final class SmcCppGenerator
                         "    TRACE(\"BEFORE EXIT     : ");
                     _source.print(stateName);
                     _source.println(
-                        "::Exit(context)\\n\\r\");");
+                        "::Exit(context)\\n\");");
                 }
                 else
                 {
@@ -1027,7 +1027,7 @@ public final class SmcCppGenerator
                         "    TRACE(\"AFTER EXIT      : ");
                     _source.print(stateName);
                     _source.println(
-                        "::Exit(context)\\n\\r\");");
+                        "::Exit(context)\\n\");");
                 }
                 else
                 {
@@ -1082,7 +1082,7 @@ public final class SmcCppGenerator
                     (pit.next()).accept(this);
                 }
 
-                _source.println(")\\n\\r\");");
+                _source.println(")\\n\");");
             }
             else
             {
@@ -1208,7 +1208,7 @@ public final class SmcCppGenerator
                     (pit.next()).accept(this);
                 }
 
-                _source.println(")\\n\\r\");");
+                _source.println(")\\n\");");
             }
             else
             {
@@ -1292,7 +1292,7 @@ public final class SmcCppGenerator
                             "    TRACE(\"BEFORE ENTRY    : ");
                         _source.print(stateName);
                         _source.println(
-                            "::Entry(context)\\n\\r\");");
+                            "::Entry(context)\\n\");");
                     }
                     else
                     {
@@ -1334,7 +1334,7 @@ public final class SmcCppGenerator
                             "    TRACE(\"AFTER ENTRY     : ");
                         _source.print(stateName);
                         _source.println(
-                            "::Entry(context)\\n\\r\");");
+                            "::Entry(context)\\n\");");
                     }
                     else
                     {
@@ -1421,7 +1421,7 @@ public final class SmcCppGenerator
                                 "    TRACE(\"BEFORE ENTRY    : ");
                             _source.print(stateName);
                             _source.println(
-                                "::Entry(context)\\n\\r\");");
+                                "::Entry(context)\\n\");");
                         }
                         else
                         {
@@ -1463,7 +1463,7 @@ public final class SmcCppGenerator
                                 "        TRACE(\"AFTER ENTRY     : ");
                             _source.print(stateName);
                             _source.println(
-                                "::Entry(context)\\n\\r\");");
+                                "::Entry(context)\\n\");");
                         }
                         else
                         {
@@ -1534,7 +1534,7 @@ public final class SmcCppGenerator
                         "    TRACE(\"BEFORE ENTRY    : ");
                     _source.print(stateName);
                     _source.println(
-                        "::Entry(context)\\n\\r\");");
+                        "::Entry(context)\\n\");");
                 }
                 else
                 {
@@ -1575,7 +1575,7 @@ public final class SmcCppGenerator
                         "    TRACE(\"AFTER ENTRY     : ");
                     _source.print(stateName);
                     _source.println(
-                        "::Entry(context)\\n\\r\");");
+                        "::Entry(context)\\n\");");
                 }
                 else
                 {
@@ -1657,10 +1657,10 @@ public final class SmcCppGenerator
         	{
 	            _source.print("ctxt.");
         	}
-        	
+
 	        _source.print(name);
 	        _source.print('(');
-	
+
 	        for (it = action.getArguments().iterator(), sep = "";
 	             it.hasNext() == true;
 	             sep = ", ")
@@ -1701,6 +1701,9 @@ public final class SmcCppGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2010/09/11 19:15:57  fperrad
+// remove \r from debug message
+//
 // Revision 1.9  2010/02/15 18:05:43  fperrad
 // fix 2950619 : make distinction between source filename (*.sm) and target filename.
 //

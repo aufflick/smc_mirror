@@ -276,7 +276,7 @@ public final class SmcCGenerator
 
             // The TRACE macro.
             _source.print("        TRACE(");
-            _source.print("\"TRANSITION   : %s.%s\\n\\r\", ");
+            _source.print("\"TRANSITION   : %s.%s\\n\", ");
             _source.println(
                 "getName(getState(fsm)), getTransition(fsm));");
 
@@ -781,7 +781,7 @@ public final class SmcCGenerator
             _source.print(mapName);
             _source.print("_");
             _source.print(stateName);
-            _source.println(")\\n\\r\");");
+            _source.println(")\\n\");");
             _source.println("    }");
         }
 
@@ -1038,7 +1038,7 @@ public final class SmcCGenerator
                 _source.print(indent2);
                 _source.print("    TRACE(\"BEFORE EXIT     : ");
                 _source.println(
-                    "EXIT_STATE(getState(fsm))\\n\\r\");");
+                    "EXIT_STATE(getState(fsm))\\n\");");
                 _source.print(indent2);
                 _source.println("}");
             }
@@ -1053,7 +1053,7 @@ public final class SmcCGenerator
                 _source.print(indent2);
                 _source.print("    TRACE(\"AFTER EXIT      : ");
                 _source.println(
-                    "EXIT_STATE(getState(fsm))\\n\\r\");");
+                    "EXIT_STATE(getState(fsm))\\n\");");
                 _source.print(indent2);
                 _source.println("}");
             }
@@ -1086,7 +1086,7 @@ public final class SmcCGenerator
                 _source.print(param.getName());
             }
 
-            _source.println(")\\n\\r\");");
+            _source.println(")\\n\");");
             _source.print(indent2);
             _source.println("}");
         }
@@ -1144,7 +1144,7 @@ public final class SmcCGenerator
                 _source.print(param.getName());
             }
 
-            _source.println(")\\n\\r\");");
+            _source.println(")\\n\");");
             _source.print(indent2);
             _source.println("}");
         }
@@ -1189,7 +1189,7 @@ public final class SmcCGenerator
                     _source.print(
                         "    TRACE(\"BEFORE ENTRY    : ");
                     _source.println(
-                        "ENTRY_STATE(getState(fsm))\\n\\r\");");
+                        "ENTRY_STATE(getState(fsm))\\n\");");
                     _source.print(indent3);
                     _source.println("}");
                 }
@@ -1206,7 +1206,7 @@ public final class SmcCGenerator
                     _source.print(
                         "    TRACE(\"AFTER ENTRY     : ");
                     _source.println(
-                        "ENTRY_STATE(getState(fsm))\\n\\r\");");
+                        "ENTRY_STATE(getState(fsm))\\n\");");
                     _source.print(indent3);
                     _source.println("}");
                 }
@@ -1238,7 +1238,7 @@ public final class SmcCGenerator
                 _source.print(indent2);
                 _source.print("    TRACE(\"BEFORE ENTRY    : ");
                 _source.println(
-                    "ENTRY_STATE(getState(fsm))\\n\\r\");");
+                    "ENTRY_STATE(getState(fsm))\\n\");");
                 _source.print(indent2);
                 _source.println("}");
             }
@@ -1253,7 +1253,7 @@ public final class SmcCGenerator
                 _source.print(indent2);
                 _source.print("    TRACE(\"AFTER ENTRY     : ");
                 _source.println(
-                    "ENTRY_STATE(getState(fsm))\\n\\r\");");
+                    "ENTRY_STATE(getState(fsm))\\n\");");
                 _source.print(indent2);
                 _source.println("}");
             }
@@ -1409,6 +1409,9 @@ public final class SmcCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2010/09/11 19:15:57  fperrad
+// remove \r from debug message
+//
 // Revision 1.10  2010/02/15 18:05:41  fperrad
 // fix 2950619 : make distinction between source filename (*.sm) and target filename.
 //
