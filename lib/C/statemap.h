@@ -6,21 +6,21 @@
  * License Version 1.1 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of
  * the License at http://www.mozilla.org/MPL/
- * 
+ *
  * Software distributed under the License is distributed on an "AS
  * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
  * implied. See the License for the specific language governing
  * rights and limitations under the License.
- * 
+ *
  * The Original Code is State Machine Compiler (SMC).
- * 
+ *
  * The Initial Developer of the Original Code is Charles W. Rapp.
- * 
+ *
  * Port to C by Francois Perrad, francois.perrad@gadz.org
  * Copyright 2004, Francois Perrad.
  * All Rights Reserved.
  *
- * Contributor(s): 
+ * Contributor(s):
  *
  * Description
  *
@@ -29,6 +29,9 @@
  *
  * Change Log
  * $Log$
+ * Revision 1.6  2010/09/11 19:10:11  fperrad
+ * remove \r from debug message
+ *
  * Revision 1.5  2009/11/24 20:42:39  cwrapp
  * v. 6.0.1 update
  *
@@ -107,7 +110,7 @@ struct FSMContext
 #define setState(fsm, state) \
     (fsm)->_state = (state); \
     if ((fsm)->_debug_flag != 0) { \
-        TRACE("ENTER STATE     : %s\n\r", getName(state)); \
+        TRACE("ENTER STATE     : %s\n", getName(state)); \
     }
 #define pushState(fsm, state) \
     if ((fsm)->_stack_curr >= (fsm)->_stack_max) { \
@@ -117,13 +120,13 @@ struct FSMContext
     (fsm)->_stack_curr ++; \
     (fsm)->_state = state; \
     if ((fsm)->_debug_flag != 0) { \
-        TRACE("PUSH TO STATE   : %s\n\r", getName(state)); \
+        TRACE("PUSH TO STATE   : %s\n", getName(state)); \
     }
 #define popState(fsm) \
     (fsm)->_stack_curr --; \
     (fsm)->_state = *((fsm)->_stack_curr); \
     if ((fsm)->_debug_flag != 0) { \
-        TRACE("POP TO STATE    : %s\n\r", getName((fsm)->_state)); \
+        TRACE("POP TO STATE    : %s\n", getName((fsm)->_state)); \
     }
 #define emptyStateStack(fsm) \
     (fsm)->_stack_curr = (fsm)->_stack_start

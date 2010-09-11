@@ -6,20 +6,20 @@
 // License Version 1.1 (the "License"); you may not use this file
 // except in compliance with the License. You may obtain a copy
 // of the License at http://www.mozilla.org/MPL/
-// 
+//
 // Software distributed under the License is distributed on an
 // "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
 // implied. See the License for the specific language governing
 // rights and limitations under the License.
-// 
+//
 // The Original Code is State Machine Compiler (SMC).
-// 
+//
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
 // Copyright (C) 2000 - 2007. Charles W. Rapp.
 // All Rights Reserved.
 //
-// Contributor(s): 
+// Contributor(s):
 //
 // Namespace
 //	statemap
@@ -32,7 +32,7 @@
 // Notes
 //  The finite state machine needs to be initialized to the
 //  starting state of the FSM.  This must be done manually in
-//  the constructor of the derived class. 
+//  the constructor of the derived class.
 //
 // Author
 //	C. W. Rapp
@@ -641,7 +641,7 @@ namespace statemap
                                << _state->getName()
                                << std::endl;
 #else
-                TRACE("ENTER STATE     : %s\n\r",
+                TRACE("ENTER STATE     : %s\n",
                       _state->getName());
 #endif // SMC_USES_IOSTREAMS
             }
@@ -691,7 +691,7 @@ namespace statemap
                                << _state->getName()
                                << std::endl;
 #else
-                TRACE("PUSH TO STATE   : %s\n\r",
+                TRACE("PUSH TO STATE   : %s\n",
                       _state->getName());
 #endif // SMC_USES_IOSTREAMS
             }
@@ -725,7 +725,7 @@ namespace statemap
                                << _state->getName()
                                << std::endl;
 #else
-                TRACE("POP TO STATE    : %s\n\r",
+                TRACE("POP TO STATE    : %s\n",
                       _state->getName());
 #endif // SMC_USES_IOSTREAMS
             }
@@ -815,6 +815,9 @@ namespace statemap
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.16  2010/09/11 19:09:38  fperrad
+// remove \r from debug message
+//
 // Revision 1.15  2009/11/24 20:42:39  cwrapp
 // v. 6.0.1 update
 //
