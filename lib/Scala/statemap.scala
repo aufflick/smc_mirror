@@ -75,7 +75,7 @@ abstract class FSMContext[State] {
     def setState(state: State): Unit = {
         val previousState = _state
         if (_debugFlag)
-            _debugStream.println("NEW STATE       : " + state)
+            _debugStream.println("ENTER STATE     : " + state)
         _state = state
         _isInTransaction = false
         // Inform all listeners about this state change
@@ -137,6 +137,9 @@ abstract class FSMContext[State] {
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2010/09/11 19:00:45  fperrad
+// use the same message in all language
+//
 // Revision 1.7  2010/03/15 21:18:01  fperrad
 // fix Scala runtime library
 //

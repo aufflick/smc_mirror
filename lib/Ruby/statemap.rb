@@ -150,7 +150,7 @@ module Statemap
 			raise "#{state} is not a Statemap.State.\n" unless state.is_a?(Statemap::State)
 			@_state = state
 			if @_debug_flag then
-				@_debug_stream.puts "NEW STATE       : %s\n" % @_state.getName
+				@_debug_stream.puts "ENTER STATE     : %s\n" % @_state.getName
 			end
 		end
 

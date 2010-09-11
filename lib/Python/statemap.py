@@ -135,7 +135,7 @@ class FSMContext(object):
 			raise ValueError("state should be a statemap.State")
 		self._state = state
 		if self._debug_flag:
-			self._debug_stream.write("NEW STATE       : %s\n" % self._state.getName())
+			self._debug_stream.write("ENTER STATE     : %s\n" % self._state.getName())
 
 	def isStateStackEmpty(self):
 		"""Returns True if the state stack is empty and False otherwise."""
