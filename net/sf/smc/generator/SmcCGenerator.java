@@ -113,14 +113,11 @@ public final class SmcCGenerator
         String context = fsm.getContext();
         String fsmClassName = fsm.getFsmClassName();
         String mapName;
-        String startStateName = fsm.getStartState();
         List<SmcTransition> transList;
         String separator;
         List<SmcParameter> params;
         String declaration;
-        String cState;
         int packageDepth = 0;
-        int index;
 
         _source.println("/*");
         _source.println(" * ex: set ro:");
@@ -136,7 +133,6 @@ public final class SmcCGenerator
         if (packageName != null && packageName.length() > 0)
         {
             context = packageName + "_" + context;
-            startStateName = packageName + "_" + startStateName;
         }
 
         // Dump out the raw source code, if any.
@@ -145,8 +141,6 @@ public final class SmcCGenerator
             _source.println(rawSource);
             _source.println();
         }
-
-        _source.println("#include <assert.h>");
 
         // Generate #includes.
         for (String include: fsm.getIncludes())
@@ -352,102 +346,6 @@ public final class SmcCGenerator
             map.accept(this);
         }
 
-        // The state name "map::state" must be changed to
-        // "map_state".
-        if ((index = startStateName.indexOf("::")) >= 0)
-        {
-            cState =
-                    startStateName.substring(0, index) +
-                    "_" +
-                startStateName.substring(index + 2);
-        }
-        else
-        {
-            cState = startStateName;
-        }
-
-        // Constructor.
-        _source.println();
-        _source.print("void ");
-        _source.print(fsmClassName);
-        _source.print("_Init");
-        _source.print("(struct ");
-        _source.print(fsmClassName);
-        _source.print("* fsm, struct ");
-        _source.print(context);
-        _source.println("* owner)");
-        _source.println("{");
-        _source.print("    FSM_INIT(fsm, &");
-        _source.print(cState);
-        _source.println(");");
-        _source.println("    fsm->_owner = owner;");
-        _source.println("}");
-
-        // EnterStartState method.
-        if (fsm.hasEntryActions() == true)
-        {
-            _source.println();
-            _source.print("void ");
-            _source.print(fsmClassName);
-            _source.print("_EnterStartState(struct ");
-            _source.print(fsmClassName);
-            _source.println("* fsm)");
-            _source.println("{");
-            _source.println("    ENTRY_STATE(getState(fsm));");
-            _source.println("}");
-        }
-
-        // Generate the context class.
-        // Generate a method for every transition in every map
-        // *except* the default transition.
-        for (SmcTransition trans: transList)
-        {
-            if (trans.getName().equals("Default") == false)
-            {
-                _source.println();
-                _source.print("void ");
-                _source.print(fsmClassName);
-                _source.print("_");
-                _source.print(trans.getName());
-                _source.print("(struct ");
-                _source.print(fsmClassName);
-                _source.print("* fsm");
-
-                params = trans.getParameters();
-                for (SmcParameter param: params)
-                {
-                    _source.print(", ");
-                    _source.print(param.getType());
-                    _source.print(" ");
-                    _source.print(param.getName());
-                }
-                _source.println(")");
-                _source.println("{");
-
-                _source.print("    const struct ");
-                _source.print(context);
-                _source.println("State* state = getState(fsm);");
-                _source.println();
-
-                _source.println("    assert(state != NULL);");
-                _source.print("    setTransition(fsm, \"");
-                _source.print(trans.getName());
-                _source.println("\");");
-                _source.print("    state->");
-                _source.print(trans.getName());
-                _source.print("(fsm");
-                for (SmcParameter param: params)
-                {
-                    _source.print(", ");
-                    _source.print(param.getName());
-                }
-                _source.println(");");
-                _source.println("    setTransition(fsm, NULL);");
-
-                _source.println("}");
-            }
-        }
-
         _source.println();
         _source.println("/*");
         _source.println(" * Local variables:");
@@ -545,13 +443,17 @@ public final class SmcCGenerator
             _source.print(mapName);
             _source.print("_");
             _source.print(stateName);
-            _source.print("), \"");
-            _source.print(mapName);
-            _source.print("_");
-            _source.print(stateName);
-            _source.print("\", ");
+            _source.print("), ");
             _source.print(
                 Integer.toString(map.getNextStateId()));
+             if (_debugLevel >= DEBUG_LEVEL_0)
+             {
+                _source.print(", \"");
+                _source.print(mapName);
+                _source.print("_");
+                _source.print(stateName);
+                _source.print("\"");
+            }
             _source.println(" };");
         }
 
@@ -1409,6 +1311,9 @@ public final class SmcCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.12  2010/09/21 08:16:00  fperrad
+// refactor C generation
+//
 // Revision 1.11  2010/09/11 19:15:57  fperrad
 // remove \r from debug message
 //
