@@ -32,13 +32,16 @@
 --
 -- CHANGE LOG
 -- $Log$
+-- Revision 1.2  2010/11/21 18:49:39  fperrad
+-- refactor Lua generation (compat 5.2)
+--
 -- Revision 1.1  2007/01/03 15:42:33  fperrad
 -- + Added Lua examples 1 - 3.
 --
 --
 --
 
-require 'AppClass'
+local AppClass = require 'AppClass'
 
 local arg = {...}
 local retcode = 0
@@ -49,7 +52,7 @@ elseif #arg > 1 then
     io.stderr:write "Only one argument is accepted.\n"
     retcode = 3
 else
-    local appobject = AppClass:new()
+    local appobject = AppClass.new()
     local str = arg[1]
     local result
     if appobject:CheckString(str) then

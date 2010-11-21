@@ -30,6 +30,9 @@
 --
 -- CHANGE LOG
 -- $Log$
+-- Revision 1.3  2010/11/21 18:49:24  fperrad
+-- refactor Lua generation (compat 5.2)
+--
 -- Revision 1.2  2009/04/22 19:40:07  fperrad
 -- Added enterStartState method
 --
@@ -39,40 +42,37 @@
 --
 --
 
-module(..., package.seeall)
+local m = {}
 
-require 'AppClass_sm'
-
-function new (self)
+function m:new ()
     local o = {}
-    setmetatable(o, self)
-    self.__index = self
-    o._fsm = AppClass_sm.AppClassContext:new({_owner = o})
+    o.fsm = require 'AppClass_sm':new({owner = o})
     -- Uncomment to see debug output.
-    -- o._fsm:setDebugFlag(true)
-    return o
+    -- o.fsm.debugFlag = true
+    return setmetatable(o, {__index = m})
 end
 
-function CheckString (self, str)
-    self._fsm:enterStartState()
+function m:CheckString (str)
+    self.fsm:enterStartState()
     for c in string.gmatch(str, '.') do
         if c == '0' then
-            self._fsm:Zero()
+            self.fsm:Zero()
         elseif c == '1' then
-            self._fsm:One()
+            self.fsm:One()
         else
-            self._fsm:Unknown()
+            self.fsm:Unknown()
         end
     end
-    self._fsm:EOS()
+    self.fsm:EOS()
     return self._is_acceptable
 end
 
-function Acceptable (self)
+function m:Acceptable ()
     self._is_acceptable = true
 end
 
-function Unacceptable (self)
+function m:Unacceptable ()
     self._is_acceptable = false
 end
 
+return m

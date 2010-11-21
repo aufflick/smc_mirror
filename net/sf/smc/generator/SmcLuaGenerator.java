@@ -146,23 +146,26 @@ public final class SmcLuaGenerator
         }
 
         _source.println();
-        _source.println("module(...)");
+        _source.println("_ENV = nil");
 
         // Declare the inner state class.
         _source.println();
         _source.print("local ");
         _source.print(context);
-        _source.println("State = statemap.State:class()");
+        _source.println("State = statemap.State.class()");
         _source.println();
 
-        _source.print("function ");
+        _source.println("local function _empty ()");
+        _source.println("end");
         _source.print(context);
-        _source.println("State:Entry (fsm) end");
-        _source.println();
-        _source.print("function ");
+        _source.println("State.Entry = _empty");
         _source.print(context);
-        _source.println("State:Exit (fsm) end");
+        _source.println("State.Exit = _empty");
         _source.println();
+
+        _source.println("local function _default (self, fsm)");
+        _source.println("    self:Default(fsm)");
+        _source.println("end");
 
         // Get the transition list.
         // Generate the default transition definitions.
@@ -174,32 +177,15 @@ public final class SmcLuaGenerator
             // Don't generate the Default transition here.
             if (trans.getName().equals("Default") == false)
             {
-                _source.print("function ");
                 _source.print(context);
-                _source.print("State:");
+                _source.print("State.");
                 _source.print(trans.getName());
-                _source.print(" (fsm");
-
-                for (SmcParameter param: params)
-                {
-                    _source.print(", ");
-                    _source.print(param.getName());
-                }
-
-                _source.println(")");
-
-                // If this method is reached, that means that
-                // this transition was passed to a state which
-                // does not define the transition. Call the
-                // state's default transition method.
-                _source.println("    self:Default(fsm)");
-
-                _source.println("end");
-                _source.println();
+                _source.println(" = _default");
             }
         }
 
         // Generate the overall Default transition for all maps.
+        _source.println();
         _source.print("function ");
         _source.print(context);
         _source.println("State:Default (fsm)");
@@ -207,18 +193,18 @@ public final class SmcLuaGenerator
         if (_debugLevel >= DEBUG_LEVEL_0)
         {
             _source.println(
-                "    if fsm:getDebugFlag() then");
+                "    if fsm.debugFlag then");
             _source.println(
-                "        fsm:getDebugStream():write(\"TRANSITION   : Default\\n\")");
+                "        fsm.debugStream:write(\"TRANSITION   : Default\\n\")");
             _source.println("    end");
         }
 
         _source.println(
             "    local msg = strformat(\"Undefined Transition\\nState: %s\\nTransition: %s\\n\",");
         _source.println(
-            "                          fsm:getState():getName(),");
+            "                          fsm:getState().name,");
         _source.println(
-            "                          fsm:getTransition())");
+            "                          fsm.transition)");
         _source.println("    error(msg)");
         _source.println("end");
 
@@ -256,8 +242,9 @@ public final class SmcLuaGenerator
         // inner classes, so generate the context first rather
         // than last.
         _source.println();
+        _source.print("local ");
         _source.print(fsmClassName);
-        _source.println(" = statemap.FSMContext:class()");
+        _source.println(" = statemap.FSMContext.class()");
 
         // Generate the context class' init.
         _source.println();
@@ -307,7 +294,7 @@ public final class SmcLuaGenerator
 
                 // Save away the transition name in case it is
                 // need in an UndefinedTransitionException.
-                _source.print("    self._transition = '");
+                _source.print("    self.transition = '");
                 _source.print(transName);
                 _source.println("'");
 
@@ -320,7 +307,7 @@ public final class SmcLuaGenerator
                 }
                 _source.println(")");
 
-                _source.println("    self._transition = nil");
+                _source.println("    self.transition = nil");
 
                 _source.println("end");
                 _source.println();
@@ -333,14 +320,6 @@ public final class SmcLuaGenerator
         _source.print(fsmClassName);
         _source.println(":enterStartState ()");
         _source.println("    self:getState():Entry(self)");
-        _source.println("end");
-        _source.println();
-
-        // getOwner() method.
-        _source.print("function ");
-        _source.print(fsmClassName);
-        _source.println(":getOwner ()");
-        _source.println("    return self._owner");
         _source.println("end");
         _source.println();
 
@@ -387,6 +366,10 @@ public final class SmcLuaGenerator
             _source.println("end");
             _source.println();
         }
+
+        _source.println("return ");
+        _source.print(fsmClassName);
+        _source.println();
 
         _source.println("-- Local variables:");
         _source.println("--  buffer-read-only: t");
@@ -524,7 +507,7 @@ public final class SmcLuaGenerator
             _source.println(":Entry (fsm)");
 
             // Declare the "ctxt" local variable.
-            _source.println("    local ctxt = fsm:getOwner()");
+            _source.println("    local ctxt = fsm.owner");
 
             // Generate the actions associated with this code.
             indent2 = _indent;
@@ -551,7 +534,7 @@ public final class SmcLuaGenerator
 
             // Declare the "ctxt" local variable.
             _source.print(_indent);
-            _source.println("    local ctxt = fsm:getOwner()");
+            _source.println("    local ctxt = fsm.owner");
 
             // Generate the actions associated with this code.
             indent2 = _indent;
@@ -689,16 +672,16 @@ public final class SmcLuaGenerator
         // guard conditions which reference it.
         if (transition.hasCtxtReference() == true)
         {
-            _source.println("    local ctxt = fsm:getOwner()");
+            _source.println("    local ctxt = fsm.owner");
         }
 
         // Output transition to debug stream.
         if (_debugLevel >= DEBUG_LEVEL_0)
         {
             _source.println(
-                "    if fsm:getDebugFlag() then");
+                "    if fsm.debugFlag then");
             _source.print(
-                "        fsm:getDebugStream():write(");
+                "        fsm.debugStream:write(");
             _source.print("\"LEAVING STATE   : ");
             _source.print(mapName);
             _source.print(".");
@@ -909,10 +892,10 @@ public final class SmcLuaGenerator
             if (_debugLevel >= DEBUG_LEVEL_1)
             {
                 _source.print(indent2);
-                _source.println("if fsm:getDebugFlag() then");
+                _source.println("if fsm.debugFlag then");
                 _source.print(indent2);
                 _source.print(
-                    "    fsm:getDebugStream():write(\"");
+                    "    fsm.debugStream:write(\"");
                 _source.print("BEFORE EXIT     : ");
                 if (packageName != null &&
                     packageName.length() > 0)
@@ -932,10 +915,10 @@ public final class SmcLuaGenerator
             if (_debugLevel >= DEBUG_LEVEL_1)
             {
                 _source.print(indent2);
-                _source.println("if fsm:getDebugFlag() then");
+                _source.println("if fsm.debugFlag then");
                 _source.print(indent2);
                 _source.print(
-                    "    fsm:getDebugStream():write(\"");
+                    "    fsm.debugStream:write(\"");
                 _source.print("AFTER EXIT      : ");
                 if (packageName != null &&
                     packageName.length() > 0)
@@ -959,10 +942,10 @@ public final class SmcLuaGenerator
             String sep;
 
             _source.print(indent2);
-            _source.println("if fsm:getDebugFlag() then");
+            _source.println("if fsm.debugFlag then");
             _source.print(indent2);
             _source.print(
-                "    fsm:getDebugStream():write(\"");
+                "    fsm.debugStream:write(\"");
             _source.print("ENTER TRANSITION: ");
             if (packageName != null && packageName.length() > 0)
             {
@@ -1054,7 +1037,7 @@ public final class SmcLuaGenerator
                     _source.print(indent2);
                     _source.println("if not r then");
                     _source.print(indent2);
-                    _source.println("    fsm:getDebugStream():write(msg)");
+                    _source.println("    fsm.debugStream:write(msg)");
                     _source.print(indent2);
                     _source.println("end");
                 }
@@ -1070,9 +1053,9 @@ public final class SmcLuaGenerator
             String sep;
 
             _source.print(indent2);
-            _source.println("if fsm:getDebugFlag() then");
+            _source.println("if fsm.debugFlag then");
             _source.print(indent2);
-            _source.print("    fsm:getDebugStream():write(\"");
+            _source.print("    fsm.debugStream:write(\"");
             _source.print("EXIT TRANSITION : ");
             if (packageName != null &&
                 packageName.length() > 0)
@@ -1137,10 +1120,10 @@ public final class SmcLuaGenerator
                 {
                     _source.print(indent2);
                     _source.println(
-                        "if fsm:getDebugFlag() then");
+                        "if fsm.debugFlag then");
                     _source.print(indent2);
                     _source.print(
-                        "    fsm:getDebugStream():write(\"");
+                        "    fsm.debugStream:write(\"");
                     _source.print("BEFORE ENTRY    : ");
                     if (packageName != null &&
                         packageName.length() > 0)
@@ -1161,10 +1144,10 @@ public final class SmcLuaGenerator
                 {
                     _source.print(indent2);
                     _source.println(
-                        "if fsm:getDebugFlag() then");
+                        "if fsm.debugFlag then");
                     _source.print(indent2);
                     _source.print(
-                        "    fsm:getDebugStream():write(\"");
+                        "    fsm.debugStream:write(\"");
                     _source.print("AFTER ENTRY     : ");
                     if (packageName != null &&
                         packageName.length() > 0)
@@ -1201,9 +1184,9 @@ public final class SmcLuaGenerator
             if (_debugLevel >= DEBUG_LEVEL_1)
             {
                 _source.print(indent2);
-                _source.println("if fsm:getDebugFlag() then");
+                _source.println("if fsm.debugFlag then");
                 _source.print(indent2);
-                _source.print("    fsm:getDebugStream():write(\"");
+                _source.print("    fsm.debugStream:write(\"");
                 _source.print("BEFORE ENTRY    : ");
                 if (packageName != null &&
                     packageName.length() > 0)
@@ -1223,9 +1206,9 @@ public final class SmcLuaGenerator
             if (_debugLevel >= DEBUG_LEVEL_1)
             {
                 _source.print(indent2);
-                _source.println("if fsm:getDebugFlag() then");
+                _source.println("if fsm.debugFlag then");
                 _source.print(indent2);
-                _source.print("    fsm:getDebugStream():write(\"");
+                _source.print("    fsm.debugStream:write(\"");
                 _source.print("AFTER ENTRY     : ");
                 if (packageName != null &&
                     packageName.length() > 0)
@@ -1335,6 +1318,9 @@ public final class SmcLuaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.15  2010/11/21 18:47:52  fperrad
+// refactor Lua generation (compat 5.2)
+//
 // Revision 1.14  2010/08/22 21:12:09  fperrad
 // Lua: refactor without package.seeall
 //
