@@ -99,7 +99,7 @@ $(TARGET) :     $(SOURCES)
 		$(JAR) $(JAR_UPDATE_FLAGS) $(TARGET) \
 			-C $(FSM_LIB_DIR) statemap
 
-test :          $(TRAGET)
+test :          $(TARGET)
 		$(JAVA) -jar $(TARGET)
 
 graph :         $(SM_SOURCES:%.sm=%_sm.dot)
@@ -119,6 +119,9 @@ clean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.14  2010/11/27 14:46:06  fperrad
+# typo
+#
 # Revision 1.13  2009/03/01 18:20:39  cwrapp
 # Preliminary v. 6.0.0 commit.
 #
