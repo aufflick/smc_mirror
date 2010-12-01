@@ -115,6 +115,7 @@ public final class SmcHeaderCGenerator
         if (packageName != null && packageName.length() > 0)
         {
             context = packageName + "_" + context;
+            fsmClassName = packageName + "_" + fsmClassName;
             startStateName = packageName + "_" + startStateName;
         }
 
@@ -399,6 +400,9 @@ public final class SmcHeaderCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2010/12/01 15:29:09  fperrad
+// C: refactor when package
+//
 // Revision 1.10  2010/09/21 08:16:00  fperrad
 // refactor C generation
 //

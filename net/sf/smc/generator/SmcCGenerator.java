@@ -133,6 +133,7 @@ public final class SmcCGenerator
         if (packageName != null && packageName.length() > 0)
         {
             context = packageName + "_" + context;
+            fsmClassName = packageName + "_" + fsmClassName;
         }
 
         // Dump out the raw source code, if any.
@@ -481,6 +482,7 @@ public final class SmcCGenerator
         if (packageName != null && packageName.length() > 0)
         {
             context = packageName + "_" + context;
+            fsmClassName = packageName + "_" + fsmClassName;
             mapName = packageName + "_" + mapName;
         }
 
@@ -596,6 +598,7 @@ public final class SmcCGenerator
         if (packageName != null && packageName.length() > 0)
         {
             context = packageName + "_" + context;
+            fsmClassName = packageName + "_" + fsmClassName;
             mapName = packageName + "_" + mapName;
         }
 
@@ -780,6 +783,7 @@ public final class SmcCGenerator
         if (packageName != null && packageName.length() > 0)
         {
             context = packageName + "_" + context;
+            fsmClassName = packageName + "_" + fsmClassName;
             mapName = packageName + "_" + mapName;
         }
 
@@ -795,8 +799,16 @@ public final class SmcCGenerator
             endStateName.equalsIgnoreCase(
                 SmcElement.NIL_STATE) == false)
         {
-            endStateName =
-                "&" + scopeStateName(endStateName, mapName);
+            endStateName = scopeStateName(endStateName, map.getName());
+            if (packageName != null && packageName.length() > 0)
+            {
+                endStateName =
+                    "&" + packageName + "_" + endStateName;
+            }
+            else
+            {
+                endStateName = "&" + endStateName;
+            }
         }
 
         // Qualify the state and push state names as well.
@@ -1311,6 +1323,9 @@ public final class SmcCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.13  2010/12/01 15:29:09  fperrad
+// C: refactor when package
+//
 // Revision 1.12  2010/09/21 08:16:00  fperrad
 // refactor C generation
 //
