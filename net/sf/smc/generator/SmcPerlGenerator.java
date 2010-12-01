@@ -801,10 +801,16 @@ public final class SmcPerlGenerator
         // The "state" is actually a transition name.
         if (transType != TransType.TRANS_POP &&
             endStateName.length () > 0 &&
-            endStateName.equals(SmcElement.NIL_STATE) == false &&
-            endStateName.indexOf("::") < 0)
+            endStateName.equals(SmcElement.NIL_STATE) == false)
         {
-            endStateName = mapName + "::" + endStateName;
+            if (endStateName.indexOf("::") < 0)
+            {
+                endStateName = mapName + "::" + endStateName;
+            }
+            else if (packageName != null && packageName.length() > 0)
+            {
+                endStateName = packageName + "::" + endStateName;
+            }
         }
 
         // Qualify the state and push state names as well.
@@ -1360,6 +1366,9 @@ public final class SmcPerlGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.12  2010/12/01 14:40:21  fperrad
+// Perl: fix when package
+//
 // Revision 1.11  2010/08/30 13:39:37  fperrad
 // Perl: better form of new
 //
