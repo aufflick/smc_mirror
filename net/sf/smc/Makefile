@@ -71,7 +71,6 @@ PARSER_PACKAGE=	net.sf.smc.parser
 PARSER_DIR=	$(subst .,/,$(PARSER_PACKAGE))
 
 GENERATOR_SOURCES= \
-		generator/SmcOptions.java \
 		generator/SmcCGenerator.java \
 		generator/SmcCodeGenerator.java \
 		generator/SmcCppGenerator.java \
@@ -91,7 +90,8 @@ GENERATOR_SOURCES= \
 		generator/SmcScalaGenerator.java \
 		generator/SmcTableGenerator.java \
 		generator/SmcTclGenerator.java \
-		generator/SmcVBGenerator.java
+		generator/SmcVBGenerator.java \
+		generator/SmcJSGenerator.java
 GENERATOR_PACKAGE= net.sf.smc.generator
 GENERATOR_DIR=	$(subst .,/,$(GENERATOR_PACKAGE))
 
@@ -208,8 +208,8 @@ realclean :	clean
 #
 # CHANGE LOG
 # $Log$
-# Revision 1.20  2009/11/24 20:42:39  cwrapp
-# v. 6.0.1 update
+# Revision 1.21  2011/02/14 19:15:33  nitin-nizhawan
+# added JS code generator
 #
 # Revision 1.19  2009/03/01 18:20:42  cwrapp
 # Preliminary v. 6.0.0 commit.
