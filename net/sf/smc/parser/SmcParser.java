@@ -39,6 +39,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -141,7 +142,8 @@ public final class SmcParser
         _parseStatus = true;
         _quitFlag = false;
 
-        _fsm = new SmcFSM(_name);
+        _fsm = new SmcFSM(_name,
+                          _targetLanguage.targetFileName(_name));
 
         // Start lexing in cooked mode.
         _lexer.setCookedMode();
@@ -301,6 +303,18 @@ public final class SmcParser
         return (_targetLanguage);
     }
 
+	// THIS METHOD WAS ADDED BY kgreg99 ONLY TO RESOLVE COMPILATION ERROR
+	// IT HAS TO BE EVALUATED
+    // Put the lexer into raw mode.
+    /* package */ void setRawMode(String openChar,
+                                  String closeChar,
+                                  String dummy )
+    {
+        _lexer.setRawMode(openChar.charAt(0),
+                          closeChar.charAt(0) );
+        return;
+    } // end of setRawMode(String, String)
+
     // Put the lexer into raw mode.
     /* package */ void setRawMode(String openChar,
                                   String closeChar)
@@ -314,8 +328,11 @@ public final class SmcParser
     // collecting parameter types.
     /* package */ void setRawMode2()
     {
-        _lexer.setRawMode(
-            OPEN_CLAUSE_LIST, CLOSE_CLAUSE_LIST, ')', ',');
+        _lexer.setRawMode(OPEN_CLAUSE_LIST,
+                          CLOSE_CLAUSE_LIST,
+                          QUOTE_LIST,
+                          ')',
+                          ',');
 
         return;
     } // end of setRawMode2()
@@ -395,6 +412,11 @@ public final class SmcParser
         return;
     }
 
+    /* package */ void setFsmClassName(String name)
+    {
+        _fsm.setFsmClassName(name.trim());
+        return;
+    }
     /* package */ void setPackageName(String name)
     {
         String pkg = _fsm.getPackage();
@@ -413,6 +435,7 @@ public final class SmcParser
         return;
     }
 
+	
     /* package */ void addImport(String name)
     {
         _fsm.addImport(name.trim());
@@ -508,6 +531,12 @@ public final class SmcParser
         }
         else
         {
+	    	// check FSM class name
+	    	if ( _fsm.getFsmClassName() == "" )
+	    	{
+	    		// set default FSM class name
+	    		_fsm.setFsmClassName( _fsm.getContext()+"Context" );
+	    	}
             if (_parserFSM.getDebugFlag() == true)
             {
                 PrintStream os = _parserFSM.getDebugStream();
@@ -1285,91 +1314,123 @@ public final class SmcParser
         /**
          * The target language is undefined.
          */
-        LANG_NOT_SET,
+        LANG_NOT_SET (""),
 
         /**
          * <a href="http://www.research.att.com/~bs/C++.html">C++</a>
          */
-        C_PLUS_PLUS,
+        C_PLUS_PLUS ("{0}_sm"),
 
         /**
          * <a href="http://java.sun.com">Java</a>
          */
-        JAVA,
+        JAVA ("{0}Context"),
 
         /**
          * <a href="http://www.tcl.tk">Tcl</a>
          */
-        TCL,
+        TCL ("{0}_sm"),
 
         /**
          * <a href="http://msdn.microsoft.com/en-us/vbasic/default.aspx">VB.net</a>
          */
-        VB,
+        VB ("{0}_sm"),
 
         /**
          * .<a href="http://msdn.microsoft.com/en-us/vcsharp/default.aspx">net C#</a>
          */
-        C_SHARP,
+        C_SHARP ("{0}_sm"),
 
         /**
          * <a href="http://www.python.org">Python</a>
          */
-        PYTHON,
+        PYTHON ("{0}_sm"),
 
         /**
          * An HTML table
          */
-        TABLE,
+        TABLE ("{0}_sm"),
 
         /**
          * <a href="http://www.graphviz.org">GraphViz</a>
          */
-        GRAPH,
+        GRAPH ("{0}_sm"),
 
         /**
          * <a href="http://www.perl.org">Perl</a>
          */
-        PERL,
+        PERL ("{0}_sm"),
 
         /**
          * <a href="http://ruby-lang.org">Ruby</a>
          */
-        RUBY,
+        RUBY ("{0}_sm"),
 
         /**
          * C
          */
-        C,
+        C ("{0}_sm"),
 
         /**
          * Objective C
          */
-        OBJECTIVE_C,
+        OBJECTIVE_C ("{0}_sm"),
 
         /**
          * <a href="http://www.lua.org">Lua</a>
          */
-        LUA,
+        LUA ("{0}_sm"),
 
         /**
          * <a href="http://groovy.codehaus.org">Groovy</a>
          */
-        GROOVY,
+        GROOVY ("{0}Context"),
 
         /**
          * <a href="http://www.scala-lang.org">Scala</a>
          */
-        SCALA,
+        SCALA ("{0}Context"),
 
         /**
          * <a href="http://www.php.net">PHP</a>
          */
-        PHP,
+        PHP ("{0}_sm"),
         /**
          * JavaScript
          */
-        JS 
+        JS ("{0}_sm");
+
+    //-----------------------------------------------------------
+    // Member methods.
+    //
+
+        //-------------------------------------------------------
+        // Constructors.
+        //
+
+        private TargetLanguage(final String format)
+        {
+            _sourceNameFormat = format;
+        } // end of TargetLanguage(String)
+
+        //
+        // end of Constructors.
+        //-------------------------------------------------------
+
+        // Returns the source file name based on the class name.
+        public String targetFileName(final String className)
+        {
+            return (
+                MessageFormat.format(
+                    _sourceNameFormat, className));
+        } // end of targetFileName(String)
+
+    //-----------------------------------------------------------
+    // Member data.
+    //
+
+        // The default source file name pattern.
+        private final String _sourceNameFormat;
     } // end of enum TargetLanguage
 
     /**
@@ -1431,6 +1492,7 @@ public final class SmcParser
     // List of characters which open and clause subexpressions.
     private static List<Character> OPEN_CLAUSE_LIST;
     private static List<Character> CLOSE_CLAUSE_LIST;
+    private static List<Character> QUOTE_LIST;
 
     // Create a hashmap which associates token names with
     // parser transitions. When a token is received, use this
@@ -1444,6 +1506,7 @@ public final class SmcParser
 
         OPEN_CLAUSE_LIST = new ArrayList<Character>();
         CLOSE_CLAUSE_LIST = new ArrayList<Character>();
+        QUOTE_LIST = new ArrayList<Character>();
 
         OPEN_CLAUSE_LIST.add(new Character('('));
         OPEN_CLAUSE_LIST.add(new Character('{'));
@@ -1454,6 +1517,9 @@ public final class SmcParser
         CLOSE_CLAUSE_LIST.add(new Character('}'));
         CLOSE_CLAUSE_LIST.add(new Character(']'));
         CLOSE_CLAUSE_LIST.add(new Character('>'));
+
+        QUOTE_LIST.add(new Character('"'));
+        QUOTE_LIST.add(new Character('\''));
 
         _TransMethod = new Method[SmcLexer.TOKEN_COUNT];
 
@@ -1512,6 +1578,10 @@ public final class SmcParser
             transName = "PACKAGE_NAME";
             _TransMethod[SmcLexer.PACKAGE_NAME] =
                 fsmClass.getDeclaredMethod("PACKAGE_NAME",
+                                           paramTypes);
+            transName = "FSM_CLASS_NAME";
+            _TransMethod[SmcLexer.FSM_CLASS_NAME] =
+                fsmClass.getDeclaredMethod("FSM_CLASS_NAME",
                                            paramTypes);
             transName = "IMPORT";
             _TransMethod[SmcLexer.IMPORT] =
@@ -1601,8 +1671,30 @@ public final class SmcParser
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.8  2011/02/14 19:15:33  nitin-nizhawan
-// added JS code generator
+// Revision 1.9  2011/02/14 21:29:56  nitin-nizhawan
+// corrected some build errors
+//
+// Revision 1.7  2010/02/15 18:05:44  fperrad
+// fix 2950619 : make distinction between source filename (*.sm) and target filename.
+//
+// Revision 1.6  2009/11/27 19:44:39  cwrapp
+// Correct TargetLanguage.GRAPH source file name definition.
+//
+// Revision 1.5  2009/11/25 22:30:19  cwrapp
+// Fixed problem between %fsmclass and sm file names.
+//
+// Revision 1.4  2009/09/12 21:44:49  kgreg99
+// Implemented feature req. #2718941 - user defined generated class name.
+// A new statement was added to the syntax: %fsmclass class_name
+// It is optional. If not used, generated class is called as before "XxxContext" where Xxx is context class name as entered via %class statement.
+// If used, generated class is called asrequested.
+// Following language generators are touched:
+// c, c++, java, c#, objc, lua, groovy, scala, tcl, VB
+// This feature is not tested yet !
+// Maybe it will be necessary to modify also the output file name.
+//
+// Revision 1.3  2009/09/05 15:39:20  cwrapp
+// Checking in fixes for 1944542, 1983929, 2731415, 2803547 and feature 2797126.
 //
 // Revision 1.2  2009/04/11 13:11:13  cwrapp
 // Corrected raw mode 3 to handle multiple argument template/generic declarations.

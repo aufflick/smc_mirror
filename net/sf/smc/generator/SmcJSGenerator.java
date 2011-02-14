@@ -113,35 +113,9 @@ public final class SmcJSGenerator
      * @param genericFlag if {@code true} then use generic
      * collections.
      */
-    public SmcJSGenerator(String srcfileBase,
-                           String srcDirectory,
-                           String headerDirectory,
-                           String castType,
-                           int graphLevel,
-                           boolean serialFlag,
-                           boolean debugFlag,
-                           boolean noExceptionFlag,
-                           boolean noCatchFlag,
-                           boolean noStreamsFlag,
-                           boolean reflectFlag,
-                           boolean syncFlag,
-                           boolean genericFlag)
+    public SmcJSGenerator(final SmcOptions options)
     {
-        super (srcfileBase,
-               "{0}{1}_sm.{2}",
-               "js",
-               srcDirectory,
-               headerDirectory,
-               castType,
-               graphLevel,
-               serialFlag,
-               debugFlag,
-               noExceptionFlag,
-               noCatchFlag,
-               noStreamsFlag,
-               reflectFlag,
-               syncFlag,
-               genericFlag);
+        super(options,"js");
         jsCode = new JSCode();
     } // end of SmcPhpGenerator(...)
 
@@ -228,7 +202,7 @@ public final class SmcJSGenerator
         //_source.println("    public function Default_($fsm) {");
         jsCode.getCurrentClass().addFunction("Default_","fsm");
 
-        if (_debugFlag == true)
+       // if (_debugFlag == true)
         {
           //  _source.println(
             //    "        if ($fsm->getDebugFlag() == true) {");
@@ -648,12 +622,12 @@ public final class SmcJSGenerator
         }
          
         // Output transition to debug stream.
-        if (_debugFlag == true)
-        {
+       // if (_debugFlag == true)
+       // {
             String sep;
 
-            jsFunc.addCode(
-                "        if (fsm.getDebugFlag() == true) {}");
+          //  jsFunc.addCode(
+              //  "        if (fsm.getDebugFlag() == true) {}");
            /* addCode(
                 "            fwrite(fsm.getDebugStream(), \"TRANSITION   : ");
             addCode(mapName);
@@ -675,7 +649,7 @@ public final class SmcJSGenerator
             _source.println("\\n\");");*/
            // _source.println(
              //   "        }");
-        }
+        //}
 
         // Loop through the guards and print each one.
         _indent = "        ";
@@ -911,8 +885,8 @@ public final class SmcJSGenerator
                       exitActions.isEmpty() == true) &&
                      transType != TransType.TRANS_PUSH &&
                      transType != TransType.TRANS_POP &&
-                     loopbackFlag == true &&
-                     _debugFlag == false)
+                     loopbackFlag == true)/* &&
+                     _debugFlag == false)*/
             {
               //  addCode(indent2);
                 jsFunc.addCode("//# No actions.");
@@ -1340,6 +1314,9 @@ class JSFunction {
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2011/02/14 21:29:56  nitin-nizhawan
+// corrected some build errors
+//
 // Revision 1.1  2011/02/14 18:32:04  nitin-nizhawan
 // added generator class for JavaScript
 //
