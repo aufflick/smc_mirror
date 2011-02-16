@@ -30,6 +30,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.2  2011/02/16 18:00:30  nitin-nizhawan
+// minor changes
+//
 // Revision 1.1  2011/02/14 18:30:39  nitin-nizhawan
 // Added example 1 for JavaScript
 //
@@ -48,8 +51,6 @@
 
 
 function AppClass() {
-    this._fsm = new AppClass_sm(this);
-    this._is_acceptable = false;
 
     // Uncomment to see debug output.
     //this._fsm.setDebugFlag(true);
@@ -57,6 +58,8 @@ function AppClass() {
 
 AppClass.prototype.CheckString = function(str) {
     var  i,len,c;
+    this._fsm = new AppClass_sm(this);
+    this._is_acceptable = false;
     this._fsm.enterStartState();
 
     for (i=0,len = str.length;i < len;i++) {
