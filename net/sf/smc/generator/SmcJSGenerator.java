@@ -231,7 +231,7 @@ public final class SmcJSGenerator
         }
 
        phpState = phpStateName(startState);
-       jsCode.addClass(context+"_sm","FSMContext","owner","this.setState("+phpState+"); this.owner=owner;");
+       jsCode.addClass(context+"_sm","FSMContext","owner","this.setState("+phpState+"); this._owner=owner;");
        // _source.println();
 
         // Generate the transition methods.
@@ -1249,9 +1249,11 @@ class JSClass {
             tmpl+=baseClass+".apply(this,arguments);\n";
         }
         tmpl+=constructorCode+"\n}\n";
-        tmpl+="\nState.mixin("+name+".prototype";
+        tmpl+="\n"+name+".prototype=State.mixin(";
         if(baseClass!=null&&baseClass.length()>0){
-            tmpl+=",State.mixin(new "+baseClass+"()";
+            tmpl+="new "+baseClass+"()";
+        } else {
+            tmpl+="{}";
         }
         tmpl+=",{\n";
         String comma="";
@@ -1259,11 +1261,7 @@ class JSClass {
             tmpl+=comma+jsFunction.generateCode()+"\n";
             comma=",";
         }
-        tmpl+="\n})";
-        if(baseClass!=null&&baseClass.length()>0){
-          tmpl+=")";
-        }
-        tmpl+=";\n";
+        tmpl+="\n});\n";
         for(Map.Entry<String,String> me : staticMembers.entrySet()){
             String key = me.getKey();
             String val = me.getValue();
@@ -1314,6 +1312,9 @@ class JSFunction {
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2011/02/16 18:02:01  nitin-nizhawan
+// added prototype channing to allow instanceof operator to work
+//
 // Revision 1.2  2011/02/14 21:29:56  nitin-nizhawan
 // corrected some build errors
 //
