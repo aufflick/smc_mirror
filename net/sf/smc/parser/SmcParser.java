@@ -1395,6 +1395,7 @@ public final class SmcParser
          * <a href="http://www.php.net">PHP</a>
          */
         PHP ("{0}_sm"),
+
         /**
          * JavaScript
          */
@@ -1434,7 +1435,8 @@ public final class SmcParser
     } // end of enum TargetLanguage
 
     /**
-     * SMC currently supports 16 different target languages.
+     * SMC currently supports 17 different target languages plus
+     * one for an error code.
      */
     public static final int LANGUAGE_COUNT = 18;
 
@@ -1671,6 +1673,9 @@ public final class SmcParser
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2011/11/20 16:29:53  cwrapp
+// Check in for SMC v. 6.1.0
+//
 // Revision 1.9  2011/02/14 21:29:56  nitin-nizhawan
 // corrected some build errors
 //

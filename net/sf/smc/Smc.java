@@ -74,6 +74,7 @@ import net.sf.smc.generator.SmcHeaderGenerator;
 import net.sf.smc.generator.SmcHeaderCGenerator;
 import net.sf.smc.generator.SmcHeaderObjCGenerator;
 import net.sf.smc.generator.SmcJavaGenerator;
+import net.sf.smc.generator.SmcJSGenerator;
 import net.sf.smc.generator.SmcLuaGenerator;
 import net.sf.smc.generator.SmcObjCGenerator;
 import net.sf.smc.generator.SmcOptions;
@@ -85,7 +86,6 @@ import net.sf.smc.generator.SmcScalaGenerator;
 import net.sf.smc.generator.SmcTableGenerator;
 import net.sf.smc.generator.SmcTclGenerator;
 import net.sf.smc.generator.SmcVBGenerator;
-import net.sf.smc.generator.SmcJSGenerator;
 import net.sf.smc.model.SmcFSM;
 import net.sf.smc.parser.SmcMessage;
 import net.sf.smc.parser.SmcParser;
@@ -1087,7 +1087,7 @@ public final class Smc
         stream.print(" [-hsuffix suffix]");
         stream.print(" [-glevel int]");
         stream.print(
-            " {-c | -c++ | -csharp | -graph | -groovy | -java | ");
+            " {-c | -c++ | -csharp | -graph | -groovy | -java | -js ");
         stream.print(
             "-lua | -objc | -perl | -php | -python | -ruby | ");
         stream.print("-scala | -table |-tcl | -vb}");
@@ -1165,6 +1165,7 @@ public final class Smc
         stream.println("\t-graph    Generate GraphViz DOT file");
         stream.println("\t-groovy   Generate Groovy code");
         stream.println("\t-java     Generate Java code");
+        stream.println("\t-js       Generate JavaScript code");
         stream.println("\t-lua      Generate Lua code");
         stream.println("\t-objc     Generate Objective-C code");
         stream.println("\t-perl     Generate Perl code");
@@ -1805,7 +1806,7 @@ public final class Smc
         _optionMap = new HashMap<String, List<Language>>();
 
         // Languages supporting each option:
-        // +     access:  Java
+        // +    -access:  Java
         // +      -cast:  C++
         // +         -d:  all
         // +         -g:  all
@@ -1819,7 +1820,7 @@ public final class Smc
         // +      -noex:  C++
         // + -nostreams:  C++
         // +   -reflect:  C#, Java, TCL, VB, Lua, Perl, PHP,
-        //                 Python, Ruby, Groovy, Scala
+        //                Python, Ruby, Groovy, Scala
         // +    -return:  all
         // +    -serial:  C#, C++, Java, Tcl, VB, Groovy, Scala
         // +    -suffix:  all
@@ -1932,6 +1933,9 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.42  2011/11/20 16:29:53  cwrapp
+// Check in for SMC v. 6.1.0
+//
 // Revision 1.41  2011/11/20 14:58:33  cwrapp
 // Check in for SMC v. 6.1.0
 //
