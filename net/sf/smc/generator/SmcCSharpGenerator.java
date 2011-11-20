@@ -121,7 +121,7 @@ public final class SmcCSharpGenerator
         }
 
         // Dump out the raw source code, if any.
-        if (rawSource != null && rawSource.length () > 0)
+        if (rawSource != null && rawSource.length() > 0)
         {
             _source.println(rawSource);
             _source.println();
@@ -2070,7 +2070,7 @@ public final class SmcCSharpGenerator
                 _source.print("    \"BEFORE ENTRY    : ");
                 _source.print(mapName);
                 _source.print('.');
-                _source.print(stateName);
+                _source.print(fqEndStateName);
                 _source.println(".Exit(context)\");");
                 _source.println("#endif");
                 _source.println();
@@ -2088,7 +2088,7 @@ public final class SmcCSharpGenerator
                 _source.print("    \"AFTER ENTRY     : ");
                 _source.print(mapName);
                 _source.print('.');
-                _source.print(stateName);
+                _source.print(fqEndStateName);
                 _source.println(".Exit(context)\");");
                 _source.println("#endif");
                 _source.println();
@@ -2239,6 +2239,9 @@ public final class SmcCSharpGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.12  2011/11/20 14:58:33  cwrapp
+// Check in for SMC v. 6.1.0
+//
 // Revision 1.11  2009/12/17 19:51:43  cwrapp
 // Testing complete.
 //

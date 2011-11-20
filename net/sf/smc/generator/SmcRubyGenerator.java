@@ -1148,7 +1148,7 @@ public final class SmcRubyGenerator
                     _source.print(
                         "    fsm.getDebugStream.write(\"");
                     _source.print("BEFORE ENTRY    : ");
-                    _source.print(stateName);
+                    _source.print(fqEndStateName);
                     _source.println(".Entry(fsm)\\n\")");
                     _source.print(indent2);
                     _source.println("    end");
@@ -1165,7 +1165,7 @@ public final class SmcRubyGenerator
                     _source.print(
                         "    fsm.getDebugStream.write(\"");
                     _source.print("AFTER ENTRY     : ");
-                    _source.print(stateName);
+                    _source.print(fqEndStateName);
                     _source.println(".Entry(fsm)\\n\")");
                     _source.print(indent2);
                     _source.println("    end");
@@ -1198,7 +1198,7 @@ public final class SmcRubyGenerator
                 _source.print(indent3);
                 _source.print("    fsm.getDebugStream.write(\"");
                 _source.print("BEFORE ENTRY    : ");
-                _source.print(stateName);
+                _source.print(fqEndStateName);
                 _source.println(".Entry(fsm)\\n\")");
                 _source.print(indent2);
                 _source.println("    end");
@@ -1214,7 +1214,7 @@ public final class SmcRubyGenerator
                 _source.print(indent3);
                 _source.print("    fsm.getDebugStream.write(\"");
                 _source.print("AFTER ENTRY     : ");
-                _source.print(stateName);
+                _source.print(fqEndStateName);
                 _source.println(".Entry(fsm)\\n\")");
                 _source.print(indent2);
                 _source.println("    end");
@@ -1323,6 +1323,9 @@ public final class SmcRubyGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2011/11/20 14:58:33  cwrapp
+// Check in for SMC v. 6.1.0
+//
 // Revision 1.10  2010/03/05 21:29:53  fperrad
 // Allows property with Groovy, Lua, Perl, Python, Ruby & Scala
 //

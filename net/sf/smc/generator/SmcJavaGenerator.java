@@ -1420,7 +1420,7 @@ public final class SmcJavaGenerator
             _source.println(" = context.getState();");
         }
 
-        _source.println();
+        // _source.println();
 
         // Dump out the exit actions - but only for the first
         // guard.
@@ -1434,24 +1434,22 @@ public final class SmcJavaGenerator
             {
                 String sep;
 
-                _source.print(_indent);
+                _source.print(indent2);
                 _source.println(
-                    "    if (context.getDebugFlag() == true)");
-                _source.print(_indent);
-                _source.println("    {");
-                _source.print(_indent);
-                _source.print("        PrintStream str = ");
+                    "if (context.getDebugFlag() == true)");
+                _source.print(indent2);
+                _source.println("{");
+                _source.print(indent2);
+                _source.print("    PrintStream str = ");
                 _source.println("context.getDebugStream();");
                 _source.println();
-                _source.print(_indent);
+                _source.print(indent2);
                 _source.print(
-                    "        str.println(\"BEFORE EXIT     : ");
-                _source.print(mapName);
-                _source.print('.');
+                    "    str.println(\"BEFORE EXIT     : ");
                 _source.print(stateName);
                 _source.println(".Exit(context)\");");
-                _source.print(_indent);
-                _source.println("    }");
+                _source.print(indent2);
+                _source.println("}");
                 _source.println();
             }
 
@@ -1463,23 +1461,22 @@ public final class SmcJavaGenerator
             {
                 String sep;
 
-                _source.print(_indent);
+                _source.println();
+                _source.print(indent2);
                 _source.println(
-                    "    if (context.getDebugFlag() == true)");
-                _source.print(_indent);
-                _source.println("    {");
-                _source.print(_indent);
-                _source.print("        PrintStream str = ");
+                    "if (context.getDebugFlag() == true)");
+                _source.print(indent2);
+                _source.println("{");
+                _source.print(indent2);
+                _source.print("    PrintStream str = ");
                 _source.println("context.getDebugStream();");
                 _source.println();
-                _source.print(_indent);
+                _source.print(indent2);
                 _source.print(
-                    "        str.println(\"AFTER EXIT      : ");
-                _source.print(mapName);
-                _source.print('.');
+                    "    str.println(\"AFTER EXIT      : ");
                 _source.print(stateName);
                 _source.println(".Exit(context)\");");
-                _source.print(_indent);
+                _source.print(indent2);
                 _source.println("    }");
                 _source.println();
             }
@@ -1512,8 +1509,6 @@ public final class SmcJavaGenerator
             _source.print(_indent);
             _source.print(
                 "    str.println(\"ENTER TRANSITION: ");
-            _source.print(mapName);
-            _source.print('.');
             _source.print(stateName);
             _source.print('.');
             _source.print(transName);
@@ -1619,8 +1614,6 @@ public final class SmcJavaGenerator
             _source.print(_indent);
             _source.print(
                 "    str.println(\"EXIT TRANSITION : ");
-            _source.print(mapName);
-            _source.print('.');
             _source.print(stateName);
             _source.print('.');
             _source.print(transName);
@@ -1713,9 +1706,7 @@ public final class SmcJavaGenerator
                 _source.print(indent3);
                 _source.print(
                     "    str.println(\"BEFORE ENTRY    : ");
-                _source.print(mapName);
-                _source.print('.');
-                _source.print(stateName);
+                _source.print(fqEndStateName);
                 _source.println(".Entry(context)\");");
                 _source.print(indent3);
                 _source.println("}");
@@ -1743,13 +1734,10 @@ public final class SmcJavaGenerator
                 _source.print(indent3);
                 _source.print(
                     "    str.println(\"AFTER ENTRY     : ");
-                _source.print(mapName);
-                _source.print('.');
-                _source.print(stateName);
+                _source.print(fqEndStateName);
                 _source.println(".Entry(context)\");");
                 _source.print(indent3);
                 _source.println("}");
-                _source.println();
             }
         }
 
@@ -1761,6 +1749,7 @@ public final class SmcJavaGenerator
         {
             _source.print(indent2);
             _source.println('}');
+            _source.println();
         }
 
         // If there is a transition associated with the pop, then
@@ -1894,6 +1883,9 @@ public final class SmcJavaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2011/11/20 14:58:33  cwrapp
+// Check in for SMC v. 6.1.0
+//
 // Revision 1.10  2009/12/17 19:51:43  cwrapp
 // Testing complete.
 //

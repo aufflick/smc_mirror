@@ -135,7 +135,7 @@
         return nil;
     }
 
-    _state = aState;
+    _state = [aState retain];
 
     return self;
 }
@@ -159,6 +159,8 @@
 
 - (void)dealloc
 {
+    [_previousState release];
+    [_state release];
     while (_stateStack != NULL) {
         SMCStateEntry *entry = _stateStack;
         _stateStack = [_stateStack next];
@@ -169,8 +171,8 @@
 
 - (void)clearState
 {
-    _previousState = _state;
-    _state = NULL;
+    [_previousState release]; _previousState = [_state retain];
+    [_state release]; _state = NULL;
 }
 
 - (SMCState*)previousState;
@@ -180,9 +182,12 @@
 
 - (void)setState:(SMCState*)state;
 {
-    _state = state;
-    if ([self debugFlag]) {
-        TRACE( @"ENTER STATE     : %@\n\r", [_state name] );
+    if (state != _state) {
+        [_state release];
+        _state = [state retain];
+        if ([self debugFlag]) {
+            TRACE( @"ENTER STATE     : %@\n\r", [_state name] );
+        }
     }
 }
 
@@ -219,7 +224,7 @@
         _stateStack = new_entry;
     }
 
-    _state = state;
+    [_state release]; _state = [state retain];
 
     if ([self debugFlag]) {
         TRACE(@"PUSH TO STATE   : %@\n\r", [_state name]);
@@ -235,7 +240,7 @@
     // Popping when there was no previous push is an error.
     NSAssert(_stateStack != NULL, @"Popping empty state stack");
 
-    _state = [_stateStack state];
+    [_state release]; _state = [[_stateStack state] retain];
     entry = _stateStack;
     _stateStack = [_stateStack next];
     [entry release];
@@ -276,6 +281,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2011/11/20 14:58:33  cwrapp
+// Check in for SMC v. 6.1.0
+//
 // Revision 1.3  2009/11/24 20:42:39  cwrapp
 // v. 6.0.1 update
 //

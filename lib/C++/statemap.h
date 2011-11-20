@@ -632,6 +632,15 @@ namespace statemap
         // Sets the current state to the specified state.
         void setState(const State& state)
         {
+            // clearState() is not called when a transition has
+            // no actions, so set _previous_state to _state in
+            // that situation. We know clearState() was not
+            // called when _state is not null.
+            if (_state != NULL)
+            {
+                _previous_state = _state;
+            }
+
             _state = const_cast<State *>(&state);
 
             if (_debug_flag == true)
@@ -682,6 +691,7 @@ namespace statemap
                 _state_stack = new_entry;
             }
 
+            _previous_state = _state;
             _state = const_cast<State *>(&state);
 
             if (_debug_flag == true)
@@ -713,6 +723,7 @@ namespace statemap
             }
 #endif // SMC_NO_EXCEPTIONS
 
+            _previous_state = _state;
             _state = _state_stack->getState();
             entry = _state_stack;
             _state_stack = _state_stack->getNext();
@@ -815,6 +826,9 @@ namespace statemap
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.17  2011/11/20 14:58:32  cwrapp
+// Check in for SMC v. 6.1.0
+//
 // Revision 1.16  2010/09/11 19:09:38  fperrad
 // remove \r from debug message
 //

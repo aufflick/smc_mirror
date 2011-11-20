@@ -571,7 +571,7 @@ public final class SmcCppGenerator
             _source.print(_indent);
             _source.print("    ");
             _source.print(context);
-            _source.println("& ctxt(context.getOwner());");
+            _source.println("& ctxt = context.getOwner();");
             _source.println();
 
             // Generate the actions associated with this code.
@@ -609,7 +609,7 @@ public final class SmcCppGenerator
             _source.print(_indent);
             _source.print("    ");
             _source.print(context);
-            _source.println("& ctxt(context.getOwner());");
+            _source.println("& ctxt = context.getOwner();");
             _source.println();
 
             // Generate the actions associated with this code.
@@ -699,7 +699,7 @@ public final class SmcCppGenerator
             _source.print(_indent);
             _source.print("    ");
             _source.print(context);
-            _source.println("& ctxt(context.getOwner());");
+            _source.println("& ctxt = context.getOwner();");
         }
 
         _source.println();
@@ -1000,6 +1000,7 @@ public final class SmcCppGenerator
                         "    str << \"BEFORE EXIT     : ");
                     _source.print(stateName);
                     _source.println("::Exit(context)\"");
+                    _source.print(indent2);
                     _source.println("        << std::endl;");
                 }
 
@@ -1041,6 +1042,7 @@ public final class SmcCppGenerator
                         "    str << \"AFTER EXIT      : ");
                     _source.print(stateName);
                     _source.println("::Exit(context)\"");
+                    _source.print(indent2);
                     _source.println("            << std::endl;");
                 }
 
@@ -1290,7 +1292,7 @@ public final class SmcCppGenerator
                         _source.print(indent3);
                         _source.print(
                             "    TRACE(\"BEFORE ENTRY    : ");
-                        _source.print(stateName);
+                        _source.print(fqEndStateName);
                         _source.println(
                             "::Entry(context)\\n\");");
                     }
@@ -1304,8 +1306,9 @@ public final class SmcCppGenerator
                         _source.print(indent3);
                         _source.print(
                             "    str << \"BEFORE ENTRY    : ");
-                        _source.print(stateName);
+                        _source.print(fqEndStateName);
                         _source.println("::Entry(context)\"");
+                        _source.print(indent3);
                         _source.println("        << std::endl;");
                     }
 
@@ -1332,7 +1335,7 @@ public final class SmcCppGenerator
                         _source.print(indent3);
                         _source.print(
                             "    TRACE(\"AFTER ENTRY     : ");
-                        _source.print(stateName);
+                        _source.print(fqEndStateName);
                         _source.println(
                             "::Entry(context)\\n\");");
                     }
@@ -1346,8 +1349,9 @@ public final class SmcCppGenerator
                         _source.print(indent3);
                         _source.print(
                             "    str << \"AFTER ENTRY     : ");
-                        _source.print(stateName);
+                        _source.print(fqEndStateName);
                         _source.println("::Entry(context)\"");
+                        _source.print(indent3);
                         _source.println("        << std::endl;");
                     }
 
@@ -1419,7 +1423,7 @@ public final class SmcCppGenerator
                             _source.print(indent3);
                             _source.print(
                                 "    TRACE(\"BEFORE ENTRY    : ");
-                            _source.print(stateName);
+                            _source.print(fqEndStateName);
                             _source.println(
                                 "::Entry(context)\\n\");");
                         }
@@ -1433,8 +1437,9 @@ public final class SmcCppGenerator
                             _source.print(indent2);
                             _source.print(
                                 "    str << \"BEFORE ENTRY    : ");
-                            _source.print(stateName);
+                            _source.print(fqEndStateName);
                             _source.println("::Entry(context)\"");
+                            _source.print(indent2);
                             _source.println("        << std::endl;");
                         }
 
@@ -1461,7 +1466,7 @@ public final class SmcCppGenerator
                             _source.print(indent3);
                             _source.print(
                                 "        TRACE(\"AFTER ENTRY     : ");
-                            _source.print(stateName);
+                            _source.print(fqEndStateName);
                             _source.println(
                                 "::Entry(context)\\n\");");
                         }
@@ -1475,8 +1480,9 @@ public final class SmcCppGenerator
                             _source.print(indent2);
                             _source.print(
                                 "        str << \"AFTER ENTRY     : ");
-                            _source.print(stateName);
+                            _source.print(fqEndStateName);
                             _source.println("::Entry(context)\"");
+                            _source.print(indent2);
                             _source.println("            << std::endl;");
                         }
 
@@ -1532,7 +1538,7 @@ public final class SmcCppGenerator
                     _source.print(indent2);
                     _source.print(
                         "    TRACE(\"BEFORE ENTRY    : ");
-                    _source.print(stateName);
+                    _source.print(fqEndStateName);
                     _source.println(
                         "::Entry(context)\\n\");");
                 }
@@ -1546,8 +1552,9 @@ public final class SmcCppGenerator
                     _source.print(indent2);
                     _source.print(
                         "    str << \"BEFORE ENTRY    : ");
-                    _source.print(stateName);
+                    _source.print(fqEndStateName);
                     _source.println("::Entry(context)\"");
+                    _source.print(indent2);
                     _source.println("        << std::endl;");
                 }
 
@@ -1573,7 +1580,7 @@ public final class SmcCppGenerator
                     _source.print(indent2);
                     _source.print(
                         "    TRACE(\"AFTER ENTRY     : ");
-                    _source.print(stateName);
+                    _source.print(fqEndStateName);
                     _source.println(
                         "::Entry(context)\\n\");");
                 }
@@ -1586,8 +1593,9 @@ public final class SmcCppGenerator
                     _source.print(indent2);
                     _source.print(
                         "    str << \"AFTER ENTRY     : ");
-                    _source.print(stateName);
+                    _source.print(fqEndStateName);
                     _source.println("::Entry(context)\"");
+                    _source.print(indent2);
                     _source.println("        << std::endl;");
                 }
 
@@ -1701,6 +1709,9 @@ public final class SmcCppGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2011/11/20 14:58:33  cwrapp
+// Check in for SMC v. 6.1.0
+//
 // Revision 1.10  2010/09/11 19:15:57  fperrad
 // remove \r from debug message
 //

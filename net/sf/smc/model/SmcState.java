@@ -86,10 +86,11 @@ public final class SmcState
 
         // Make sure the first character in the class name is
         // upper case.
-        String firstLetter = name.substring(0, 1);
-        String remainder = name.substring(1);
+//         String firstLetter = name.substring(0, 1);
+//         String remainder = name.substring(1);
 
-        _className = firstLetter.toUpperCase() + remainder;
+//         _className = firstLetter.toUpperCase() + remainder;
+        _className = name;
 
         _entryActions = null;
         _exitActions = null;
@@ -383,6 +384,9 @@ public final class SmcState
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2011/11/20 14:58:33  cwrapp
+// Check in for SMC v. 6.1.0
+//
 // Revision 1.2  2010/03/08 17:02:41  fperrad
 // New representation of the Default state. The result is full UML.
 //

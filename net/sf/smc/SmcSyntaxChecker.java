@@ -65,6 +65,9 @@ import net.sf.smc.parser.SmcParser.TargetLanguage;
  *   <li>
  *     If this is Java code generation that the .sm fle and the
  *     context class have the same name.
+ *     <br/>
+ *     (Note: Removed as of v. 6.1.0 due to addition of %fsmclass
+        feature).
  *   </li>
  *   <li>
  *     If this is TCL code generation that argument parameter
@@ -183,22 +186,25 @@ public final class SmcSyntaxChecker
         // If this is Java, then <name> in <name>.sm must match
         // %class <name>.
         // That is foo.sm is the FSM for foo.java.
-        if (_targetLanguage == TargetLanguage.JAVA &&
-            fsm.getName().equals(context) == false)
-        {
-            _messages.add(
-                new SmcMessage(
-                    _fsmName,
-                    0,
-                    SmcMessage.ERROR,
-                    ".sm file name \"" +
-                    fsm.getName() +
-                    "\" does not match context class name \"" +
-                    context +
-                    "\"."));
+        // With the addition of the %fsmclass feature, this check
+        // is no longer guaranteed to be true.
+        // Removing.
+//         if (_targetLanguage == TargetLanguage.JAVA &&
+//             fsm.getName().equals(context) == false)
+//         {
+//             _messages.add(
+//                 new SmcMessage(
+//                     _fsmName,
+//                     0,
+//                     SmcMessage.ERROR,
+//                     ".sm file name \"" +
+//                     fsm.getName() +
+//                     "\" does not match context class name \"" +
+//                     context +
+//                     "\"."));
 
-            _checkFlag = false;
-        }
+//             _checkFlag = false;
+//         }
 
         // Check if all the end states are valid.
         // Check each map in turn. But don't stop when an error
@@ -498,6 +504,9 @@ public final class SmcSyntaxChecker
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2011/11/20 14:58:33  cwrapp
+// Check in for SMC v. 6.1.0
+//
 // Revision 1.9  2009/03/27 09:41:47  cwrapp
 // Added F. Perrad changes back in.
 //

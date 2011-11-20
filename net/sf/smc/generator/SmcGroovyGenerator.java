@@ -1144,7 +1144,7 @@ public final class SmcGroovyGenerator
                     _source.print(
                         "    context.debugStream.println('");
                     _source.print("BEFORE ENTRY    : ");
-                    _source.print(stateName);
+                    _source.print(fqEndStateName);
                     _source.println(".Entry(context)')");
                     _source.println();
                 }
@@ -1160,7 +1160,7 @@ public final class SmcGroovyGenerator
                     _source.print(
                         "    context.debugStream.println('");
                     _source.print("AFTER ENTRY     : ");
-                    _source.print(stateName);
+                    _source.print(fqEndStateName);
                     _source.println(".Entry(context)')");
                     _source.println();
                 }
@@ -1193,7 +1193,7 @@ public final class SmcGroovyGenerator
                 _source.print(
                     "    context.debugStream.println('");
                 _source.print("BEFORE ENTRY    : ");
-                _source.print(stateName);
+                _source.print(fqEndStateName);
                 _source.println(".Entry(context)')");
                 _source.println();
             }
@@ -1209,7 +1209,7 @@ public final class SmcGroovyGenerator
                 _source.print(
                     "    context.debugStream.println('");
                 _source.print("AFTER ENTRY     : ");
-                _source.print(stateName);
+                _source.print(fqEndStateName);
                 _source.println(".Entry(context)')");
                 _source.println();
             }
@@ -1348,6 +1348,9 @@ public final class SmcGroovyGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.12  2011/11/20 14:58:33  cwrapp
+// Check in for SMC v. 6.1.0
+//
 // Revision 1.11  2010/03/05 21:29:53  fperrad
 // Allows property with Groovy, Lua, Perl, Python, Ruby & Scala
 //

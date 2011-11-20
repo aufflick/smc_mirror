@@ -118,6 +118,10 @@ namespace statemap
             debugStream_ = null;
         } // end of FSMContext()
 
+        public FSMContext()
+        : this(null)
+        {}
+
         // The state change event.
         public event StateChangeEventHandler StateChange;
 
@@ -193,6 +197,15 @@ namespace statemap
             Trace.WriteLine("ENTER STATE     : " +    state.Name);
 #endif
 
+            // clearState() is not called when a transition has
+            // no actions, so set _previousState to _state in
+            // that situation. We know clearState() was not
+            // called when _state is not null.
+            if (state_ != null)
+            {
+                previousState_ = state_;
+            }
+
             state_ = state;
 
             OnStateChange(e);
@@ -239,6 +252,7 @@ namespace statemap
                 stateStack_.Push(state_);
             }
 
+            previousState_ = state_;
             state_ = state;
 
             OnStateChange(e);
@@ -267,6 +281,7 @@ namespace statemap
 
                 // The pop method removes the top element
                 // from the stack and returns it.
+                previousState_ = state_;
                 state_ = nextState;
 
 #if TRACE
@@ -354,6 +369,9 @@ namespace statemap
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2011/11/20 14:58:32  cwrapp
+// Check in for SMC v. 6.1.0
+//
 // Revision 1.8  2009/12/17 19:51:43  cwrapp
 // Testing complete.
 //

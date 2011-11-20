@@ -793,6 +793,7 @@
 ./smc/lib/Java/State.java
 ./smc/lib/Java/StateUndefinedException.java
 ./smc/lib/Java/TransitionUndefinedException.java
+./smc/lib/JavaScription/statemap.js
 ./smc/lib/Lua/Makefile
 ./smc/lib/Lua/README
 ./smc/lib/Lua/statemap.lua

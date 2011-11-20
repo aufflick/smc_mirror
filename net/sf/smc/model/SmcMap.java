@@ -34,8 +34,6 @@
 
 package net.sf.smc.model;
 
-import java.io.PrintStream;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -76,6 +74,7 @@ public final class SmcMap
         _fsm = fsm;
         _defaultState = null;
         _states = new ArrayList<SmcState>();
+        _stateId = 0;
     } // end of SmcMap(String, int, SmcFSM)
 
     //
@@ -372,9 +371,9 @@ public final class SmcMap
      * Returns the next unique state identifier.
      * @return the next unique state identifier.
      */
-    public static int getNextStateId()
+    public int getNextStateId()
     {
-        return (_StateId++);
+        return (_stateId++);
     } // end of getNextStateId()
 
     //
@@ -439,17 +438,16 @@ public final class SmcMap
     private List<SmcState> _states;
     private SmcState _defaultState;
 
-    //-----------------------------------------------------------
-    // Statics.
-    //
-
     // Use this to generate unique state IDs.
-    private static int _StateId = 0;
+    private int _stateId;
 } // end of class SmcMap
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2011/11/20 14:58:33  cwrapp
+// Check in for SMC v. 6.1.0
+//
 // Revision 1.4  2009/11/24 20:42:39  cwrapp
 // v. 6.0.1 update
 //

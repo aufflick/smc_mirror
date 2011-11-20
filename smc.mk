@@ -40,7 +40,7 @@
 # Macros.
 #
 
-VERSION=        6_0_1
+VERSION=        6_1_0
 
 STAGING_DIR=    ../staging
 SMC_STAGING_DIR=$(STAGING_DIR)/smc
@@ -58,7 +58,7 @@ RM_F=		rm -f
 RM_RF=		rm -rf
 
 JAVADOC=		javadoc
-DOC_VERSION=	6_0_1
+DOC_VERSION=	$(VERSION)
 DOC_DIR=		docs/javadocs
 DOC_SOURCES=	./doc_sources.txt
 
@@ -101,6 +101,9 @@ $(SMC_STAGING_DIR) :    $(STAGING_DIR)
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.21  2011/11/20 14:58:32  cwrapp
+# Check in for SMC v. 6.1.0
+#
 # Revision 1.20  2009/09/05 15:39:16  cwrapp
 # Checking in fixes for 1944542, 1983929, 2731415, 2803547 and feature 2797126.
 #

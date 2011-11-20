@@ -1177,7 +1177,7 @@ public final class SmcPerlGenerator
                     _source.print(indent2);
                     _source.print("    print $fh \"");
                     _source.print("BEFORE ENTRY    : ");
-                    _source.print(stateName);
+                    _source.print(fqEndStateName);
                     _source.println("->Entry($fsm)\\n\";");
                     _source.print(indent2);
                     _source.println("}");
@@ -1198,7 +1198,7 @@ public final class SmcPerlGenerator
                     _source.print(indent2);
                     _source.print("    print $fh \"");
                     _source.print("AFTER ENTRY     : ");
-                    _source.print(stateName);
+                    _source.print(fqEndStateName);
                     _source.println("->Entry($fsm)\\n\";");
                     _source.print(indent2);
                     _source.println("}");
@@ -1234,7 +1234,7 @@ public final class SmcPerlGenerator
                 _source.print(indent2);
                 _source.print("    print $fh \"");
                 _source.print("BEFORE ENTRY    : ");
-                _source.print(stateName);
+                _source.print(fqEndStateName);
                 _source.println("->Entry($fsm)\\n\";");
                 _source.print(indent2);
                 _source.println("}");
@@ -1253,7 +1253,7 @@ public final class SmcPerlGenerator
                 _source.print(indent2);
                 _source.print("    print $fh \"");
                 _source.print("AFTER ENTRY     : ");
-                _source.print(stateName);
+                _source.print(fqEndStateName);
                 _source.println("->Entry($fsm)\\n\";");
                 _source.print(indent2);
                 _source.println("}");
@@ -1366,6 +1366,9 @@ public final class SmcPerlGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.13  2011/11/20 14:58:33  cwrapp
+// Check in for SMC v. 6.1.0
+//
 // Revision 1.12  2010/12/01 14:40:21  fperrad
 // Perl: fix when package
 //

@@ -1292,7 +1292,7 @@ public final class SmcTclGenerator
                             _source.print(
                                 "    puts [$context getDebugStream] ");
                             _source.print("\"BEFORE ENTRY    : \\[");
-                            _source.print(stateName);
+                            _source.print(fqEndStateName);
                             _source.println("\\] Entry $context\";");
                             _source.print(indent3);
                             _source.println("}");
@@ -1315,7 +1315,7 @@ public final class SmcTclGenerator
                             _source.print(
                                 "    puts [$context getDebugStream] ");
                             _source.print("\"AFTER ENTRY     : \\[");
-                            _source.print(stateName);
+                            _source.print(fqEndStateName);
                             _source.println("\\] Exit $context\";");
                             _source.print(indent3);
                             _source.println("}");
@@ -1391,7 +1391,7 @@ public final class SmcTclGenerator
                     _source.print(
                         "    puts [$context getDebugStream] ");
                     _source.print("\"BEFORE ENTRY    : \\[");
-                    _source.print(stateName);
+                    _source.print(fqEndStateName);
                     _source.println("\\] Exit $context\";");
                     _source.print(indent3);
                     _source.println("}");
@@ -1414,7 +1414,7 @@ public final class SmcTclGenerator
                     _source.print(
                         "    puts [$context getDebugStream] ");
                     _source.print("\"AFTER ENTRY     : \\[");
-                    _source.print(stateName);
+                    _source.print(fqEndStateName);
                     _source.println("\\] Entry $context\";");
                     _source.print(indent3);
                     _source.println("}");
@@ -1461,7 +1461,7 @@ public final class SmcTclGenerator
                 _source.print(
                     "    puts [$context getDebugStream] ");
                 _source.print("\"BEFORE ENTRY    : \\[");
-                _source.print(stateName);
+                _source.print(fqEndStateName);
                 _source.println("\\] Entry $context\";");
                 _source.print(indent2);
                 _source.println("}");
@@ -1482,7 +1482,7 @@ public final class SmcTclGenerator
                 _source.print(
                     "    puts [$context getDebugStream] ");
                 _source.print("\"AFTER ENTRY     : \\[");
-                _source.print(stateName);
+                _source.print(fqEndStateName);
                 _source.println("\\] Entry $context\";");
                 _source.print(indent2);
                 _source.println("}");
@@ -1659,6 +1659,9 @@ public final class SmcTclGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2011/11/20 14:58:33  cwrapp
+// Check in for SMC v. 6.1.0
+//
 // Revision 1.10  2009/12/17 19:51:43  cwrapp
 // Testing complete.
 //

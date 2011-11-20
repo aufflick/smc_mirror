@@ -61,6 +61,7 @@ install :       $(LIB_STAGING_DIR)
 		-$(MAKE) -C CSharp install
 		-$(MAKE) -C Groovy install
 		-$(MAKE) -C Java install
+		-$(MAKE) -C JavaScript install
 		-$(MAKE) -C Lua install
 		-$(MAKE) -C ObjC install
 		-$(MAKE) -C Perl install
@@ -76,6 +77,7 @@ uninstall :
 		$(MAKE) -C CSharp uninstall
 		$(MAKE) -C Groovy uninstall
 		$(MAKE) -C Java uninstall
+		$(MAKE) -C JavaScript uninstall
 		$(MAKE) -C Lua uninstall
 		$(MAKE) -C ObjC uninstall
 		$(MAKE) -C Perl uninstall
@@ -91,6 +93,7 @@ clean :
 		$(MAKE) -C CSharp clean
 		$(MAKE) -C Groovy clean
 		$(MAKE) -C Java clean
+		$(MAKE) -C JavaScript clean
 		$(MAKE) -C Lua clean
 		$(MAKE) -C ObjC clean
 		$(MAKE) -C Perl clean
@@ -106,6 +109,7 @@ realclean :
 		$(MAKE) -C CSharp realclean
 		$(MAKE) -C Groovy realclean
 		$(MAKE) -C Java realclean
+		$(MAKE) -C JavaScript realclean
 		$(MAKE) -C Lua realclean
 		$(MAKE) -C ObjC realclean
 		$(MAKE) -C Perl realclean
@@ -118,6 +122,9 @@ realclean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.16  2011/11/20 14:58:32  cwrapp
+# Check in for SMC v. 6.1.0
+#
 # Revision 1.15  2009/05/16 15:42:03  cwrapp
 # Removed VB from lib release, superceded by DotNot.
 #

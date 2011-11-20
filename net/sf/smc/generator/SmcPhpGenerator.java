@@ -1161,7 +1161,7 @@ public final class SmcPhpGenerator
                     _source.print(
                         "    fwrite($fsm->getDebugStream(), \"");
                     _source.print("BEFORE ENTRY    : ");
-                    _source.print(stateName);
+                    _source.print(fqEndStateName);
                     _source.println("->Entry($fsm);\\n\");");
                     _source.print(indent2);
                     _source.println("}");
@@ -1179,7 +1179,7 @@ public final class SmcPhpGenerator
                     _source.print(
                         "    fwrite($fsm->getDebugStream(), \"");
                     _source.print("AFTER ENTRY     : ");
-                    _source.print(stateName);
+                    _source.print(fqEndStateName);
                     _source.println("->Entry($fsm);\\n\");");
                     _source.print(indent2);
                     _source.println("}");
@@ -1214,7 +1214,7 @@ public final class SmcPhpGenerator
                 _source.print(
                     "    fwrite($fsm->getDebugStream(), \"");
                 _source.print("BEFORE ENTRY    : ");
-                _source.print(stateName);
+                _source.print(fqEndStateName);
                 _source.println("->Entry($fsm);\\n\");");
                 _source.print(indent2);
                 _source.println("}");
@@ -1232,7 +1232,7 @@ public final class SmcPhpGenerator
                 _source.print(
                     "    fwrite($fsm->getDebugStream(), \"");
                 _source.print("AFTER ENTRY     : ");
-                _source.print(stateName);
+                _source.print(fqEndStateName);
                 _source.println("->Entry($fsm);\\n\");");
                 _source.print(indent2);
                 _source.println("}");
@@ -1405,6 +1405,9 @@ public final class SmcPhpGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2011/11/20 14:58:33  cwrapp
+// Check in for SMC v. 6.1.0
+//
 // Revision 1.10  2010/03/15 13:15:03  fperrad
 // fix multi guard
 //

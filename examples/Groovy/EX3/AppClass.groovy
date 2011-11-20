@@ -34,6 +34,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2011/11/20 14:58:32  cwrapp
+// Check in for SMC v. 6.1.0
+//
 // Revision 1.3  2009/12/17 19:51:43  cwrapp
 // Testing complete.
 //
@@ -54,7 +57,7 @@ class AppClass {
         _is_acceptable = false
 
         // Uncomment to see debug output.
-        _fsm.setDebugFlag(true)
+        // _fsm.setDebugFlag(true)
     }
 
     def CheckString (String string) {

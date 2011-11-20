@@ -1131,7 +1131,7 @@ public final class SmcLuaGenerator
                         _source.print(packageName);
                         _source.print(".");
                     }
-                    _source.print(stateName);
+                    _source.print(fqEndStateName);
                     _source.println(":Entry(fsm)\\n\")");
                     _source.print(indent2);
                     _source.println("end");
@@ -1155,7 +1155,7 @@ public final class SmcLuaGenerator
                         _source.print(packageName);
                         _source.print(".");
                     }
-                    _source.print(stateName);
+                    _source.print(fqEndStateName);
                     _source.println(":Entry(fsm)\\n\")");
                     _source.print(indent2);
                     _source.println("end");
@@ -1194,7 +1194,7 @@ public final class SmcLuaGenerator
                     _source.print(packageName);
                     _source.print(".");
                 }
-                _source.print(stateName);
+                _source.print(fqEndStateName);
                 _source.println(":Entry(fsm)\\n\")");
                 _source.print(indent2);
                 _source.println("end");
@@ -1216,7 +1216,7 @@ public final class SmcLuaGenerator
                     _source.print(packageName);
                     _source.print(".");
                 }
-                _source.print(stateName);
+                _source.print(fqEndStateName);
                 _source.println(":Entry(fsm)\\n\")");
                 _source.print(indent2);
                 _source.println("end");
@@ -1318,6 +1318,9 @@ public final class SmcLuaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.16  2011/11/20 14:58:33  cwrapp
+// Check in for SMC v. 6.1.0
+//
 // Revision 1.15  2010/11/21 18:47:52  fperrad
 // refactor Lua generation (compat 5.2)
 //

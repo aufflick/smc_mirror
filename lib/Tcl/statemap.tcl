@@ -29,6 +29,9 @@
 #
 # Change Log
 # $Log$
+# Revision 1.11  2011/11/20 14:58:33  cwrapp
+# Check in for SMC v. 6.1.0
+#
 # Revision 1.10  2010/09/11 19:02:32  fperrad
 # use the same message in all language
 #
@@ -158,6 +161,12 @@ namespace eval ::statemap:: {
             puts $_debug_stream "ENTER STATE     : [$state_name getName]";
         }
 
+        # Set the previous state in case clearState was not
+        # called.
+        if {[string compare $_state ""] != 0} {
+            set _previous_state $_state;
+        }
+
         set _state $state_name;
 
         return -code ok;
@@ -187,6 +196,7 @@ namespace eval ::statemap:: {
             lappend _state_stack $_state;
         }
 
+        set _pervious_state $_state;
         set _state $state_name;
 
         return -code ok;
@@ -194,6 +204,7 @@ namespace eval ::statemap:: {
 
     public method popState {} {
         if {[llength $_state_stack] > 0} {
+            set _pervious_state $_state;
             set _state [lindex $_state_stack end];
             set _state_stack [lrange $_state_stack 0 [expr [llength $_state_stack] - 2]];
 

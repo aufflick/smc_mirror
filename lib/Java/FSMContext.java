@@ -178,7 +178,7 @@ public abstract class FSMContext
 
     /**
      * If this FSM is in transition, then returns the transition
-     * name. If not in trnasition, then returns an empty string.
+     * name. If not in transition, then returns an empty string.
      * @return the current transition name.
      */
     public String getTransition()
@@ -244,6 +244,15 @@ public abstract class FSMContext
                                      state.getName());
         }
 
+        // clearState() is not called when a transition has
+        // no actions, so set _previousState to _state in
+        // that situation. We know clearState() was not
+        // called when _state is not null.
+        if (_state != null)
+        {
+            _previousState = _state;
+        }
+
         _state = state;
 
         // Inform any and all listeners about this state
@@ -275,8 +284,6 @@ public abstract class FSMContext
      */
     public void pushState(State state)
     {
-        State previousState = _state;
-
         if (_state == null)
         {
             throw (new NullPointerException());
@@ -293,13 +300,14 @@ public abstract class FSMContext
             _stateStack = new java.util.Stack<State>();
         }
 
+        _previousState = _state;
         _stateStack.push(_state);
         _state = state;
 
         // Inform any and all listeners about this state
         // change.
         _listeners.firePropertyChange(
-            STATE_PROPERTY, previousState, _state);
+            STATE_PROPERTY, _previousState, _state);
 
         return;
     } // end of pushState(State)
@@ -327,10 +335,9 @@ public abstract class FSMContext
         }
         else
         {
-            State previousState = _state;
-
             // The pop method removes the top element
             // from the stack and returns it.
+            _previousState = _state;
             _state = _stateStack.pop();
 
             if (_stateStack.isEmpty() == true)
@@ -347,7 +354,7 @@ public abstract class FSMContext
             // Inform any and all listeners about this state
             // change.
             _listeners.firePropertyChange(
-                STATE_PROPERTY, previousState, _state);
+                STATE_PROPERTY, _previousState, _state);
         }
 
         return;
@@ -468,6 +475,9 @@ public abstract class FSMContext
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.15  2011/11/20 14:58:33  cwrapp
+// Check in for SMC v. 6.1.0
+//
 // Revision 1.14  2009/11/24 20:42:39  cwrapp
 // v. 6.0.1 update
 //

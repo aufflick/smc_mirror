@@ -1115,6 +1115,16 @@ import java.util.Map;
                 fsmClass.getDeclaredMethod(transName,
                                            paramTypes);
 
+            transName = "lt";
+            _TransMethod['<'] =
+                fsmClass.getDeclaredMethod(transName,
+                                           paramTypes);
+
+            transName = "gt";
+            _TransMethod['>'] =
+                fsmClass.getDeclaredMethod(transName,
+                                           paramTypes);
+
             transName = "dollar";
             _TransMethod['$'] =
                 fsmClass.getDeclaredMethod(transName,
@@ -1222,6 +1232,9 @@ import java.util.Map;
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2011/11/20 14:58:33  cwrapp
+// Check in for SMC v. 6.1.0
+//
 // Revision 1.4  2009/09/12 21:44:49  kgreg99
 // Implemented feature req. #2718941 - user defined generated class name.
 // A new statement was added to the syntax: %fsmclass class_name

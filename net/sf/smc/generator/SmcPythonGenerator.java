@@ -1045,7 +1045,7 @@ public final class SmcPythonGenerator
                     _source.print(
                         "    fsm.getDebugStream().write(\"");
                     _source.print("BEFORE ENTRY    : ");
-                    _source.print(stateName);
+                    _source.print(fqEndStateName);
                     _source.println(".Entry(fsm)\\n\")");
                     _source.println();
                 }
@@ -1062,7 +1062,7 @@ public final class SmcPythonGenerator
                     _source.print(
                         "    fsm.getDebugStream().write(");
                     _source.print("\"AFTER ENTRY     : ");
-                    _source.print(stateName);
+                    _source.print(fqEndStateName);
                     _source.println(".Entry(fsm)\\n\")");
                     _source.println();
                 }
@@ -1095,7 +1095,7 @@ public final class SmcPythonGenerator
                 _source.print(indent3);
                 _source.print("    fsm.getDebugStream().write(");
                 _source.print("\"BEFORE ENTRY    : ");
-                _source.print(stateName);
+                _source.print(fqEndStateName);
                 _source.println(".Entry(fsm)\\n\")");
                 _source.println();
             }
@@ -1111,7 +1111,7 @@ public final class SmcPythonGenerator
                 _source.print(indent3);
                 _source.print("    fsm.getDebugStream().write(");
                 _source.print("\"AFTER ENTRY     : ");
-                _source.print(stateName);
+                _source.print(fqEndStateName);
                 _source.println(".Entry(fsm)\\n\")");
                 _source.println();
             }
@@ -1222,6 +1222,9 @@ public final class SmcPythonGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.13  2011/11/20 14:58:33  cwrapp
+// Check in for SMC v. 6.1.0
+//
 // Revision 1.12  2010/05/19 09:08:17  fperrad
 // fix #3003558
 //

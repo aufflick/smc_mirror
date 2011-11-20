@@ -141,6 +141,7 @@ public final class Smc
         _outputDirectory = null;
         _headerDirectory = null;
         _suffix = null;
+        _hsuffix = null;
         _accessLevel = null;
 
         // Process the command line.
@@ -463,6 +464,33 @@ public final class Smc
                 else
                 {
                     _suffix = args[i+1];
+                    argsConsumed = 2;
+                }
+            }
+            else if (args[i].startsWith("-hs") == true)
+            {
+                // -hsuffix should be followed by a suffix.
+                if ((i + 1) == args.length ||
+                    args[i+1].startsWith("-") == true)
+                {
+                    retcode = false;
+                    _errorMsg =
+                        HEADER_SUFFIX_FLAG +
+                        " not followed by a value";
+                }
+                else if (_supportsOption(
+                             HEADER_SUFFIX_FLAG) == false)
+                {
+                    retcode = false;
+                    _errorMsg =
+                        _targetLanguage.name() +
+                        " does not support " +
+                        HEADER_SUFFIX_FLAG +
+                        ".";
+                }
+                else
+                {
+                    _hsuffix = args[i+1];
                     argsConsumed = 2;
                 }
             }
@@ -875,7 +903,7 @@ public final class Smc
 
                                 fileName =
                                     fileName.replaceAll(
-                                        "/", File.separator);
+                                        "/", fileSeparator);
                             }
 
                             _sourceFileList.add(fileName);
@@ -1056,6 +1084,7 @@ public final class Smc
         stream.print(" [-cast cast_type]");
         stream.print(" [-d directory]");
         stream.print(" [-headerd directory]");
+        stream.print(" [-hsuffix suffix]");
         stream.print(" [-glevel int]");
         stream.print(
             " {-c | -c++ | -csharp | -graph | -groovy | -java | ");
@@ -1089,7 +1118,7 @@ public final class Smc
         stream.println(
             "\t-sync     Synchronize access to transition methods");
         stream.print("\t          ");
-        stream.println("(use with -csharep, -java, -groovy, -scala and -vb only)");
+        stream.println("(use with -csharp, -java, -groovy, -scala and -vb only)");
         stream.println(
             "\t-noex     Do not generate C++ exception throws ");
         stream.print("\t          ");
@@ -1120,7 +1149,11 @@ public final class Smc
             "\t-headerd  Place generated header files in ");
         stream.println("directory");
         stream.print("\t          ");
-        stream.println("(use with -c, -c++ only)");
+        stream.println("(use with -c, -c++, -objc only)");
+        stream.println(
+            "\t-hsuffix  Add this suffix to output header file");
+        stream.print("\t          ");
+        stream.println("(use with -c, -c++, -objc only)");
         stream.print(
             "\t-glevel   Detail level from 0 (least) to 2 ");
         stream.println("(greatest)");
@@ -1178,7 +1211,7 @@ public final class Smc
         String srcFilePath =
             "." + System.getProperty("file.separator");
         String srcFileBase = fsm.getTargetFileName();
-        String headerPath = srcFilePath;
+        String headerPath;
         String headerFileName = "";
         FileOutputStream headerFileStream = null;
         PrintStream headerStream = null;
@@ -1218,6 +1251,10 @@ public final class Smc
         {
             headerPath = _headerDirectory;
         }
+        else
+        {
+            headerPath = srcFilePath;
+        }
 
         if (_accessLevel == null)
         {
@@ -1252,7 +1289,7 @@ public final class Smc
                 _targetLanguage.headerGenerator(options);
             headerFileName =
                 headerGenerator.sourceFile(
-                    headerPath, srcFileBase, null);
+                    headerPath, srcFileBase, _hsuffix);
             headerFileStream =
                 new FileOutputStream(headerFileName);
             headerStream =
@@ -1524,6 +1561,9 @@ public final class Smc
     // Append this suffix to the end of the output file.
     private static String _suffix;
 
+    // Append this suffix to the end of the output header file.
+    private static String _hsuffix;
+
     // Place the output files in this directory. May be null.
     private static String _outputDirectory;
 
@@ -1602,7 +1642,7 @@ public final class Smc
     /* package */ static Language _targetLanguage;
 
     private static final String APP_NAME = "smc";
-    private static final String VERSION = "v. 6.0.1";
+    private static final String VERSION = "v. 6.1.0";
 
     // Command line option flags.
     private static final String ACCESS_FLAG = "-access";
@@ -1614,6 +1654,7 @@ public final class Smc
     private static final String GENERIC_FLAG = "-generic";
     private static final String GLEVEL_FLAG = "-glevel";
     private static final String HEADER_FLAG = "-headerd";
+    private static final String HEADER_SUFFIX_FLAG = "-hsuffix";
     private static final String HELP_FLAG = "-help";
     private static final String NO_CATCH_FLAG = "-nocatch";
     private static final String NO_EXCEPTIONS_FLAG = "-noex";
@@ -1764,27 +1805,28 @@ public final class Smc
         _optionMap = new HashMap<String, List<Language>>();
 
         // Languages supporting each option:
-        // +     access: Java
-        // +      -cast: C++
-        // +         -d: all
-        // +         -g: all
-        // +        -g0: all
-        // +        -g1: all
-        // +    -glevel: graph
-        // +    -header: C, C++, Objective C
-        // +      -help: all
-        // +   -nocatch: all
-        // +      -noex: C++
-        // + -nostreams: C++
-        // +   -reflect: C#, Java, TCL, VB, Lua, Perl, PHP,
-        //                Python, Ruby, Groovy, Scala
-        // +    -return: all
-        // +    -serial: C#, C++, Java, Tcl, VB, Groovy, Scala
-        // +    -suffix: all
-        // +      -sync: C#, Java, VB, Groovy, Scala
-        // +   -verbose: all
-        // +   -version: all
-        // +  -vverbose: all
+        // +     access:  Java
+        // +      -cast:  C++
+        // +         -d:  all
+        // +         -g:  all
+        // +        -g0:  all
+        // +        -g1:  all
+        // +    -glevel:  graph
+        // +    -header:  C, C++, Objective-C
+        // +    -hsuffix: C, C++, Objective-C
+        // +      -help:  all
+        // +   -nocatch:  all
+        // +      -noex:  C++
+        // + -nostreams:  C++
+        // +   -reflect:  C#, Java, TCL, VB, Lua, Perl, PHP,
+        //                 Python, Ruby, Groovy, Scala
+        // +    -return:  all
+        // +    -serial:  C#, C++, Java, Tcl, VB, Groovy, Scala
+        // +    -suffix:  all
+        // +      -sync:  C#, Java, VB, Groovy, Scala
+        // +   -verbose:  all
+        // +   -version:  all
+        // +  -vverbose:  all
 
         // Set the options supporting all languages first.
         for (TargetLanguage target :
@@ -1823,6 +1865,7 @@ public final class Smc
         languages.add(_languages[TargetLanguage.C.ordinal()]);
         languages.add(_languages[TargetLanguage.OBJECTIVE_C.ordinal()]);
         _optionMap.put(HEADER_FLAG, languages);
+        _optionMap.put(HEADER_SUFFIX_FLAG, languages);
 
         // Languages supporting thread synchronization.
         languages = new ArrayList<Language>();
@@ -1889,6 +1932,9 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.41  2011/11/20 14:58:33  cwrapp
+// Check in for SMC v. 6.1.0
+//
 // Revision 1.40  2011/02/14 21:29:56  nitin-nizhawan
 // corrected some build errors
 //

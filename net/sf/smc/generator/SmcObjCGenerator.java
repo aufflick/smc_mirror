@@ -154,6 +154,7 @@ public final class SmcObjCGenerator
         // Statically declare all derive state classes.
         _source.print(_indent);
         _source.println("// Class declarations.");
+		
         for (mapIt = fsm.getMaps().iterator(), index = 0;
              mapIt.hasNext() == true;
             )
@@ -165,9 +166,31 @@ public final class SmcObjCGenerator
             _source.print("@implementation ");
             _source.println(mapName);
 
+			// add static members			
             for (stateIt = map.getStates().iterator();
                  stateIt.hasNext() == true;
-                 ++index)
+                 )
+            {
+                state = stateIt.next();
+
+                _source.print(_indent);
+                _source.print("    ");
+                _source.print("static ");
+                _source.print(mapName);
+                _source.print("_");
+                _source.print(state.getClassName());
+                _source.print(" *g");
+                _source.print(mapName);
+                _source.print("_");
+                _source.print(state.getClassName());
+                _source.println(" = nil;");
+			}
+			_source.println();
+				
+			// add methods
+            for (stateIt = map.getStates().iterator();
+                 stateIt.hasNext() == true;
+                 )
             {
                 state = stateIt.next();
                 _source.print(_indent);
@@ -181,18 +204,6 @@ public final class SmcObjCGenerator
 
                 _source.print(_indent);
                 _source.println("{");
-
-                _source.print(_indent);
-                _source.print("    ");
-                _source.print("static ");
-                _source.print(mapName);
-                _source.print("_");
-                _source.print(state.getClassName());
-                _source.print(" *g");
-                _source.print(mapName);
-                _source.print("_");
-                _source.print(state.getClassName());
-                _source.println(" = nil;");
 
                 _source.print(_indent);
                 _source.print("    if (!g");
@@ -236,6 +247,35 @@ public final class SmcObjCGenerator
                 _source.println();
             }
 
+			// add cleanup
+			_source.print(_indent);
+			_source.println("+ (void) cleanupStates");
+			_source.print(_indent);
+			_source.println("{");
+			
+			// cleanup content
+            for (stateIt = map.getStates().iterator();
+                 stateIt.hasNext() == true;
+                 ++index)
+            {
+                state = stateIt.next();
+
+				_source.print(_indent);
+                _source.print("    ");
+				_source.print("[g");
+                _source.print(mapName);
+                _source.print("_");
+                _source.print(state.getClassName());
+				_source.print(" release]; g");
+                _source.print(mapName);
+                _source.print("_");
+                _source.print(state.getClassName());
+				_source.println(" = nil;");
+			}
+
+			_source.print(_indent);
+			_source.println("}");
+				
             _source.println("@end");
         }
 
@@ -445,6 +485,30 @@ public final class SmcObjCGenerator
         _source.println("return self;");
         _source.print(_indent);
         _source.println("}");
+		
+		// add dealloc
+		_source.print(_indent);
+		_source.println("- (void)dealloc");
+		_source.print(_indent);
+		_source.println("{");
+		
+        for (mapIt = fsm.getMaps().iterator(), index = 0;
+             mapIt.hasNext() == true;
+			 )
+        {
+            map = mapIt.next();
+            mapName = map.getName();
+
+			_source.print(_indent);
+			_source.print("    [");
+			_source.print(mapName);
+			_source.println(" cleanupStates];");
+		}
+		
+		_source.print(_indent);
+        _source.println("    [super dealloc];");
+		_source.print(_indent);
+		_source.println("}");
 
         // Output the state method
         // - (FooState*)state;
@@ -1195,7 +1259,7 @@ public final class SmcObjCGenerator
                     _source.print(indent3);
                     _source.print(
                         "    TRACE(@\"BEFORE ENTRY    : ");
-                    _source.print(stateName);
+                    _source.print(fqEndStateName);
                     _source.println("\\n\\r\");");
                     _source.print(indent3);
                     _source.print("}");
@@ -1216,7 +1280,7 @@ public final class SmcObjCGenerator
                     _source.print(indent3);
                     _source.print(
                         "    TRACE(@\"AFTER ENTRY     : ");
-                    _source.print(stateName);
+                    _source.print(fqEndStateName);
                     _source.println("\\n\\r\");");
                     _source.print(indent3);
                     _source.print("}");
@@ -1250,7 +1314,7 @@ public final class SmcObjCGenerator
                 _source.print("{");
                 _source.print(indent2);
                 _source.print("    TRACE(@\"BEFORE ENTRY    : ");
-                _source.print(stateName);
+                _source.print(fqEndStateName);
                 _source.println("\\n\\r\");");
                 _source.print(indent2);
                 _source.print("}");
@@ -1267,7 +1331,7 @@ public final class SmcObjCGenerator
                 _source.print("{");
                 _source.print(indent2);
                 _source.print("    TRACE(@\"AFTER ENTRY     : ");
-                _source.print(stateName);
+                _source.print(fqEndStateName);
                 _source.println("\\n\\r\");");
                 _source.print(indent2);
                 _source.print("}");
@@ -1401,6 +1465,9 @@ public final class SmcObjCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2011/11/20 14:58:33  cwrapp
+// Check in for SMC v. 6.1.0
+//
 // Revision 1.10  2010/02/15 18:05:43  fperrad
 // fix 2950619 : make distinction between source filename (*.sm) and target filename.
 //

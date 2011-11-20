@@ -1739,7 +1739,7 @@ public final class SmcVBGenerator
                     _source.println("Trace.WriteLine( _");
                     _source.print(indent1);
                     _source.print("    \"BEFORE ENTRY    : ");
-                    _source.print(stateName);
+                    _source.print(fqEndStateName);
                     _source.println(".Entry(context)\")");
                     _source.println("#End If");
                     _source.println();
@@ -1755,7 +1755,7 @@ public final class SmcVBGenerator
                     _source.println("Trace.WriteLine( _");
                     _source.print(indent1);
                     _source.print("    \"AFTER ENTRY     : ");
-                    _source.print(stateName);
+                    _source.print(fqEndStateName);
                     _source.println(".Entry(context)\")");
                     _source.println("#End If");
                     _source.println();
@@ -1788,7 +1788,7 @@ public final class SmcVBGenerator
                 _source.println("Trace.WriteLine( _");
                 _source.print(indent2);
                 _source.print("    \"BEFORE ENTRY    : ");
-                _source.print(stateName);
+                _source.print(fqEndStateName);
                 _source.println(".Entry(context)\")");
                 _source.println("#End If");
                 _source.println();
@@ -1804,7 +1804,7 @@ public final class SmcVBGenerator
                 _source.println("Trace.WriteLine( _");
                 _source.print(indent2);
                 _source.print("    \"AFTER ENTRY     : ");
-                _source.print(stateName);
+                _source.print(fqEndStateName);
                 _source.println(".Entry(context)\")");
                 _source.println("#End If");
                 _source.println();
@@ -1929,6 +1929,9 @@ public final class SmcVBGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2011/11/20 14:58:33  cwrapp
+// Check in for SMC v. 6.1.0
+//
 // Revision 1.7  2009/12/17 19:51:43  cwrapp
 // Testing complete.
 //
