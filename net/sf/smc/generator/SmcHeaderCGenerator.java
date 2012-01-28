@@ -272,6 +272,56 @@ public final class SmcHeaderCGenerator
             cState = startStateName;
         }
 
+        _source.print("#ifdef NO_");
+        _source.print(targetfileCaps);
+        _source.println("_MACRO");
+
+        // Constructor
+        _source.print("extern void ");
+        _source.print(fsmClassName);
+        _source.print("_Init");
+        _source.print("(struct ");
+        _source.print(fsmClassName);
+        _source.print("*, struct ");
+        _source.print(context);
+        _source.println("*);");
+
+        // EnterStartState method.
+        if (fsm.hasEntryActions() == true)
+        {
+            _source.print("extern void ");
+            _source.print(fsmClassName);
+            _source.print("_EnterStartState(struct ");
+            _source.print(fsmClassName);
+            _source.println("*);");
+        }
+
+        // Generate a method for every transition in every map
+        // *except* the default transition.
+        for (SmcTransition trans: transList)
+        {
+            if (trans.getName().equals("Default") == false)
+            {
+                _source.print("extern void ");
+                _source.print(fsmClassName);
+                _source.print("_");
+                _source.print(trans.getName());
+                _source.print("(struct ");
+                _source.print(fsmClassName);
+                _source.print("*");
+
+                params = trans.getParameters();
+                for (SmcParameter param: params)
+                {
+                    _source.print(", ");
+                    _source.print(param.getType());
+                }
+                _source.println(");");
+            }
+        }
+
+        _source.println("#else");
+
         // Constructor
         _source.print("#define ");
         _source.print(fsmClassName);
@@ -340,6 +390,7 @@ public final class SmcHeaderCGenerator
             }
         }
 
+        _source.println("#endif");
         _source.println();
         _source.println("#endif");
 
@@ -400,6 +451,9 @@ public final class SmcHeaderCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.12  2012/01/28 18:03:02  fperrad
+// fix 3476060 : generate both C functions and macros
+//
 // Revision 1.11  2010/12/01 15:29:09  fperrad
 // C: refactor when package
 //
