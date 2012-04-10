@@ -233,14 +233,18 @@ public final class SmcGuard
              (_condition.indexOf("ctxt ") >= 0 ||
               _condition.indexOf("ctxt.") >= 0 ||
               _condition.indexOf("ctxt->") >= 0 ||
-              _condition.indexOf("ctxt:") >= 0)) ||
+              _condition.indexOf("ctxt:") >= 0 ||
+              _condition.indexOf("ctxt,") >= 0 ||
+              _condition.indexOf("ctxt)") >= 0)) ||
             _hasActions() == true ||
             (_transType == TransType.TRANS_POP &&
              _popArgs != null &&
              (_popArgs.indexOf("ctxt ") >= 0 ||
               _popArgs.indexOf("ctxt.") >= 0 ||
               _popArgs.indexOf("ctxt->") >= 0 ||
-              _popArgs.indexOf("ctxt:") >= 0)))
+              _popArgs.indexOf("ctxt:") >= 0 ||
+              _popArgs.indexOf("ctxt,") >= 0 ||
+              _popArgs.indexOf("ctxt)") >= 0)))
         {
             retcode = true;
         }
@@ -449,6 +453,9 @@ public final class SmcGuard
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2012/04/10 19:25:35  fperrad
+// fix 3513161 : ctxt detection in guard (for C)
+//
 // Revision 1.3  2009/10/06 15:31:59  kgreg99
 // 1. Started implementation of feature request #2718920.
 //     1.1 Added method boolean isStatic() to SmcAction class. It returns false now, but is handled in following language generators: C#, C++, java, php, VB. Instance identificator is not added in case it is set to true.
