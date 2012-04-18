@@ -907,8 +907,6 @@ public final class SmcPythonGenerator
                 _source.println("pass");
             }
             // If there are:
-            // 1. No entry actions,
-            // 2. No exit actions,
             // 3. Only one guard,
             // 4. No condition,
             // 5. No actions,
@@ -916,10 +914,6 @@ public final class SmcPythonGenerator
             // 7. No debug code being generated.
             // then give this transition a pass.
             else if (_guardCount == 1 &&
-                     (entryActions == null ||
-                      entryActions.isEmpty() == true) &&
-                     (exitActions == null ||
-                      exitActions.isEmpty() == true) &&
                      transType != TransType.TRANS_PUSH &&
                      transType != TransType.TRANS_POP &&
                      loopbackFlag == true &&
@@ -1222,6 +1216,9 @@ public final class SmcPythonGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.14  2012/04/18 07:43:38  fperrad
+// fix #3519013
+//
 // Revision 1.13  2011/11/20 14:58:33  cwrapp
 // Check in for SMC v. 6.1.0
 //
