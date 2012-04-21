@@ -243,13 +243,6 @@ public final class SmcHeaderGenerator
         {
             _source.print(_indent);
             _source.print(declaration);
-
-            // Add a semicolon if the user did not use one.
-            if (declaration.endsWith(";") == false)
-            {
-                _source.print(";");
-            }
-
             _source.println();
         }
         _source.println();
@@ -870,6 +863,9 @@ public final class SmcHeaderGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2012/04/21 10:04:06  fperrad
+// fix 3518773 : remove additional ';' with '%declare'
+//
 // Revision 1.7  2010/02/15 18:05:43  fperrad
 // fix 2950619 : make distinction between source filename (*.sm) and target filename.
 //

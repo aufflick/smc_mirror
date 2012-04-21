@@ -156,13 +156,6 @@ public final class SmcHeaderCGenerator
         for (String declaration: fsm.getDeclarations())
         {
             _source.print(declaration);
-
-            // Add a semicolon if the user did not use one.
-            if (declaration.endsWith(";") == false)
-            {
-                _source.print(";");
-            }
-
             _source.println();
         }
 
@@ -451,6 +444,9 @@ public final class SmcHeaderCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.13  2012/04/21 10:04:06  fperrad
+// fix 3518773 : remove additional ';' with '%declare'
+//
 // Revision 1.12  2012/01/28 18:03:02  fperrad
 // fix 3476060 : generate both C functions and macros
 //
