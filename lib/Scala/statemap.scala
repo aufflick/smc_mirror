@@ -42,8 +42,7 @@ class StateUndefinedException() extends RuntimeException() {
 class TransitionUndefinedException(reason: String) extends RuntimeException(reason) {
 }
 
-@serializable
-abstract class FSMContext[State] {
+abstract class FSMContext[State] extends Serializable {
     private var _state: State = _
     private var _stateStack: Stack[State] = new Stack[State]
     protected var _transition: String = ""
@@ -137,6 +136,9 @@ abstract class FSMContext[State] {
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2012/05/13 21:31:13  fperrad
+// fix deprecation with Scala 2.9.1
+//
 // Revision 1.8  2010/09/11 19:00:45  fperrad
 // use the same message in all language
 //
