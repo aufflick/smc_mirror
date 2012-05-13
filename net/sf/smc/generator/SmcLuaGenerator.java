@@ -639,6 +639,7 @@ public final class SmcLuaGenerator
         String packageName = map.getFSM().getPackage();
         String mapName = map.getName();
         String stateName = state.getClassName();
+        String instanceName = state.getInstanceName();
         String transName = transition.getName();
         List<SmcParameter> parameters =
             transition.getParameters();
@@ -725,14 +726,21 @@ public final class SmcLuaGenerator
             _source.print("        ");
             _source.print(mapName);
             _source.print(".Default:");
-            _source.print(transName);
-            _source.print("(fsm");
-
-            // Add user-defined parameters.
-            for (SmcParameter param: parameters)
+            if (instanceName.equals("DefaultState") == false)
             {
-                _source.print(", ");
-                _source.print(param.getName());
+                _source.print(transName);
+                _source.print("(fsm");
+
+                // Add user-defined parameters.
+                for (SmcParameter param: parameters)
+                {
+                    _source.print(", ");
+                    _source.print(param.getName());
+                }
+            }
+            else
+            {
+                _source.print("Default(fsm");
             }
             _source.println(")");
             _source.print(_indent);
@@ -1318,6 +1326,9 @@ public final class SmcLuaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.17  2012/05/13 16:31:10  fperrad
+// fix 3525846 : endless recursion with guarded transitions in Default state
+//
 // Revision 1.16  2011/11/20 14:58:33  cwrapp
 // Check in for SMC v. 6.1.0
 //

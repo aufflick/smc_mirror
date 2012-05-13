@@ -832,8 +832,16 @@ public final class SmcCGenerator
 
             _source.println("    else {");
             _source.print("        ");
-            _source.print(mapName);
-            _source.print("_DefaultState_");
+            if (stateName.equals("DefaultState") == false)
+            {
+                _source.print(mapName);
+                _source.print("_DefaultState_");
+            }
+            else
+            {
+                _source.print(context);
+                _source.print("State_");
+            }
             _source.print(transName);
             _source.print("(fsm");
 
@@ -1435,6 +1443,9 @@ public final class SmcCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.15  2012/05/13 16:31:10  fperrad
+// fix 3525846 : endless recursion with guarded transitions in Default state
+//
 // Revision 1.14  2012/01/28 18:03:02  fperrad
 // fix 3476060 : generate both C functions and macros
 //

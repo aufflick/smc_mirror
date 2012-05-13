@@ -649,6 +649,7 @@ public final class SmcCppGenerator
         String fsmClassName = map.getFSM().getFsmClassName();
         String mapName = map.getName();
         String stateName = state.getClassName();
+        String instanceName = state.getInstanceName();
         String transName = transition.getName();
         boolean nullCondition = false;
         List<SmcGuard> guards = transition.getGuards();
@@ -777,8 +778,16 @@ public final class SmcCppGenerator
             _source.println("    {");
             _source.print(_indent);
             _source.print("         ");
-            _source.print(mapName);
-            _source.print("_Default::");
+            if (instanceName.equals("DefaultState") == false)
+            {
+                _source.print(mapName);
+                _source.print("_Default::");
+            }
+            else
+            {
+                _source.print(context);
+                _source.print("State::");
+            }
             _source.print(transName);
             _source.print("(context");
 
@@ -1709,6 +1718,9 @@ public final class SmcCppGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.12  2012/05/13 16:31:10  fperrad
+// fix 3525846 : endless recursion with guarded transitions in Default state
+//
 // Revision 1.11  2011/11/20 14:58:33  cwrapp
 // Check in for SMC v. 6.1.0
 //

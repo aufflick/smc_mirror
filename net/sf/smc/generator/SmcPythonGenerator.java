@@ -592,8 +592,10 @@ public final class SmcPythonGenerator
     {
         SmcState state = transition.getState();
         SmcMap map = state.getMap();
+        String context = map.getFSM().getContext();
         String mapName = map.getName();
         String stateName = state.getClassName();
+        String instanceName = state.getInstanceName();
         String transName = transition.getName();
         List<SmcParameter> parameters =
             transition.getParameters();
@@ -670,8 +672,16 @@ public final class SmcPythonGenerator
             // Call the super class' transition method using
             // the class name.
             _source.print("            ");
-            _source.print(mapName);
-            _source.print("_Default.");
+            if (instanceName.equals("DefaultState") == false)
+            {
+                _source.print(mapName);
+                _source.print("_Default.");
+            }
+            else
+            {
+                _source.print(context);
+                _source.print("State.");
+            }
             _source.print(transName);
             _source.print("(self, fsm");
 
@@ -1216,6 +1226,9 @@ public final class SmcPythonGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.15  2012/05/13 16:31:10  fperrad
+// fix 3525846 : endless recursion with guarded transitions in Default state
+//
 // Revision 1.14  2012/04/18 07:43:38  fperrad
 // fix #3519013
 //
