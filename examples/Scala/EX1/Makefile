@@ -53,7 +53,7 @@ SMC=            java -jar ../../../bin/Smc.jar
 SMC_FLAGS=      -scala $(TRACE) $(SERIAL) $(SYNC) $(REFLECT)
 
 SCALAC=         scalac
-SCALAC_FLAGS=   -g ../../../lib/Scala/statemap.scala
+SCALAC_FLAGS=   ../../../lib/Scala/statemap.scala
 
 SCALA=          scala
 SCALA_FLAGS=
@@ -107,6 +107,9 @@ clean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.4  2012/05/14 07:54:07  fperrad
+# fix deprecation with Scala 2.9.1
+#
 # Revision 1.3  2008/07/29 06:51:09  fperrad
 # - add a target 'png'
 #

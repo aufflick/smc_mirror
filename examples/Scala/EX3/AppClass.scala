@@ -34,6 +34,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2012/05/14 07:54:08  fperrad
+// fix deprecation with Scala 2.9.1
+//
 // Revision 1.2  2009/04/23 13:12:08  fperrad
 // Added enterStartState method
 //
@@ -51,7 +54,7 @@ class AppClass() {
 
     def CheckString(string: String): Boolean = {
         _fsm.enterStartState()
-        for (val c <- string.elements) {
+        for (c <- string.iterator) {
             c match {
                 case '0' => _fsm.Zero()
                 case '1' => _fsm.One()

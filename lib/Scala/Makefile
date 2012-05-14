@@ -39,7 +39,7 @@ include ../../smc.mk
 LIB_SOURCES=    $(PACKAGE_NAME).scala
 
 SCALAC=         scalac
-SCALAC_FLAGS=   -d . -g
+SCALAC_FLAGS=   -d .
 JAR=            jar
 JAR_FLAGS=      cvf
 JAR_FILE=       $(PACKAGE_NAME).jar
@@ -78,6 +78,9 @@ realclean :     clean
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.4  2012/05/14 07:54:08  fperrad
+# fix deprecation with Scala 2.9.1
+#
 # Revision 1.3  2009/03/01 18:20:41  cwrapp
 # Preliminary v. 6.0.0 commit.
 #
