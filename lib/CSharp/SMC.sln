@@ -1,27 +1,26 @@
-Microsoft Visual Studio Solution File, Format Version 7.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SMC", "SMC.csproj", "{FEEC0290-D600-4DD3-8E0C-EE6DC1EE9A79}"
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SMC", "SMC.csproj", "{95A23F32-99AE-4315-8319-56BEE5D63B2F}"
 EndProject
 Global
-	GlobalSection(SolutionConfiguration) = preSolution
-		ConfigName.0 = Debug
-		ConfigName.1 = DebugNoTrace
-		ConfigName.2 = Release
-		ConfigName.3 = ReleaseNoTrace
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+		ReleaseNoTrace|Any CPU = ReleaseNoTrace|Any CPU
+		DebugNoTrace|Any CPU = DebugNoTrace|Any CPU
 	EndGlobalSection
-	GlobalSection(ProjectDependencies) = postSolution
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{95A23F32-99AE-4315-8319-56BEE5D63B2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95A23F32-99AE-4315-8319-56BEE5D63B2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95A23F32-99AE-4315-8319-56BEE5D63B2F}.DebugNoTrace|Any CPU.ActiveCfg = DebugNoTrace|Any CPU
+		{95A23F32-99AE-4315-8319-56BEE5D63B2F}.DebugNoTrace|Any CPU.Build.0 = DebugNoTrace|Any CPU
+		{95A23F32-99AE-4315-8319-56BEE5D63B2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95A23F32-99AE-4315-8319-56BEE5D63B2F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95A23F32-99AE-4315-8319-56BEE5D63B2F}.ReleaseNoTrace|Any CPU.ActiveCfg = ReleaseNoTrace|Any CPU
+		{95A23F32-99AE-4315-8319-56BEE5D63B2F}.ReleaseNoTrace|Any CPU.Build.0 = ReleaseNoTrace|Any CPU
 	EndGlobalSection
-	GlobalSection(ProjectConfiguration) = postSolution
-		{FEEC0290-D600-4DD3-8E0C-EE6DC1EE9A79}.Debug.ActiveCfg = Debug|.NET
-		{FEEC0290-D600-4DD3-8E0C-EE6DC1EE9A79}.Debug.Build.0 = Debug|.NET
-		{FEEC0290-D600-4DD3-8E0C-EE6DC1EE9A79}.DebugNoTrace.ActiveCfg = DebugNoTrace|.NET
-		{FEEC0290-D600-4DD3-8E0C-EE6DC1EE9A79}.DebugNoTrace.Build.0 = DebugNoTrace|.NET
-		{FEEC0290-D600-4DD3-8E0C-EE6DC1EE9A79}.Release.ActiveCfg = Release|.NET
-		{FEEC0290-D600-4DD3-8E0C-EE6DC1EE9A79}.Release.Build.0 = Release|.NET
-		{FEEC0290-D600-4DD3-8E0C-EE6DC1EE9A79}.ReleaseNoTrace.ActiveCfg = ReleaseNoTrace|.NET
-		{FEEC0290-D600-4DD3-8E0C-EE6DC1EE9A79}.ReleaseNoTrace.Build.0 = ReleaseNoTrace|.NET
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-	EndGlobalSection
-	GlobalSection(ExtensibilityAddIns) = postSolution
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = SMC.csproj
 	EndGlobalSection
 EndGlobal
