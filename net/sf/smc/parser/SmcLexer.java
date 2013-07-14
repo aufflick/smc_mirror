@@ -13,7 +13,7 @@
 //
 // The Initial Developer of the Original Code is Charles W. Rapp.
 // Portions created by Charles W. Rapp are
-// Copyright © 2000 - 2006, 2008. Charles W. Rapp.
+// Copyright (C) 2000 - 2006, 2008. Charles W. Rapp.
 // All Rights Reserved.
 //
 // Contributor(s):
@@ -1232,6 +1232,9 @@ import java.util.Map;
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2013/07/14 14:32:38  cwrapp
+// check in for release 6.2.0
+//
 // Revision 1.5  2011/11/20 14:58:33  cwrapp
 // Check in for SMC v. 6.1.0
 //

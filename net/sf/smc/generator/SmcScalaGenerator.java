@@ -511,7 +511,7 @@ public final class SmcScalaGenerator
             _source.print('.');
             _source.print(state.getClassName());
             _source.print("\", ");
-            _source.print(map.getNextStateId());
+            _source.print(SmcMap.getNextStateId());
             _source.println(")");
         }
 
@@ -1328,6 +1328,9 @@ public final class SmcScalaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.14  2013/07/14 14:32:38  cwrapp
+// check in for release 6.2.0
+//
 // Revision 1.13  2012/05/13 21:31:14  fperrad
 // fix deprecation with Scala 2.9.1
 //

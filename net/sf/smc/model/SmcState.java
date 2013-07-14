@@ -163,6 +163,16 @@ public final class SmcState
     } // end of getInstanceName()
 
     /**
+     * Returns {@code true} if this is the default state and
+     * {@code false} otherwise.
+     * @return {@code true} if this is the default state.
+     */
+    public boolean isDefaultState()
+    {
+        return (_instanceName.equals(DEFAULT_STATE));
+    } // end of isDefaultState()
+
+    /**
      * Returns the entry action list.
      * @return the entry action list.
      */
@@ -252,8 +262,7 @@ public final class SmcState
      * @param name the transition name.
      * @return true or false
      */
-    public boolean
-        callDefault(String name)
+    public boolean callDefault(String name)
     {
         for (SmcTransition transition: _transitions)
         {
@@ -379,11 +388,23 @@ public final class SmcState
     private List<SmcAction> _entryActions;
     private List<SmcAction> _exitActions;
     private List<SmcTransition> _transitions;
+
+    //-----------------------------------------------------------
+    // Constants.
+    //
+
+    /**
+     * The default state instance name is "DefaultState".
+     */
+    public static final String DEFAULT_STATE = "DefaultState";
 } // end of class SmcState
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2013/07/14 14:32:38  cwrapp
+// check in for release 6.2.0
+//
 // Revision 1.3  2011/11/20 14:58:33  cwrapp
 // Check in for SMC v. 6.1.0
 //

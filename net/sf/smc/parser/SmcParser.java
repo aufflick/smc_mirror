@@ -262,6 +262,17 @@ public final class SmcParser
         return (_mapInProgress.isKnownState(name));
     } // end of isDuplicateState(String)
 
+    /**
+     * Returns {@code true} if the in-progress state is the
+     * default state and {@code false} otherwise.
+     * @return {@code true} if the in-progress state is the
+     * default state.
+     */
+    /* package */ boolean isDefaultState()
+    {
+        return (_stateInProgress.isDefaultState());
+    } // end of isDefaultState()
+
     //
     // end of State Machine Guards
     //-----------------------------------------------------------
@@ -1673,6 +1684,9 @@ public final class SmcParser
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2013/07/14 14:32:39  cwrapp
+// check in for release 6.2.0
+//
 // Revision 1.10  2011/11/20 16:29:53  cwrapp
 // Check in for SMC v. 6.1.0
 //

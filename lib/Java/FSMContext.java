@@ -335,9 +335,17 @@ public abstract class FSMContext
         }
         else
         {
+            // clearState() is not called when a transition has
+            // no actions, so set _previousState to _state in
+            // that situation. We know clearState() was not
+            // called when _state is not null.
+            if (_state != null)
+            {
+                _previousState = _state;
+            }
+
             // The pop method removes the top element
             // from the stack and returns it.
-            _previousState = _state;
             _state = _stateStack.pop();
 
             if (_stateStack.isEmpty() == true)
@@ -475,6 +483,9 @@ public abstract class FSMContext
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.16  2013/07/14 14:32:36  cwrapp
+// check in for release 6.2.0
+//
 // Revision 1.15  2011/11/20 14:58:33  cwrapp
 // Check in for SMC v. 6.1.0
 //

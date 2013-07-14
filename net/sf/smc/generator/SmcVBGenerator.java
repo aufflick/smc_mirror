@@ -858,7 +858,7 @@ public final class SmcVBGenerator
             _source.print('.');
             _source.print(stateName);
             _source.print("\", ");
-            _source.print(map.getNextStateId());
+            _source.print(SmcMap.getNextStateId());
             _source.println(")");
         }
 
@@ -1929,6 +1929,9 @@ public final class SmcVBGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2013/07/14 14:32:38  cwrapp
+// check in for release 6.2.0
+//
 // Revision 1.8  2011/11/20 14:58:33  cwrapp
 // Check in for SMC v. 6.1.0
 //

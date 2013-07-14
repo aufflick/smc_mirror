@@ -34,6 +34,8 @@
 
 package net.sf.smc.generator;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.util.Iterator;
@@ -89,6 +91,7 @@ public abstract class SmcCodeGenerator
         _targetfileBase = options.targetfileBase();
         _srcDirectory = options.srcDirectory();
         _headerDirectory = options.headerDirectory();
+        _headerSuffix = options.headerSuffix();
         _castType = options.castType();
         _graphLevel = options.graphLevel();
         _serialFlag = options.serialFlag();
@@ -262,9 +265,12 @@ public abstract class SmcCodeGenerator
         return (retval);
     } // end of escape(String)
 
-    // Scope the state name. If the state is unscoped, then
-    // return "<mapName>.<stateName>". If the state named
-    // contains the scope string "::", replace that with a ".".
+    /**
+     * Scopes the state name. If the state is unscoped, then
+     * returns "&lt;mapName&gt;.&lt;stateName&gt;". If the state
+     * name contains the scope string "::", replaces that with
+     * a ".".
+     */
     protected String scopeStateName(String stateName,
                                     String mapName)
     {
@@ -287,6 +293,134 @@ public abstract class SmcCodeGenerator
 
         return (retval.toString());
     } // end of scopeStateName(String, String)
+
+    /**
+     * Returns a relative path from directory {@code dir0} to
+     * directory {@code dir1}. This method assumes that the
+     * two directories are different.
+     * @param srcDir the source file directory.
+     * @param headerDir the header file directory.
+     * @return relative path from {@code dir0} to {@code dir1}.
+     */
+    protected String findPath(final String srcDir,
+                              final String headerDir)
+    {
+        final File dir0 = new File(srcDir);
+        final File dir1 = new File(headerDir);
+        String path0;
+        String path1;
+
+        try
+        {
+            final String[] abs0 =
+                (dir0.getCanonicalPath()).split(File.separator);
+            final String[] abs1 =
+                (dir1.getCanonicalPath()).split(File.separator);
+            final int minSize =
+                (abs0.length < abs1.length ?
+                 abs0.length :
+                 abs1.length);
+            int index;
+            boolean flag;
+
+            for (index = 0, flag = true;
+                 index < minSize && flag == true;
+                 ++index)
+            {
+                flag = abs0[index].equals(abs1[index]);
+            }
+
+            // Did we find a divergence between the two paths?
+            if (flag == false)
+            {
+                // Yes. So back up the index by one to get to the
+                // most common parent.
+                --index;
+
+                // Generate the "backup" path from the first
+                // directory back to this most common parent.
+                path0 = backupPath(index, abs0.length) +
+                        File.separator;
+                path1 = generatePath(index, abs1);
+            }
+            // No, the two directories lie along exactly the same
+            // absolute path but they are not the same directory.
+            // Instead, one directory is a subdirectory of
+            // another.
+            // Is dir1 the subdirectory?
+            else if (abs1.length > abs0.length)
+            {
+                // Yes, dir1 is the subdirectory.
+                path0 = "";
+                path1 = generatePath(index, abs1);
+            }
+            else
+            {
+                // No, dir0 is the subdirectory. Then back up
+                // from dir0.
+                path0 = backupPath(index, abs0.length);
+                path1 = "";
+            }
+        }
+        catch (IOException ioex)
+        {
+            path0 =
+                "ERROR calling java.io.File.getCanonicalPath: ";
+            path1 = ioex.getMessage();
+        }
+
+        return (path0 + path1);
+    } // end of findPath(File, File)
+
+    /**
+     * Returns a path which backs up from the target source file
+     * directory to the most code parent directory.
+     * @param index the path list index of the most common parent
+     * directory.
+     * @param length the path list length.
+     * @return the path from the target source file directory to
+     * the most common parent directory.
+     */
+    private static String backupPath(int index, final int length)
+    {
+        String sep = "";
+        final StringBuilder retval = new StringBuilder();
+
+        for (; index < length; ++index, sep = File.separator)
+        {
+            retval.append(sep);
+            retval.append(BACKDIR);
+        }
+
+        return (retval.toString());
+    } // end of backupPath(int, int)
+
+    /**
+     * Returns the relative path from the most common parent
+     * directory to the header file directory.
+     * @param index the path list index of the most common parent
+     * directory.
+     * @param path the absolute path to the header file
+     * directory.
+     * @return relative path from the most common parent
+     * directory to the header file directory.
+     */
+    private static String generatePath(int index,
+                                       final String[] path)
+    {
+        String sep = "";
+        final StringBuilder retval = new StringBuilder();
+
+        for (; index < path.length; ++index,sep = File.separator)
+        {
+            retval.append(sep);
+            retval.append(path[index]);
+        }
+
+        retval.append(File.separatorChar);
+
+        return (retval.toString());
+    } // end of generatePath(int, String[])
 
 //---------------------------------------------------------------
 // Member data
@@ -316,6 +450,11 @@ public abstract class SmcCodeGenerator
      * Place the generated header file in this directory.
      */
     protected final String _headerDirectory;
+
+    /**
+     * Place this suffix on the header file.
+     */
+    protected final String _headerSuffix;
 
     /**
      * Use this cast type (C++ only).
@@ -402,6 +541,11 @@ public abstract class SmcCodeGenerator
     // Constants.
     //
 
+    /**
+     * The default header file suffix is "h".
+     */
+    public static final String DEFAULT_HEADER_SUFFIX = "h";
+
     // Debug output detail level.
 
     /**
@@ -445,14 +589,24 @@ public abstract class SmcCodeGenerator
      */
     public static final int GRAPH_LEVEL_2 = 2;
 
-    // The source file name path format.
+    /**
+     * The source file name path format.
+     */
     private static final String SOURCE_PATH_FORMAT =
         "{0}{1}.{2}";
+
+    /**
+     * The backup path element is "..".
+     */
+    private static final String BACKDIR = "..";
 } // end of class SmcCodeGenerator
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2013/07/14 14:32:38  cwrapp
+// check in for release 6.2.0
+//
 // Revision 1.6  2010/02/15 18:05:43  fperrad
 // fix 2950619 : make distinction between source filename (*.sm) and target filename.
 //

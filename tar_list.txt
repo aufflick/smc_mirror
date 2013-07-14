@@ -844,6 +844,7 @@
 ./smc/net/sf/smc/generator/SmcHeaderCGenerator.java
 ./smc/net/sf/smc/generator/SmcHeaderGenerator.java
 ./smc/net/sf/smc/generator/SmcHeaderObjCGenerator.java
+./smc/net/sf/smc/generator/SmcJSGenerator.java
 ./smc/net/sf/smc/generator/SmcJavaGenerator.java
 ./smc/net/sf/smc/generator/SmcLuaGenerator.java
 ./smc/net/sf/smc/generator/SmcObjCGenerator.java

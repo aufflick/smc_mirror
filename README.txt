@@ -2,7 +2,7 @@
 
                                SMC
                      The State Machine Compiler
-                         (Version: 6.0.2)
+                         (Version: 6.2.0)
 
                      http://smc.sourceforge.net
 
@@ -13,74 +13,81 @@
 
 Major changes:
 
-None
+(All)
+    SMC is now compiled with Java 1.7 and requires JRE 1.7 or
+    better to run.
+
+(SMC Language)
+    The Default state is explicitly not allowed to have Entry and
+    Exit action blocks. This is because "Default" is not an
+    actual state but a psuedo-state used to start default
+    transition definitions.
+
+    Previously, Entry and Exit blocks could be defined for the
+    Default state but nothing was done with them. Now these
+    definitions will cause a compile error.
+    (SF bug 3602051)
 
 
 Minor changes:
 
-(Java)
-    -access keyword to specify the generated class access level.
-    Used with -java only.
-
-(All)
-    Added %fsmclass keyword which allows the generated FSM
-    classes to have a name other than the default
-    <app class>Context. This feature allows an application class
-    to reference multiple finite state machines.
-
-(C#, Groovy, Java, Lua, Perl, PHP, Python, Ruby, Scala, Tcl and VB.Net)
-    Added "getStates" method for retrieving the finite state
-    machine's states.
-
-(All)
-    Enhance debugging output by adding command line options -g0
-    and -g1 which provide ever greater debug output. -g is the
-    same as -g0. -g0 reports the exiting and entering a state,
-    entering and exiting a transtion. -g1 reports exit and entry
-    action execution.
-
-(C#, VB.Net)
-    Added -generic support to these languages.
+(None.)
 
 
 Bug Fixes:
 
+(C++)
+    The generated C++ source file #includes are not correctly
+    guarded with #if's.
+    (SF bug 3468212)
+
+(C, C++)
+    The -hsuffix is not used when generating the #include.
+    (SF bug 3468873)
+
+(All)
+    The state map identifier generator is reset to zero for each
+    state map. The state map identifier is no longer reset,
+    guaranteeing a unique identifier for each state.
+    (SF bug 3481674)
+
+(All)
+    Previous state incorrectly set to null.
+    (SF bug 3482199)
+
+(JavaScript)
+    Generates an invalid comment block.
+    (SF bug 3484428)
+
+(C, C++)
+    When -d and -headerd are both used, the generated source file
+    #include for the generated header file may contain an
+    incorrect relative path.
+    (SF bug 3505374)
+
+(JavaScript)
+    SmcJSGenerator.java missing from source code distribution.
+    (SF bug 3536188)
+
 (Objective-C)
-    Corrected generated code errors.
+    Better support for Objective-C ARC.
+    (SF bug 3499277, 3536197, SF feature 3529866)
 
-(Php)
-    statemap.php had an assignment in a test condition instead of
-    equality operator.
-
-(All)
-    Strings using both single and double quotes are handled
-    correctly.
-
-(Java)
-    Errors due to lower case state names corrected.
-
-(Java)
-    Serializing the FSM property change listeners is corrected.
-
-(Python)
-    The problem occurring when raising the
-    StateUndefinedException is now fixed.
-
-(All)
-    Compiler warnings are now output even when there are no
-    errors.
-
-(All)
-    Normalized the use of emptyStateStack.
-
+(Objective-C)
+    Generates an entry prototype when it should generate an exit
+    prototype.
+    (SF bug 3573125)
 
 
 1. System Requirements
 ----------------------
 
-+ JRE (Standard Edition) 1.6.0 or better.
++ JRE (Standard Edition) 1.7.0 or better.
 + Whatever JRE's requirements are (see http://java.sun.com/j2se/
   for more information).
++ SMC is dual licensed under Mozzile Public License, version 1.1
+  and GNU General Public License, version 2.0. See the file
+  LICENSE.txt for more information.
 
 
 2. Introduction

@@ -16,7 +16,7 @@
  *
  * The Initial Developer of the Original Code is Charles W. Rapp.
  * Portions created by Charles W. Rapp are
- * Copyright (C) 2000 - 2005, 2008. Charles W. Rapp.
+ * Copyright (C) 2000 - 2005, 2008, 2013. Charles W. Rapp.
  * All Rights Reserved.
  *
  * Contributor(s):
@@ -39,6 +39,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.8  2013/07/14 14:32:39  cwrapp
+ * check in for release 6.2.0
+ *
  * Revision 1.7  2010/03/05 21:29:54  fperrad
  * Allows property with Groovy, Lua, Perl, Python, Ruby & Scala
  *
@@ -713,11 +716,30 @@ States
 StateStart
 {
     // This state has an entry actions.
+    // But is it allowed to have an entry action? If it is the
+    // default state, then no, it may not have an entry action.
+    ENTRY(token: SmcLexer.Token)
+      [ctxt.isDefaultState() == true]
+        EntryStart
+        {
+            error("Default state may not have an entry action.",
+                  token.getLineNumber());
+        }
+
     ENTRY(token: SmcLexer.Token)
         EntryStart
         {}
 
     // This state has an exit action.
+    // Check if this is the default state.
+    EXIT(token: SmcLexer.Token)
+      [ctxt.isDefaultState() == true]
+        ExitStart
+        {
+            error("Default state may not have an exit action.",
+                  token.getLineNumber());
+        }
+
     EXIT(token: SmcLexer.Token)
         ExitStart
         {}

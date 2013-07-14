@@ -1,5 +1,169 @@
                               SMC -
                   The State Machine Compiler
+                        Version 6.2.0
+
+
++ Major changes
+---------------
+
+(All)
+    SMC is now compiled with Java 1.7 and requires JRE 1.7 or
+    better to run.
+
+(SMC Language)
+    The Default state is explicitly not allowed to have Entry and
+    Exit action blocks. This is because "Default" is not an
+    actual state but a psuedo-state used to start default
+    transition definitions.
+
+    Previously, Entry and Exit blocks could be defined for the
+    Default state but nothing was done with them. Now these
+    definitions will cause a compile error.
+    (SF bug 3602051)
+
+
++ Minor changes:
+--------------
+
+(None.)
+
+
++ Bug Fixes:
+----------
+
+(C++)
+    The generated C++ source file #includes are not correctly
+    guarded with #if's.
+    (SF bug 3468212)
+
+(C, C++)
+    The -hsuffix is not used when generating the #include.
+    (SF bug 3468873)
+
+(All)
+    The state map identifier generator is reset to zero for each
+    state map. The state map identifier is no longer reset,
+    guaranteeing a unique identifier for each state.
+    (SF bug 3481674)
+
+(All)
+    Previous state incorrectly set to null.
+    (SF bug 3482199)
+
+(JavaScript)
+    Generates an invalid comment block.
+    (SF bug 3484428)
+
+(C, C++)
+    When -d and -headerd are both used, the generated source file
+    #include for the generated header file may contain an
+    incorrect relative path.
+    (SF bug 3505374)
+
+(JavaScript)
+    SmcJSGenerator.java missing from source code distribution.
+    (SF bug 3536188)
+
+(Objective-C)
+    Better support for Objective-C ARC.
+    (SF bug 3499277, 3536197, SF feature 3529866)
+
+(Objective-C)
+    Generates an entry prototype when it should generate an exit
+    prototype.
+    (SF bug 3573125)
+
+
+
+                              SMC -
+                  The State Machine Compiler
+                        Version 6.1.0
+
+
+
+Major changes:
+--------------
+
+(JavaScript)
+    -js command line option added which generates JavaScript code
+    from the compiled .sm file.
+    (SF feature 3031739)
+
+
+Minor changes:
+--------------
+
+(C, C++, Objective-C)
+    %access keyword to specify the generated class access level.
+    Now supported by C, C++ and Objective-C.
+    (SF feature 2797126)
+
+(C, C++, Objective-C)
+    Added -hsuffix command line option which defines the header
+    file suffix.
+    (SF feature 3162390)
+
+(All)
+    Added %fsmclass keyword which allows the generated FSM
+    classes to have a name other than the default
+    <app class>Context. This feature allows an application class
+    to reference multiple finite state machines.
+    (SF feature 2718941)
+
+(C#, Groovy, Java, Lua, Perl, PHP, Python, Ruby, Scala, Tcl and VB.Net)
+    Added "getStates" method for retrieving the finite state
+    machine's states.
+    (SF features 2718892, 1734959)
+
+(All)
+    Added Programmers Manual, section 13 to better describe SMC
+    % directives.
+    (SF feature 3366065)
+
+(All)
+    Added PDF document ./docs/SMC_Report.pdf which provides an
+    in-depth and readable overview of SMC capabilities and
+    usefulness.
+
+
++ Bug Fixes:
+------------
+
+(All)
+    The state map identifier generator is reset to zero for each
+    state map.
+    (SF bug 2948932)
+
+(All)
+    Corrected debug output to correctly report BEFORE ENTRY and
+    AFTER ENTRY state.
+    (SF bug 2972608)
+
+(All)
+    Corrected compiler error caused by state names containing
+    only lower-case letters.
+    (SF bug 3001108)
+
+(C, C++, Objective-C)
+    Corrected -headerd being incorrectly set.
+    (SF bug 3002846)
+
+(C++)
+    The previous state is now correctly set.
+    (SF bug 2918863, 3014876)
+
+(JavaScript)
+    The JavaScript file statemap.js included in the release.
+    (SF bug 3436664)
+
+(All)
+    Text error in SmcLexer.sm corrected.
+    (SF bug 3436635)
+
+
+
+                              SMC -
+                  The State Machine Compiler
                         Version 6.0.1
 
 

@@ -106,10 +106,32 @@
 - (void)pushState:(SMCState*)state;
 - (void)popState;
 @end
+  
+/*
+ * Support for ARC and non-ARC compilation. 
+ * Use S_RELEASE instead of release, if you want to support both ARC and non-ARC.
+ *
+ * See https://gist.github.com/2823399 for detail.
+ */
+
+#if __has_feature(objc_arc)
+#define S_RETAIN self
+#define S_AUTORELEASE self
+#define S_RELEASE self
+#define S_DEALLOC self
+#else
+#define S_RETAIN retain
+#define S_AUTORELEASE autorelease
+#define S_RELEASE release
+#define S_DEALLOC dealloc
+#endif
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2013/07/14 14:32:36  cwrapp
+// check in for release 6.2.0
+//
 // Revision 1.2  2009/04/10 14:02:10  cwrapp
 // Set initial state via initializer.
 //

@@ -491,7 +491,7 @@ public final class SmcLuaGenerator
         _source.print('.');
         _source.print(stateName);
         _source.print("', ");
-        _source.print(map.getNextStateId());
+        _source.print(SmcMap.getNextStateId());
         _source.println(")");
 
         // Add the Entry() and Exit() member functions if this
@@ -1326,6 +1326,9 @@ public final class SmcLuaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.18  2013/07/14 14:32:38  cwrapp
+// check in for release 6.2.0
+//
 // Revision 1.17  2012/05/13 16:31:10  fperrad
 // fix 3525846 : endless recursion with guarded transitions in Default state
 //

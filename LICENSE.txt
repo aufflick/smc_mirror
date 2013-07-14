@@ -448,16 +448,17 @@ EXHIBIT A -Mozilla Public License.
 
      The Initial Developer of the Original Code is _Charles W. Rapp_______.
      Portions created by _Charles W. Rapp______ are Copyright (C) ______
-     _2000_-_2011._Charles W. Rapp_. All Rights Reserved.
+     _2000_-_2013._Charles W. Rapp_. All Rights Reserved.
 
      Contributor(s): Eitan_Suez,_Francois_Perrad___________.
 
      Alternatively, the contents of this file may be used under
-     the terms of the GNU General Public License (the GNU GPL License),
-     in which case the provisions of GNU GPL License are applicable
-     instead of those above. If you wish to allow use of your version
-     of this file only under the terms of the GNU GPL License and not
-     to allow others to use your version of this file under the MPL,
+     the terms of the GNU General Public License, version 2.0
+     (the GNU GPL License), in which case the provisions of
+     GNU GPL License are applicable instead of those above. If
+     you wish to allow use of your version of this file only
+     under the terms of the GNU GPL License and not to allow
+     others to use your version of this file under the MPL,
      indicate your decision by deleting the provisions above and
      replace them with the notice and other provisions required
      by the GNU GPL License.  If you do not delete the provisions

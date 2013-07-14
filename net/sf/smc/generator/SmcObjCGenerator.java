@@ -96,7 +96,7 @@ public final class SmcObjCGenerator
      * %{ %} raw source code - if any
      *
      * #import <i>%include header file</i>
-     * #import "<i>context</i>.h"
+     * #import "<i>context</i>.<i>hsuffix</i>"
      *   </pre>
      * </code>
      * @param fsm emit Objective C code for this finite state
@@ -149,7 +149,7 @@ public final class SmcObjCGenerator
         // Include the context file last.
         _source.print("#import \"");
         _source.print(_targetfileBase);
-        _source.println(".h\"");
+        _source.format(".%s\"%n", _headerSuffix);
 
         // Statically declare all derive state classes.
         _source.print(_indent);
@@ -266,7 +266,7 @@ public final class SmcObjCGenerator
                 _source.print(mapName);
                 _source.print("_");
                 _source.print(state.getClassName());
-				_source.print(" release]; g");
+				_source.print(" S_RELEASE]; g");
                 _source.print(mapName);
                 _source.print("_");
                 _source.print(state.getClassName());
@@ -506,7 +506,7 @@ public final class SmcObjCGenerator
 		}
 		
 		_source.print(_indent);
-        _source.println("    [super dealloc];");
+        _source.println("    [super S_DEALLOC];");
 		_source.print(_indent);
 		_source.println("}");
 
@@ -1465,6 +1465,9 @@ public final class SmcObjCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.12  2013/07/14 14:32:38  cwrapp
+// check in for release 6.2.0
+//
 // Revision 1.11  2011/11/20 14:58:33  cwrapp
 // Check in for SMC v. 6.1.0
 //

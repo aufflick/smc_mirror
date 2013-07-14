@@ -491,7 +491,7 @@ public final class SmcHeaderObjCGenerator
         if (actions != null && actions.size() > 0)
         {
             _source.print(_indent);
-            _source.print(" -(void)Entry:(");
+            _source.print(" -(void)Exit:(");
             _source.print(fsmClassName);
             _source.println("*)context;");        }
 
@@ -572,6 +572,9 @@ public final class SmcHeaderObjCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2013/07/14 14:32:38  cwrapp
+// check in for release 6.2.0
+//
 // Revision 1.7  2009/11/25 22:30:19  cwrapp
 // Fixed problem between %fsmclass and sm file names.
 //

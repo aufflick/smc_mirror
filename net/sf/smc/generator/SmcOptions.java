@@ -88,6 +88,7 @@ public final class SmcOptions
                       final String targetfileBase,
                       final String srcDirectory,
                       final String headerDirectory,
+                      final String headerSuffix,
                       final String castType,
                       final int graphLevel,
                       final boolean serialFlag,
@@ -103,6 +104,7 @@ public final class SmcOptions
         _srcfileBase = srcfileBase;
         _targetfileBase = targetfileBase;
         _headerDirectory = headerDirectory;
+        _headerSuffix = headerSuffix;
         _castType = castType;
         _graphLevel = graphLevel;
         _srcDirectory = srcDirectory;
@@ -160,6 +162,15 @@ public final class SmcOptions
     {
         return (_headerDirectory);
     } // end of headerDirectory()
+
+    /**
+     * Returns the target header file suffix.
+     * @return the target header file suffix.
+     */
+    public String headerSuffix()
+    {
+        return (_headerSuffix);
+    } // end of headerSuffix()
 
     /**
      * Returns the C++ cast type.
@@ -280,6 +291,9 @@ public final class SmcOptions
     // Place the generated header file in this directory.
     private final String _headerDirectory;
 
+    // The header file suffix.
+    private final String _headerSuffix;
+
     // Use this cast type (C++ only).
     private final String _castType;
 
@@ -319,6 +333,9 @@ public final class SmcOptions
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.3  2013/07/14 14:32:38  cwrapp
+// check in for release 6.2.0
+//
 // Revision 1.2  2010/02/15 18:05:43  fperrad
 // fix 2950619 : make distinction between source filename (*.sm) and target filename.
 //

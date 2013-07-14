@@ -166,8 +166,10 @@ public final class SmcCGenerator
              _srcDirectory.equals(_headerDirectory) == false))
         {
             // They are in different directories. Prepend the
-            // header directory to the file name.
-            _source.print(_headerDirectory);
+            // path from the source file directory to the header
+            // file directory.
+            _source.print(
+                findPath(_srcDirectory, _headerDirectory));
         }
         // Else they are in the same directory.
         else if (_srcDirectory != null)
@@ -175,7 +177,7 @@ public final class SmcCGenerator
             _source.print(_srcDirectory);
         }
         _source.print(_targetfileBase);
-        _source.println(".h\"");
+        _source.format(".%s\"%n", _headerSuffix);
 
         // Print out the default definitions for all the
         // transitions. First, get the transitions list.
@@ -557,8 +559,7 @@ public final class SmcCGenerator
             _source.print("_");
             _source.print(stateName);
             _source.print("), ");
-            _source.print(
-                Integer.toString(map.getNextStateId()));
+            _source.print(SmcMap.getNextStateId());
              if (_debugLevel >= DEBUG_LEVEL_0)
              {
                 _source.print(", \"");
@@ -1443,6 +1444,9 @@ public final class SmcCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.16  2013/07/14 14:32:37  cwrapp
+// check in for release 6.2.0
+//
 // Revision 1.15  2012/05/13 16:31:10  fperrad
 // fix 3525846 : endless recursion with guarded transitions in Default state
 //

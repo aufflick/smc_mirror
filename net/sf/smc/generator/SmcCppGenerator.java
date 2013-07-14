@@ -95,9 +95,9 @@ public final class SmcCppGenerator
      * %{ %} raw source code - if any
      *
      * #include <i>%include header file</i>
-    // #include "<i>context</i>_sm.h"
+    // #include "<i>context</i>_sm.<i>hsuffix</i>"
     // (If the -headerd option is used, then this is generated:
-    // #include "<i>header dir</i>/<i>context</i>.h")
+    // #include "<i>header dir</i>/<i>context</i>.<i>hsuffix</i>")
     //
     // using namespace statemap;
     // using namespace <i>%import namespace</i>
@@ -163,8 +163,10 @@ public final class SmcCppGenerator
              _srcDirectory.equals(_headerDirectory) == false))
         {
             // They are in different directories. Prepend the
-            // header directory to the file name.
-            _source.print(_headerDirectory);
+            // path from the source file directory to the header
+            // file directory.
+            _source.print(
+                findPath(_srcDirectory, _headerDirectory));
         }
         // Else they are in the same directory.
         else if (_srcDirectory != null)
@@ -172,7 +174,7 @@ public final class SmcCppGenerator
             _source.print(_srcDirectory);
         }
         _source.print(_targetfileBase);
-        _source.println(".h\"");
+        _source.format(".%s\"%n", _headerSuffix);
 
         // Import the statemap namespace symbols into the main
         // namespace.
@@ -1718,6 +1720,9 @@ public final class SmcCppGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.13  2013/07/14 14:32:38  cwrapp
+// check in for release 6.2.0
+//
 // Revision 1.12  2012/05/13 16:31:10  fperrad
 // fix 3525846 : endless recursion with guarded transitions in Default state
 //

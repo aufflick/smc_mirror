@@ -484,7 +484,7 @@ public final class SmcRubyGenerator
             _source.print('.');
             _source.print(state.getClassName());
             _source.print("', ");
-            _source.print(map.getNextStateId());
+            _source.print(SmcMap.getNextStateId());
             _source.println(").freeze");
         }
 
@@ -1323,6 +1323,9 @@ public final class SmcRubyGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.12  2013/07/14 14:32:38  cwrapp
+// check in for release 6.2.0
+//
 // Revision 1.11  2011/11/20 14:58:33  cwrapp
 // Check in for SMC v. 6.1.0
 //

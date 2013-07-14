@@ -49,7 +49,8 @@ SMC's command line options are:
              : Do not use C++ iostream
                (use with -c++ only).
     -version : Print SMC version to standard out and exit.
-    -verbose : Output more compiler messages.
+    -verbose : Output compiler messages (SMC is silent by default).
+    -vverbose: Output more compiler messages.
     -help    : Print this message to standard out and exit.
     -sync    : Synchronize generated Java code
                (use with -java, -groovy, -vb and -csharp only).

@@ -74,7 +74,6 @@ public final class SmcMap
         _fsm = fsm;
         _defaultState = null;
         _states = new ArrayList<SmcState>();
-        _stateId = 0;
     } // end of SmcMap(String, int, SmcFSM)
 
     //
@@ -371,7 +370,7 @@ public final class SmcMap
      * Returns the next unique state identifier.
      * @return the next unique state identifier.
      */
-    public int getNextStateId()
+    public static int getNextStateId()
     {
         return (_stateId++);
     } // end of getNextStateId()
@@ -390,8 +389,7 @@ public final class SmcMap
      */
     public void addState(SmcState state)
     {
-        if (state.getInstanceName().compareTo(
-                "DefaultState") == 0)
+        if (state.isDefaultState() == true)
         {
             _defaultState = state;
         }
@@ -438,13 +436,21 @@ public final class SmcMap
     private List<SmcState> _states;
     private SmcState _defaultState;
 
-    // Use this to generate unique state IDs.
-    private int _stateId;
+    //-----------------------------------------------------------
+    // Statics.
+    //
+
+    // Use this to generate unique state IDs. Must use a static
+    // integer to guarantee uniqueness across multiple maps.
+    private static int _stateId = 0;
 } // end of class SmcMap
 
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2013/07/14 14:32:38  cwrapp
+// check in for release 6.2.0
+//
 // Revision 1.5  2011/11/20 14:58:33  cwrapp
 // Check in for SMC v. 6.1.0
 //

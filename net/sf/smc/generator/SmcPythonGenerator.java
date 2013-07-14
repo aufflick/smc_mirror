@@ -421,7 +421,7 @@ public final class SmcPythonGenerator
             _source.print('.');
             _source.print(state.getClassName());
             _source.print("', ");
-            _source.print(map.getNextStateId());
+            _source.print(SmcMap.getNextStateId());
             _source.println(")");
         }
 
@@ -1226,6 +1226,9 @@ public final class SmcPythonGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.16  2013/07/14 14:32:38  cwrapp
+// check in for release 6.2.0
+//
 // Revision 1.15  2012/05/13 16:31:10  fperrad
 // fix 3525846 : endless recursion with guarded transitions in Default state
 //

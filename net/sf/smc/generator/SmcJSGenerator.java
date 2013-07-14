@@ -387,7 +387,7 @@ public final class SmcJSGenerator
         // declare the static members
         for (SmcState state: states)
         {
-            jsCode.getCurrentClass().addStaticMember(state.getInstanceName(),"new "+mapName+"_"+state.getClassName()+"('"+mapName+"."+state.getClassName()+"',"+map.getNextStateId()+");");
+            jsCode.getCurrentClass().addStaticMember(state.getInstanceName(),"new "+mapName+"_"+state.getClassName()+"('"+mapName+"."+state.getClassName()+"',"+SmcMap.getNextStateId()+");");
         }
         jsCode.getCurrentClass().addStaticMember("Default_"," new "+mapName+"_Default('"+mapName+".Default_',-1);");
         //_source.println("}");
@@ -408,7 +408,7 @@ public final class SmcJSGenerator
             _source.print('.');
             _source.print(state.getClassName());
             _source.print("', ");
-            _source.print(map.getNextStateId());
+            _source.print(SmcMap.getNextStateId());
             _source.println(");");
         }
 
@@ -867,7 +867,7 @@ public final class SmcJSGenerator
                 _guardCount > 1)
             {
                // addCode(indent2);
-                jsFunc.addCode("//# No actions.");
+                jsFunc.addCode("/* No actions. */");
             }
             // If there are:
             // 1. No entry actions,
@@ -889,7 +889,7 @@ public final class SmcJSGenerator
                      _debugFlag == false)*/
             {
               //  addCode(indent2);
-                jsFunc.addCode("//# No actions.");
+                jsFunc.addCode("/* No actions. */");
               //  addCode(indent2);
             }
 
@@ -1312,6 +1312,9 @@ class JSFunction {
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2013/07/14 14:32:38  cwrapp
+// check in for release 6.2.0
+//
 // Revision 1.3  2011/02/16 18:02:01  nitin-nizhawan
 // added prototype channing to allow instanceof operator to work
 //

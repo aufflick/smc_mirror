@@ -141,7 +141,7 @@ public final class Smc
         _outputDirectory = null;
         _headerDirectory = null;
         _suffix = null;
-        _hsuffix = null;
+        _hsuffix = SmcCodeGenerator.DEFAULT_HEADER_SUFFIX;
         _accessLevel = null;
 
         // Process the command line.
@@ -1073,6 +1073,7 @@ public final class Smc
         stream.print(" [-nostreams]");
         stream.print(" [-version]");
         stream.print(" [-verbose]");
+        stream.print(" [-vverbose]");
         stream.print(" [-help]");
         stream.print(" [-sync]");
         stream.print(" [-noex]");
@@ -1112,6 +1113,8 @@ public final class Smc
         stream.print("\t-version  Print smc version ");
         stream.println("information to standard out and exit");
         stream.print("\t-verbose  ");
+        stream.println("Output compiler messages (SMC is silent by default).");
+        stream.print("\t-vverbose  ");
         stream.println("Output more compiler messages.");
         stream.print("\t-help     Print this message to ");
         stream.println("standard out and exit");
@@ -1270,6 +1273,7 @@ public final class Smc
                                  srcFileBase,
                                  _outputDirectory,
                                  _headerDirectory,
+                                 _hsuffix,
                                  _castType,
                                  _graphLevel,
                                  _serial,
@@ -1643,7 +1647,7 @@ public final class Smc
     /* package */ static Language _targetLanguage;
 
     private static final String APP_NAME = "smc";
-    private static final String VERSION = "v. 6.1.0";
+    private static final String VERSION = "v. 6.2.0";
 
     // Command line option flags.
     private static final String ACCESS_FLAG = "-access";
@@ -1663,6 +1667,7 @@ public final class Smc
     private static final String REFLECT_FLAG = "-reflect";
     private static final String RETURN_FLAG = "-return";
     private static final String SERIAL_FLAG = "-serial";
+    private static final String SILENT_FLAG = "-silent";
     private static final String SUFFIX_FLAG = "-suffix";
     private static final String SYNC_FLAG = "-sync";
     private static final String VERBOSE_FLAG = "-verbose";
@@ -1933,6 +1938,9 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.43  2013/07/14 14:32:37  cwrapp
+// check in for release 6.2.0
+//
 // Revision 1.42  2011/11/20 16:29:53  cwrapp
 // Check in for SMC v. 6.1.0
 //
