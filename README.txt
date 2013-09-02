@@ -2,6 +2,50 @@
 
                                SMC
                      The State Machine Compiler
+                         (Version: 6.3.0)
+
+                     http://smc.sourceforge.net
+
+
+
+0. What's New?
+--------------
+
+Major changes:
+
+(None.)
+
+
+Minor changes:
+
+(Java)
+    Cleaned up generated Java code so that there are no more
+    warnings about the code.
+    (SF feature 92)
+
+(Java)
+    Added flag -generic7 which uses <> braces for allocated
+    generic classes.
+    (SF feature 92)
+
+
+
+Bug Fixes:
+
+(All)
+    Corrected a fatal error when "-headerd ." is specified.
+    (SF bug 189)
+
+(Objective-C)
+    Added "__weak" to the owner object reference to allow the
+    owner to be decommissioned.
+    (SF bug 188)
+
+
+
+
+                               SMC
+                     The State Machine Compiler
                          (Version: 6.2.0)
 
                      http://smc.sourceforge.net

@@ -102,6 +102,7 @@ public abstract class SmcCodeGenerator
         _reflectFlag = options.reflectFlag();
         _syncFlag = options.syncFlag();
         _genericFlag = options.genericFlag();
+        _java7Flag = options.java7Flag();
         _accessLevel = options.accessLevel();
         _suffix = suffix;
         _source = null;
@@ -526,6 +527,12 @@ public abstract class SmcCodeGenerator
     protected final boolean _genericFlag;
 
     /**
+     * This flag is {@code true} when Java 7 generic code is
+     * generated. Used with -java and -reflect only.
+     */
+    protected final boolean _java7Flag;
+
+    /**
      * Used this access keyword for the generated classes.
      */
     protected final String _accessLevel;
@@ -604,6 +611,9 @@ public abstract class SmcCodeGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2013/09/02 14:45:57  cwrapp
+// SMC 6.3.0 commit.
+//
 // Revision 1.7  2013/07/14 14:32:38  cwrapp
 // check in for release 6.2.0
 //

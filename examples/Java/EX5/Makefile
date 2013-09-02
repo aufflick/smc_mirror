@@ -35,7 +35,7 @@ SM_SOURCES=     Task.sm \
                 TaskManager.sm
 
 SOURCES=        TaskFSM.java \
-	      TaskManagerFSM.java \
+                TaskManagerFSM.java \
                 Task.java \
                 TaskManager.java \
                 TaskController.java \
@@ -62,8 +62,10 @@ SYNC=           -sync
 # Uncomment to turn on reflection.
 # REFLECT=        -reflect
 
-# Uncomment to turn on generic collections..
+# Uncomment either to turn on generic collections
+# (but only if REFLECT is uncommented).
 # GENERIC=        -generic
+# GENERIC=        -generic7
 
 SMC=            java -jar ../../../bin/Smc.jar
 SMC_FLAGS=      -java $(TRACE) $(SERIAL) $(SYNC) $(REFLECT) $(GENERIC)
@@ -130,6 +132,9 @@ clean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.16  2013/09/02 14:45:56  cwrapp
+# SMC 6.3.0 commit.
+#
 # Revision 1.15  2009/11/25 22:30:18  cwrapp
 # Fixed problem between %fsmclass and sm file names.
 #

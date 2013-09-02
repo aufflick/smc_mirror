@@ -40,7 +40,7 @@
 # Macros.
 #
 
-VERSION=        6_2_0
+VERSION=        6_3_0
 
 STAGING_DIR=    ../staging
 SMC_STAGING_DIR=$(STAGING_DIR)/smc
@@ -59,18 +59,19 @@ RM_RF=		rm -rf
 
 JAVADOC=	javadoc
 DOC_VERSION=	$(VERSION)
-DOC_DIR=	docs/javadocs
+DOC_DIR=	./docs/javadocs
 DOC_SOURCES=	./doc_sources.txt
 
-WINDOW_TITLE=	"SMC v. $(DOC_VERSION) API Specification"
-DOC_TITLE=	"SMC v. $(DOC_VERSION) API Specification"
-HEADER=		"<b>SMC</b><br><font size="-1">$(DOC_VERSION)</font>"
-FOOTER=		"<font size=-1>Copyright &copy; 2013. Charles W. Rapp. All Rights Reserved. Use is subject to <a href=\"\">license terms</a>.</font>"
+WINDOW_TITLE=	'SMC v. $(DOC_VERSION) API Specification'
+DOC_TITLE=	'SMC v. $(DOC_VERSION) API Specification'
+HEADER=		'<b>SMC</b><br><font size="-1">$(DOC_VERSION)</font>'
+FOOTER=		'<font size=-1>Copyright &copy; 2013. Charles W. Rapp. All Rights Reserved. Use is subject to <a href=\"\">license terms</a>.</font>'
 OVERVIEW=	./overview.html
 
 JAVADOC_FLAGS=	-protected \
-		-d ./$(DOC_DIR) \
+		-d $(DOC_DIR) \
 		-sourcepath . \
+		-use \
 		-classpath ./lib/statemap.jar \
 		-overview $(OVERVIEW) \
 		-windowtitle $(WINDOW_TITLE) \
@@ -101,6 +102,9 @@ $(SMC_STAGING_DIR) :    $(STAGING_DIR)
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.23  2013/09/02 14:45:52  cwrapp
+# SMC 6.3.0 commit.
+#
 # Revision 1.22  2013/07/14 14:32:34  cwrapp
 # check in for release 6.2.0
 #

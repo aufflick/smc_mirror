@@ -143,6 +143,8 @@ public final class Smc
         _suffix = null;
         _hsuffix = SmcCodeGenerator.DEFAULT_HEADER_SUFFIX;
         _accessLevel = null;
+        _generic = false;
+        _java7Flag = false;
 
         // Process the command line.
         if (parseArgs(args) == false)
@@ -791,7 +793,7 @@ public final class Smc
                     argsConsumed = 1;
                 }
             }
-            else if (args[i].startsWith("-ge") == true)
+            else if (args[i].equals("-generic") == true)
             {
                 if (_supportsOption(GENERIC_FLAG) == false)
                 {
@@ -802,9 +804,38 @@ public final class Smc
                         GENERIC_FLAG +
                         ".";
                 }
+                else if (_generic == true)
+                {
+                    retcode = false;
+                    _errorMsg = GENERIC_FLAG + " already set.";
+                }
                 else
                 {
                     _generic = true;
+                    _java7Flag = false;
+                    argsConsumed = 1;
+                }
+            }
+            else if (args[i].equals("-generic7") == true)
+            {
+                if (_supportsOption(GENERIC7_FLAG) == false)
+                {
+                    retcode = false;
+                    _errorMsg =
+                        _targetLanguage.name() +
+                        " does not support " +
+                        GENERIC7_FLAG +
+                        ".";
+                }
+                else if (_generic == true)
+                {
+                    retcode = false;
+                    _errorMsg = GENERIC_FLAG + " already set.";
+                }
+                else
+                {
+                    _generic = true;
+                    _java7Flag = true;
                     argsConsumed = 1;
                 }
             }
@@ -1082,6 +1113,7 @@ public final class Smc
         stream.print(" [-return]");
         stream.print(" [-reflect]");
         stream.print(" [-generic]");
+        stream.print(" [-generic7]");
         stream.print(" [-cast cast_type]");
         stream.print(" [-d directory]");
         stream.print(" [-headerd directory]");
@@ -1143,6 +1175,9 @@ public final class Smc
         stream.println("\t-generic  Use generic collections");
         stream.print("\t          ");
         stream.println("(use with -csharp, -java or -vb and -reflect only)");
+        stream.println("\t-generic7  Use Java 7 generic collections");
+        stream.print("\t          ");
+        stream.println("(use with -java  and -reflect only)");
         stream.println("\t-cast     Use this C++ cast type ");
         stream.print("\t          ");
         stream.println("(use with -c++ only)");
@@ -1271,8 +1306,8 @@ public final class Smc
 
         options = new SmcOptions(fsm.getSourceFileName(),
                                  srcFileBase,
-                                 _outputDirectory,
-                                 _headerDirectory,
+                                 srcFilePath,
+                                 headerPath,
                                  _hsuffix,
                                  _castType,
                                  _graphLevel,
@@ -1284,6 +1319,7 @@ public final class Smc
                                  _reflection,
                                  _sync,
                                  _generic,
+                                 _java7Flag,
                                  _accessLevel);
 
         // Create the header file name and generator -
@@ -1603,6 +1639,10 @@ public final class Smc
     // reflection map.
     private static boolean _generic;
 
+    // If generics are used, then this is the Java target
+    // language version.
+    private static boolean _java7Flag;
+
     // If true, then generate compiler verbose messages.
     private static boolean _verbose;
 
@@ -1657,6 +1697,7 @@ public final class Smc
     private static final String DEBUG_LEVEL0_FLAG = "-g0";
     private static final String DEBUG_LEVEL1_FLAG = "-g1";
     private static final String GENERIC_FLAG = "-generic";
+    private static final String GENERIC7_FLAG = "-generic7";
     private static final String GLEVEL_FLAG = "-glevel";
     private static final String HEADER_FLAG = "-headerd";
     private static final String HEADER_SUFFIX_FLAG = "-hsuffix";
@@ -1920,6 +1961,11 @@ public final class Smc
         languages.add(_languages[TargetLanguage.VB.ordinal()]);
         _optionMap.put(GENERIC_FLAG, languages);
 
+        // The -generic7 option.
+        languages = new ArrayList<Language>();
+        languages.add(_languages[TargetLanguage.JAVA.ordinal()]);
+        _optionMap.put(GENERIC7_FLAG, languages);
+
         // Define the allowed access level keywords for each language
         // which supports the -access option.
         List<String> accessLevels;
@@ -1938,6 +1984,9 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.44  2013/09/02 14:45:57  cwrapp
+// SMC 6.3.0 commit.
+//
 // Revision 1.43  2013/07/14 14:32:37  cwrapp
 // check in for release 6.2.0
 //

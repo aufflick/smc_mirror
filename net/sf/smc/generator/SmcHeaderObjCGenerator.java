@@ -270,7 +270,7 @@ public final class SmcHeaderObjCGenerator
         _source.println("{");
 
         _source.print(_indent);
-        _source.print("    ");
+        _source.print("    __weak ");
         _source.print(context);
         _source.println(" *_owner;");
 
@@ -572,6 +572,9 @@ public final class SmcHeaderObjCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2013/09/02 14:45:57  cwrapp
+// SMC 6.3.0 commit.
+//
 // Revision 1.8  2013/07/14 14:32:38  cwrapp
 // check in for release 6.2.0
 //

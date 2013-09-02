@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2013/09/02 14:45:56  cwrapp
+// SMC 6.3.0 commit.
+//
 // Revision 1.9  2009/03/27 09:41:46  cwrapp
 // Added F. Perrad changes back in.
 //
@@ -876,7 +879,8 @@ public abstract class TcpConnection
     {
         try
         {
-            Class context = TcpConnectionContext.class;
+            Class<TcpConnectionContext> context =
+                TcpConnectionContext.class;
             Class[] parameters = new Class[1];
             Method undefined;
             int i;

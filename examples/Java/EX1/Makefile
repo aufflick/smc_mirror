@@ -48,8 +48,10 @@ CHECKSTRING=    $(JAVA) $(JAVA_FLAGS) checkstring
 # Uncomment to turn on reflection.
 # REFLECT=        -reflect
 
-# Uncomment to turn on generic collections..
+# Uncomment either to turn on generic collections
+# (but only if REFLECT is uncommented).
 # GENERIC=        -generic
+# GENERIC=        -generic7
 
 SMC=            java -jar ../../../bin/Smc.jar
 SMC_FLAGS=      -java $(TRACE) $(SERIAL) $(SYNC) $(REFLECT) $(GENERIC)
@@ -107,6 +109,9 @@ clean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.12  2013/09/02 14:45:56  cwrapp
+# SMC 6.3.0 commit.
+#
 # Revision 1.11  2009/03/01 18:20:38  cwrapp
 # Preliminary v. 6.0.0 commit.
 #

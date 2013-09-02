@@ -81,6 +81,9 @@ public final class SmcOptions
      * synchronization code.
      * @param genericFlag if {@code true} then use generic
      * collections.
+     * @param java7Flag if {@code genericFlag} is {@code true}
+     * and the target language is Java, then generate generic
+     * code according to this Java version.
      * @param accessLevel use this access keyword for the
      * generated classes.
      */
@@ -99,6 +102,7 @@ public final class SmcOptions
                       final boolean reflectFlag,
                       final boolean syncFlag,
                       final boolean genericFlag,
+                      final boolean java7Flag,
                       final String accessLevel)
     {
         _srcfileBase = srcfileBase;
@@ -116,6 +120,7 @@ public final class SmcOptions
         _reflectFlag = reflectFlag;
         _syncFlag = syncFlag;
         _genericFlag = genericFlag;
+        _java7Flag = java7Flag;
         _accessLevel = accessLevel;
     } // end f SmcOptions(...)
 
@@ -263,6 +268,16 @@ public final class SmcOptions
     } // end of genericFlag()
 
     /**
+     * Returns {@code true} if Java 7 diamond brace (&lt;&gt;)
+     * are used in generic code.
+     * @return {@code true} if the target language is Java 7.
+     */
+    public boolean java7Flag()
+    {
+        return (_java7Flag);
+    } // end of java7Flag()
+
+    /**
      * Returns the generated class access level.
      * @return the generated class access level.
      */
@@ -326,6 +341,11 @@ public final class SmcOptions
     // generic transition map. Used with -java and -reflect only.
     private final boolean _genericFlag;
 
+    // When generics are used and the target language is Java,
+    // then output diamond braces (<>) if the Java target version
+    // is Java 7 or better.
+    private final boolean _java7Flag;
+
     // Used this access keyword for the generated classes.
     private final String _accessLevel;
 } // end of class SmcOptions
@@ -333,6 +353,9 @@ public final class SmcOptions
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2013/09/02 14:45:58  cwrapp
+// SMC 6.3.0 commit.
+//
 // Revision 1.3  2013/07/14 14:32:38  cwrapp
 // check in for release 6.2.0
 //
