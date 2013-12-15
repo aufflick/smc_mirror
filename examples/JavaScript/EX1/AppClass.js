@@ -30,6 +30,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.4  2013/12/15 17:25:36  fperrad
+// *** empty log message ***
+//
 // Revision 1.3  2011/04/23 13:13:05  fperrad
 // clean up CVS change log
 //
@@ -41,19 +44,18 @@
 //
 
 
-function AppClass() {
-
+function AppClass () {
+    this._fsm = new AppClassContext(this);
     // Uncomment to see debug output.
     //this._fsm.setDebugFlag(true);
 }
+try {
+    global.AppClass = AppClass;
+} catch (ex) {}
 
 AppClass.prototype.CheckString = function(str) {
-    var  i,len,c;
-    this._fsm = new AppClass_sm(this);
-    this._is_acceptable = false;
     this._fsm.enterStartState();
-
-    for (i=0,len = str.length;i < len;i++) {
+    for (var i=0; i < str.length; i++) {
         switch (str.charAt(i)) {
             case '0':
                 this._fsm.Zero();
@@ -66,16 +68,14 @@ AppClass.prototype.CheckString = function(str) {
                 break;
         }
     }
-
     this._fsm.EOS();
-
-    return(this._is_acceptable);
+    return this._is_acceptable;
 }
 
-AppClass.prototype.Acceptable=function() {
-     this._is_acceptable = true;
+AppClass.prototype.Acceptable = function() {
+    this._is_acceptable = true;
 }
 
-AppClass.prototype.Unacceptable=function() {
-     this._is_acceptable = false;
+AppClass.prototype.Unacceptable = function() {
+    this._is_acceptable = false;
 }
