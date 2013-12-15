@@ -30,7 +30,7 @@
 //
 // CHANGE LOG
 // $Log$
-// Revision 1.3  2013/12/15 16:36:11  fperrad
+// Revision 1.1  2013/12/15 16:38:48  fperrad
 // full refactor of JavaScript
 //
 // Revision 1.3  2011/04/23 13:13:05  fperrad
@@ -62,6 +62,10 @@ AppClass.prototype.CheckString = function(str) {
                 break;
             case '1':
                 this._fsm.One();
+                break;
+            case 'c':
+            case 'C':
+                this._fsm.C();
                 break;
             default:
                 this._fsm.Unknown();

@@ -1169,7 +1169,7 @@ public final class Smc
         stream.println("(use this option with ANT)");
         stream.println("\t-reflect  Generate reflection code");
         stream.print("\t          ");
-        stream.print("(use with -csharp, -groovy, -java, -lua,");
+        stream.print("(use with -csharp, -groovy, -java, -js, -lua,");
         stream.print(" -perl, -php, -python, -ruby, -scala, ");
         stream.println("-tcl and -vb only)");
         stream.println("\t-generic  Use generic collections");
@@ -1865,8 +1865,8 @@ public final class Smc
         // +   -nocatch:  all
         // +      -noex:  C++
         // + -nostreams:  C++
-        // +   -reflect:  C#, Java, TCL, VB, Lua, Perl, PHP,
-        //                Python, Ruby, Groovy, Scala
+        // +   -reflect:  C#, Java, JavaScript, TCL, VB, Lua, Perl,
+        //                PHP, Python, Ruby, Groovy, Scala
         // +    -return:  all
         // +    -serial:  C#, C++, Java, Tcl, VB, Groovy, Scala
         // +    -suffix:  all
@@ -1927,6 +1927,7 @@ public final class Smc
         languages = new ArrayList<Language>();
         languages.add(_languages[TargetLanguage.C_SHARP.ordinal()]);
         languages.add(_languages[TargetLanguage.JAVA.ordinal()]);
+        languages.add(_languages[TargetLanguage.JS.ordinal()]);
         languages.add(_languages[TargetLanguage.VB.ordinal()]);
         languages.add(_languages[TargetLanguage.TCL.ordinal()]);
         languages.add(_languages[TargetLanguage.LUA.ordinal()]);
@@ -1984,6 +1985,9 @@ public final class Smc
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.45  2013/12/15 16:31:41  fperrad
+// full refactor of JavaScript
+//
 // Revision 1.44  2013/09/02 14:45:57  cwrapp
 // SMC 6.3.0 commit.
 //
