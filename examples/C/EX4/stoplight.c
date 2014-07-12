@@ -34,6 +34,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.7  2014/07/12 10:41:45  fperrad
+ * remove _rcs_id
+ *
  * Revision 1.6  2010/12/01 15:29:09  fperrad
  * C: refactor when package
  *
@@ -58,8 +61,6 @@
 #include <unistd.h>
 #endif
 #include "stoplight.h"
-
-const static char _rcs_id[] = "$Id: ";
 
 extern int NSGreenTimer;
 extern int EWGreenTimer;

@@ -30,6 +30,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.3  2014/07/12 10:41:45  fperrad
+ * remove _rcs_id
+ *
  * Revision 1.2  2007/08/05 13:41:14  cwrapp
  * Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more information.
  *
@@ -40,8 +43,6 @@
 
 #include <stdio.h>
 #include "AppClass.h"
-
-const static char _rcs_id[] = "$Id$";
 
 int main(int argc, char *argv[])
 {

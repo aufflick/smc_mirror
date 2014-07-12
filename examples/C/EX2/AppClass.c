@@ -27,6 +27,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.5  2014/07/12 10:41:45  fperrad
+ * remove _rcs_id
+ *
  * Revision 1.4  2009/03/27 15:26:55  fperrad
  * C : the function Context_EnterStartState is generated only if FSM hasEntryActions
  *
@@ -42,8 +45,6 @@
  */
 
 #include "AppClass.h"
-
-const static char _rcs_id[] = "$Id$";
 
 void AppClass_Init(struct AppClass *this)
 {
