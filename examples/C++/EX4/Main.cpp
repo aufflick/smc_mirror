@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2014/07/12 10:48:50  fperrad
+// remove _rcs_id
+//
 // Revision 1.8  2009/03/27 09:41:45  cwrapp
 // Added F. Perrad changes back in.
 //
@@ -60,8 +63,6 @@ using namespace std;
 #define SA_NOMASK 0
 #endif
 #endif
-
-const static char _rcs_id[] = "$Id$";
 
 using namespace cpp_ex4;
 

@@ -33,6 +33,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2014/07/12 10:48:50  fperrad
+// remove _rcs_id
+//
 // Revision 1.9  2009/03/27 09:41:45  cwrapp
 // Added F. Perrad changes back in.
 //
@@ -61,8 +64,6 @@
 #endif
 #include <stdlib.h>
 #include "stoplight.h"
-
-const static char _rcs_id[] = "$Id$";
 
 using namespace std;
 

@@ -30,6 +30,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2014/07/12 10:48:49  fperrad
+// remove _rcs_id
+//
 // Revision 1.6  2009/12/17 19:51:42  cwrapp
 // Testing complete.
 //
@@ -48,8 +51,6 @@
 #endif
 
 #include "AppClass.h"
-
-const static char _rcs_id[] = "$Id$";
 
 AppClass::AppClass()
 : _fsm(*this),

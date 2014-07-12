@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2014/07/12 10:48:49  fperrad
+// remove _rcs_id
+//
 // Revision 1.7  2006/06/03 19:39:24  cwrapp
 // Final v. 4.3.1 check in.
 //
@@ -53,8 +56,6 @@
 //
 
 #include "AppClass.h"
-
-const static char _rcs_id[] = "$Id$";
 
 using namespace std;
 using namespace statemap;

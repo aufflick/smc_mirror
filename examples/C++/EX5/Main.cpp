@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2014/07/12 10:48:50  fperrad
+// remove _rcs_id
+//
 // Revision 1.6  2007/12/28 12:34:40  cwrapp
 // Version 5.0.1 check-in.
 //
@@ -47,6 +50,7 @@
 //
 
 #include "AppClass.h"
+#include <stdlib.h>
 #include <signal.h>
 
 using namespace std;
@@ -56,8 +60,6 @@ using namespace std;
 #define SA_NOMASK 0
 #endif
 #endif
-
-const static char _rcs_id[] = "$Id$";
 
 // Global variable declarations.
 AppClass appObject;
