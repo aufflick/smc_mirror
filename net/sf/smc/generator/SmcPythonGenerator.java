@@ -194,7 +194,7 @@ public final class SmcPythonGenerator
         _source.println(
             "            fsm.getState().getName(), fsm.getTransition())");
         _source.println(
-            "        raise statemap.TransitionUndefinedException, msg");
+            "        raise statemap.TransitionUndefinedException(msg)");
 
         // Generate the getTransitions() method.
         if (_reflectFlag == true)
@@ -1226,6 +1226,9 @@ public final class SmcPythonGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.17  2014/07/12 08:18:18  fperrad
+// compat python3
+//
 // Revision 1.16  2013/07/14 14:32:38  cwrapp
 // check in for release 6.2.0
 //

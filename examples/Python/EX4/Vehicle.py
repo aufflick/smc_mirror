@@ -29,6 +29,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.3  2014/07/12 08:21:44  fperrad
+# compat python3
+#
 # Revision 1.2  2009/04/19 14:39:48  cwrapp
 # Added call to enterStartState before issuing first FSM transition.
 #
@@ -159,7 +162,7 @@ class Vehicle:
 
 	def setSpeed(klass, speed):
 		if speed < 1 or speed > 10:
-			print "Invalid speed (%d).\n" % speed
+			print("Invalid speed (%d).\n" % speed)
 		else:
 			klass._speed = speed
 

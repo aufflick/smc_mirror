@@ -32,6 +32,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.2  2014/07/12 08:21:21  fperrad
+# compat python3
+#
 # Revision 1.1  2005/05/28 17:48:29  cwrapp
 # Added Python examples 1 - 4 and 7.
 #
@@ -43,10 +46,10 @@ import AppClass
 
 retcode = 0
 if len(sys.argv) < 2:
-	print "No string to check.\n"
+	print("No string to check.\n")
 	retcode = 2
 elif len(sys.argv) > 2:
-	print "Only one argument is accepted.\n"
+	print("Only one argument is accepted.\n")
 	retcode = 3
 else:
 	appobject = AppClass.AppClass()
@@ -56,5 +59,5 @@ else:
 		retcode = 1
 	else:
 		result = "acceptable"
-	print 'The string "%s" is %s.\n' % (str, result)
+	print('The string "%s" is %s.\n' % (str, result))
 sys.exit(retcode)
