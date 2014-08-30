@@ -184,30 +184,7 @@ public final class SmcCGenerator
         transList = fsm.getTransitions();
 
         _source.println();
-        _source.println("#define getOwner(fsm) \\");
-        _source.println("    (fsm)->_owner");
-        _source.println();
-
-        _source.println("#define POPULATE_STATE(state) \\");
-        if (fsm.hasEntryActions() == true)
-        {
-            _source.println("    state##_Entry, \\");
-        }
-        if (fsm.hasExitActions() == true)
-        {
-            _source.println("    state##_Exit, \\");
-        }
-        for (SmcTransition trans: transList)
-        {
-            if (trans.getName().equals("Default") == false)
-            {
-                _source.print("    state##_");
-                _source.print(trans.getName());
-                _source.println(", \\");
-            }
-        }
-        _source.println("    state##_Default");
-
+        _source.println("#define getOwner(fsm) (fsm)->_owner");
 
         _source.println();
         if (fsm.hasEntryActions() == true)
@@ -217,10 +194,6 @@ public final class SmcCGenerator
             _source.println("        (state)->Entry(fsm); \\");
             _source.println("    }");
         }
-        else
-        {
-            _source.println("#define ENTRY_STATE(state)");
-        }
         _source.println();
         if (fsm.hasExitActions() == true)
         {
@@ -228,10 +201,6 @@ public final class SmcCGenerator
             _source.println("    if ((state)->Exit != NULL) { \\");
             _source.println("        (state)->Exit(fsm); \\");
             _source.println("    }");
-        }
-        else
-        {
-            _source.println("#define EXIT_STATE(state)");
         }
 
         // Output the default transition definitions.
@@ -246,7 +215,7 @@ public final class SmcCGenerator
                 _source.print(trans.getName());
                 _source.print("(struct ");
                 _source.print(fsmClassName);
-                _source.print(" *fsm");
+                _source.print(" *const fsm");
 
                 params = trans.getParameters();
                 for (SmcParameter param: params)
@@ -268,7 +237,7 @@ public final class SmcCGenerator
         _source.print(context);
         _source.print("State_Default(struct ");
         _source.print(fsmClassName);
-        _source.println(" *fsm)");
+        _source.println(" *const fsm)");
         _source.println("{");
 
         // Print the transition out to the verbose log.
@@ -324,16 +293,6 @@ public final class SmcCGenerator
                 _source.print("_Default ");
                 _source.print(context);
                 _source.println("State_Default");
-                _source.print("#define ");
-                _source.print(mapName);
-                _source.print("_");
-                _source.print(state.getInstanceName());
-                _source.println("_Entry NULL");
-                _source.print("#define ");
-                _source.print(mapName);
-                _source.print("_");
-                _source.print(state.getInstanceName());
-                _source.println("_Exit NULL");
             }
 
             for (SmcTransition trans: transList)
@@ -384,9 +343,9 @@ public final class SmcCGenerator
         _source.print("_Init");
         _source.print("(struct ");
         _source.print(fsmClassName);
-        _source.print("* fsm, struct ");
+        _source.print(" *const fsm, struct ");
         _source.print(context);
-        _source.println("* owner)");
+        _source.println(" *const owner)");
         _source.println("{");
         _source.print("    FSM_INIT(fsm, &");
         _source.print(cState);
@@ -402,7 +361,7 @@ public final class SmcCGenerator
             _source.print(fsmClassName);
             _source.print("_EnterStartState(struct ");
             _source.print(fsmClassName);
-            _source.println("* fsm)");
+            _source.println(" *const fsm)");
             _source.println("{");
             _source.println("    ENTRY_STATE(getState(fsm));");
             _source.println("}");
@@ -422,7 +381,7 @@ public final class SmcCGenerator
                 _source.print(trans.getName());
                 _source.print("(struct ");
                 _source.print(fsmClassName);
-                _source.print("* fsm");
+                _source.print(" *const fsm");
 
                 params = trans.getParameters();
                 for (SmcParameter param: params)
@@ -484,6 +443,7 @@ public final class SmcCGenerator
         String mapName = map.getName();
         String transName;
         String stateName;
+        List<SmcAction> actions;
 
         // If a package has been specified,
         if (packageName != null && packageName.length() > 0)
@@ -554,21 +514,68 @@ public final class SmcCGenerator
             _source.print(mapName);
             _source.print("_");
             _source.print(stateName);
-            _source.print(" = { POPULATE_STATE(");
+            _source.println(" = {");
+            if (map.getFSM().hasEntryActions() == true)
+            {
+                _source.print("    ");
+                actions = state.getEntryActions();
+                if (actions != null && actions.isEmpty() == false)
+                {
+                    _source.print(mapName);
+                    _source.print("_");
+                    _source.print(stateName);
+                    _source.println("_Entry,");
+                }
+                else
+                {
+                    _source.println("NULL, /* Entry */");
+                }
+            }
+            if (map.getFSM().hasExitActions() == true)
+            {
+                _source.print("    ");
+                actions = state.getExitActions();
+                if (actions != null && actions.isEmpty() == false)
+                {
+                    _source.print(mapName);
+                    _source.print("_");
+                    _source.print(stateName);
+                    _source.println("_Exit,");
+                }
+                else
+                {
+                    _source.println("NULL, /* Exit */");
+                }
+            }
+            for (SmcTransition trans: map.getFSM().getTransitions())
+            {
+                if (trans.getName().equals("Default") == false)
+                {
+                    _source.print("    ");
+                    _source.print(mapName);
+                    _source.print("_");
+                    _source.print(stateName);
+                    _source.print("_");
+                    _source.print(trans.getName());
+                    _source.println(",");
+                }
+            }
+            _source.print("    ");
             _source.print(mapName);
             _source.print("_");
             _source.print(stateName);
-            _source.print("), ");
+            _source.println("_Default,");
+            _source.print("    ");
             _source.print(SmcMap.getNextStateId());
-             if (_debugLevel >= DEBUG_LEVEL_0)
-             {
+            if (_debugLevel >= DEBUG_LEVEL_0)
+            {
                 _source.print(", \"");
                 _source.print(mapName);
                 _source.print("_");
                 _source.print(stateName);
                 _source.print("\"");
             }
-            _source.println(" };");
+            _source.println("\n};");
         }
 
         return;
@@ -607,18 +614,13 @@ public final class SmcCGenerator
         if (actions != null && actions.isEmpty() == false)
         {
             _source.println();
-            _source.print("#undef ");
-            _source.print(mapName);
-            _source.print("_");
-            _source.print(instanceName);
-            _source.println("_Entry");
             _source.print("void ");
             _source.print(mapName);
             _source.print("_");
             _source.print(instanceName);
             _source.print("_Entry(struct ");
             _source.print(fsmClassName);
-            _source.println(" *fsm)");
+            _source.println(" *const fsm)");
             _source.println("{");
 
             // Declare the "ctxt" local variable.
@@ -644,18 +646,13 @@ public final class SmcCGenerator
         if (actions != null && actions.isEmpty() == false)
         {
             _source.println();
-            _source.print("#undef ");
-            _source.print(mapName);
-            _source.print("_");
-            _source.print(instanceName);
-            _source.println("_Exit");
             _source.print("void ");
             _source.print(mapName);
             _source.print("_");
             _source.print(instanceName);
             _source.print("_Exit(struct ");
             _source.print(fsmClassName);
-            _source.println(" *fsm)");
+            _source.println(" *const fsm)");
             _source.println("{");
 
             // Declare the "ctxt" local variable.
@@ -734,7 +731,7 @@ public final class SmcCGenerator
         _source.print(transName);
         _source.print("(struct ");
         _source.print(fsmClassName);
-        _source.print(" *fsm");
+        _source.print(" *const fsm");
 
         // Add user-defined parameters.
         for (SmcParameter parameter: transition.getParameters())
@@ -754,7 +751,7 @@ public final class SmcCGenerator
         {
             _source.print("    struct ");
             _source.print(context);
-            _source.println("* ctxt = getOwner(fsm);");
+            _source.println(" *ctxt = getOwner(fsm);");
         }
 
         // ANSI C requires all local variables be declared
@@ -1063,8 +1060,9 @@ public final class SmcCGenerator
         // v. 1.0, beta 3: Not any more. The exit actions are
         // executed only if 1) this is a standard, non-loopback
         // transition or a pop transition.
-        if (transType == TransType.TRANS_POP ||
-            loopbackFlag == false)
+        if ((map.getFSM().hasEntryActions() == true) &&
+             (transType == TransType.TRANS_POP ||
+              loopbackFlag == false))
         {
             if (_debugLevel >= DEBUG_LEVEL_1)
             {
@@ -1213,7 +1211,7 @@ public final class SmcCGenerator
 
             // Before doing the push, execute the end state's
             // entry actions (if any) if this is not a loopback.
-            if (loopbackFlag == false)
+            if (map.getFSM().hasEntryActions() == true && loopbackFlag == false)
             {
                 if (_debugLevel >= DEBUG_LEVEL_1)
                 {
@@ -1262,9 +1260,10 @@ public final class SmcCGenerator
         // v. 1.0, beta 3: Not any more. The entry actions are
         // executed only if 1) this is a standard, non-loopback
         // transition or a push transition.
-        if ((transType == TransType.TRANS_SET &&
-             loopbackFlag == false) ||
-             transType == TransType.TRANS_PUSH)
+        if (map.getFSM().hasEntryActions() == true &&
+            ((transType == TransType.TRANS_SET &&
+              loopbackFlag == false) ||
+              transType == TransType.TRANS_PUSH))
         {
             if (_debugLevel >= DEBUG_LEVEL_1)
             {
@@ -1362,15 +1361,15 @@ public final class SmcCGenerator
             _source.print(name);
             _source.print("(ctxt");
 
-	        for (String arg: action.getArguments())
-	        {
-	            if (arg.length() > 0)
-	            {
-	                _source.print(", ");
-	                _source.print(arg);
-	            }
-	        }
-	        _source.println(");");
+            for (String arg: action.getArguments())
+            {
+                if (arg.length() > 0)
+               {
+                    _source.print(", ");
+                    _source.print(arg);
+                }
+            }
+            _source.println(");");
         }
 
         return;
@@ -1444,6 +1443,9 @@ public final class SmcCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.17  2014/08/30 07:12:41  fperrad
+// refactor C generation
+//
 // Revision 1.16  2013/07/14 14:32:37  cwrapp
 // check in for release 6.2.0
 //
