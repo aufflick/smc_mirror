@@ -296,8 +296,8 @@ namespace statemap
     protected:
     private:
 
-		char *_state;
-		char *_transition;
+        char *_state;
+        char *_transition;
     };
 
     // This class is thrown when a state ID is either less than
@@ -385,8 +385,8 @@ namespace statemap
     protected:
     private:
 
-		int _index;
-		int _minIndex;
+        int _index;
+        int _minIndex;
         int _maxIndex;
     };
 #endif // !SMC_NO_EXCEPTIONS
@@ -832,6 +832,9 @@ namespace statemap
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.19  2014/09/06 19:31:28  fperrad
+// remove hard tab
+//
 // Revision 1.18  2013/07/14 14:32:36  cwrapp
 // check in for release 6.2.0
 //
