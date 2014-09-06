@@ -34,6 +34,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2014/09/06 19:55:33  fperrad
+// remove hard tab
+//
 // Revision 1.8  2014/09/06 09:03:43  fperrad
 // pragma only for MS compiler
 //
@@ -86,8 +89,8 @@ void AppClass::Run()
 #endif
 
     _fsm.enterStartState();
-	while (_continue_running == 1)
-	{
+    while (_continue_running == 1)
+    {
 #ifdef WIN32
         // Sleep for half a second at a time.
         // This will allow for timely receipt of
@@ -99,74 +102,74 @@ void AppClass::Run()
 
         ProcessingCompleted();
 #else
-	    pause();
+        pause();
 #endif
-	}
+    }
 
-	return;
+    return;
 } // end of AppClass::Run()
 
 void AppClass::ReceiveRequest(const char *message)
 {
-	if (strcmp(message, "stop") == 0)
-	{
-		// Stop processing messages.
-		_continue_running = 0;
-	}
-	else
-	{
-		// Increment the request count.
-		++_number_of_requests;
+    if (strcmp(message, "stop") == 0)
+    {
+        // Stop processing messages.
+        _continue_running = 0;
+    }
+    else
+    {
+        // Increment the request count.
+        ++_number_of_requests;
 
-		// Process this message.
-		_fsm.RequestReceived();
-	}
+        // Process this message.
+        _fsm.RequestReceived();
+    }
 
-	return;
+    return;
 } // end of AppClass::ReceiveRequest(const char*)
 
 void AppClass::CheckForRequest()
 {
-	if (_number_of_requests > 0)
-	{
-		_fsm.ProcessRequest();
-	}
-	else if (_number_of_requests < 0)
-	{
-		cout << "The number of outstanding requests is less than zero (";
-		cout << _number_of_requests << "); resetting to zero." << endl;
-		_number_of_requests = 0;
-	}
+    if (_number_of_requests > 0)
+    {
+        _fsm.ProcessRequest();
+    }
+    else if (_number_of_requests < 0)
+    {
+        cout << "The number of outstanding requests is less than zero (";
+        cout << _number_of_requests << "); resetting to zero." << endl;
+        _number_of_requests = 0;
+    }
 
-	return;
+    return;
 } // end of AppClass::CheckForRequest()
 
 void AppClass::DoRequest()
 {
-	// Decrement the request count.
-	--_number_of_requests;
+    // Decrement the request count.
+    --_number_of_requests;
 
 #ifdef WIN32
     cout << "Processing request ..." << endl;
 #else
-	// Local variable decalarations.
-	itimerval nextTimeout;
+    // Local variable decalarations.
+    itimerval nextTimeout;
 
-	// Sleep on this request.
-	(void) memset((char *) &nextTimeout, 0, sizeof(nextTimeout));
-	nextTimeout.it_value.tv_sec = 5;
-	if (setitimer(ITIMER_REAL, &nextTimeout, (itimerval *) NULL) < 0)
-	{
-	    // Failed to start process timer - quit.
-		_continue_running = 0;
-	}
-	else
-	{
-	    cout << "Processing request ..." << endl;
-	}
+    // Sleep on this request.
+    (void) memset((char *) &nextTimeout, 0, sizeof(nextTimeout));
+    nextTimeout.it_value.tv_sec = 5;
+    if (setitimer(ITIMER_REAL, &nextTimeout, (itimerval *) NULL) < 0)
+    {
+        // Failed to start process timer - quit.
+        _continue_running = 0;
+    }
+    else
+    {
+        cout << "Processing request ..." << endl;
+    }
 #endif
 
-	return;
+    return;
 } // end of AppClass::DoRequest()
 
 void AppClass::ProcessingCompleted()

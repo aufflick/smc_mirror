@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2014/09/06 19:53:42  fperrad
+// remove hard tab
+//
 // Revision 1.5  2014/07/12 10:48:49  fperrad
 // remove _rcs_id
 //
@@ -55,22 +58,22 @@ using namespace statemap;
 
 int main(int argc, char *argv[])
 {
-	AppClass thisContext;
+    AppClass thisContext;
     int retcode = 0;
 
-	if (argc < 2)
-	{
-		cerr << "No string to check." << endl;
+    if (argc < 2)
+    {
+        cerr << "No string to check." << endl;
         retcode = 2;
-	}
+    }
     else if (argc > 2)
     {
         cerr << "Only one argument is accepted." << endl;
         retcode = 3;
     }
-	else
-	{
-		cout << "The string \"" << argv[1] << "\" is ";
+    else
+    {
+        cout << "The string \"" << argv[1] << "\" is ";
 
         try
         {
@@ -93,7 +96,7 @@ int main(int argc, char *argv[])
 
             retcode = 1;
         }
-	}
+    }
 
-	return (retcode);
+    return retcode;
 }

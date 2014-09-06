@@ -30,6 +30,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2014/09/06 19:54:11  fperrad
+// remove hard tab
+//
 // Revision 1.8  2014/09/06 09:03:00  fperrad
 // pragma only for MS compiler
 //
@@ -66,20 +69,20 @@ AppClass::AppClass()
 bool AppClass::CheckString(const char *theString)
 {
     _fsm.enterStartState();
-	while(*theString)
-	{
-		switch(*theString)
-		{
-		case '0':
-			_fsm.Zero();
-			break;
+    while(*theString)
+    {
+        switch(*theString)
+        {
+        case '0':
+            _fsm.Zero();
+            break;
 
-		case '1':
-			_fsm.One();
-			break;
+        case '1':
+            _fsm.One();
+            break;
 
-		case 'c':
-		case 'C':
+        case 'c':
+        case 'C':
 // Uncomment to test serialization.
 //               if (serialize("foobar.txt") < 0)
 //               {
@@ -93,20 +96,20 @@ bool AppClass::CheckString(const char *theString)
 //               {
 //                   _fsm.C();
 //               }
-			_fsm.C();
-			break;
+            _fsm.C();
+            break;
 
-		default:
-			_fsm.Unknown();
-			break;
-		}
-		++theString;
-	}
+        default:
+            _fsm.Unknown();
+            break;
+        }
+        ++theString;
+    }
 
-	// end of string has been reached - send the EOS transition.
-	_fsm.EOS();
+    // end of string has been reached - send the EOS transition.
+    _fsm.EOS();
 
-	return(isAcceptable);
+    return isAcceptable;
 }
 
 // Uncomment to test serialization.

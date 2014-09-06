@@ -33,6 +33,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2014/09/06 19:53:42  fperrad
+// remove hard tab
+//
 // Revision 1.4  2005/05/28 13:31:18  cwrapp
 // Updated C++ examples.
 //
@@ -47,26 +50,26 @@ class AppClass
 private:
     AppClassContext _fsm;
 
-	bool isAcceptable;
-		// If a string is acceptable, then this variable is set to true;
-		// false, otherwise.
+    bool isAcceptable;
+        // If a string is acceptable, then this variable is set to true;
+        // false, otherwise.
 
 public:
-	AppClass();
-		// Default constructor.
+    AppClass();
+        // Default constructor.
 
-	~AppClass() {};
-		// Destructor.
+    ~AppClass() {};
+        // Destructor.
 
-	bool CheckString(const char*);
-		// Checks if the string is acceptable.
+    bool CheckString(const char*);
+        // Checks if the string is acceptable.
 
-	inline void Acceptable()
-	{ isAcceptable = true; };
+    inline void Acceptable()
+    { isAcceptable = true; };
 
-	inline void Unacceptable()
-	{ isAcceptable = false; };
-		// State machine actions.
+    inline void Unacceptable()
+    { isAcceptable = false; };
+        // State machine actions.
 };
 
 #endif

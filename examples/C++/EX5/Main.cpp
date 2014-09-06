@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2014/09/06 19:55:33  fperrad
+// remove hard tab
+//
 // Revision 1.7  2014/07/12 10:48:50  fperrad
 // remove _rcs_id
 //
@@ -66,66 +69,66 @@ AppClass appObject;
 
 int main(int, char**)
 {
-	// External routine declarations.
-	void SigintHandler(int);
+    // External routine declarations.
+    void SigintHandler(int);
 
 #ifdef WIN32
     // Windows kinda supports signals.
     (void) signal(SIGINT, SigintHandler);
 #else
-	// Local variable declarations.
-	struct sigaction signalAction;
+    // Local variable declarations.
+    struct sigaction signalAction;
 
-	// External routine declarations.
-	void SigalrmHandler(int);
+    // External routine declarations.
+    void SigalrmHandler(int);
 
-	// Set up the SIGINT handler.
-	signalAction.sa_handler = SigintHandler;
+    // Set up the SIGINT handler.
+    signalAction.sa_handler = SigintHandler;
 #if defined(__hpux) || defined (__linux__)
-	sigemptyset(&signalAction.sa_mask);
+    sigemptyset(&signalAction.sa_mask);
 #if defined(__linux__)
-	signalAction.sa_restorer = NULL;
+    signalAction.sa_restorer = NULL;
 #endif
 #endif
-	signalAction.sa_flags = SA_NOMASK;
-	if (sigaction(SIGINT, &signalAction, (struct sigaction *) NULL) != 0)
-	{
-		cerr << "Unable to set SIGINT handling function." << endl;
-		exit(1);
-	}
+    signalAction.sa_flags = SA_NOMASK;
+    if (sigaction(SIGINT, &signalAction, (struct sigaction *) NULL) != 0)
+    {
+        cerr << "Unable to set SIGINT handling function." << endl;
+        exit(1);
+    }
 
-	// Set up the SIGALRM handler.
-	signalAction.sa_handler = SigalrmHandler;
+    // Set up the SIGALRM handler.
+    signalAction.sa_handler = SigalrmHandler;
 #if defined(__hpux) || defined (__linux__)
-	sigemptyset(&signalAction.sa_mask);
+    sigemptyset(&signalAction.sa_mask);
 #if defined(__linux__)
-	signalAction.sa_restorer = NULL;
+    signalAction.sa_restorer = NULL;
 #endif
 #endif
-	signalAction.sa_flags = SA_NOMASK;
-	if (sigaction(SIGALRM, &signalAction, (struct sigaction *) NULL) != 0)
-	{
-		cerr << "Unable to set SIGALRM handling function." << endl;
-		exit(1);
-	}
+    signalAction.sa_flags = SA_NOMASK;
+    if (sigaction(SIGALRM, &signalAction, (struct sigaction *) NULL) != 0)
+    {
+        cerr << "Unable to set SIGALRM handling function." << endl;
+        exit(1);
+    }
 #endif
 
-	cout << "Starting message processor." << endl;
-	appObject.Run();
-	cout << "Stopping message processor." << endl;
+    cout << "Starting message processor." << endl;
+    appObject.Run();
+    cout << "Stopping message processor." << endl;
 
-	return(0);
+    return 0;
 }
 
 void SigintHandler(int)
 {    // Local variable declarations.
     char theMessage[21];
 
-	cout << "Enter a one word message> " << flush;
-	cin >> theMessage;
+    cout << "Enter a one word message> " << flush;
+    cin >> theMessage;
 
-	// Send the message to the context.
-	appObject.ReceiveRequest(theMessage);
+    // Send the message to the context.
+    appObject.ReceiveRequest(theMessage);
 
 #ifdef WIN32
     // Windows removes the SIGINT callback. So put
@@ -133,12 +136,12 @@ void SigintHandler(int)
     (void) signal(SIGINT, SigintHandler);
 #endif
 
-	return;
+    return;
 }
 
 #ifndef WIN32
 void SigalrmHandler(int)
 {
-	appObject.ProcessingCompleted();
+    appObject.ProcessingCompleted();
 }
 #endif

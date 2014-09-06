@@ -33,6 +33,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2014/09/06 19:54:11  fperrad
+// remove hard tab
+//
 // Revision 1.5  2009/12/17 19:51:42  cwrapp
 // Testing complete.
 //
@@ -50,26 +53,26 @@ class AppClass
 private:
     AppClassContext _fsm;
 
-	bool isAcceptable;
-		// If a string is acceptable, then this variable is set to true;
-		// false, otherwise.
+    bool isAcceptable;
+        // If a string is acceptable, then this variable is set to true;
+        // false, otherwise.
 
 public:
-	AppClass();
-		// Default constructor.
+    AppClass();
+        // Default constructor.
 
-	~AppClass() {};
-		// Destructor.
+    ~AppClass() {};
+        // Destructor.
 
-	bool CheckString(const char*);
-		// Checks if the string is acceptable.
+    bool CheckString(const char*);
+        // Checks if the string is acceptable.
 
-	inline void Acceptable()
-	{ isAcceptable = true; };
+    inline void Acceptable()
+    { isAcceptable = true; };
 
-	inline void Unacceptable()
-	{ isAcceptable = false; };
-		// State machine actions.
+    inline void Unacceptable()
+    { isAcceptable = false; };
+        // State machine actions.
 
 // Uncomment to test serialization.
 //     int serialize(const std::string& filename);

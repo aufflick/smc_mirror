@@ -33,6 +33,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.5  2014/09/06 19:55:33  fperrad
+// remove hard tab
+//
 // Revision 1.4  2005/05/28 13:31:18  cwrapp
 // Updated C++ examples.
 //
@@ -55,27 +58,27 @@ private:
     int _continue_running;
 
 public:
-	AppClass();
-		// Default constructor.
+    AppClass();
+        // Default constructor.
 
-	inline ~AppClass() {};
-		// Destructor.
+    inline ~AppClass() {};
+        // Destructor.
 
-	void Run();
-	    // Start the message processing.
+    void Run();
+        // Start the message processing.
 
-	void ReceiveRequest(const char *message);
-	    // Increment the number of requests and issue a RequestReceived
-		// transition.
+    void ReceiveRequest(const char *message);
+        // Increment the number of requests and issue a RequestReceived
+        // transition.
 
-	void CheckForRequest();
-	    // Check to see if there is another request to process.
+    void CheckForRequest();
+        // Check to see if there is another request to process.
 
-	void DoRequest();
-	    // Handle all messages the same way: sleep on it.
+    void DoRequest();
+        // Handle all messages the same way: sleep on it.
 
-	void ProcessingCompleted();
-	    // The processing of the current request has finished.
+    void ProcessingCompleted();
+        // The processing of the current request has finished.
 };
 
 #endif
