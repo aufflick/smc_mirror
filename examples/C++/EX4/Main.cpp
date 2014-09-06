@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2014/09/06 19:55:00  fperrad
+// *** empty log message ***
+//
 // Revision 1.9  2014/07/12 10:48:50  fperrad
 // remove _rcs_id
 //
@@ -70,13 +73,13 @@ Stoplight *TheLight;
 int KeepGoing = 1;
 
 int YellowTimer = 2;
-	// Yellow lights last 2 seconds.
+    // Yellow lights last 2 seconds.
 
 int NSGreenTimer = 8;
-	// North-south green lasts 8 seconds.
+    // North-south green lasts 8 seconds.
 
 int EWGreenTimer = 5;
-	// East-west green lasts 5 seconds.
+    // East-west green lasts 5 seconds.
 
 #ifdef WIN32
 // Number of milliseconds until the next timeout.
@@ -85,51 +88,51 @@ DWORD Gtimeout;
 
 int main()
 {
-	void SigintHandler(int);
+    void SigintHandler(int);
 
 #ifdef WIN32
     // Windows kinda supports signals.
     (void) signal(SIGINT, SigintHandler);
 #else
-	struct sigaction signalAction;
+    struct sigaction signalAction;
 
-	void SigalrmHandler(int);
+    void SigalrmHandler(int);
 
-	signalAction.sa_handler = SigintHandler;
+    signalAction.sa_handler = SigintHandler;
 #if defined(__hpux) || defined (__linux__)
-	sigemptyset(&signalAction.sa_mask);
+    sigemptyset(&signalAction.sa_mask);
 #if defined(__linux__)
-	signalAction.sa_restorer = NULL;
+    signalAction.sa_restorer = NULL;
 #endif
 #endif
-	signalAction.sa_flags = SA_NOMASK;
-	if (sigaction(SIGINT, &signalAction, (struct sigaction *) NULL) != 0)
-	{
-		cerr << "Unable to set SIGINT handling function." << endl;
-		exit(1);
-	}
+    signalAction.sa_flags = SA_NOMASK;
+    if (sigaction(SIGINT, &signalAction, (struct sigaction *) NULL) != 0)
+    {
+        cerr << "Unable to set SIGINT handling function." << endl;
+        exit(1);
+    }
 
-	signalAction.sa_handler = SigalrmHandler;
+    signalAction.sa_handler = SigalrmHandler;
 #if defined(__hpux) || defined(__linux__)
-	sigemptyset(&signalAction.sa_mask);
+    sigemptyset(&signalAction.sa_mask);
 #if defined(__linux__)
-	signalAction.sa_restorer = NULL;
+    signalAction.sa_restorer = NULL;
 #endif
 #endif
-	signalAction.sa_flags = SA_NOMASK;
-	if (sigaction(SIGALRM, &signalAction, (struct sigaction *) NULL) != 0)
-	{
-		cerr << "Unable to set SIGALRM handling function." << endl;
-		exit(1);
-	}
+    signalAction.sa_flags = SA_NOMASK;
+    if (sigaction(SIGALRM, &signalAction, (struct sigaction *) NULL) != 0)
+    {
+        cerr << "Unable to set SIGALRM handling function." << endl;
+        exit(1);
+    }
 #endif
 
-	TheLight = Stoplight::Initialize(EAST_WEST);
-	if (TheLight == (Stoplight *) NULL)
-	{
-		cerr << "Failed to create stoplight object." << endl;
-		exit(1);
-	}
+    TheLight = Stoplight::Initialize(EAST_WEST);
+    if (TheLight == (Stoplight *) NULL)
+    {
+        cerr << "Failed to create stoplight object." << endl;
+        exit(1);
+    }
 
     TheLight->start();
 
@@ -150,24 +153,24 @@ int main()
         TheLight->Timeout();
     }
 #else
-	while (KeepGoing)
+    while (KeepGoing)
         ;
 #endif
 
-	cout << "Terminating application." << endl;
-	return(0);
+    cout << "Terminating application." << endl;
+    return 0;
 }
 
 void SigintHandler(int)
 {
-	KeepGoing = 0;
-	return;
+    KeepGoing = 0;
+    return;
 }
 
 #ifndef WIN32
 void SigalrmHandler(int)
 {
-	TheLight->Timeout();
-	return;
+    TheLight->Timeout();
+    return;
 }
 #endif
