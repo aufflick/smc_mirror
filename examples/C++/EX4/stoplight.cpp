@@ -33,6 +33,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2014/09/06 09:03:21  fperrad
+// pragma only for MS compiler
+//
 // Revision 1.10  2014/07/12 10:48:50  fperrad
 // remove _rcs_id
 //
@@ -52,7 +55,7 @@
 // Initial revision
 //
 
-#ifdef WIN32
+#ifdef _MSC_VER
 #pragma warning(disable: 4355)
 #endif
 

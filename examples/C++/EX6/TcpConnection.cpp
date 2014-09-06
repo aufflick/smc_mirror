@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2014/09/06 09:04:29  fperrad
+// pragma only for MS compiler
+//
 // Revision 1.7  2007/12/28 12:34:40  cwrapp
 // Version 5.0.1 check-in.
 //
@@ -46,7 +49,7 @@
 // Initial revision
 //
 
-#ifdef WIN32
+#ifdef _MSC_VER
 #pragma warning(disable: 4355)
 #endif
 
@@ -67,7 +70,7 @@
 #  endif
 #endif
 
-#if defined(WIN32)
+#ifdef _MSC_VER
 // Get rid of an annoying build warning.
 #pragma warning(disable: 4355)
 #endif
