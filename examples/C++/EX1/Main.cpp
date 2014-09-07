@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2014/09/07 07:19:00  fperrad
+// exception const reference
+//
 // Revision 1.9  2014/09/06 19:53:15  fperrad
 // remove hard tab
 //
@@ -94,7 +97,7 @@ int main(int argc, char *argv[])
                 cout << "acceptable." << endl;
             }
         }
-        catch (SmcException smcex)
+        catch (const SmcException &smcex)
         {
             cout << "not acceptable - "
                  << smcex.what()
