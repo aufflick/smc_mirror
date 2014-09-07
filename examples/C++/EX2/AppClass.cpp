@@ -30,6 +30,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2014/09/07 17:16:44  fperrad
+// explicit condition
+//
 // Revision 1.8  2014/09/06 19:53:42  fperrad
 // remove hard tab
 //
@@ -66,7 +69,7 @@ AppClass::AppClass()
 bool AppClass::CheckString(const char *theString)
 {
     _fsm.enterStartState();
-    while(*theString)
+    while(*theString != '\0')
     {
         switch(*theString)
         {
