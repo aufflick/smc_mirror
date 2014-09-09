@@ -27,6 +27,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.6  2014/09/09 02:59:16  fperrad
+ * explicit condition
+ *
  * Revision 1.5  2014/07/12 10:41:45  fperrad
  * remove _rcs_id
  *
@@ -71,7 +74,7 @@ void AppClass_Unacceptable(struct AppClass *this)
 
 int AppClass_CheckString(struct AppClass *this, const char *theString)
 {
-	while (*theString)
+	while (*theString != '\0')
 	{
 		switch (*theString)
 		{
