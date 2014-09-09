@@ -34,6 +34,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.3  2014/09/09 03:09:40  fperrad
+ * prototype with name parameter
+ *
  * Revision 1.2  2007/08/05 13:36:32  cwrapp
  * Version 5.0.1 check-in. See net/sf/smc/CODE_README.txt for more information.
  *
@@ -54,9 +57,9 @@ struct AppClass
 	struct AppClassContext _fsm;
 };
 
-extern void AppClass_Init(struct AppClass *);
-extern int AppClass_CheckString(struct AppClass *, const char*);
-extern void AppClass_Acceptable(struct AppClass *);
-extern void AppClass_Unacceptable(struct AppClass *);
+extern void AppClass_Init(struct AppClass *this);
+extern int AppClass_CheckString(struct AppClass *this, const char *theString);
+extern void AppClass_Acceptable(struct AppClass *this);
+extern void AppClass_Unacceptable(struct AppClass *this);
 
 #endif

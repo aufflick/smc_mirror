@@ -34,6 +34,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.5  2014/09/09 03:09:40  fperrad
+ * prototype with name parameter
+ *
  * Revision 1.4  2010/12/01 15:29:09  fperrad
  * C: refactor when package
  *
@@ -74,9 +77,9 @@ struct smc_ex4_Stoplight
     struct smc_ex4_stoplightContext _fsm;
 };
 
-extern void smc_ex4_Stoplight_Init(struct smc_ex4_Stoplight*, enum Directions);
-extern void smc_ex4_Stoplight_TurnLight(struct smc_ex4_Stoplight*, enum StopLights, enum LightColors);
-extern void smc_ex4_Stoplight_SetTimer(struct smc_ex4_Stoplight*, int);
-extern void smc_ex4_Stoplight_Timeout(struct smc_ex4_Stoplight*);
+extern void smc_ex4_Stoplight_Init(struct smc_ex4_Stoplight* this, enum Directions direction);
+extern void smc_ex4_Stoplight_TurnLight(struct smc_ex4_Stoplight* this, enum StopLights light, enum LightColors color);
+extern void smc_ex4_Stoplight_SetTimer(struct smc_ex4_Stoplight* this, int seconds);
+extern void smc_ex4_Stoplight_Timeout(struct smc_ex4_Stoplight* this);
 
 #endif
