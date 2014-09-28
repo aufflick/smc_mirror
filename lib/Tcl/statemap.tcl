@@ -19,7 +19,7 @@
 # Contributor(s):
 #
 # RCS ID
-# $Id$
+# Id: statemap.tcl,v 1.11 2011/11/20 14:58:33 cwrapp Exp
 #
 # statemap.tcl --
 #
@@ -28,7 +28,7 @@
 #  generated state machine.
 #
 # Change Log
-# $Log$
+# Log: statemap.tcl,v
 # Revision 1.11  2011/11/20 14:58:33  cwrapp
 # Check in for SMC v. 6.1.0
 #

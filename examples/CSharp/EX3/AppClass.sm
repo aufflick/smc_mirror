@@ -30,10 +30,10 @@
 //  palindromes.
 //
 // RCS ID
-// $Id$
+// Id: AppClass.sm,v 1.4 2008/08/16 15:26:45 fperrad Exp
 //
 // CHANGE LOG
-// $Log$
+// Log: AppClass.sm,v
 // Revision 1.4  2008/08/16 15:26:45  fperrad
 // + EX3 uses 'jump' when the end state is in another map
 //

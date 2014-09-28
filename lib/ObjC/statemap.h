@@ -36,7 +36,7 @@
 //	Chris Liscio
 //
 // RCS ID
-// $Id$
+// Id: statemap.h,v 1.3 2013/07/14 14:32:36 cwrapp Exp
 //
 // CHANGE LOG
 // (See bottom of this file)
@@ -128,7 +128,7 @@
 
 //
 // CHANGE LOG
-// $Log$
+// Log: statemap.h,v
 // Revision 1.3  2013/07/14 14:32:36  cwrapp
 // check in for release 6.2.0
 //

@@ -22,7 +22,7 @@
 //   examples/C#.
 //
 // RCS ID
-// $Id$
+// Id: FSMContext.cs,v 1.9 2011/11/20 14:58:32 cwrapp Exp
 //
 // statemap.java --
 //
@@ -114,8 +114,6 @@ namespace statemap
             transition_ = "";
             previousState_ = null;
             stateStack_ = new System.Collections.Stack();
-            debugFlag_ = false;
-            debugStream_ = null;
         } // end of FSMContext()
 
         public FSMContext()
@@ -141,41 +139,6 @@ namespace statemap
                 name_ = value;
             }
         } // end of Name()
-
-        // DEPRECATED
-        // As of v. 4.3.3, System.Diagnostics.Trace is
-        // used instead of the debugFlag_, debugStream_
-        // pair.
-        // Used to enable debugging output
-        public bool Debug
-        {
-            get
-            {
-                return debugFlag_;
-            }
-            set
-            {
-                debugFlag_ = value;
-            }
-        }
-
-        // DEPRECATED
-        // As of v. 4.3.3, System.Diagnostics.Trace is
-        // used instead of the debugFlag_, debugStream_
-        // pair. debugStream_ will always be null.
-        // Used to set the output text writer.
-        public TextWriter DebugStream
-        {
-            get
-            {
-                return debugStream_;
-            }
-            set
-            {
-                // DEPRECATED.
-                // debugStream_ = value;
-            }
-        }
 
         // Is this state machine in a transition? If state is
         // null, then true; otherwise, false.
@@ -329,46 +292,32 @@ namespace statemap
     //
 
         // The finite state machine's unique name.
-        [NonSerialized]
         protected string name_;
 
         // The current state.
-        [NonSerialized]
         protected State state_;
+
+        // This stack is used when a push transition is taken.
+        protected System.Collections.Stack stateStack_;
 
         // The current transition *name*. Used for debugging
         // purposes.
+        // Do no persist the transition name because an FSM
+        // should *not* be serialized while in transition.
         [NonSerialized]
         protected string transition_;
 
         // Remember what state a transition left.
         // Do no persist the previous state because an FSM should
-        // be serialized while in transition.
+        // *not* be serialized while in transition.
         [NonSerialized]
         protected State previousState_;
-
-        // This stack is used when a push transition is taken.
-        [NonSerialized]
-        protected System.Collections.Stack stateStack_;
-
-        // DEPRECATED
-        // As of v. 4.3.3, System.Diagnostics.Trace is
-        // used instead of the debugFlag_, debugStream_
-        // pair. debugStream_ will always be null.
-        // When this flag is set to true, this class will print
-        // out debug messages.
-        [NonSerialized]
-        protected bool debugFlag_;
-
-        // Write debug output to this stream.
-        [NonSerialized]
-        protected TextWriter debugStream_;
     } // end of class FSMContext
 } // end of namespace statemap
 
 //
 // CHANGE LOG
-// $Log$
+// Log: FSMContext.cs,v
 // Revision 1.9  2011/11/20 14:58:32  cwrapp
 // Check in for SMC v. 6.1.0
 //

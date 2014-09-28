@@ -19,7 +19,7 @@
 # Contributor(s):
 #
 # RCS ID
-# $Id$
+# Id: Makefile,v 1.1 2011/11/20 15:07:53 cwrapp Exp
 #
 # CHANGE LOG
 # (See the bottom of this file.)
@@ -55,7 +55,7 @@ realclean :     clean
 
 #
 # CHANGE LOG
-# $Log$
+# Log: Makefile,v
 # Revision 1.1  2011/11/20 15:07:53  cwrapp
 # Check in for SMC v. 6.1.0
 #

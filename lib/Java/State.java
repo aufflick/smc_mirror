@@ -24,7 +24,7 @@
 //  any Java class wanting to use an smc-generated state machine.
 //
 // RCS ID
-// $Id$
+// Id: State.java,v 1.7 2009/03/27 09:41:07 cwrapp Exp
 //
 // CHANGE LOG
 // (See the bottom of this file.)
@@ -141,7 +141,7 @@ public abstract class State
 
 //
 // CHANGE LOG
-// $Log$
+// Log: State.java,v
 // Revision 1.7  2009/03/27 09:41:07  cwrapp
 // Added F. Perrad changes back in.
 //

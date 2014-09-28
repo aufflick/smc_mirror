@@ -22,7 +22,7 @@
 //   examples/C#.
 //
 // RCS ID
-// $Id$
+// Id: TransitionUndefinedException.cs,v 1.1 2005/05/28 18:44:13 cwrapp Exp
 //
 // TransitionUndefinedException.cs --
 //
@@ -30,7 +30,7 @@
 //  definition for the transition, default or otherwise.
 //
 // Change Log
-// $Log$
+// Log: TransitionUndefinedException.cs,v
 // Revision 1.1  2005/05/28 18:44:13  cwrapp
 // Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
 //

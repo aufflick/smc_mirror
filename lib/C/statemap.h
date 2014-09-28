@@ -25,10 +25,10 @@
  * Description
  *
  * RCS ID
- * $Id$
+ * Id: statemap.h,v 1.7 2010/09/21 08:15:20 fperrad Exp
  *
  * Change Log
- * $Log$
+ * Log: statemap.h,v
  * Revision 1.7  2010/09/21 08:15:20  fperrad
  * refactor C generation
  *

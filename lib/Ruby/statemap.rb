@@ -20,7 +20,7 @@
 # Contributor(s):
 #
 # RCS ID
-# $Id$
+# Id: statemap.rb,v 1.5 2010/09/11 18:55:55 fperrad Exp
 #
 
 # This namespace contains two class (and two exceptions) :

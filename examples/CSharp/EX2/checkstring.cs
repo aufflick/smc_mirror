@@ -28,10 +28,10 @@
 //  This routine starts the finite state machine running.
 //
 // RCS ID
-// $Id$
+// Id: checkstring.cs,v 1.1 2005/05/28 13:05:17 cwrapp Exp
 //
 // CHANGE LOG
-// $Log$
+// Log: checkstring.cs,v
 // Revision 1.1  2005/05/28 13:05:17  cwrapp
 // Added CSharp examples 1 - 3.
 //

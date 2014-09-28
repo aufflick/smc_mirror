@@ -22,7 +22,7 @@
 //   examples/C#.
 //
 // RCS ID
-// $Id$
+// Id: AssemblyInfo.cs,v 1.5 2013/07/14 15:08:11 cwrapp Exp
 //
 // statemap.java --
 //
@@ -30,7 +30,7 @@
 //  the smc-generated application FSM context class.
 //
 // CHANGE LOG
-// $Log$
+// Log: AssemblyInfo.cs,v
 // Revision 1.5  2013/07/14 15:08:11  cwrapp
 // check in for release 6.2.0
 //

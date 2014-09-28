@@ -23,7 +23,7 @@
 # Contributor(s):
 #
 # RCS ID
-# $Id$
+# Id: Makefile,v 1.4 2012/05/14 07:54:08 fperrad Exp
 #
 # CHANGE LOG
 # (See the bottom of this file.)
@@ -77,7 +77,7 @@ realclean :     clean
 
 #
 # CHANGE LOG
-# $Log$
+# Log: Makefile,v
 # Revision 1.4  2012/05/14 07:54:08  fperrad
 # fix deprecation with Scala 2.9.1
 #

@@ -156,11 +156,7 @@ public final class SmcCppGenerator
         // Is the header file included in a different directory
         // than the source file?
         _source.print("#include \"");
-        if ((_srcDirectory == null &&
-             _headerDirectory != null) ||
-            (_srcDirectory != null &&
-             _headerDirectory != null &&
-             _srcDirectory.equals(_headerDirectory) == false))
+        if (_srcDirectory.equals(_headerDirectory) == false)
         {
             // They are in different directories. Prepend the
             // path from the source file directory to the header
@@ -169,7 +165,7 @@ public final class SmcCppGenerator
                 findPath(_srcDirectory, _headerDirectory));
         }
         // Else they are in the same directory.
-        else if (_srcDirectory != null)
+        else
         {
             _source.print(_srcDirectory);
         }
@@ -1713,6 +1709,9 @@ public final class SmcCppGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.15  2014/09/28 15:41:19  cwrapp
+// SMC 6.4.0 release.
+//
 // Revision 1.14  2014/09/13 06:25:32  fperrad
 // refactor C++ generation
 //

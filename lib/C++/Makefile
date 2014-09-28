@@ -19,7 +19,7 @@
 # Contributor(s):
 #
 # RCS ID
-# $Id$
+# Id: Makefile,v 1.10 2009/03/01 18:20:40 cwrapp Exp
 #
 # CHANGE LOG
 # (See the bottom of this file.)
@@ -56,7 +56,7 @@ realclean :     clean
 
 #
 # CHANGE LOG
-# $Log$
+# Log: Makefile,v
 # Revision 1.10  2009/03/01 18:20:40  cwrapp
 # Preliminary v. 6.0.0 commit.
 #

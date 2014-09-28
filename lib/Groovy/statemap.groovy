@@ -23,7 +23,7 @@
 // Contributor(s):
 //
 // RCS ID
-// $Id$
+// Id: statemap.groovy,v 1.7 2010/03/17 13:13:29 fperrad Exp
 //
 // CHANGE LOG
 // (See the bottom of this file.)
@@ -150,7 +150,7 @@ abstract class FSMContext implements Serializable {
 
 //
 // CHANGE LOG
-// $Log$
+// Log: statemap.groovy,v
 // Revision 1.7  2010/03/17 13:13:29  fperrad
 // add TransitionUndefinedException toString
 //

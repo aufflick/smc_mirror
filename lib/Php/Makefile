@@ -30,7 +30,7 @@
 #   examples/PHP.
 #
 # RCS ID
-# $Id$
+# Id: Makefile,v 1.3 2009/03/01 18:20:41 cwrapp Exp
 #
 # CHANGE LOG
 # (See the bottom of this file.)
@@ -68,7 +68,7 @@ realclean :	clean
 
 #
 # CHANGE LOG
-# $Log$
+# Log: Makefile,v
 # Revision 1.3  2009/03/01 18:20:41  cwrapp
 # Preliminary v. 6.0.0 commit.
 #

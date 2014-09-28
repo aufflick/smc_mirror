@@ -24,10 +24,10 @@
 '  by SMC-generated state machines.
 '
 ' RCS ID
-' $Id$
+' Id: StateUndefinedException.vb,v 1.1 2005/05/28 18:47:13 cwrapp Exp
 '
 ' Change Log
-' $Log$
+' Log: StateUndefinedException.vb,v
 ' Revision 1.1  2005/05/28 18:47:13  cwrapp
 ' Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
 '

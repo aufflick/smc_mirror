@@ -39,7 +39,7 @@
 // code in the user specified target language.
 //
 // RCS ID
-// $Id$
+// Id: Smc.java,v 1.45 2013/12/15 16:31:41 fperrad Exp
 //
 // CHANGE LOG
 // (See bottom of file.)
@@ -212,6 +212,7 @@ public final class Smc
                                         System.err,
                                         parser.getMessages());
 					}
+
                     if (fsm == null)
                     {
                         retcode = 1;
@@ -1245,8 +1246,8 @@ public final class Smc
                IOException,
                ParseException
     {
-        int endIndex =
-            _sourceFileName.length() - 3;
+        final int endIndex =
+            _sourceFileName.lastIndexOf(File.separatorChar);
         String srcFilePath =
             "." + System.getProperty("file.separator");
         String srcFileBase = fsm.getTargetFileName();
@@ -1267,21 +1268,28 @@ public final class Smc
         // and all is well.
         System.setProperty("line.separator", "\n");
 
-        // Strip away any preceding directories from
-        // the source file name.
-        endIndex = _sourceFileName.lastIndexOf(File.separatorChar);
-        if (endIndex >= 0)
-        {
-            srcFilePath =
-                _sourceFileName.substring(
-                    0, (endIndex + 1));
-        }
-
-        // If -d was specified, then use place generated file
+        // If -d was specified, then place generated file
         // there.
         if (_outputDirectory != null)
         {
             srcFilePath = _outputDirectory;
+        }
+        // Strip away any preceding directories from the source
+        // file name and use that as the source file path.
+        else if (endIndex >= 0)
+        {
+            // Note: this substring includes the file separator
+            // at the end because endIndex points to that
+            // character.
+            srcFilePath =
+                _sourceFileName.substring(
+                    0, (endIndex + 1));
+        }
+        // If there are no preceeding directories, then put the
+        // generated code in the current working directory.
+        else
+        {
+            srcFilePath = "";
         }
 
         // If -headerd was specified, then place the file
@@ -1984,7 +1992,7 @@ public final class Smc
 
 //
 // CHANGE LOG
-// $Log$
+// Log: Smc.java,v
 // Revision 1.45  2013/12/15 16:31:41  fperrad
 // full refactor of JavaScript
 //

@@ -23,7 +23,7 @@
 # Contributor(s):
 #
 # RCS ID
-# $Id$
+# Id: statemap.py,v 1.8 2010/09/11 18:56:57 fperrad Exp
 #
 # See: http://smc.sourceforge.net/
 #

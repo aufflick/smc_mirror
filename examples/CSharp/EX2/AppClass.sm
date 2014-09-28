@@ -26,10 +26,10 @@
 //    This state machine is recognizes the regular expression 0*1*.
 //
 // RCS ID
-// $Id$
+// Id: AppClass.sm,v 1.2 2009/03/27 09:41:45 cwrapp Exp
 //
 // CHANGE LOG
-// $Log$
+// Log: AppClass.sm,v
 // Revision 1.2  2009/03/27 09:41:45  cwrapp
 // Added F. Perrad changes back in.
 //

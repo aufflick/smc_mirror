@@ -24,10 +24,10 @@
 //  any Java class wanting to use an smc-generated state machine.
 //
 // RCS ID
-// $Id$
+// Id: TransitionUndefinedException.java,v 1.5 2009/03/27 09:41:07 cwrapp Exp
 //
 // Change Log
-// $Log$
+// Log: TransitionUndefinedException.java,v
 // Revision 1.5  2009/03/27 09:41:07  cwrapp
 // Added F. Perrad changes back in.
 //

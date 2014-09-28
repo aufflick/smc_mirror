@@ -26,7 +26,7 @@
 //   and examples/ObjC.
 //
 // RCS ID
-// $Id$
+// Id: SmcCodeGenerator.java,v 1.8 2013/09/02 14:45:57 cwrapp Exp
 //
 // CHANGE LOG
 // (See the bottom of this file.)
@@ -38,9 +38,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StringWriter;
+import java.text.MessageFormat;
 import java.util.Iterator;
 import java.util.List;
-import java.text.MessageFormat;
+import java.util.regex.Pattern;
 import net.sf.smc.model.SmcAction;
 import net.sf.smc.model.SmcElement;
 import net.sf.smc.model.SmcElement.TransType;
@@ -296,27 +297,30 @@ public abstract class SmcCodeGenerator
     } // end of scopeStateName(String, String)
 
     /**
-     * Returns a relative path from directory {@code dir0} to
-     * directory {@code dir1}. This method assumes that the
+     * Returns a relative path from directory {@code srdDir} to
+     * directory {@code headerDir}. This method assumes that the
      * two directories are different.
      * @param srcDir the source file directory.
      * @param headerDir the header file directory.
-     * @return relative path from {@code dir0} to {@code dir1}.
+     * @return relative path from {@code srcDir} to
+     * {@code headerDir}.
      */
     protected String findPath(final String srcDir,
                               final String headerDir)
     {
         final File dir0 = new File(srcDir);
         final File dir1 = new File(headerDir);
-        String path0;
-        String path1;
+        String path0 = "";
+        String path1 = "";
 
         try
         {
+            final String ifs =
+                Pattern.quote(File.separator);
             final String[] abs0 =
-                (dir0.getCanonicalPath()).split(File.separator);
+                (dir0.getCanonicalPath()).split(ifs);
             final String[] abs1 =
-                (dir1.getCanonicalPath()).split(File.separator);
+                (dir1.getCanonicalPath()).split(ifs);
             final int minSize =
                 (abs0.length < abs1.length ?
                  abs0.length :
@@ -340,8 +344,7 @@ public abstract class SmcCodeGenerator
 
                 // Generate the "backup" path from the first
                 // directory back to this most common parent.
-                path0 = backupPath(index, abs0.length) +
-                        File.separator;
+                path0 = backupPath(index, abs0.length);
                 path1 = generatePath(index, abs1);
             }
             // No, the two directories lie along exactly the same
@@ -355,13 +358,16 @@ public abstract class SmcCodeGenerator
                 path0 = "";
                 path1 = generatePath(index, abs1);
             }
-            else
+            // Is dir0 the subdirectory?
+            else if (abs0.length > abs1.length)
             {
-                // No, dir0 is the subdirectory. Then back up
+                // Yes, dir0 is the subdirectory. Then back up
                 // from dir0.
                 path0 = backupPath(index, abs0.length);
                 path1 = "";
             }
+            // Else the source and header directories are the
+            // same.
         }
         catch (IOException ioex)
         {
@@ -392,6 +398,8 @@ public abstract class SmcCodeGenerator
             retval.append(sep);
             retval.append(BACKDIR);
         }
+
+        retval.append(File.separator);
 
         return (retval.toString());
     } // end of backupPath(int, int)
@@ -610,7 +618,7 @@ public abstract class SmcCodeGenerator
 
 //
 // CHANGE LOG
-// $Log$
+// Log: SmcCodeGenerator.java,v
 // Revision 1.8  2013/09/02 14:45:57  cwrapp
 // SMC 6.3.0 commit.
 //

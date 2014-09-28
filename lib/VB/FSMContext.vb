@@ -24,10 +24,10 @@
 '  by SMC-generated state machines.
 '
 ' RCS ID
-' $Id$
+' Id: FSMContext.vb,v 1.2 2009/03/01 18:20:41 cwrapp Exp
 '
 ' Change Log
-' $Log$
+' Log: FSMContext.vb,v
 ' Revision 1.2  2009/03/01 18:20:41  cwrapp
 ' Preliminary v. 6.0.0 commit.
 '

@@ -38,7 +38,7 @@
 //	C. W. Rapp
 //
 // RCS ID
-// $Id$
+// Id: statemap.h,v 1.19 2014/09/06 19:31:28 fperrad Exp
 //
 // CHANGE LOG
 // (See bottom of file)
@@ -831,7 +831,7 @@ namespace statemap
 
 //
 // CHANGE LOG
-// $Log$
+// Log: statemap.h,v
 // Revision 1.19  2014/09/06 19:31:28  fperrad
 // remove hard tab
 //

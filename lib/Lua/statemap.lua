@@ -20,7 +20,7 @@
 -- Contributor(s):
 --
 -- RCS ID
--- $Id$
+-- Id: statemap.lua,v 1.6 2010/11/21 18:46:31 fperrad Exp
 --
 --
 -- This module contains two class  :

@@ -25,7 +25,7 @@
 //  state machine.
 //
 // RCS ID
-// $Id$
+// Id: FSMContext.java,v 1.16 2013/07/14 14:32:36 cwrapp Exp
 //
 // CHANGE LOG
 // (See the bottom of this file.)
@@ -482,7 +482,7 @@ public abstract class FSMContext
 
 //
 // CHANGE LOG
-// $Log$
+// Log: FSMContext.java,v
 // Revision 1.16  2013/07/14 14:32:36  cwrapp
 // check in for release 6.2.0
 //

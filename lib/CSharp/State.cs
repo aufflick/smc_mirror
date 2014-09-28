@@ -22,7 +22,7 @@
 //   examples/C#.
 //
 // RCS ID
-// $Id$
+// Id: State.cs,v 1.2 2006/09/16 15:04:28 cwrapp Exp
 //
 // State.cs --
 //
@@ -81,7 +81,7 @@ namespace statemap
 
 //
 // CHANGE LOG
-// $Log$
+// Log: State.cs,v
 // Revision 1.2  2006/09/16 15:04:28  cwrapp
 // Initial v. 4.3.3 check-in.
 //

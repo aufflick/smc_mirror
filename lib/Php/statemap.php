@@ -25,10 +25,10 @@
  See: http://smc.sourceforge.net/
 
  RCS ID
- $Id$
+ Id: statemap.php,v 1.5 2009/11/24 20:42:39 cwrapp Exp
 
  CHANGE LOG
- $Log$
+ Log: statemap.php,v
  Revision 1.5  2009/11/24 20:42:39  cwrapp
  v. 6.0.1 update
 

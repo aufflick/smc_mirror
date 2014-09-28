@@ -22,7 +22,7 @@
 //   examples/C#.
 //
 // RCS ID
-// $Id$
+// Id: StateUndefinedException.cs,v 1.1 2005/05/28 18:44:13 cwrapp Exp
 //
 // StateUndefinedException.cs --
 //
@@ -30,7 +30,7 @@
 //  before the current transition has completed.
 //
 // Change Log
-// $Log$
+// Log: StateUndefinedException.cs,v
 // Revision 1.1  2005/05/28 18:44:13  cwrapp
 // Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
 //

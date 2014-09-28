@@ -29,10 +29,10 @@
 //   member function in the context class.
 //
 // RCS ID
-// $Id$
+// Id: AppClass.cs,v 1.3 2009/12/17 19:51:42 cwrapp Exp
 //
 // CHANGE LOG
-// $Log$
+// Log: AppClass.cs,v
 // Revision 1.3  2009/12/17 19:51:42  cwrapp
 // Testing complete.
 //
@@ -46,10 +46,19 @@
 // Initial revision
 //
 
+using System;
+#if SERIAL
+using System.Runtime.Serialization;
+#endif
+
 public class AppClass
 {
     private AppClassContext _fsm;
+
+	[NonSerialized]
     private bool _is_acceptable;
+
+	[NonSerialized]
     private bool _abort;
 
     public AppClass()
@@ -91,8 +100,6 @@ public class AppClass
         return(_is_acceptable);
     }
 
-    
-
     public bool Acceptable
     {
         get {return _is_acceptable;}
@@ -113,4 +120,11 @@ public class AppClass
     {
         _abort = true;
     }
+
+#if SERIAL
+	void IDeserializationCallback.OnDeserialization(object sender)
+	{
+		_fsm.Owner = this;
+	}
+#endif
 }

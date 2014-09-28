@@ -19,10 +19,10 @@
 # Contributor(s):
 #
 # RCS ID
-# $Id$
+# Id: pkgIndex.tcl,v 1.5 2005/05/28 18:47:13 cwrapp Exp
 #
 # CHANGE LOG
-# $Log$
+# Log: pkgIndex.tcl,v
 # Revision 1.5  2005/05/28 18:47:13  cwrapp
 # Updated C++, Java and Tcl libraries, added CSharp, Python and VB.
 #

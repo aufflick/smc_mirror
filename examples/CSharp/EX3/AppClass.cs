@@ -29,10 +29,10 @@
 //  member function in the context class.
 //
 // RCS ID
-// $Id$
+// Id: AppClass.cs,v 1.3 2009/12/17 19:51:43 cwrapp Exp
 //
 // CHANGE LOG
-// $Log$
+// Log: AppClass.cs,v
 // Revision 1.3  2009/12/17 19:51:43  cwrapp
 // Testing complete.
 //

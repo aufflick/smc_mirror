@@ -23,7 +23,7 @@
 // Contributor(s):
 //
 // RCS ID
-// $Id$
+// Id: statemap.scala,v 1.9 2012/05/13 21:31:13 fperrad Exp
 //
 // CHANGE LOG
 // (See the bottom of this file.)
@@ -135,7 +135,7 @@ abstract class FSMContext[State] extends Serializable {
 
 //
 // CHANGE LOG
-// $Log$
+// Log: statemap.scala,v
 // Revision 1.9  2012/05/13 21:31:13  fperrad
 // fix deprecation with Scala 2.9.1
 //
