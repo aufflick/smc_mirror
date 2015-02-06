@@ -1056,7 +1056,7 @@ public final class SmcCGenerator
         // v. 1.0, beta 3: Not any more. The exit actions are
         // executed only if 1) this is a standard, non-loopback
         // transition or a pop transition.
-        if ((map.getFSM().hasEntryActions() == true) &&
+        if ((map.getFSM().hasExitActions() == true) &&
              (transType == TransType.TRANS_POP ||
               loopbackFlag == false))
         {
@@ -1439,6 +1439,9 @@ public final class SmcCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.19  2015/02/06 16:33:02  fperrad
+// fix http://sourceforge.net/p/smc/bugs/201/
+//
 // Revision 1.18  2014/09/28 15:41:19  cwrapp
 // SMC 6.4.0 release.
 //
