@@ -26,7 +26,7 @@
 //   and examples/ObjC.
 //
 // RCS ID
-// $Id$
+// Id: SmcLexer.java,v 1.6 2013/07/14 14:32:38 cwrapp Exp
 //
 // CHANGE LOG
 // (See the bottom of this file.)
@@ -1231,7 +1231,7 @@ import java.util.Map;
 
 //
 // CHANGE LOG
-// $Log$
+// Log: SmcLexer.java,v
 // Revision 1.6  2013/07/14 14:32:38  cwrapp
 // check in for release 6.2.0
 //

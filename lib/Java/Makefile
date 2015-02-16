@@ -35,11 +35,11 @@ include ../../smc.mk
 LIB_SOURCES=    FSMContext.java \
                 State.java \
                 TransitionUndefinedException.java \
-                StateUndefinedException.java
+                StateUndefinedException.java \
+		FSMContext7.java \
+		State7.java
 
-JAVAC=          javac
-JAVAC_FLAGS=    -d . -g
-JAR=            jar
+JAVAC_FLAGS=    -d . -g -source 1.7 -target 1.7
 JAR_FLAGS=      cvf
 JAR_FILE=       ./$(PACKAGE_NAME).jar
 

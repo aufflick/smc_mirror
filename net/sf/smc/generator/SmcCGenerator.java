@@ -90,20 +90,20 @@ public final class SmcCGenerator
 
     /**
      * Emits the following C code for the FSM:
-     * <code>
-     *   <pre>
+     * <pre>
+     *   <code>
      * %{ %} raw source code - if any
      *
      * #include &lt;%include header file&gt;
      * #include "<i>context</i>.h"
-     *   </pre>
-     * </code>
+     *   </code>
+     * </pre>
      * If the -headerd option is used, then this is generated:
-     * <code>
-     *   <pre>
+     * <pre>
+     *   <code>
      * #include "<i>header dir</i>/<i>context</i>.h")
-     *   </pre>
-     * </code>
+     *   </code>
+     * </pre>
      * @param fsm Emit code for this finite state machine.
      */
     public void visit(SmcFSM fsm)
@@ -1330,11 +1330,11 @@ public final class SmcCGenerator
     /**
      * Emits C code for this FSM action. The emitted C code has
      * the format:
-     * <code>
-     *   <pre>
+     * <pre>
+     *   <code>
      * <i>action</i>(ctxt[, <i>arg0</i>, ... , <i>argn</i>]);
-     *   </pre>
-     * </code>
+     *   </code>
+     * </pre>
      * @param action emit C code for this action.
      */
     public void visit(SmcAction action)
@@ -1374,11 +1374,11 @@ public final class SmcCGenerator
     /**
      * Emits C code for this transition parameter. The emitted
      * C code has the format:
-     * <code>
-     *   <pre>
+     * <pre>
+     *   <code>
      * <i>type</i> <i>name</i>
-     *   </pre>
-     * </code>
+     *   </code>
+     * </pre>
      * @param parameter emit C code for this transition
      * parameter.
      */
@@ -1439,6 +1439,69 @@ public final class SmcCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.20  2015/02/16 21:43:09  cwrapp
+// SMC v. 6.5.0
+//
+// SMC - The State Machine Compiler v. 6.5.0
+//
+// Major changes:
+//
+// (Java)
+//     Added a new "-java7" target language. This version represents
+//     the FSM as a transition table. The transition table maps the
+//     current state and the transition to a
+//     java.lang.invoke.MethodHandle. The transition is executed by
+//     calling MethodHandle.invokeExact, which is only slightly
+//     slower than a compiled method call.
+//
+//     The -java7 generated code is compatible with -java generated
+//     code. This allows developers to switch between the two
+//     without changing application code.
+//
+//     NOTE: -java7 requires Java 1.7 or latter to run.
+//
+//
+// Minor changes:
+//
+// (None.)
+//
+//
+// Bug Fixes:
+//
+// (Objective-C)
+//     Incorrect initWithOwner body generated. Same fundamental
+//     problem as SF bug 200. See below.
+//     (SF bug 198)
+//
+// (Website)
+//     Corrected broken link in FAQ page.
+//     (SF bug 199)
+//
+// (C++)
+//     Corrected the invalid generated FSM class name.
+//     (SF bug 200)
+//
+// (C)
+//     EXIT_STATE() #define macro not generated.
+//     (SF bug 201)
+//
+// (Manual)
+//     Corrected examples which showed %fsmclass and %map set to the
+//     same name. This is invalid for most target languages since
+//     that would mean the nested map class would have the same name
+//     as the containing FSM class.
+//
+//
+//
+// ++++++++++++++++++++++++++++++++++++++++
+//
+// If you have any questions or bugs, please surf
+// over to http://smc.sourceforge.net and check out
+// the discussion and bug forums. Note: you must be
+// a SourceForge member to add articles or bugs. You
+// do not have to be a member to read posted
+// articles or bugs.
+//
 // Revision 1.19  2015/02/06 16:33:02  fperrad
 // fix http://sourceforge.net/p/smc/bugs/201/
 //

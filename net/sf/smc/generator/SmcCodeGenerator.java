@@ -137,6 +137,7 @@ public abstract class SmcCodeGenerator
      * @param path The destination directory.
      * @param basename The file's basename sans suffix.
      * @param suffix Append this suffix to the file.
+     * @return the absolute source file name.
      */
     public String sourceFile(final String path,
                              final String basename,
@@ -272,29 +273,51 @@ public abstract class SmcCodeGenerator
      * returns "&lt;mapName&gt;.&lt;stateName&gt;". If the state
      * name contains the scope string "::", replaces that with
      * a ".".
+     * @param stateName an absolute or relative state name.
+     * @param mapName the current map.
+     * @return the scoped absolute state name.
      */
     protected String scopeStateName(String stateName,
                                     String mapName)
     {
-        int index;
-        StringWriter retval = new StringWriter();
-
-        index = stateName.indexOf("::");
-        if (index < 0)
-        {
-            retval.write(mapName);
-            retval.write(".");
-            retval.write(stateName);
-        }
-        else
-        {
-            retval.write(stateName.substring(0, index));
-            retval.write('.');
-            retval.write(stateName.substring(index + 2));
-        }
-
-        return (retval.toString());
+        return (scopeStateName(stateName, mapName, "."));
     } // end of scopeStateName(String, String)
+
+    /**
+     * Scopes the state name. If the state is unscoped, then
+     * returns "&lt;mapName&gt;.&lt;stateName&gt;". If the state
+     * name contains the scope string "::", replaces that with
+     * a {@code ifs}.
+     * @param stateName an absolute or relative state name.
+     * @param mapName the current map.
+     * @param ifs the map name, state name separator.
+     * @return the scoped absolute state name.
+     */
+    protected String scopeStateName(String stateName,
+                                    String mapName,
+                                    final String ifs)
+    {
+        final int index = stateName.indexOf("::");
+        String retval = stateName;
+
+        // If the index is > 0, then a map name was provided.
+        if (index > 0)
+        {
+            mapName = stateName.substring(0, index);
+        }
+
+        // If state name is of the form "::name", then that means
+        // the state is in the current map.
+        if (index >= 0)
+        {
+            stateName = stateName.substring(index + 2);
+        }
+
+        // Else this is a relative state name. Use the map and
+        // state names as given.
+
+        return (mapName + ifs + stateName);
+    } // end of scopeStateName(String, String, String)
 
     /**
      * Returns a relative path from directory {@code srdDir} to

@@ -29,7 +29,7 @@
 #   and examples/ObjC.
 #
 # RCS ID
-# $Id$
+# Id: Makefile,v 1.1 2009/03/01 18:20:42 cwrapp Exp
 #
 # CHANGE LOG
 # (See the bottom of this file.)
@@ -38,6 +38,9 @@
 #################################################################
 # Macros
 #
+
+# Include the official macros.
+include ../../../../smc.mk
 
 SM_SOURCES= \
 		SmcLexer.sm \
@@ -53,15 +56,13 @@ PACKAGE_NAME=	net.sf.smc.parser
 PACKAGE_DIR=	$(subst .,/,$(PACKAGE_NAME))
 
 STATEMAP_LIB_DIR=	../../../../lib/Java
-APP_CLASSPATH=	../../../..:$(STATEMAP_LIB_DIR)/statemap.jar
+APP_CLASSPATH=	$(STATEMAP_LIB_DIR)/statemap.jar:../model/SmcModel.jar
 
 BIN_DIR=		../../../../bin
 INSTALL_DIR=	../../../../../staging/smc/lib/Java
 
-JAVAC=		javac
-JAVAC_FLAGS=	-d . -g -Xlint:unchecked -classpath $(APP_CLASSPATH)
+JAVAC_FLAGS=	-d . -g -source 1.7 -target 1.7 -Xlint:unchecked -classpath $(APP_CLASSPATH)
 
-JAR=		jar
 JAR_CREATE_FLAGS=	cf
 JAR_FILE=	SmcParser.jar
 
@@ -106,7 +107,7 @@ realclean :	clean
 
 #
 # CHANGE LOG
-# $Log$
+# Log: Makefile,v
 # Revision 1.1  2009/03/01 18:20:42  cwrapp
 # Preliminary v. 6.0.0 commit.
 #

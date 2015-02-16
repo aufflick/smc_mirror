@@ -26,7 +26,7 @@
 //   and examples/ObjC.
 //
 // RCS ID
-// $Id$
+// Id: SmcTransition.java,v 1.1 2009/03/01 18:20:42 cwrapp Exp
 //
 // CHANGE LOG
 // (See the bottom of this file.)
@@ -69,19 +69,22 @@ public final class SmcTransition
      * parameters, line number and owning state.
      * @param name transition name.
      * @param parameters transition parameters.
+     * @param transId the assigned transition identifier.
      * @param lineNumber where this transition appears in the .sm
      * file.
      * @param state transition appears in this state.
      */
-    public SmcTransition(String name,
-                         List<SmcParameter> parameters,
-                         int lineNumber,
-                         SmcState state)
+    public SmcTransition(final String name,
+                         final List<SmcParameter> parameters,
+                         final int transId,
+                         final int lineNumber,
+                         final SmcState state)
     {
         super (name, lineNumber);
 
         _state = state;
         _parameters = parameters;
+        _identifier = transId;
         _guards = new ArrayList<SmcGuard>();
     } // end of SmcTransition(String, List<>, int, SmcState)
 
@@ -125,18 +128,17 @@ public final class SmcTransition
      * {@code trans}.
      */
     @Override
-    public int compareTo(SmcTransition trans)
-        throws ClassCastException
+    public int compareTo(final SmcTransition trans)
     {
-        int retval;
+        int retval = _name.compareTo(trans._name);
 
-        if ((retval = _name.compareTo(trans.getName())) == 0)
+        if (retval == 0)
         {
             retval = _compareParams(trans.getParameters());
         }
 
         return(retval);
-    }
+    } // end of compareTo(SmcTransition)
 
     // end of Comparable Interface Implemenation.
     //-----------------------------------------------------------
@@ -144,6 +146,15 @@ public final class SmcTransition
     //-----------------------------------------------------------
     // Get methods.
     //
+
+    /**
+     * Returns the unique transition identifier.
+     * @return transition identifier.
+     */
+    public int getIdentifier()
+    {
+        return (_identifier);
+    } // end of getIdentifier()
 
     /**
      * Returns the transitions owning state.
@@ -244,34 +255,40 @@ public final class SmcTransition
     //-----------------------------------------------------------
 
     /**
-     * Returns {@code true} if {@code obj} is a non-{@code null}
-     * transition instance with the same name and parameters;
-     * {@code false} otherwise.
+     * Returns {@code true} if {@code obj} is a
+     * non-{@code null SmcTransition} instance with the same name
+     * and parameters; {@code false} otherwise.
      * @param obj the compared object.
-     * @return {@code true} if {@code obj} is a non-{@code null}
-     * transition instance with the same name and parameters;
-     * {@code false} otherwise.
+     * @return {@code true} if {@code obj} is a
+     * non-{@code null SmcTransition} instance with the same name
+     * and parameters.
      */
     @Override
-    public boolean equals(Object obj)
+    public boolean equals(final Object obj)
     {
-        boolean retval;
+        boolean retcode = (this == obj);
 
-        try
+        if (retcode == false && obj instanceof SmcTransition)
         {
-            SmcTransition trans = (SmcTransition) obj;
+            final SmcTransition trans = (SmcTransition) obj;
 
-            retval =
-                (_name.equals(trans.getName()) == true &&
-                 _compareParams(trans.getParameters()) == 0);
-        }
-        catch (Exception jex)
-        {
-            retval = false;
+            retcode =
+                (_name.equals(trans._name) == true &&
+                 _compareParams(trans._parameters) == 0);
         }
 
-        return(retval);
+        return(retcode);
     } // end of equals(Object)
+
+    /**
+     * Returns the unique transition identifier.
+     * @return transition identifier as the transition hash code.
+     */
+    @Override
+    public int hashCode()
+    {
+        return (_identifier);
+    } // end of hashCode()
 
     /**
      * Returns an interger value &lt;, equal to or &gt; than
@@ -303,7 +320,7 @@ public final class SmcTransition
     @Override
     public String toString()
     {
-        StringBuffer retval = new StringBuffer(512);
+        final StringBuffer retval = new StringBuffer(512);
         String sep;
         Iterator<SmcParameter> pit;
 
@@ -329,51 +346,83 @@ public final class SmcTransition
             }
         }
 
-        return(retval.toString());
+        return (retval.toString());
     } // end of toString()
 
-    // Compare this transition's parameters with the given list.
-    private int _compareParams(List<SmcParameter> params)
+    /**
+     * Returns an integer value &lt;, equal to, or &gt; zero
+     * based on whether {@code p1} is &lt;, equal to, or &gt;
+     * {@code p2}. The comparison is based on {@link List#size}
+     * first and, if the list sizes are equal, on comparing each
+     * {@link SmcParameter} in turn.
+     * @param p1 the first parameter list.
+     * @param p2 the second parameter list.
+     * @return an integer value &lt;, equal to, or &gt; zero.
+     */
+    public static int compareParams(final List<SmcParameter> p1,
+                                    final List<SmcParameter> p2)
     {
-        Iterator<SmcParameter> pit1;
-        Iterator<SmcParameter> pit2;
-        SmcParameter param1;
-        SmcParameter param2;
-        int retval;
+        int retval = (p1.size() - p2.size());
 
-        retval = _parameters.size() - params.size();
         if (retval == 0)
         {
-            for (pit1 = _parameters.iterator(),
-                     pit2 = params.iterator(),
-                     retval = 0;
-                 pit1.hasNext() == true &&
-                     pit2.hasNext() == true &&
-                     retval == 0;
-                )
+            Iterator<SmcParameter> pit1 = p1.iterator();
+            Iterator<SmcParameter> pit2 = p2.iterator();
+            SmcParameter param1;
+            SmcParameter param2;
+
+            while (pit1.hasNext() == true &&
+                   pit2.hasNext() == true &&
+                   retval == 0)
             {
                 param1 = pit1.next();
                 param2 = pit2.next();
+
                 retval = param1.compareTo(param2);
             }
         }
-        
 
         return (retval);
-    }
+    } // end of compareParams(List<>, List<>)
+
+    // Compare this transition's parameters with the given list.
+    private int _compareParams(final List<SmcParameter> params)
+    {
+        return (compareParams(_parameters, params));
+    } // end of _compareParams(List<>)
 
 //---------------------------------------------------------------
 // Member data
 //
 
+    /**
+     * This transition appears in this state.
+     */
     private SmcState _state;
-    private List<SmcParameter> _parameters;
-    private List<SmcGuard> _guards;
+
+    /**
+     * Each unique transition (transition name plus parameters)
+     * is assigned a unique integer identifier. This is used
+     * in the -java7 transition table generation.
+     */
+    private final int _identifier;
+
+    /**
+     * The transition name plus its parameters uniquely defines
+     * the transition.
+     */
+    private final List<SmcParameter> _parameters;
+
+    /**
+     * The transition guards. There must be at least one
+     * guard.
+     */
+    private final List<SmcGuard> _guards;
 } // end of class SmcTransition
 
 //
 // CHANGE LOG
-// $Log$
+// Log: SmcTransition.java,v
 // Revision 1.1  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
 //

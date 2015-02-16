@@ -33,10 +33,10 @@
  *  This statemap finds tokens in a statemap source file.
  *
  * RCS ID
- * $Id$
+ * Id: SmcLexer.sm,v 1.4 2011/11/20 14:58:33 cwrapp Exp
  *
  * CHANGE LOG
- * $Log$
+ * Log: SmcLexer.sm,v
  * Revision 1.4  2011/11/20 14:58:33  cwrapp
  * Check in for SMC v. 6.1.0
  *

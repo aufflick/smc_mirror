@@ -41,8 +41,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import net.sf.smc.model.SmcAction;
 import net.sf.smc.model.SmcElement.TransType;
 import net.sf.smc.model.SmcFSM;
@@ -93,7 +95,10 @@ public final class SmcParser
     {
         _name = name;
         _targetLanguage = targetLanguage;
-        _messages = new ArrayList<SmcMessage>();
+        _messages = new ArrayList<>();
+        _transitions = new HashMap<>();
+        _nextTransitionId = 1;
+
         _lexer = new SmcLexer(istream, debugFlag);
         _parserFSM = new SmcParserContext(this);
         _parserFSM.setDebugFlag(debugFlag);
@@ -542,12 +547,6 @@ public final class SmcParser
         }
         else
         {
-	    	// check FSM class name
-	    	if ( _fsm.getFsmClassName() == "" )
-	    	{
-	    		// set default FSM class name
-	    		_fsm.setFsmClassName( _fsm.getContext()+"Context" );
-	    	}
             if (_parserFSM.getDebugFlag() == true)
             {
                 PrintStream os = _parserFSM.getDebugStream();
@@ -559,8 +558,7 @@ public final class SmcParser
                            ")");
             }
 
-            _mapInProgress =
-                new SmcMap(name, lineNumber, _fsm);
+            _mapInProgress = new SmcMap(name, lineNumber, _fsm);
         }
 
         return;
@@ -759,6 +757,11 @@ public final class SmcParser
                     _transitionName, params);
             if (_transitionInProgress == null)
             {
+                final int transId =
+                    getTransitionId(
+                        new TransitionKey(
+                            _transitionName, params));
+
                 if (_parserFSM.getDebugFlag() == true)
                 {
                     PrintStream os = _parserFSM.getDebugStream();
@@ -790,6 +793,7 @@ public final class SmcParser
                     new SmcTransition(
                         _transitionName,
                         params,
+                        transId,
                         lineNumber,
                         _stateInProgress);
             }
@@ -1311,6 +1315,24 @@ public final class SmcParser
     // end of State Machine Actions
     //-----------------------------------------------------------
 
+    // Returns the unique integer value assigned to the given
+    // transition name, parameters key. If there is no previously
+    // assigned value, then assigns one now.
+    private int getTransitionId(final TransitionKey transKey)
+    {
+        Integer retval = _transitions.get(transKey);
+
+        if (retval == null)
+        {
+            retval = Integer.valueOf(_nextTransitionId);
+            ++_nextTransitionId;
+
+            _transitions.put(transKey, retval);
+        }
+
+        return (retval.intValue());
+    } // end of getTransitionId(TransitionKey)
+
 //---------------------------------------------------------------
 // Enums.
 //
@@ -1333,7 +1355,7 @@ public final class SmcParser
         C_PLUS_PLUS ("{0}_sm"),
 
         /**
-         * <a href="http://java.sun.com">Java</a>
+         * <a href="http://java.oracle.com">Java</a>
          */
         JAVA ("{0}Context"),
 
@@ -1410,7 +1432,16 @@ public final class SmcParser
         /**
          * JavaScript
          */
-        JS ("{0}_sm");
+        JS ("{0}_sm"),
+
+        /**
+         * <a href="http://java.oracle.com">Java 7</a>
+         * <p>
+         * This version generates a transiton table, not the
+         * State pattern.
+         * </p>
+         */
+        JAVA7 ("{0}Context");
 
     //-----------------------------------------------------------
     // Member methods.
@@ -1447,9 +1478,178 @@ public final class SmcParser
 
     /**
      * SMC currently supports 17 different target languages plus
-     * one for an error code.
+     * one for an error code and plus another for a second
+     * Java implementation.
      */
-    public static final int LANGUAGE_COUNT = 18;
+    public static final int LANGUAGE_COUNT = 19;
+
+//---------------------------------------------------------------
+// Inner classes.
+//
+
+    /**
+     * This immutable class is used to map a unique transition
+     * name, parameter list pair to its unique integer
+     * identifier. This is needed to support -java7 and
+     * overloaded transition names.
+     * <p>
+     * The associated parameter integer identifier is stored
+     * in {@code #_transitions} map.
+     * </p>
+     */
+    private static final class TransitionKey
+        implements Comparable<TransitionKey>
+    {
+    //-----------------------------------------------------------
+    // Member methods.
+    //
+
+        //-------------------------------------------------------
+        // Constructors.
+        //
+
+        // Creates a new transition key for the given name and
+        // parameters.
+        // Note: not argument checking is performed.
+        private TransitionKey(final String name,
+                              final List<SmcParameter> params)
+        {
+            _name = name;
+            _parameters = params;
+        } // end of TransitionKey(String, List<>)
+
+        //
+        // end of Constructors.
+        //-------------------------------------------------------
+
+        //-------------------------------------------------------
+        // Comparable Interface Implementation.
+        //
+
+        /**
+         * Returns an interger value &lt;, equal to or &gt; than
+         * zero if {@code this} transition key is &lt;, equal to
+         * or &gt; than {@code key}. This compararison is based
+         * on the transition name first and, if equal, then on
+         * the parameters.
+         * @param key the compared transition instance.
+         * @return an interger value &lt;, equal to or &gt; than
+         * zero if {@code this} transition is &lt;, equal to or
+         * &gt; than {@code key}.
+         */
+        @Override
+        public int compareTo(final TransitionKey key)
+        {
+            int retval = _name.compareTo(key._name);
+
+            if (retval == 0)
+            {
+                retval =
+                    SmcTransition.compareParams(
+                        _parameters, key._parameters);
+            }
+
+            return (retval);
+        } // end of compareTo(TransitionKey)
+
+        //
+        // end of Comparable Interface Implementation.
+        //-------------------------------------------------------
+
+        //-------------------------------------------------------
+        // Object Method Overrides.
+        //
+
+        /**
+         * Returns {@code true} if {@code obj} is a
+         * non-{@code null TransitionKey} instance with the same
+         * name and parameters; {@code false} otherwise.
+         * <p>
+         * This class does <em>not</em> override
+         * {@link Object#hashCode}.
+         * </p>
+         * @param obj the compared object.
+         * @return {@code true} if {@code obj} is a
+         * non-{@code null TransitionKey} instance with the same
+         * name and parameters.
+         */
+        @Override
+        public boolean equals(final Object obj)
+        {
+            boolean retcode = (this == obj);
+
+            if (retcode == false && obj instanceof TransitionKey)
+            {
+                final TransitionKey key = (TransitionKey) obj;
+
+                retcode =
+                    (_name.equals(key._name) == true &&
+                     SmcTransition.compareParams(
+                         _parameters, key._parameters) == 0);
+            }
+
+            return (retcode);
+        } // end of equals(Object)
+
+        /**
+         * Returns the transition text representation.
+         * @return the transition text representation.
+         */
+        @Override
+            public String toString()
+        {
+            final StringBuffer retval = new StringBuffer(512);
+            String sep;
+            Iterator<SmcParameter> pit;
+
+            retval.append(_name);
+            retval.append("(");
+
+            for (pit = _parameters.iterator(), sep = "";
+                 pit.hasNext() == true;
+                 sep = ", ")
+            {
+                retval.append(sep);
+                retval.append(pit.next());
+            }
+
+            retval.append(")");
+
+            return (retval.toString());
+        } // end of toString()
+
+        //
+        // end of Object Method Overrides.
+        //-------------------------------------------------------
+
+        //-------------------------------------------------------
+        // Get Methods.
+        //
+
+        public String name()
+        {
+            return (_name);
+        } // end of name()
+
+        public List<SmcParameter> parameters()
+        {
+            return (_parameters);
+        } // end of parameters()
+
+        //
+        // end of Get Methods.
+        //-------------------------------------------------------
+
+    //-----------------------------------------------------------
+    // Member data.
+    //
+
+        // The transition name.
+        private final String _name;
+
+        // The transition parameters.
+        private final List<SmcParameter> _parameters;
+    } // end of class TransitionKey
 
 //---------------------------------------------------------------
 // Member Data
@@ -1496,7 +1696,17 @@ public final class SmcParser
     // Store parsed action arguments here.
     private List<String> _argList;
 
+    // The current line being parsed.
     private int _lineNumber;
+
+    // Maps unique transition name, parameter list key to the
+    // transition's assigned identifier.
+    private final Map<TransitionKey, Integer> _transitions;
+
+    // Use this value to assign the next transition identifier.
+    // Initial to one because zero is reserved for the default
+    // transition.
+    private int _nextTransitionId;
 
     //-----------------------------------------------------------
     // Statics.
@@ -1684,6 +1894,69 @@ public final class SmcParser
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.12  2015/02/16 21:43:09  cwrapp
+// SMC v. 6.5.0
+//
+// SMC - The State Machine Compiler v. 6.5.0
+//
+// Major changes:
+//
+// (Java)
+//     Added a new "-java7" target language. This version represents
+//     the FSM as a transition table. The transition table maps the
+//     current state and the transition to a
+//     java.lang.invoke.MethodHandle. The transition is executed by
+//     calling MethodHandle.invokeExact, which is only slightly
+//     slower than a compiled method call.
+//
+//     The -java7 generated code is compatible with -java generated
+//     code. This allows developers to switch between the two
+//     without changing application code.
+//
+//     NOTE: -java7 requires Java 1.7 or latter to run.
+//
+//
+// Minor changes:
+//
+// (None.)
+//
+//
+// Bug Fixes:
+//
+// (Objective-C)
+//     Incorrect initWithOwner body generated. Same fundamental
+//     problem as SF bug 200. See below.
+//     (SF bug 198)
+//
+// (Website)
+//     Corrected broken link in FAQ page.
+//     (SF bug 199)
+//
+// (C++)
+//     Corrected the invalid generated FSM class name.
+//     (SF bug 200)
+//
+// (C)
+//     EXIT_STATE() #define macro not generated.
+//     (SF bug 201)
+//
+// (Manual)
+//     Corrected examples which showed %fsmclass and %map set to the
+//     same name. This is invalid for most target languages since
+//     that would mean the nested map class would have the same name
+//     as the containing FSM class.
+//
+//
+//
+// ++++++++++++++++++++++++++++++++++++++++
+//
+// If you have any questions or bugs, please surf
+// over to http://smc.sourceforge.net and check out
+// the discussion and bug forums. Note: you must be
+// a SourceForge member to add articles or bugs. You
+// do not have to be a member to read posted
+// articles or bugs.
+//
 // Revision 1.11  2013/07/14 14:32:39  cwrapp
 // check in for release 6.2.0
 //

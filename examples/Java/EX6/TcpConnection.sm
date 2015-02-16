@@ -28,10 +28,10 @@
 //  The TCP/IP state transition diagram.
 //
 // RCS ID
-// $Id$
+// Id: TcpConnection.sm,v 1.7 2007/12/28 12:34:40 cwrapp Exp
 //
 // CHANGE LOG
-// $Log$
+// Log: TcpConnection.sm,v
 // Revision 1.7  2007/12/28 12:34:40  cwrapp
 // Version 5.0.1 check-in.
 //
@@ -88,19 +88,19 @@
 %%
 CLOSED
 {
-    PassiveOpen(port: int)
+    Open(port: int)
         ServiceOpening
         {
             openServerSocket(port);
         }
 
-    ActiveOpen(address: InetAddress, port: int)
+    Open(address: InetAddress, port: int)
         ClientOpening
         {
             openClientSocket(address, port);
         }
 
-    AcceptOpen(segment: TcpSegment)
+    Open(segment: TcpSegment)
         SYN_RCVD
         {
             sendAcceptSynAck(segment);
@@ -120,7 +120,7 @@ CLOSED
 // Wait here until service open has either succeeded or failed.
 ServiceOpening
 {
-    Opened
+    Accepted
         LISTEN
         {
             openSuccess();
@@ -593,13 +593,13 @@ Exit
 
 Default
 {
-    PassiveOpen(port: int)
+    Open(port: int)
         nil
         {
             openFailed("already open");
         }
 
-    ActiveOpen(address: InetAddress, port: int)
+    Open(address: InetAddress, port: int)
         nil
         {
             openFailed("already open");

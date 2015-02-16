@@ -31,7 +31,7 @@
 //  transition, a state's entry or exit.
 //
 // RCS ID
-// $Id$
+// Id: SmcAction.java,v 1.2 2009/10/06 15:31:59 kgreg99 Exp
 //
 // CHANGE LOG
 // (See the bottom of this file.)
@@ -224,6 +224,7 @@ public final class SmcAction
     /**
     * Returns {@code true} if this action is a static member.
     * Returns {@code false} if this action is an instance member.
+    * @return {@code true} if this action is a static member.
     */
     public boolean isStatic()
     {
@@ -231,8 +232,11 @@ public final class SmcAction
     }// end of isStatic
     
     /**
-    * Returns {@code true} if this action is the predefined EmptyStateStack()
-    * Returns {@code false} if this action is not the predefined EmptyStateStack()
+    * Returns {@code true} if this action is the predefined
+    * EmptyStateStack() Returns {@code false} if this action is
+    * not the predefined EmptyStateStack().
+    * @return {@code true} if this action is
+    * {@code EmptyStateStack}.
     */
     public boolean isEmptyStateStack()
     {
@@ -362,7 +366,7 @@ public final class SmcAction
 
 //
 // CHANGE LOG
-// $Log$
+// Log: SmcAction.java,v
 // Revision 1.2  2009/10/06 15:31:59  kgreg99
 // 1. Started implementation of feature request #2718920.
 //     1.1 Added method boolean isStatic() to SmcAction class. It returns false now, but is handled in following language generators: C#, C++, java, php, VB. Instance identificator is not added in case it is set to true.

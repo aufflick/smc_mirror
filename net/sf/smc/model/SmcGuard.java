@@ -26,7 +26,7 @@
 //   and examples/ObjC.
 //
 // RCS ID
-// $Id$
+// Id: SmcGuard.java,v 1.4 2012/04/10 19:25:35 fperrad Exp
 //
 // CHANGE LOG
 // (See the bottom of this file.)
@@ -177,7 +177,10 @@ public final class SmcGuard
     } // end of getTransType()
 
     /**
-     * Returns the transition end state name.
+     * Returns the transition end state name. If this is a
+     * {@link net.sf.smc.model.SmcElement.TransType#TRANS_PUSH push}
+     * transition, then this is the state pushed on to the state
+     * stack.
      * @return the transition end state name.
      */
     public String getEndState()
@@ -189,7 +192,7 @@ public final class SmcGuard
      * Returns the push state name. This is only valid if the
      * transition is a
      * {@link net.sf.smc.model.SmcElement.TransType#TRANS_PUSH push}
-     * transition. This state become the current state after the
+     * transition. This state becomes the current state after the
      * transition completes. It is <i>not</i> the state pushed on
      * to the state stack.
      * @return the push state name.
@@ -236,7 +239,7 @@ public final class SmcGuard
               _condition.indexOf("ctxt:") >= 0 ||
               _condition.indexOf("ctxt,") >= 0 ||
               _condition.indexOf("ctxt)") >= 0)) ||
-            _hasActions() == true ||
+            hasActions() == true ||
             (_transType == TransType.TRANS_POP &&
              _popArgs != null &&
              (_popArgs.indexOf("ctxt ") >= 0 ||
@@ -251,6 +254,33 @@ public final class SmcGuard
 
         return (retcode);
     } // end of hasCtxtReference()
+
+    /**
+     * Returns {@code true} if this guard has at least one
+     * action which is not {@code emptyStateStack}; otherwise,
+     * returns {@code false}.
+     * @return {@code true}if the guard has actions.
+     */
+    public boolean hasActions()
+    {
+        boolean retcode = false;
+
+        if (_actions != null && _actions.isEmpty() == false)
+        {
+            Iterator<SmcAction> ait;
+            SmcAction action;
+
+            for (ait = _actions.iterator();
+                 ait.hasNext() == true && retcode == false;
+                )
+            {
+                action = ait.next();
+                retcode = !action.isEmptyStateStack();
+            }
+        }
+
+        return (retcode);
+    } // end of hasActions(List<SmcAction>)
 
     /**
      * Returns the transition action list.
@@ -411,31 +441,6 @@ public final class SmcGuard
         return (retval.toString());
     }
 
-    // The ctxt local variable is created if:
-    // 1. The action list is not null.
-    // 2. The action list has 1 or more items of which
-    //    one is *not* emptyStateStack.
-    private boolean _hasActions()
-    {
-        boolean retcode = false;
-
-        if (_actions != null && _actions.isEmpty() == false)
-        {
-            Iterator<SmcAction> ait;
-            SmcAction action;
-
-            for (ait = _actions.iterator();
-                 ait.hasNext() == true && retcode == false;
-                )
-            {
-                action = ait.next();
-                retcode = !action.isEmptyStateStack();
-            }
-        }
-
-        return (retcode);
-    } // end of hasActions(List<SmcAction>)
-
 //---------------------------------------------------------------
 // Member data.
 //
@@ -452,7 +457,7 @@ public final class SmcGuard
 
 //
 // CHANGE LOG
-// $Log$
+// Log: SmcGuard.java,v
 // Revision 1.4  2012/04/10 19:25:35  fperrad
 // fix 3513161 : ctxt detection in guard (for C)
 //

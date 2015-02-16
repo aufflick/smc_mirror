@@ -26,7 +26,7 @@
 //   and examples/ObjC.
 //
 // RCS ID
-// $Id$
+// Id: SmcFSM.java,v 1.5 2010/02/15 18:05:43 fperrad Exp
 //
 // CHANGE LOG
 // (See the bottom of this file.)
@@ -284,9 +284,10 @@ public final class SmcFSM
 
     /**
      * Returns the named map. May return {@code null}.
+     * @param name map name.
      * @return the named map.
      */
-    public SmcMap findMap(String name)
+    public SmcMap findMap(final String name)
     {
         Iterator<SmcMap> mapIt;
         SmcMap map;
@@ -321,7 +322,7 @@ public final class SmcFSM
      */
     public List<SmcTransition> getTransitions()
     {
-        Comparator<SmcTransition> comparator =
+        final Comparator<SmcTransition> comparator =
             new Comparator<SmcTransition>()
             {
                 public int compare(SmcTransition o1,
@@ -633,7 +634,7 @@ public final class SmcFSM
 
 //
 // CHANGE LOG
-// $Log$
+// Log: SmcFSM.java,v
 // Revision 1.5  2010/02/15 18:05:43  fperrad
 // fix 2950619 : make distinction between source filename (*.sm) and target filename.
 //

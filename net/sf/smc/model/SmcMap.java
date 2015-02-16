@@ -26,7 +26,7 @@
 //   and examples/ObjC.
 //
 // RCS ID
-// $Id$
+// Id: SmcMap.java,v 1.6 2013/07/14 14:32:38 cwrapp Exp
 //
 // CHANGE LOG
 // (See the bottom of this file.)
@@ -64,6 +64,9 @@ public final class SmcMap
     /**
      * Creates a state machine map with the given name, line
      * number and finite state machine.
+     * @param name FSM map name.
+     * @param lineNumber .sm file where element begins.
+     * @param fsm the map resides in this FSM.
      */
     public SmcMap(final String name,
                   final int lineNumber,
@@ -126,6 +129,7 @@ public final class SmcMap
     /**
      * Returns {@code true} if the state is in the list and
      * {@code false} otherwise.
+     * @param state an FSM state.
      * @return {@code true} if the state is in the list and
      * {@code false} otherwise.
      */
@@ -153,6 +157,7 @@ public final class SmcMap
     /**
      * Returns {@code true} if this map contains the nsamed
      * state; {@code false} otherwise.
+     * @param stateName an FSM state name.
      * @return {@code true} if this map contains the nsamed
      * state; {@code false} otherwise.
      */
@@ -447,7 +452,7 @@ public final class SmcMap
 
 //
 // CHANGE LOG
-// $Log$
+// Log: SmcMap.java,v
 // Revision 1.6  2013/07/14 14:32:38  cwrapp
 // check in for release 6.2.0
 //

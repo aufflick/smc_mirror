@@ -26,7 +26,7 @@
 //   and examples/ObjC.
 //
 // RCS ID
-// $Id$
+// Id: SmcElement.java,v 1.1 2009/03/01 18:20:42 cwrapp Exp
 //
 // CHANGE LOG
 // (See the bottom of this file.)
@@ -152,11 +152,11 @@ public abstract class SmcElement
         // Now merge the two lists together.
         // Continue until the end of either list is reached.
         for (it1 = l1.iterator(),
-                     it2 = l2.iterator(),
-                     e1 = null,
-                     e2 = null;
+                 it2 = l2.iterator(),
+                 e1 = null,
+                 e2 = null;
              (it1.hasNext() == true || e1 != null) &&
-                     (it2.hasNext() == true || e2 != null);
+                 (it2.hasNext() == true || e2 != null);
             )
         {
             if (e1 == null)
@@ -278,7 +278,7 @@ public abstract class SmcElement
 
 //
 // CHANGE LOG
-// $Log$
+// Log: SmcElement.java,v
 // Revision 1.1  2009/03/01 18:20:42  cwrapp
 // Preliminary v. 6.0.0 commit.
 //

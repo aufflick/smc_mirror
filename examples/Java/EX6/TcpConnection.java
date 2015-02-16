@@ -25,10 +25,10 @@
 //  Both TCP client and server sockets are TCP connections.
 //
 // RCS ID
-// $Id$
+// Id: TcpConnection.java,v 1.10 2013/09/02 14:45:56 cwrapp Exp
 //
 // CHANGE LOG
-// $Log$
+// Log: TcpConnection.java,v
 // Revision 1.10  2013/09/02 14:45:56  cwrapp
 // SMC 6.3.0 commit.
 //
@@ -221,7 +221,7 @@ public abstract class TcpConnection
                 }
                 else if (name.compareTo("SERVER_OPENED") == 0)
                 {
-                    _fsm.Opened();
+                    _fsm.Accepted();
                 }
                 else if (name.compareTo("CLIENT_OPENED") == 0)
                 {
@@ -298,7 +298,7 @@ public abstract class TcpConnection
                 // transitions.
                 // _outputTransitions();
 
-                _fsm.PassiveOpen(port);
+                _fsm.Open(port);
             }
             finally
             {
@@ -320,7 +320,7 @@ public abstract class TcpConnection
                 // transitions.
                 // _outputTransitions();
 
-                _fsm.ActiveOpen(address, port);
+                _fsm.Open(address, port);
             }
             finally
             {
@@ -342,7 +342,7 @@ public abstract class TcpConnection
                 // transitions.
                 // _outputTransitions();
 
-                _fsm.AcceptOpen(segment);
+                _fsm.Open(segment);
             }
             finally
             {

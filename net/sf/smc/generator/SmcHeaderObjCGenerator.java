@@ -349,16 +349,16 @@ public final class SmcHeaderObjCGenerator
     /**
      * Generates the map class declaration and then the state
      * classes:
-     * <code>
-     *   <pre>
+     * <pre>
+     *   <code>
      * class <i>map name</i>
      * {
      * public:
      *
      *     static <i>map name</i>_<i>state name</i> <i>state name</i>;
      * };
-     *   </pre>
-     * </code>
+     *   </code>
+     * </pre>
      * @param map emit Objective C header code for this map.
     */
     public void visit(SmcMap map)
@@ -442,8 +442,8 @@ public final class SmcHeaderObjCGenerator
 
     /**
      * Generates the state class declaration.
-     * <code>
-     *   <pre>
+     * <pre>
+     *   <code>
      * {@literal @interface} <i>map name</i>_<i>state name</i> : <i>map name</i>_Default
      * {
      * }
@@ -451,8 +451,8 @@ public final class SmcHeaderObjCGenerator
      * (declare the transition methods.)
      * - (void)<i>transition name</i>:(<i>context</i>*)context <i>args</i>;
      * {@literal @end}
-     *   </pre>
-     * </code>
+     *   </code>
+     * </pre>
      * @param state emits Objective C header code for this state.
      */
     public void visit(SmcState state)
@@ -511,11 +511,11 @@ public final class SmcHeaderObjCGenerator
 
     /**
      * Generates the transition method declaration:
-     * <code>
-     *   <pre>
+     * <pre>
+     *   <code>
      * - (void)<i>transition name</i>:(<i>context</i>Context*)context <i>args</i>;
-     *   </pre>
-     * </code>
+     *   </code>
+     * </pre>
      * @param transition emits Groovy code for this state transition.
      */
     public void visit(SmcTransition transition)
@@ -572,6 +572,69 @@ public final class SmcHeaderObjCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2015/02/16 21:43:09  cwrapp
+// SMC v. 6.5.0
+//
+// SMC - The State Machine Compiler v. 6.5.0
+//
+// Major changes:
+//
+// (Java)
+//     Added a new "-java7" target language. This version represents
+//     the FSM as a transition table. The transition table maps the
+//     current state and the transition to a
+//     java.lang.invoke.MethodHandle. The transition is executed by
+//     calling MethodHandle.invokeExact, which is only slightly
+//     slower than a compiled method call.
+//
+//     The -java7 generated code is compatible with -java generated
+//     code. This allows developers to switch between the two
+//     without changing application code.
+//
+//     NOTE: -java7 requires Java 1.7 or latter to run.
+//
+//
+// Minor changes:
+//
+// (None.)
+//
+//
+// Bug Fixes:
+//
+// (Objective-C)
+//     Incorrect initWithOwner body generated. Same fundamental
+//     problem as SF bug 200. See below.
+//     (SF bug 198)
+//
+// (Website)
+//     Corrected broken link in FAQ page.
+//     (SF bug 199)
+//
+// (C++)
+//     Corrected the invalid generated FSM class name.
+//     (SF bug 200)
+//
+// (C)
+//     EXIT_STATE() #define macro not generated.
+//     (SF bug 201)
+//
+// (Manual)
+//     Corrected examples which showed %fsmclass and %map set to the
+//     same name. This is invalid for most target languages since
+//     that would mean the nested map class would have the same name
+//     as the containing FSM class.
+//
+//
+//
+// ++++++++++++++++++++++++++++++++++++++++
+//
+// If you have any questions or bugs, please surf
+// over to http://smc.sourceforge.net and check out
+// the discussion and bug forums. Note: you must be
+// a SourceForge member to add articles or bugs. You
+// do not have to be a member to read posted
+// articles or bugs.
+//
 // Revision 1.9  2013/09/02 14:45:57  cwrapp
 // SMC 6.3.0 commit.
 //

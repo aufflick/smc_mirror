@@ -26,7 +26,7 @@
 //   and examples/ObjC.
 //
 // RCS ID
-// $Id$
+// Id: SmcState.java,v 1.4 2013/07/14 14:32:38 cwrapp Exp
 //
 // CHANGE LOG
 // (See the bottom of this file.)
@@ -84,12 +84,6 @@ public final class SmcState
             _instanceName = name;
         }
 
-        // Make sure the first character in the class name is
-        // upper case.
-//         String firstLetter = name.substring(0, 1);
-//         String remainder = name.substring(1);
-
-//         _className = firstLetter.toUpperCase() + remainder;
         _className = name;
 
         _entryActions = null;
@@ -401,7 +395,7 @@ public final class SmcState
 
 //
 // CHANGE LOG
-// $Log$
+// Log: SmcState.java,v
 // Revision 1.4  2013/07/14 14:32:38  cwrapp
 // check in for release 6.2.0
 //

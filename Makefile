@@ -30,7 +30,7 @@
 #   examples/ObjC.
 #
 # RCS ID
-# $Id$
+# Id: Makefile,v 1.15 2009/12/18 15:51:33 cwrapp Exp
 #
 # CHANGE LOG
 # (See the bottom of this file.)
@@ -64,7 +64,7 @@ javadocs :
 		$(JAVADOC) $(JAVADOC_FLAGS) @$(DOC_SOURCES)
 
 # Copy all products to the staging directory.
-install :	$(SMC_STAGING_DIR) javadocs
+install :	$(SMC_STAGING_DIR)
 		-$(RM_RF) $(SMC_STAGING_DIR)/*
 		$(MAKE) -C lib install
 		$(MAKE) -C net/sf/smc install
@@ -139,7 +139,7 @@ realclean :
 
 #
 # CHANGE LOG
-# $Log$
+# Log: Makefile,v
 # Revision 1.15  2009/12/18 15:51:33  cwrapp
 # Created separate tar and zip file lists.
 #

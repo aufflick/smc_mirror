@@ -74,6 +74,7 @@ import net.sf.smc.generator.SmcHeaderGenerator;
 import net.sf.smc.generator.SmcHeaderCGenerator;
 import net.sf.smc.generator.SmcHeaderObjCGenerator;
 import net.sf.smc.generator.SmcJavaGenerator;
+import net.sf.smc.generator.SmcJava7Generator;
 import net.sf.smc.generator.SmcJSGenerator;
 import net.sf.smc.generator.SmcLuaGenerator;
 import net.sf.smc.generator.SmcObjCGenerator;
@@ -233,7 +234,7 @@ public final class Smc
 
                         // Second - do the semantic check.
                         fsm.accept(checker);
-                        if ( checker.getMessages().size() > 0)
+                        if (checker.getMessages().size() > 0)
                         {
                             _outputMessages(
                                 _sourceFileName,
@@ -1121,15 +1122,15 @@ public final class Smc
         stream.print(" [-hsuffix suffix]");
         stream.print(" [-glevel int]");
         stream.print(
-            " {-c | -c++ | -csharp | -graph | -groovy | -java | -js ");
+            " {-c | -c++ | -csharp | -graph | -groovy | -java | ");
         stream.print(
-            "-lua | -objc | -perl | -php | -python | -ruby | ");
-        stream.print("-scala | -table |-tcl | -vb}");
+            "-java7 | -js -lua | -objc | -perl | -php | -python | ");
+        stream.print("-ruby | -scala | -table |-tcl | -vb}");
         stream.println(" statemap_file");
         stream.println("    where:");
         stream.println(
             "\t-access   Use this access keyword for the generated classes");
-        stream.println("\t          (use with -java only)");
+        stream.println("\t          (use with -java, -java7 only)");
         stream.println(
             "\t-suffix   Add this suffix to output file");
         stream.println(
@@ -1154,7 +1155,7 @@ public final class Smc
         stream.println(
             "\t-sync     Synchronize access to transition methods");
         stream.print("\t          ");
-        stream.println("(use with -csharp, -java, -groovy, -scala and -vb only)");
+        stream.println("(use with -csharp, -java, -java7, -groovy, -scala and -vb only)");
         stream.println(
             "\t-noex     Do not generate C++ exception throws ");
         stream.print("\t          ");
@@ -1170,7 +1171,7 @@ public final class Smc
         stream.println("(use this option with ANT)");
         stream.println("\t-reflect  Generate reflection code");
         stream.print("\t          ");
-        stream.print("(use with -csharp, -groovy, -java, -js, -lua,");
+        stream.print("(use with -csharp, -groovy, -java, -java7, -js, -lua,");
         stream.print(" -perl, -php, -python, -ruby, -scala, ");
         stream.println("-tcl and -vb only)");
         stream.println("\t-generic  Use generic collections");
@@ -1204,6 +1205,7 @@ public final class Smc
         stream.println("\t-graph    Generate GraphViz DOT file");
         stream.println("\t-groovy   Generate Groovy code");
         stream.println("\t-java     Generate Java code");
+        stream.println("\t-java7    Generate Java code as a transition table");
         stream.println("\t-js       Generate JavaScript code");
         stream.println("\t-lua      Generate Lua code");
         stream.println("\t-objc     Generate Objective-C code");
@@ -1220,7 +1222,7 @@ public final class Smc
             "    Note: statemap_file must end in \".sm\"");
         stream.print(
             "    Note: must select one of -c, -c++, -csharp, ");
-        stream.print("-graph, -groovy, -java, -lua, -objc, -perl, ");
+        stream.print("-graph, -groovy, -java, -java7, -lua, -objc, -perl, ");
         stream.println(
             "-php, -python, -ruby, -scala, -table, -tcl or -vb.");
 
@@ -1311,6 +1313,11 @@ public final class Smc
         {
             _accessLevel = "/* package */";
         }
+
+        // If the target language is Java7, then turn on
+        // the java7 flag.
+        _java7Flag =
+            (_targetLanguage.language() == TargetLanguage.JAVA7);
 
         options = new SmcOptions(fsm.getSourceFileName(),
                                  srcFileBase,
@@ -1763,6 +1770,13 @@ public final class Smc
                 "Java",
                 SmcJavaGenerator.class,
                 null);
+        _languages[TargetLanguage.JAVA7.ordinal()] =
+            new Language(
+                TargetLanguage.JAVA7,
+                "-java7",
+                "Java7",
+                SmcJava7Generator.class,
+                null);
         _languages[TargetLanguage.GRAPH.ordinal()] =
             new Language(
                 TargetLanguage.GRAPH,
@@ -1912,6 +1926,7 @@ public final class Smc
         // The -access option.
         languages = new ArrayList<Language>();
         languages.add(_languages[TargetLanguage.JAVA.ordinal()]);
+        languages.add(_languages[TargetLanguage.JAVA7.ordinal()]);
         _optionMap.put(ACCESS_FLAG, languages);
 
         // Languages using a header file.
@@ -1926,6 +1941,7 @@ public final class Smc
         languages = new ArrayList<Language>();
         languages.add(_languages[TargetLanguage.C_SHARP.ordinal()]);
         languages.add(_languages[TargetLanguage.JAVA.ordinal()]);
+        languages.add(_languages[TargetLanguage.JAVA7.ordinal()]);
         languages.add(_languages[TargetLanguage.VB.ordinal()]);
         languages.add(_languages[TargetLanguage.GROOVY.ordinal()]);
         languages.add(_languages[TargetLanguage.SCALA.ordinal()]);
@@ -1935,6 +1951,7 @@ public final class Smc
         languages = new ArrayList<Language>();
         languages.add(_languages[TargetLanguage.C_SHARP.ordinal()]);
         languages.add(_languages[TargetLanguage.JAVA.ordinal()]);
+        languages.add(_languages[TargetLanguage.JAVA7.ordinal()]);
         languages.add(_languages[TargetLanguage.JS.ordinal()]);
         languages.add(_languages[TargetLanguage.VB.ordinal()]);
         languages.add(_languages[TargetLanguage.TCL.ordinal()]);
@@ -1951,6 +1968,7 @@ public final class Smc
         languages = new ArrayList<Language>();
         languages.add(_languages[TargetLanguage.C_SHARP.ordinal()]);
         languages.add(_languages[TargetLanguage.JAVA.ordinal()]);
+        languages.add(_languages[TargetLanguage.JAVA7.ordinal()]);
         languages.add(_languages[TargetLanguage.VB.ordinal()]);
         languages.add(_languages[TargetLanguage.TCL.ordinal()]);
         languages.add(_languages[TargetLanguage.C_PLUS_PLUS.ordinal()]);
@@ -1967,12 +1985,14 @@ public final class Smc
         languages = new ArrayList<Language>();
         languages.add(_languages[TargetLanguage.C_SHARP.ordinal()]);
         languages.add(_languages[TargetLanguage.JAVA.ordinal()]);
+        languages.add(_languages[TargetLanguage.JAVA7.ordinal()]);
         languages.add(_languages[TargetLanguage.VB.ordinal()]);
         _optionMap.put(GENERIC_FLAG, languages);
 
         // The -generic7 option.
         languages = new ArrayList<Language>();
         languages.add(_languages[TargetLanguage.JAVA.ordinal()]);
+        languages.add(_languages[TargetLanguage.JAVA7.ordinal()]);
         _optionMap.put(GENERIC7_FLAG, languages);
 
         // Define the allowed access level keywords for each language
@@ -1987,6 +2007,8 @@ public final class Smc
         accessLevels.add("private");
         _accessMap.put(
             _languages[TargetLanguage.JAVA.ordinal()], accessLevels);
+        _accessMap.put(
+            _languages[TargetLanguage.JAVA7.ordinal()], accessLevels);
     } // end of static
 } // end of class Smc
 

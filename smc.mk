@@ -40,7 +40,7 @@
 # Macros.
 #
 
-VERSION=        6_4_0
+VERSION=        6_5_0
 
 STAGING_DIR=    ../staging
 SMC_STAGING_DIR=$(STAGING_DIR)/smc
@@ -57,6 +57,10 @@ MV=		mv
 RM_F=		rm -f
 RM_RF=		rm -rf
 
+JAVA_BIN=	/Library/Java/JavaVirtualMachines/jdk1.7.0_71.jdk/Contents/Home/bin/
+JAVAC=          $(JAVA_BIN)javac
+JAR=            $(JAVA_BIN)jar
+
 JAVADOC=	javadoc
 DOC_VERSION=	$(VERSION)
 DOC_DIR=	./docs/javadocs
@@ -65,7 +69,7 @@ DOC_SOURCES=	./doc_sources.txt
 WINDOW_TITLE=	'SMC v. $(DOC_VERSION) API Specification'
 DOC_TITLE=	'SMC v. $(DOC_VERSION) API Specification'
 HEADER=		'<b>SMC</b><br><font size="-1">$(DOC_VERSION)</font>'
-FOOTER=		'<font size=-1>Copyright &copy; 2013. Charles W. Rapp. All Rights Reserved. Use is subject to <a href=\"\">license terms</a>.</font>'
+FOOTER=		'<font size=-1>Copyright &copy; 2015. Charles W. Rapp. All Rights Reserved. Use is subject to <a href=\"\">license terms</a>.</font>'
 OVERVIEW=	./overview.html
 
 JAVADOC_FLAGS=	-protected \
@@ -102,6 +106,69 @@ $(SMC_STAGING_DIR) :    $(STAGING_DIR)
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.25  2015/02/16 21:43:01  cwrapp
+# SMC v. 6.5.0
+#
+# SMC - The State Machine Compiler v. 6.5.0
+#
+# Major changes:
+#
+# (Java)
+#     Added a new "-java7" target language. This version represents
+#     the FSM as a transition table. The transition table maps the
+#     current state and the transition to a
+#     java.lang.invoke.MethodHandle. The transition is executed by
+#     calling MethodHandle.invokeExact, which is only slightly
+#     slower than a compiled method call.
+#
+#     The -java7 generated code is compatible with -java generated
+#     code. This allows developers to switch between the two
+#     without changing application code.
+#
+#     NOTE: -java7 requires Java 1.7 or latter to run.
+#
+#
+# Minor changes:
+#
+# (None.)
+#
+#
+# Bug Fixes:
+#
+# (Objective-C)
+#     Incorrect initWithOwner body generated. Same fundamental
+#     problem as SF bug 200. See below.
+#     (SF bug 198)
+#
+# (Website)
+#     Corrected broken link in FAQ page.
+#     (SF bug 199)
+#
+# (C++)
+#     Corrected the invalid generated FSM class name.
+#     (SF bug 200)
+#
+# (C)
+#     EXIT_STATE() #define macro not generated.
+#     (SF bug 201)
+#
+# (Manual)
+#     Corrected examples which showed %fsmclass and %map set to the
+#     same name. This is invalid for most target languages since
+#     that would mean the nested map class would have the same name
+#     as the containing FSM class.
+#
+#
+#
+# ++++++++++++++++++++++++++++++++++++++++
+#
+# If you have any questions or bugs, please surf
+# over to http://smc.sourceforge.net and check out
+# the discussion and bug forums. Note: you must be
+# a SourceForge member to add articles or bugs. You
+# do not have to be a member to read posted
+# articles or bugs.
+#
 # Revision 1.24  2014/09/28 15:41:15  cwrapp
 # SMC 6.4.0 release.
 #

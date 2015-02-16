@@ -65,7 +65,7 @@ import net.sf.smc.parser.SmcParser.TargetLanguage;
  *   <li>
  *     If this is Java code generation that the .sm fle and the
  *     context class have the same name.
- *     <br/>
+ *     <br>
  *     (Note: Removed as of v. 6.1.0 due to addition of %fsmclass
         feature).
  *   </li>
@@ -504,6 +504,69 @@ public final class SmcSyntaxChecker
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2015/02/16 21:43:09  cwrapp
+// SMC v. 6.5.0
+//
+// SMC - The State Machine Compiler v. 6.5.0
+//
+// Major changes:
+//
+// (Java)
+//     Added a new "-java7" target language. This version represents
+//     the FSM as a transition table. The transition table maps the
+//     current state and the transition to a
+//     java.lang.invoke.MethodHandle. The transition is executed by
+//     calling MethodHandle.invokeExact, which is only slightly
+//     slower than a compiled method call.
+//
+//     The -java7 generated code is compatible with -java generated
+//     code. This allows developers to switch between the two
+//     without changing application code.
+//
+//     NOTE: -java7 requires Java 1.7 or latter to run.
+//
+//
+// Minor changes:
+//
+// (None.)
+//
+//
+// Bug Fixes:
+//
+// (Objective-C)
+//     Incorrect initWithOwner body generated. Same fundamental
+//     problem as SF bug 200. See below.
+//     (SF bug 198)
+//
+// (Website)
+//     Corrected broken link in FAQ page.
+//     (SF bug 199)
+//
+// (C++)
+//     Corrected the invalid generated FSM class name.
+//     (SF bug 200)
+//
+// (C)
+//     EXIT_STATE() #define macro not generated.
+//     (SF bug 201)
+//
+// (Manual)
+//     Corrected examples which showed %fsmclass and %map set to the
+//     same name. This is invalid for most target languages since
+//     that would mean the nested map class would have the same name
+//     as the containing FSM class.
+//
+//
+//
+// ++++++++++++++++++++++++++++++++++++++++
+//
+// If you have any questions or bugs, please surf
+// over to http://smc.sourceforge.net and check out
+// the discussion and bug forums. Note: you must be
+// a SourceForge member to add articles or bugs. You
+// do not have to be a member to read posted
+// articles or bugs.
+//
 // Revision 1.10  2011/11/20 14:58:33  cwrapp
 // Check in for SMC v. 6.1.0
 //
