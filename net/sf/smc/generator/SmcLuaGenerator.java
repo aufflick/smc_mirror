@@ -147,7 +147,7 @@ public final class SmcLuaGenerator
         }
 
         _source.println();
-        _source.println("_ENV = nil");
+        _source.println("local _ENV = nil");
 
         // Declare the inner state class.
         _source.println();
@@ -1327,6 +1327,9 @@ public final class SmcLuaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.20  2015/04/24 18:25:24  fperrad
+// Lua: shadow _ENV
+//
 // Revision 1.19  2015/02/16 21:43:09  cwrapp
 // SMC v. 6.5.0
 //
