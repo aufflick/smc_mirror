@@ -33,6 +33,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2015/08/02 19:44:34  cwrapp
+// Release 6.6.0 commit.
+//
 // Revision 1.6  2014/09/06 19:54:11  fperrad
 // remove hard tab
 //
@@ -48,10 +51,16 @@
 
 #include "AppClass_sm.h"
 
+#ifdef CRTP
+class AppClass : public AppClassContext<AppClass>
+#else
 class AppClass
+#endif
 {
 private:
+#ifndef CRTP
     AppClassContext _fsm;
+#endif
 
     bool isAcceptable;
         // If a string is acceptable, then this variable is set to true;
@@ -74,9 +83,10 @@ public:
     { isAcceptable = false; };
         // State machine actions.
 
-// Uncomment to test serialization.
-//     int serialize(const std::string& filename);
-//     int deserialize(const std::string& filename);
+#ifdef SERIALIZE
+    int serialize(const std::string& filename);
+    int deserialize(const std::string& filename);
+#endif
 };
 
 #endif

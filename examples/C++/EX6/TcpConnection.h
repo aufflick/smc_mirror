@@ -32,6 +32,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2015/08/02 19:44:35  cwrapp
+// Release 6.6.0 commit.
+//
 // Revision 1.5  2007/12/28 12:34:40  cwrapp
 // Version 5.0.1 check-in.
 //
@@ -57,6 +60,9 @@
 class TcpConnection :
     /* implements */ public InputListener,
     /* implements */ public TimerListener
+#ifdef CRTP
+    /* extends */ , public TcpConnectionContext<TcpConnection>
+#endif
 {
 // Member functions.
  public:
@@ -223,7 +229,9 @@ class TcpConnection :
     // Store failure messages here.
     char *_errorMessage;
 
+#ifndef CRTP
     TcpConnectionContext _fsm;
+#endif
 };
 
 #endif

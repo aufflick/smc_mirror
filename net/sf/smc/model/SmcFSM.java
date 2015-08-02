@@ -430,16 +430,25 @@ public final class SmcFSM
     } // end of setContext(String)
 
     /**
-     * Set the fsm class name and source file name.
+     * Sets the fsm class name. <strong>Note:</strong> this
+     * method does <em>not</em> set the target file name.
      * @param fsmName The finite state machine's class name.
      */
     public void setFsmClassName(String fsmName)
     {
         _fsmClassName = fsmName;
-        _targetFileName = fsmName;
-
         return;
     } // end of setFsmClassName(String)
+
+    /**
+     * Sets the FSM source file name.
+     * @param fileName the finite state machine file name.
+     */
+    public void setFsmTargetFile(final String fileName)
+    {
+        _targetFileName = fileName;
+        return;
+    } // end of setFsmTargetFile(String)
 
     /**
      * Sets the context class header file name.

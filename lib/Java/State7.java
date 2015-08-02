@@ -69,7 +69,7 @@ public final class State7
                   final int id,
                   final MethodHandle entry,
                   final MethodHandle exit,
-                  final MethodHandle[] transitions,
+                  final TransitionHandle[] transitions,
                   final String[] transNames)
     {
         _name = name;
@@ -143,7 +143,7 @@ public final class State7
      * @param transitionId the unique transition identifier.
      * @return the transition method handle.
      */
-    public MethodHandle transition(final int transitionId)
+    public TransitionHandle transition(final int transitionId)
     {
         return (_transitions[transitionId]);
     } // end of transition(int)
@@ -197,7 +197,7 @@ public final class State7
     /**
      * Transition action method handles.
      */
-    private final MethodHandle[] _transitions;
+    private final TransitionHandle[] _transitions;
 
     /**
      * The transition names implemented in this class.

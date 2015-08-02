@@ -326,8 +326,7 @@ public final class SmcPhpGenerator
 
                 _source.print("            ");
                 _source.print(mapName);
-                _source.print("::$Default");
-                _source.println(",");
+                _source.println("::$Default_,");
 
                 for (SmcState state: map.getStates())
                 {
@@ -1406,6 +1405,9 @@ public final class SmcPhpGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.14  2015/08/02 19:44:36  cwrapp
+// Release 6.6.0 commit.
+//
 // Revision 1.13  2015/02/16 21:43:09  cwrapp
 // SMC v. 6.5.0
 //

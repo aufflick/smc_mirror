@@ -40,7 +40,7 @@
 # Macros.
 #
 
-VERSION=        6_5_0
+VERSION=        6_6_0
 
 STAGING_DIR=    ../staging
 SMC_STAGING_DIR=$(STAGING_DIR)/smc
@@ -106,6 +106,9 @@ $(SMC_STAGING_DIR) :    $(STAGING_DIR)
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.26  2015/08/02 19:44:31  cwrapp
+# Release 6.6.0 commit.
+#
 # Revision 1.25  2015/02/16 21:43:01  cwrapp
 # SMC v. 6.5.0
 #

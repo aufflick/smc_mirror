@@ -2,6 +2,112 @@
 
                                SMC
                      The State Machine Compiler
+                         (Version: 6.6.0)
+
+                     http://smc.sourceforge.net
+
+
+
+0. What's New?
+--------------
+
+Major changes:
+
+[C++]
+    Added a new "-crtp" (Curiously Recurring Template Pattern)
+    option making FSM integration into an application easier and
+    more efficient. Instead of the user class containing an FSM
+    data member like "AppClassContext _fsm", the user class
+    publicly inherits the context like:
+
+        class AppClass : public AppClassContext<AppClass>
+
+    A transition is issued by calling the transition method
+    directly rather than through the _fsm data member. So the
+    call "_fsm.Open()" becomes "Open()". This removes one layer
+    of indirection from user code.
+
+    All C++ examples had their Makefiles updated to include two
+    macros for the CRTP feature. Uncomment these macros and
+    compile to see how this feature works.
+
+[C++]
+    Added a new "-stack max-state-stack-depth" option. This
+    option generates a fixed-size state stack with the specified
+    maximum depth. No dynamic memory is allocated for the state
+    stack.
+
+    Caveat: use this option only if 1) your FSM uses the push
+    transition, and 2) your push transitions can only reach a
+    well-defined maximum limit. Conversely, if your FSM does not
+    use push transitions or your push limit is unbounded, then do
+    not use this option.
+
+    This option can be used in combination with "-noex" to create
+    a C++ FSM which performs no dynamic memory allocation (since
+    C++ exceptions automatically use dynamic memory allocation.)
+
+    C++ example EX3 was updated to demonstrate this feature.
+
+
+Minor changes:
+
+(All)
+    Added a new directive "%fsmfile" and modified the behavior or
+    "%fsmclass". Previously, directive "%fsmclass" set both the
+    FSM class name *and* file name. Now "%fsmclass" sets only the
+    FSM class name and "%fsmfile" sets the file name in which it
+    is stored.
+
+(C#)
+    Added the attribute
+    [System.CodeDom.Compiler.GeneratedCode("smc", "x.x.x")]
+    to each generated class. This attribute is used by source
+    analyzers such as FxCop.
+
+(Java)
+    Updated -java7 -reflection to emit a public final class for
+    each map. This class contains a public static final State7
+    field for each of the map's states. The purpose behind this
+    feature is to restore the ability to reference states as
+    "<map name>.<state name>". When using -java7, it is
+    preferable to reference a state using the integer constant
+    named "<map name>_<state name>_STATE_ID".
+
+
+Bug Fixes:
+
+(All)
+    The -version command line option returns the wrong version.
+    (SF bug 202)
+
+(Java)
+    -java7 generates invalid code for transitions with generic
+    parameters.
+    (SF bug 203)
+
+(Php)
+    Using -php and -reflect emits an incorrect name for the
+    Default state. In Php, the Default state is named "Default_"
+    so as not to conflict with a Php reserved word.
+    (SF bug 204)
+
+(Php)
+    The previous state is not set in action-less transitions.
+    (SF bug 205)
+
+(Java)
+    -java7 does not correctly fall through to the Default
+    transition. This is due to the actual transition having a
+    different method signature than the Default transition (which
+    has not parameters).
+    (SF bug 206)
+
+
+
+
+                               SMC
+                     The State Machine Compiler
                          (Version: 6.3.0)
 
                      http://smc.sourceforge.net

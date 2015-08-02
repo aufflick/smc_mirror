@@ -34,6 +34,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2015/08/02 19:44:35  cwrapp
+// Release 6.6.0 commit.
+//
 // Revision 1.9  2014/09/06 19:55:33  fperrad
 // remove hard tab
 //
@@ -74,12 +77,22 @@
 using namespace std;
 
 AppClass::AppClass()
+#ifdef CRTP
+: _number_of_requests(0),
+  _continue_running(1)
+#else
 : _fsm(*this),
   _number_of_requests(0),
   _continue_running(1)
+#endif
 {
-    // Uncomment following line to see debug output.
-    // _fsm.setDebugFlag(true);
+#ifdef FSM_DEBUG
+#ifdef CRTP
+    setDebugFlag(true);
+#else
+    _fsm.setDebugFlag(true);
+#endif
+#endif
 }
 
 void AppClass::Run()
@@ -88,7 +101,11 @@ void AppClass::Run()
     DWORD SleepTime;
 #endif
 
+#ifdef CRTP
+    enterStartState();
+#else
     _fsm.enterStartState();
+#endif
     while (_continue_running == 1)
     {
 #ifdef WIN32
@@ -122,7 +139,11 @@ void AppClass::ReceiveRequest(const char *message)
         ++_number_of_requests;
 
         // Process this message.
+#ifdef CRTP
+        RequestReceived();
+#else
         _fsm.RequestReceived();
+#endif
     }
 
     return;
@@ -132,7 +153,11 @@ void AppClass::CheckForRequest()
 {
     if (_number_of_requests > 0)
     {
+#ifdef CRTP
+        ProcessRequest();
+#else
         _fsm.ProcessRequest();
+#endif
     }
     else if (_number_of_requests < 0)
     {
@@ -176,5 +201,9 @@ void AppClass::ProcessingCompleted()
 {
     cout << "... Processing completed." << endl;
 
+#ifdef CRTP
+    ProcessingDone();
+#else
     _fsm.ProcessingDone();
+#endif
 } // end of AppClass::ProcessingCompleted()

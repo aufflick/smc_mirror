@@ -33,6 +33,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.12  2015/08/02 19:44:34  cwrapp
+// Release 6.6.0 commit.
+//
 // Revision 1.11  2014/09/06 09:03:21  fperrad
 // pragma only for MS compiler
 //
@@ -79,12 +82,28 @@ extern DWORD Gtimeout;
 namespace cpp_ex4
 {
     Stoplight::Stoplight(const statemap::State& state)
+#ifdef CRTP
+    : StoplightContext(state)
+#else
     : _fsm(*this, state)
-    {}
+#endif
+    {
+#ifdef FSM_DEBUG
+#ifdef CRTP
+        setDebugFlag(true);
+#else
+        _fsm.setDebugFlag(true);
+#endif
+#endif
+    }
 
     void Stoplight::start()
     {
+#ifdef CRTP
+        enterStartState();
+#else
         _fsm.enterStartState();
+#endif
         return;
     }
 

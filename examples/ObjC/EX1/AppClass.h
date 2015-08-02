@@ -28,20 +28,24 @@
 
 #import "AppClass_sm.h"
 
-@interface AppClass : NSObject
+@protocol AppClass <NSObject>
+    // Methods called back from the fsm
+    - (void)Acceptable;
+    - (void)Unacceptable;
+@end
+
+@interface AppClass : NSObject <AppClass>
 {
     AppClassContext *_fsm;
-	BOOL isAcceptable;
+    BOOL isAcceptable;
 }
+
 - (BOOL)checkString:(char*)str;
 
-// Methods called back from the fsm
-- (void)Acceptable;
-- (void)Unacceptable;
 @end
 
 // CHANGE LOG
-// $Log$
+// Log: AppClass.h,v 
 // Revision 1.1  2007/01/15 00:23:48  cwrapp
 // Release 4.4.0 initial commit.
 //

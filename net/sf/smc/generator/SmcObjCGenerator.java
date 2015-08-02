@@ -262,7 +262,7 @@ public final class SmcObjCGenerator
 
 				_source.print(_indent);
                 _source.print("    ");
-				_source.print("[g");
+                _source.print("[g");
                 _source.print(mapName);
                 _source.print("_");
                 _source.print(state.getClassName());
@@ -416,8 +416,8 @@ public final class SmcObjCGenerator
         // }
         _source.print(_indent);
         _source.print("- (id)initWithOwner:(");
-        _source.print(context);
-        _source.print("*)");
+        printContextType(context);
+        _source.print(")");
         _source.println("owner;");
         _source.print(_indent);
         _source.println("{");
@@ -458,8 +458,8 @@ public final class SmcObjCGenerator
         // }
         _source.print(_indent);
         _source.print("- (id)initWithOwner:(");
-        _source.print(context);
-        _source.print("*)");
+        printContextType(context);
+        _source.print(")");
         _source.println("owner state:(SMCState*)aState;");
         _source.print(_indent);
         _source.println("{");
@@ -536,8 +536,8 @@ public final class SmcObjCGenerator
         // }
         _source.print(_indent);
         _source.print("- (");
-        _source.print(context);
-        _source.println("*)owner;");
+        printContextType(context);
+        _source.println(")owner;");
         _source.print(_indent);
         _source.println("{");
         _source.print(_indent);
@@ -705,8 +705,8 @@ public final class SmcObjCGenerator
             // Declare the "ctxt" local variable.
             _source.print(_indent);
             _source.print("    ");
-            _source.print(context);
-            _source.println(" *ctxt = [context owner];");
+            printContextType(context);
+            _source.println(" ctxt = [context owner];");
             _source.println();
 
             // Generate the actions associated with this code.
@@ -736,8 +736,8 @@ public final class SmcObjCGenerator
             // Declare the "ctxt" local variable.
             _source.print(_indent);
             _source.print("    ");
-            _source.print(context);
-            _source.println(" *ctxt = [context owner];");
+            printContextType(context);
+            _source.println(" ctxt = [context owner];");
             _source.println();
 
             // Generate the actions associated with this code.
@@ -823,8 +823,8 @@ public final class SmcObjCGenerator
         {
             _source.print(_indent);
             _source.print("    ");
-            _source.print(context);
-            _source.println(" *ctxt = [context owner];");
+            printContextType(context);
+            _source.println(" ctxt = [context owner];");
         }
 
         // Print the transition to the verbose log.
@@ -1457,6 +1457,29 @@ public final class SmcObjCGenerator
                 "]");
     } // end of convertScope(String)
 
+    /**
+     * Outputs the appropriate context declaration based on
+     * whether the "-protocol" command line parameter was
+     * specified or not.
+     * @param context context class name.
+     */
+    private void printContextType(final String context)
+    {
+        if (_useProtocolFlag == true)
+        {
+            _source.print("id<");
+            _source.print(context);
+            _source.print(">");
+        }
+        else
+        {
+            _source.print(context);
+            _source.print("*");
+        }
+
+        return;
+    } // end of printContextType(String)
+
 //---------------------------------------------------------------
 // Member data
 //
@@ -1464,7 +1487,7 @@ public final class SmcObjCGenerator
 
 //
 // CHANGE LOG
-// $Log$
+// Log: SmcObjCGenerator.java,v
 // Revision 1.13  2015/02/16 21:43:09  cwrapp
 // SMC v. 6.5.0
 //

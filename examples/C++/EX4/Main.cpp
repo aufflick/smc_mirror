@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2015/08/02 19:44:34  cwrapp
+// Release 6.6.0 commit.
+//
 // Revision 1.10  2014/09/06 19:55:00  fperrad
 // *** empty log message ***
 //
@@ -150,7 +153,7 @@ int main()
             Sleep(500);
         }
 
-        TheLight->Timeout();
+        TheLight->SigTimeout();
     }
 #else
     while (KeepGoing)
@@ -170,7 +173,7 @@ void SigintHandler(int)
 #ifndef WIN32
 void SigalrmHandler(int)
 {
-    TheLight->Timeout();
+    TheLight->SigTimeout();
     return;
 }
 #endif

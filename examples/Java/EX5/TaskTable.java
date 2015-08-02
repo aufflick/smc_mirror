@@ -30,6 +30,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2015/08/02 19:44:35  cwrapp
+// Release 6.6.0 commit.
+//
 // Revision 1.5  2007/02/21 13:41:08  cwrapp
 // Moved Java code to release 1.5.0
 //
@@ -92,7 +95,7 @@ public final class TaskTable
 
                 if (renderer == null)
                 {
-                    Class c = getColumnClass(column);
+                    Class<?> c = getColumnClass(column);
 
                     if (c.equals(Object.class))
                     {
@@ -109,6 +112,8 @@ public final class TaskTable
 
                 return(renderer);
             }
+
+            private static final long serialVersionUID = 1L;
         };
 
         _taskTable.setPreferredScrollableViewportSize(
@@ -328,7 +333,7 @@ public final class TaskTable
             return(retval);
         }
 
-        public Class getColumnClass(int c)
+        public Class<?> getColumnClass(int c)
         {
             return(getValueAt(0, c).getClass());
         }
@@ -480,6 +485,7 @@ public final class TaskTable
         };
 
         private List<Object[]> _data;
+        private static final long serialVersionUID = 1L;
     }
 
     private final class JComponentCellRenderer

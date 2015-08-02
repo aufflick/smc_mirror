@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2015/08/02 19:44:35  cwrapp
+// Release 6.6.0 commit.
+//
 // Revision 1.6  2007/12/28 12:34:40  cwrapp
 // Version 5.0.1 check-in.
 //
@@ -135,7 +138,7 @@ public final class AsyncTimer
 
         // First, tell the timer to stop. Then remove
         // the timer from the map.
-        if ((timer = (TimerThread) _timerMap.get(name)) != null)
+        if ((timer = _timerMap.get(name)) != null)
         {
             timer.stopTimer();
             _timerMap.remove(name);

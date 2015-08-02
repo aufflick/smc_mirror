@@ -23,6 +23,9 @@
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.12  2015/08/02 19:44:34  cwrapp
+# Release 6.6.0 commit.
+#
 # Revision 1.11  2008/07/29 06:50:57  fperrad
 # - add a target 'png'
 #
@@ -67,11 +70,15 @@ CHECKSTRING=    ./$(TARGET)
 # Uncomment to turn off IOStreams for debug.
 # NO_STREAMS=     -nostreams
 
+# Uncomment to see state machine debug output.
+# FSM_DEBUG=      -DFSM_DEBUG
+
 # Uncomment to turn on debug message generation.
 TRACE=          -g $(NO_STREAMS)
 
-# Uncomment to turn on serialization.
+# Uncomment both lines to turn on serialization.
 # SERIAL=         -serial
+# SERIAL_FLAG=	  -DSERIALIZE
 
 # Uncomment to turn off try/catch/rethrow generation.
 # NO_CATCH=       -nocatch
@@ -79,11 +86,20 @@ TRACE=          -g $(NO_STREAMS)
 # Uncomment to turn off exception throws.
 # NO_EXCEPT=      -noex
 
+# Uncomment to turn on static memory allocation.
+# Note: this limits input strings to 10 characters to the
+#       left of 'c'.
+# STACK=         -stack 10
+
+# Uncomment to turn on CRTP code and -crtp SMC flag.
+# CRTP=           -crtp
+# CRTP_FLAG=      -DCRTP
+
 SMC=            java -jar ../../../bin/Smc.jar
-SMC_FLAGS=      -c++ $(TRACE) $(SERIAL) $(NO_CATCH) $(NO_EXCEPT)
+SMC_FLAGS=      -c++ $(TRACE) $(SERIAL) $(NO_CATCH) $(NO_EXCEPT) $(STACK) $(CRTP)
 
 CXX=            c++
-CPPFLAGS=       -g -Wall -Wextra -I../../../lib/C++
+CPPFLAGS=       -g -Wall -Wextra -I../../../lib/C++ $(FSM_DEBUG) $(SERIAL_FLAG) $(CRTP_FLAG)
 
 RM_F=           rm -f
 

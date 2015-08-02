@@ -55,10 +55,11 @@ TRACE=          -g
 
 SMC=            java -jar ../../../bin/Smc.jar
 TARGET_LANG=    -java
+# TARGET_LANG=    -java7
 SMC_FLAGS=      $(TARGET_LANG) $(TRACE) $(SERIAL) $(SYNC) $(REFLECT) $(GENERIC)
 
 JAVAC=          javac
-JAVAC_FLAGS=    -g -Xlint:unchecked -classpath ../../../lib/Java/statemap.jar
+JAVAC_FLAGS=    -g -Xlint -classpath ../../../lib/Java/statemap.jar
 
 JAVA=           java
 JAVA_FLAGS=     -classpath .:../../../lib/Java/statemap.jar
@@ -111,6 +112,9 @@ clean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.13  2015/08/02 19:44:35  cwrapp
+# Release 6.6.0 commit.
+#
 # Revision 1.12  2015/02/16 21:43:08  cwrapp
 # SMC v. 6.5.0
 #

@@ -69,7 +69,7 @@ SYNC=           -sync
 
 # JAVA_BIN=	/Library/Java/JavaVirtualMachines/jdk1.7.0_71.jdk/Contents/Home/bin/
 JAVAC=          $(JAVA_BIN)javac
-JAVAC_FLAGS=    -d . -g -Xlint:unchecked -classpath $(FSM_LIB_DIR)/statemap.jar
+JAVAC_FLAGS=    -d . -g -Xlint -classpath $(FSM_LIB_DIR)/statemap.jar
 
 JAR=                    $(JAVA_BIN)jar
 JAR_CREATE_FLAGS=       cmf
@@ -79,6 +79,7 @@ JAVA=           $(JAVA_BIN)java
 
 SMC=            $(JAVA) -jar ../../../bin/Smc.jar
 TARGET_LANG=	-java
+# TARGET_LANG=    -java7
 SMC_FLAGS=      $(TARGET_LANG) $(TRACE) $(SERIAL) $(SYNC) $(REFLECT) $(GENERIC)
 
 FSM_LIB_DIR=    ../../../lib/Java
@@ -133,6 +134,9 @@ clean :
 #
 # CHANGE LOG
 # $Log$
+# Revision 1.16  2015/08/02 19:44:35  cwrapp
+# Release 6.6.0 commit.
+#
 # Revision 1.15  2015/02/16 21:43:09  cwrapp
 # SMC v. 6.5.0
 #

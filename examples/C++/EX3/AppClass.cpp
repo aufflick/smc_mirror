@@ -30,6 +30,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2015/08/02 19:44:34  cwrapp
+// Release 6.6.0 commit.
+//
 // Revision 1.10  2014/09/07 17:16:44  fperrad
 // explicit condition
 //
@@ -60,17 +63,72 @@
 #endif
 
 #include "AppClass.h"
+#include <fcntl.h>
 
 AppClass::AppClass()
+#ifdef CRTP
+: isAcceptable(false)
+#else
 : _fsm(*this),
   isAcceptable(false)
+#endif
 {
     // Uncomment to see debug output.
-    // _fsm.setDebugFlag(true);
+#ifdef FSM_DEBUG
+#ifdef CRTP
+    setDebugFlag(true);
+#else
+    _fsm.setDebugFlag(true);
+#endif
+#endif
 }
 
 bool AppClass::CheckString(const char *theString)
 {
+#ifdef CRTP
+    enterStartState();
+    while(*theString != '\0')
+    {
+        switch(*theString)
+        {
+        case '0':
+            Zero();
+            break;
+
+        case '1':
+            One();
+            break;
+
+        case 'c':
+        case 'C':
+#ifdef SERIALIZE
+            if (serialize("foobar.txt") < 0)
+            {
+                std::cerr << "FSM serialization failed." << std::endl;
+            }
+            else if (deserialize("foobar.txt") < 0)
+            {
+                std::cerr << "FSM deserialization failed." << std::endl;
+            }
+            else
+            {
+                C();
+            }
+#else
+            C();
+#endif
+            break;
+
+        default:
+            Unknown();
+            break;
+        }
+        ++theString;
+    }
+
+    // end of string has been reached - send the EOS transition.
+    EOS();
+#else
     _fsm.enterStartState();
     while(*theString != '\0')
     {
@@ -86,19 +144,20 @@ bool AppClass::CheckString(const char *theString)
 
         case 'c':
         case 'C':
-// Uncomment to test serialization.
-//               if (serialize("foobar.txt") < 0)
-//               {
-//                   std::cerr << "FSM serialization failed." << std::endl;
-//               }
-//               else if (deserialize("foobar.txt") < 0)
-//               {
-//                   std::cerr << "FSM deserialization failed." << std::endl;
-//               }
-//               else
-//               {
-//                   _fsm.C();
-//               }
+#ifdef SERIALIZE
+            if (serialize("foobar.txt") < 0)
+            {
+                std::cerr << "FSM serialization failed." << std::endl;
+            }
+            else if (deserialize("foobar.txt") < 0)
+            {
+                std::cerr << "FSM deserialization failed." << std::endl;
+            }
+            else
+            {
+                _fsm.C();
+            }
+#endif
             _fsm.C();
             break;
 
@@ -111,74 +170,148 @@ bool AppClass::CheckString(const char *theString)
 
     // end of string has been reached - send the EOS transition.
     _fsm.EOS();
+#endif
 
     return isAcceptable;
 }
 
-// Uncomment to test serialization.
-// int AppClass::serialize(const std::string& filename)
-// {
-//     int fd(open(filename.c_str(),
-//                 (O_WRONLY | O_CREAT | O_TRUNC),
-//                 (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)));
-//     int retval(-1);
+#ifdef SERIALIZE
+int AppClass::serialize(const std::string& filename)
+{
+    int fd(open(filename.c_str(),
+                (O_WRONLY | O_CREAT | O_TRUNC),
+                (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)));
+    int retval(-1);
 
-//     if (fd >= 0)
-//     {
-//         int size(_fsm.getStateStackDepth() + 1);
-//         int bufferSize(size * sizeof(int));
-//         int buffer[size + 1];
-//         int i;
+    if (fd >= 0)
+    {
+#ifdef CRTP
+        int stackDepth(getStateStackDepth());
+#else
+        int stackDepth(_fsm.getStateStackDepth());
+#endif
+        int size(stackDepth + 2);
+        int bufferSize(size * sizeof(int));
+        int buffer[size];
+        int i;
+        int stateId;
 
-//         buffer[0] = size;
-//         buffer[size] = (_fsm.getState()).getId();
-//         for (i = (size - 1); i > 0; --i)
-//         {
-//             _fsm.popState();
-//             buffer[i] = (_fsm.getState()).getId();
-//         }
+#ifdef FSM_DEBUG
+        printf("stack depth: %d, array size: %d, buffer size: %d\n",
+               stackDepth,
+               size,
+               bufferSize);
+#endif
 
-//         retval = write(fd, buffer, (bufferSize + sizeof(int)));
+        buffer[0] = size;
+#ifdef CRTP
+        stateId = getState().getId();
+#else
+        stateId = (_fsm.getState()).getId();
+#endif
+        buffer[size - 1] = stateId;
 
-//         (void) close(fd);
-//         fd = -1;
-//     }
+#ifdef FSM_DEBUG
+        printf("states: %d", stateId);
+#endif
 
-//     return (retval);
-// } // end of AppClass::serialize(const std::string&)
+        // Note: stop at index 1 because index 0 contains the
+        // array size.
+        for (i = (size - 2); i > 0; --i)
+        {
+#ifdef CRTP
+            popState();
+            stateId = getState().getId();
+#else
+            _fsm.popState();
+            stateId = (_fsm.getState()).getId();
+#endif
+            buffer[i] = stateId;
 
-// Uncomment to test serialization.
-// int AppClass::deserialize(const std::string& filename)
-// {
-//     int fd(open(filename.c_str(), O_RDONLY));
-//     int size;
-//     int retval(-1);
+#ifdef FSM_DEBUG
+            printf(" %d", stateId);
+#endif
+        }
 
-//     _fsm.clearState();
+#ifdef FSM_DEBUG
+        printf("\n");
+#endif
 
-//     if (fd >= 0 && read(fd, &size, sizeof(int)) == sizeof(int))
-//     {
-//         int bufferSize(size * sizeof(int));
-//         int buffer[size];
+        retval = write(fd, buffer, bufferSize);
 
-//         if (read(fd, buffer, bufferSize) == bufferSize)
-//         {
-//             int i;
+        (void) close(fd);
+        fd = -1;
+    }
 
-//             retval = (bufferSize + sizeof(int));
+    return (retval);
+} // end of AppClass::serialize(const std::string&)
 
-//             for (i = 0; i < size; i++)
-//             {
-//                 _fsm.pushState(_fsm.valueOf(buffer[i]));
-//             }
-//         }
-//     }
+int AppClass::deserialize(const std::string& filename)
+{
+    int fd(open(filename.c_str(), O_RDONLY));
+    int size;
+    int retval(-1);
 
-//     if (fd >= 0)
-//     {
-//         (void) close(fd);
-//         fd = -1;
-//     }
+#ifdef CRTP
+    clearState();
+    emptyStateStack();
+#else
+    _fsm.clearState();
+    _fsm.emptyStateStack();
+#endif
 
-//     return (retval);
-// } // end of AppClass::deserialize(const std::string&)
+    if (fd >= 0 && read(fd, &size, sizeof(int)) == sizeof(int))
+    {
+#ifdef FSM_DEBUG
+        int stackDepth = (size - 2);
+#endif
+        int arraySize = (size - 1);
+        int bufferSize(arraySize * sizeof(int));
+        int buffer[arraySize];
+        int stateId;
+
+#ifdef FSM_DEBUG
+        printf("stack depth: %d, array size: %d, buffer size: %d\n",
+               stackDepth,
+               size,
+               (int) (size * sizeof(int)));
+#endif
+
+        if (read(fd, buffer, bufferSize) == bufferSize)
+        {
+            int i;
+
+            retval = (bufferSize + sizeof(int));
+
+#ifdef FSM_DEBUG
+            printf("states:");
+#endif
+
+            // Iterate over the entire state ID buffer because
+            // the final push makes the last state the current
+            // state.
+            for (i = 0; i < arraySize; i++)
+            {
+                stateId = buffer[i];
+#ifdef CRTP
+                pushState(valueOf(stateId));
+#else
+                _fsm.pushState(_fsm.valueOf(stateId));
+#endif
+
+#ifdef FSM_DEBUG
+                printf(" %d", stateId);
+#endif
+            }
+        }
+    }
+
+    if (fd >= 0)
+    {
+        (void) close(fd);
+        fd = -1;
+    }
+
+    return (retval);
+} // end of AppClass::deserialize(const std::string&)
+#endif

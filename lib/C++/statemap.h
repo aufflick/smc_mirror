@@ -71,8 +71,8 @@
 #endif
 #if ! defined(SMC_NO_EXCEPTIONS)
 #include <stdexcept>
-#endif
 #include <cstring>
+#endif
 
 // Limit names to 100 ASCII characters.
 // Why 100? Because it is a round number.
@@ -84,6 +84,14 @@ namespace statemap
 // Routines.
 //
 
+#ifdef SMC_FIXED_STACK
+    // When static memory is used, a string has only one copy.
+    inline char* copyString(const char *s)
+    {
+        // Cast your const upon the waters and see what blows up.
+        return (const_cast<char *>(s));
+    }
+#else // ! SMC_FIXED_STACK
     inline char* copyString(const char *s)
     {
         char *retval = NULL;
@@ -97,6 +105,7 @@ namespace statemap
 
         return (retval);
     }
+#endif // ! SMC_FIXED_STACK
 
 //---------------------------------------------------------------
 // Exception Classes.
@@ -135,6 +144,36 @@ namespace statemap
     protected:
     private:
     };
+
+#ifdef SMC_FIXED_STACK
+    class PushOnFullStateStackException :
+        public SmcException
+    {
+    //-----------------------------------------------------------
+    // Member methods.
+    //
+    public:
+
+        // Default constructor.
+        PushOnFullStateStackException()
+        : SmcException("cannot push on full state stack")
+        {};
+
+        // Destructor.
+        virtual ~PushOnFullStateStackException() throw()
+        {};
+
+    protected:
+    private:
+
+    //-----------------------------------------------------------
+    // Member data.
+    //
+    public:
+    protected:
+    private:
+    };
+#endif
 
     // This class is thrown when a pop is issued on an empty
     // state stack.
@@ -430,11 +469,15 @@ namespace statemap
 
         virtual ~State()
         {
+#ifndef SMC_FIXED_STACK
             if (_name != NULL)
             {
+                // Delete the string iff static memory is
+                // *not* used.
                 delete[] _name;
                 _name = NULL;
             }
+#endif
         };
 
     private:
@@ -522,6 +565,9 @@ namespace statemap
         // Destructor.
         virtual ~FSMContext()
         {
+#ifdef SMC_FIXED_STACK
+            _transition = NULL;
+#else // ! SMC_FIXED_STACK
             StateEntry *state;
 
             if (_transition != NULL)
@@ -537,6 +583,7 @@ namespace statemap
                 _state_stack = _state_stack->_next;
                 delete state;
             }
+#endif // ! SMC_FIXED_STACK
         };
 
         // Comparison and assignment operators
@@ -610,11 +657,13 @@ namespace statemap
         // is turned on.
         void setTransition(const char *transition)
         {
+#ifndef SMC_FIXED_STACK
             if (_transition != NULL)
             {
                 delete[] _transition;
                 _transition = NULL;
             }
+#endif // ! SMC_FIXED_STACK
 
             _transition = copyString(transition);
 
@@ -662,6 +711,94 @@ namespace statemap
             }
         };
 
+#ifdef SMC_FIXED_STACK
+        // Returns true if the state stack is empty and false
+        // otherwise.
+        bool isStateStackEmpty() const
+        {
+            return (_state_stack_depth == 0);
+        }
+
+        // Returns the state stack's depth.
+        int getStateStackDepth() const
+        {
+            return (_state_stack_depth);
+        }
+
+        // Push the current state on top of the state stack
+        // and make the specified state the current state.
+        void pushState(const State& state)
+        {
+#ifdef SMC_NO_EXCEPTIONS
+            assert (_state_stack_depth < SMC_STATE_STACK_SIZE);
+#else
+            if (_state_stack_depth == SMC_STATE_STACK_SIZE)
+            {
+                throw PushOnFullStateStackException();
+            }
+#endif
+
+            // Do the push only if there is a state to be pushed
+            // on the stack.
+            if (_state != NULL)
+            {
+                _state_stack[_state_stack_depth] = _state;
+                ++_state_stack_depth;
+            }
+
+            _previous_state = _state;
+            _state = const_cast<State *>(&state);
+
+            if (_debug_flag == true)
+            {
+#ifdef SMC_USES_IOSTREAMS
+                *_debug_stream << "PUSH TO STATE   : "
+                               << _state->getName()
+                               << std::endl;
+#else
+                TRACE("PUSH TO STATE   : %s\n",
+                      _state->getName());
+#endif // SMC_USES_IOSTREAMS
+            }
+        };
+
+        // Make the state on top of the state stack the
+        // current state.
+        void popState()
+        {
+            // Popping when there was no previous push is an error.
+#ifdef SMC_NO_EXCEPTIONS
+            assert(_state_stack_depth > 0);
+#else
+            if (_state_stack_depth == 0)
+            {
+                throw PopOnEmptyStateStackException();
+            }
+#endif
+
+            _previous_state = _state;
+            --_state_stack_depth;
+            _state = _state_stack[_state_stack_depth];
+
+            if (_debug_flag == true)
+            {
+#ifdef SMC_USES_IOSTREAMS
+                *_debug_stream << "POP TO STATE    : "
+                               << _state->getName()
+                               << std::endl;
+#else
+                TRACE("POP TO STATE    : %s\n",
+                      _state->getName());
+#endif // SMC_USES_IOSTREAMS
+            }
+        };
+
+        // Remove all states from the state stack.
+        void emptyStateStack()
+        {
+            _state_stack_depth = 0;
+        };
+#else // ! SMC_FIXED_STACK
         // Returns true if the state stack is empty and false
         // otherwise.
         bool isStateStackEmpty() const
@@ -764,6 +901,7 @@ namespace statemap
 
             _state_stack = NULL;
         };
+#endif // ! SMC_FIXED_STACK
 
     protected:
 
@@ -771,7 +909,11 @@ namespace statemap
         FSMContext(const State& state)
         : _state(const_cast<State *>(&state)),
           _previous_state(NULL),
+#ifdef SMC_FIXED_STACK
+          _state_stack_depth(0),
+#else
           _state_stack(NULL),
+#endif
           _transition(NULL),
 #ifdef SMC_USES_IOSTREAMS
           _debug_flag(false),
@@ -806,7 +948,12 @@ namespace statemap
         State *_previous_state;
 
         // The stack of pushed states.
+#ifdef SMC_FIXED_STACK
+        State* _state_stack[SMC_STATE_STACK_SIZE];
+        int _state_stack_depth;
+#else
         StateEntry *_state_stack;
+#endif
 
         // The current transition *name*. Use for debugging
         // purposes.

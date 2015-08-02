@@ -26,7 +26,7 @@
 //   and examples/ObjC.
 //
 // RCS ID
-// $Id$
+// Id: SmcOptions.java,v 1.4 2013/09/02 14:45:58 cwrapp Exp
 //
 // CHANGE LOG
 // (See the bottom of this file.)
@@ -53,6 +53,8 @@ public final class SmcOptions
 
     /**
      * Stores the target code generator options.
+     * @param appName application name.
+     * @param appVersion application version.
      * @param srcfileBase basename of source file (*.sm).
      * @param targetfileBase write the emitted code to this target
      * source file name sans the suffix.
@@ -75,6 +77,10 @@ public final class SmcOptions
      * generate try/catch/rethrow code.
      * @param noStreamsFlag if {@code true} then use TRACE macro
      * for debug output.
+     * @param crtpFlag if {@code true} then user defined class
+     * derived from generated code via CRTP.
+     * @param stateStackSize statically allocated state stack
+     * maximum size. (C++ only).
      * @param reflectFlag if {@code true} then generate
      * reflection code.
      * @param syncFlag if {@code true} then generate
@@ -86,8 +92,12 @@ public final class SmcOptions
      * code according to this Java version.
      * @param accessLevel use this access keyword for the
      * generated classes.
+     * @param useProtocolFlag use "@protocol" instead of "@class"
+     * in generated Objective-C code.
      */
-    public SmcOptions(final String srcfileBase,
+    public SmcOptions(final String appName,
+                      final String appVersion,
+                      final String srcfileBase,
                       final String targetfileBase,
                       final String srcDirectory,
                       final String headerDirectory,
@@ -99,12 +109,17 @@ public final class SmcOptions
                       final boolean noExceptionFlag,
                       final boolean noCatchFlag,
                       final boolean noStreamsFlag,
+                      final boolean crtpFlag,
+                      final int stateStackSize,
                       final boolean reflectFlag,
                       final boolean syncFlag,
                       final boolean genericFlag,
                       final boolean java7Flag,
-                      final String accessLevel)
+                      final String accessLevel,
+                      final boolean useProtocolFlag)
     {
+        _appName = appName;
+        _appVersion = appVersion;
         _srcfileBase = srcfileBase;
         _targetfileBase = targetfileBase;
         _headerDirectory = headerDirectory;
@@ -117,11 +132,14 @@ public final class SmcOptions
         _noExceptionFlag = noExceptionFlag;
         _noCatchFlag = noCatchFlag;
         _noStreamsFlag = noStreamsFlag;
+        _crtpFlag = crtpFlag;
+        _stateStackSize = stateStackSize;
         _reflectFlag = reflectFlag;
         _syncFlag = syncFlag;
         _genericFlag = genericFlag;
         _java7Flag = java7Flag;
         _accessLevel = accessLevel;
+        _useProtocolFlag = useProtocolFlag;
     } // end f SmcOptions(...)
 
     //
@@ -131,6 +149,24 @@ public final class SmcOptions
     //-----------------------------------------------------------
     // Get methods.
     //
+
+    /**
+     * Returns the application name.
+     * @return application name.
+     */
+    public String applicationName()
+    {
+        return (_appName);
+    } // end of applicationName()
+
+    /**
+     * Returns the application version.
+     * @return application version.
+     */
+    public String applicationVersion()
+    {
+        return (_appVersion);
+    } // end of applicationVersion()
 
     /**
      * Returns the source file name's base.
@@ -241,6 +277,25 @@ public final class SmcOptions
     } // end of noStreamsFlag()
 
     /**
+     * Returns the "crtp" flag.
+     * @return the "crtp" flag.
+     */
+    public boolean crtpFlag()
+    {
+        return (_crtpFlag);
+    } // end of crtpFlag()
+
+    /**
+     * Returns the fixed-length state stack size. A zero return
+     * value means that the state stack size is unbounded.
+     * @return fixed-length state stack size.
+     */
+    public int stateStackSize()
+    {
+        return (_stateStackSize);
+    } // end of stateStackSize()
+
+    /**
      * Returns the reflection flag.
      * @return the reflection flag.
      */
@@ -286,6 +341,17 @@ public final class SmcOptions
         return (_accessLevel);
     } // end of accessLevel()
 
+    /**
+     * Returns {@code true} if "@protocol" should be used in
+     * generated Objective-C code.
+     * @return {@code true} if "@protocol" should be used in
+     * generated Objective-C code.
+     */
+    public boolean useProtocolFlag()
+    {
+        return (_useProtocolFlag);
+    } // end of useProtocolFlag()
+
     //
     // end of Get methods.
     //-----------------------------------------------------------
@@ -293,6 +359,16 @@ public final class SmcOptions
 //---------------------------------------------------------------
 // Member data.
 //
+
+    /**
+     * The application name.
+     */
+    private final String _appName;
+
+    /**
+     * The application version.
+     */
+    private final String _appVersion;
 
     // The .sm file's base name.
     private final String _srcfileBase;
@@ -330,6 +406,14 @@ public final class SmcOptions
     // This flag is true when I/O streams should not be used.
     private final boolean _noStreamsFlag;
 
+    // This flag is true when the state machine class is a template
+    // from which the user defined class will be derived (CRTP).
+    private final boolean _crtpFlag;
+
+    // The fixed-length state stack size. Used with -c++ and
+    // -noex only.
+    private final int _stateStackSize;
+
     // This flag is true when reflection is supported.
     private final boolean _reflectFlag;
 
@@ -346,13 +430,16 @@ public final class SmcOptions
     // is Java 7 or better.
     private final boolean _java7Flag;
 
-    // Used this access keyword for the generated classes.
+    // Use this access keyword for the generated classes.
     private final String _accessLevel;
+
+    // Use "@protocol" instead of "@class". Used with -objc only.
+    private final boolean _useProtocolFlag;
 } // end of class SmcOptions
 
 //
 // CHANGE LOG
-// $Log$
+// Log: SmcOptions.java,v
 // Revision 1.4  2013/09/02 14:45:58  cwrapp
 // SMC 6.3.0 commit.
 //

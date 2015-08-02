@@ -26,7 +26,7 @@
 //   and examples/ObjC.
 //
 // RCS ID
-// $Id$
+// Id: SmcHeaderGenerator.java,v 1.10 2015/02/16 21:43:09 cwrapp Exp
 //
 // CHANGE LOG
 // (See the bottom of this file.)
@@ -156,6 +156,16 @@ public final class SmcHeaderGenerator
             _source.println("#define SMC_NO_EXCEPTIONS");
         }
 
+        // If this application is using static memory only, then
+        // define SMC_FIXED_STACK and SMC_STATE_STACK_SIZE.
+        if (_stateStackSize > 0)
+        {
+            _source.println();
+            _source.println("#define SMC_FIXED_STACK");
+            _source.println("#define SMC_STATE_STACK_SIZE " +
+                            _stateStackSize);
+        }
+
         // Include required standard .h files.
         _source.println();
         _source.println("#include <statemap.h>");
@@ -231,6 +241,10 @@ public final class SmcHeaderGenerator
         _source.print(context);
         _source.println("State;");
         _source.print(_indent);
+        if (_crtpFlag)
+        {
+            _source.print("template<typename DERIVED> ");
+        }
         _source.print("class ");
         _source.print(fsmClassName);
         _source.println(";");
@@ -278,10 +292,22 @@ public final class SmcHeaderGenerator
         _source.print(_indent);
         _source.print("    virtual void Entry(");
         _source.print(fsmClassName);
+        if (_crtpFlag == true)
+        {
+            _source.print("<");
+            _source.print(context);
+            _source.print(">");
+        }
         _source.println("&) {};");
         _source.print(_indent);
         _source.print("    virtual void Exit(");
         _source.print(fsmClassName);
+        if (_crtpFlag == true)
+        {
+            _source.print("<");
+            _source.print(context);
+            _source.print(">");
+        }
         _source.println("&) {};");
         _source.println();
 
@@ -300,6 +326,12 @@ public final class SmcHeaderGenerator
                 _source.print(trans.getName());
                 _source.print("(");
                 _source.print(fsmClassName);
+                if (_crtpFlag)
+                {
+                    _source.print("<");
+                    _source.print(context);
+                    _source.print(">");
+                }
                 _source.print("& context");
 
                 params = trans.getParameters();
@@ -321,6 +353,12 @@ public final class SmcHeaderGenerator
         _source.print(_indent);
         _source.print("    virtual void Default(");
         _source.print(fsmClassName);
+        if (_crtpFlag)
+        {
+            _source.print("<");
+            _source.print(context);
+            _source.print(">");
+        }
         _source.println("& context);");
 
         // The base class has been defined.
@@ -344,6 +382,10 @@ public final class SmcHeaderGenerator
         //     virtual void enterStartState()
         //
         _source.print(_indent);
+        if (_crtpFlag)
+        {
+            _source.println("template<typename DERIVED>");
+        }
         _source.print("class ");
         _source.print(fsmClassName);
         _source.println(" :");
@@ -358,14 +400,26 @@ public final class SmcHeaderGenerator
         _source.print("    explicit ");
         _source.print(fsmClassName);
         _source.print("(");
-        _source.print(context);
-        _source.println("& owner)");
+        if (_crtpFlag == false)
+        {
+            _source.print(context);
+            _source.print("& owner");
+        }
+        _source.println(")");
         _source.print(_indent);
         _source.print("    : FSMContext(");
         _source.print(fsm.getStartState());
-        _source.println("),");
-        _source.print(_indent);
-        _source.println("      _owner(&owner)");
+        _source.print(")");
+        if (_crtpFlag == false)
+        {
+            _source.println(",");
+            _source.print(_indent);
+            _source.println("      _owner(owner)");
+        }
+        else
+        {
+            _source.println();
+        }
         _source.print(_indent);
         _source.println("    {};");
         _source.println();
@@ -373,13 +427,24 @@ public final class SmcHeaderGenerator
         _source.print("    ");
         _source.print(fsmClassName);
         _source.print("(");
-        _source.print(context);
-        _source.println(
-            "& owner, const statemap::State& state)");
+        if (_crtpFlag == false)
+        {
+            _source.print(context);
+            _source.print("& owner, ");
+        }
+        _source.println("const statemap::State& state)");
         _source.print(_indent);
-        _source.println("    : FSMContext(state),");
-        _source.print(_indent);
-        _source.println("      _owner(&owner)");
+        _source.print("    : FSMContext(state)");
+        if (_crtpFlag == false)
+        {
+            _source.println(",");
+            _source.print(_indent);
+            _source.println("      _owner(owner)");
+        }
+        else
+        {
+            _source.println();
+        }
         _source.print(_indent);
         _source.println("    {};");
         _source.println();
@@ -390,6 +455,8 @@ public final class SmcHeaderGenerator
         _source.print(_indent);
         _source.println("        getState().Entry(*this);");
         _source.print(_indent);
+        _source.println("        return;");
+        _source.print(_indent);
         _source.println("    }");
         _source.println();
         _source.print(_indent);
@@ -399,7 +466,14 @@ public final class SmcHeaderGenerator
         _source.print(_indent);
         _source.println("    {");
         _source.print(_indent);
-        _source.println("        return *_owner;");
+        if (_crtpFlag)
+        {
+            _source.println("        return (*static_cast<DERIVED*>(this));");
+        }
+        else
+        {
+            _source.println("        return (_owner);");
+        }
         _source.print(_indent);
         _source.println("    };");
         _source.println();
@@ -510,15 +584,17 @@ public final class SmcHeaderGenerator
             _source.println("State& valueOf(int stateId);");
         }
 
-        // Member data.
-        _source.println();
-        _source.print(_indent);
-        _source.println("private:");
-        _source.println();
-        _source.print(_indent);
-        _source.print("    ");
-        _source.print(context);
-        _source.println("* _owner;");
+        if (_crtpFlag == false)
+        {
+            // Member data.
+            _source.println();
+            _source.print(_indent);
+            _source.println("private:");
+            _source.print(_indent);
+            _source.print("    ");
+            _source.print(context);
+            _source.println("& _owner;");
+        }
 
         // v. 2.2.0: If we are supporting serialization, then
         // declare the min and max indices.
@@ -767,6 +843,12 @@ public final class SmcHeaderGenerator
             _source.print(_indent);
             _source.print("    virtual void Entry(");
             _source.print(fsmClassName);
+            if (_crtpFlag == true)
+            {
+                _source.print("<");
+                _source.print(context);
+                _source.print(">");
+            }
             _source.println("&);");
         }
 
@@ -776,6 +858,12 @@ public final class SmcHeaderGenerator
             _source.print(_indent);
             _source.print("    virtual void Exit(");
             _source.print(fsmClassName);
+            if (_crtpFlag == true)
+            {
+                _source.print("<");
+                _source.print(context);
+                _source.print(">");
+            }
             _source.println("&);");
         }
 
@@ -813,8 +901,13 @@ public final class SmcHeaderGenerator
         _source.print("    virtual void ");
         _source.print(transition.getName());
         _source.print("(");
-        _source.print(
-            state.getMap().getFSM().getFsmClassName());
+        _source.print(state.getMap().getFSM().getFsmClassName());
+        if (_crtpFlag)
+        {
+            _source.print("<");
+            _source.print(state.getMap().getFSM().getContext());
+            _source.print(">");
+        }
         _source.print("& context");
 
         // Add user-defined parameters.
@@ -855,7 +948,7 @@ public final class SmcHeaderGenerator
 
 //
 // CHANGE LOG
-// $Log$
+// Log: SmcHeaderGenerator.java,v
 // Revision 1.10  2015/02/16 21:43:09  cwrapp
 // SMC v. 6.5.0
 //

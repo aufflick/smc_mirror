@@ -563,15 +563,23 @@ public abstract class FSMContext7
     } // end of lookupMethod(Lookup, String, MethodType)
 
     /**
-     * Returns the default method for the transition after it is
-     * determined that the current state and the default state do
-     * not implement the transition. The search order is:
+     * Returns the transition method handle for the given map,
+     * state, transition name, and transition method signature.
+     * If the method is not found in the current state, then
+     * returns the appropriate default transition. The search
+     * order is:
      * <ol>
      *   <li>
-     *     &lt;map&gt;::&lt;state&gt;::Default
+     *     &lt;map&gt;::&lt;state&gt;::&lt;transition&gt;(parameters)
      *   </li>
      *   <li>
-     *     &lt;map&gt;::Default::Default
+     *     &lt;map&gt;::Default::&lt;transition&gt;(parameters)
+     *   </li>
+     *   <li>
+     *     &lt;map&gt;::&lt;state&gt;::Default()
+     *   </li>
+     *   <li>
+     *     &lt;map&gt;::Default::Default()
      *   </li>
      *   <li>
      *     {@link FSMContext7#defaultTransition}
@@ -579,42 +587,76 @@ public abstract class FSMContext7
      * </ol>
      * @param lookup used to retrieve the virtual method handle.
      * @param clazz the method is implemented in this class.
-     * @param map the map name.
-     * @param state the state name.
-     * @return the default transition.
+     * @param mapName the map name.
+     * @param stateName the state name.
+     * @param transName the transition name.
+     * @param mt the transition method signature.
+     * @return the transition method handle.
      */
-    protected static MethodHandle
-        findDefault(final Lookup lookup,
-                    final Class<?> clazz,
-                    final String map,
-                    final String state)
+    protected static TransitionHandle
+        lookupTransition(final Lookup lookup,
+                         final Class<?> clazz,
+                         final String mapName,
+                         final String stateName,
+                         final String transName,
+                         MethodType mt)
     {
-        final String stateDefault =
-            map + "_" + state + "_" + DEFAULT_NAME;
-        final String defaultDefault =
-            map + "_" + DEFAULT_NAME + "_" + DEFAULT_NAME;
-        MethodHandle retval = lookupMethod(lookup,
-                                           clazz,
-                                           stateDefault,
-                                           NO_ARGS_TYPE);
+        String mn = String.format(TRANSITION_NAME_FORMAT,
+                                  mapName,
+                                  stateName,
+                                  transName);
+        boolean isDefault = false;
+        MethodHandle mh = lookupMethod(lookup, clazz, mn, mt);
 
-        // If the state does not have a default method and
-        // the default state does not have a default method,
-        // then use the allows-present system default method.
-        if (retval == null &&
-            (retval = lookupMethod(lookup,
-                                   clazz,
-                                   defaultDefault,
-                                   NO_ARGS_TYPE)) == null)
+        // Is this method in the current state?
+        if (mh == null)
         {
-            retval = lookupMethod(lookup,
-                                  FSMContext7.class,
-                                  SYSTEM_DEFAULT,
-                                  NO_ARGS_TYPE);
+            // No. Is this method in the default state?
+            mn =
+                String.format(TRANSITION_NAME_FORMAT,
+                              mapName,
+                              DEFAULT_NAME,
+                              transName);
+            mh = lookupMethod(lookup, clazz, mn, mt);
+            if (mh == null)
+            {
+                // No. this means that a default transition must
+                // be used.
+                isDefault = true;
+                mt = NO_ARGS_TYPE;
+
+                // Does the current state have a default
+                // transition?
+                mn = String.format(TRANSITION_NAME_FORMAT,
+                                   mapName,
+                                   stateName,
+                                   DEFAULT_NAME);
+                mh = lookupMethod(lookup, clazz, mn, mt);
+                if (mh == null)
+                {
+                    // No, again.
+                    // Finally, does the default state have a
+                    // default transition?
+                    mn = String.format(TRANSITION_NAME_FORMAT,
+                                       mapName,
+                                       DEFAULT_NAME,
+                                       DEFAULT_NAME);
+                    mh = lookupMethod(lookup, clazz, mn, mt);
+                    if (mh == null)
+                    {
+                        // No, four strikes and you are out.
+                        // Use the system default transition.
+                        mh = lookupMethod(lookup,
+                                          clazz,
+                                          SYSTEM_DEFAULT,
+                                          mt);
+                    }
+                }
+            }
         }
 
-        return (retval);
-    } // end of findDefault(Lookup, String, String, MethodType)
+        return (new TransitionHandle(isDefault, mh));
+    } // end of lookupTransition(...)
 
 //---------------------------------------------------------------
 // Member data

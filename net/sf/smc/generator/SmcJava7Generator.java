@@ -615,13 +615,19 @@ public final class SmcJava7Generator
         _source.println("import java.lang.invoke.MethodHandles;");
         _source.println("import java.lang.invoke.MethodHandles.Lookup;");
         _source.println("import java.lang.invoke.MethodType;");
-        _source.println("import java.util.ArrayDeque;");
-        _source.println("import java.util.Arrays;");
-        _source.println("import java.util.Iterator;");
+
+        // The following two imports are only used for
+        // serializing/deserializing.
+        if (_serialFlag == true)
+        {
+            _source.println("import java.util.ArrayDeque;");
+            _source.println("import java.util.Iterator;");
+        }
 
         // Import the required FSMContext7 and State7 classes.
         _source.println("import statemap.FSMContext7;");
         _source.println("import statemap.State7;");
+        _source.println("import statemap.TransitionHandle;");
 
         _source.println();
 
@@ -674,7 +680,7 @@ public final class SmcJava7Generator
         // 4.2. Output get/set methods.
         if (_serialFlag == true || _reflectFlag == true)
         {
-            outputGet();
+            outputGet(fsm.getContext());
         }
         outputSet(fsm);
 
@@ -709,10 +715,19 @@ public final class SmcJava7Generator
     } // end of outputMethods(SmcFSM)
 
     /**
-     * Outputs the two FSM class constructors: one which uses the
-     * default start state and one which allows the start state
-     * to to dynamically set. The second constructor is necessary
-     * for de-serializing an FSM context.
+     * Outputs the three FSM class constructors:
+     * <ol>
+     *   <li>
+     *     the default state constructor,
+     *   </li>
+     *   <li>
+     *     the start state by ID constructor, and
+     *   </li>
+     *   <li>
+     *     the start state by instance constructor. This
+     *     constructor is used for de-serializing an FSM context.
+     *   </li>
+     * </ol>
      * @param smc the FSM model.
      */
     private void outputConstructors(final SmcFSM fsm)
@@ -756,6 +771,22 @@ public final class SmcJava7Generator
         _source.println();
 
         // Generate the second constructor which allows the
+        // initial state to be dynamically set using the
+        // state identifier.
+        _source.print("    ");
+        _source.print(_accessLevel);
+        _source.print(" ");
+        _source.print(fsmClassName);
+        _source.print("(final ");
+        _source.print(context);
+        _source.println(" owner, final int initStateId)");
+        _source.println("    {");
+        _source.print("        this (owner, _States[initStateId]);");
+        _source.println("    }");
+        _source.println();
+
+
+        // Generate the third constructor which allows the
         // initial state to be dynamically set. Overrides the
         // %start specifier.
         _source.print("    ");
@@ -785,8 +816,9 @@ public final class SmcJava7Generator
     /**
      * Writes the get emthods requested by the -serial and/or
      * -reflect flags.
+     * @param context context class name.
      */
-    private void outputGet()
+    private void outputGet(final String context)
     {
         _source.println(
             "    //-----------------------------------------------------------");
@@ -798,13 +830,20 @@ public final class SmcJava7Generator
         // FSMContext7 since State7 is now final (i.e., has no
         // state sub-classes).
 
-        // If serialization is turned on, then generate a
-        // setOwner method which allows the application class
-        // to restore its ownership of the FSM.
-        if (_serialFlag == true)
+        // getOwner() method.
+        _source.print("    public ");
+        _source.print(context);
+        _source.println(" getOwner()");
+        _source.println("    {");
+        _source.println("        return (ctxt);");
+        _source.println("    }");
+        _source.println();
+
+        if (_reflectFlag == true)
         {
+            // getState(int) method.
             _source.println(
-                "    public State7 valueOf(int stateId)");
+                "    public static State7 getState(final int stateId)");
             _source.println(
                 "        throws ArrayIndexOutOfBoundsException");
             _source.println("    {");
@@ -812,19 +851,16 @@ public final class SmcJava7Generator
                 "        return (_States[stateId]);");
             _source.println("    }");
             _source.println();
-        }
 
-        if (_reflectFlag == true)
-        {
             // getStates() method.
-            _source.println("    public State7[] getStates()");
+            _source.println("    public static State7[] getStates()");
             _source.println("    {");
             _source.println("        return (_States);");
             _source.println("    }");
             _source.println();
 
             // getTransitions() method.
-            _source.println("    public String[] getTransitions()");
+            _source.println("    public static String[] getTransitions()");
             _source.println("    {");
             _source.println(
                 "        return (TRANSITION_NAMES);");
@@ -839,7 +875,7 @@ public final class SmcJava7Generator
         _source.println();
 
         return;
-    } // end of outputGet()
+    } // end of outputGet(String)
 
     /**
      * Writes the owner set methods requested by the -serial
@@ -982,21 +1018,55 @@ public final class SmcJava7Generator
 
                 _source.println("        try");
                 _source.println("        {");
+                _source.println(
+                    "            final TransitionHandle th =");
                 _source.print(
-                    "            (getState().transition(");
+                    "                getState().transition(");
                 _source.print(transName);
                 _source.print(trans.getIdentifier());
                 _source.print(TRANSITION_ID_SUFFIX);
-                _source.print(")).invokeExact(this");
-
-                for (pit = params.iterator();
-                     pit.hasNext() == true;
-                    )
-                {
-                    _source.print(", ");
-                    _source.print((pit.next()).getName());
-                }
                 _source.println(");");
+                _source.println();
+
+                // If the transition takes no parameters, then it
+                // has the same signature as a default
+                // transition.
+                if (params.isEmpty() == true)
+                {
+                    _source.println(
+                        "            (th.handle()).invokeExact(this);");
+                }
+                // Otherwise, there is a need to distinguish
+                // between actual and default transitions.
+                else
+                {
+                    _source.println(
+                        "            if (th.isDefault() == true)");
+                    _source.println(
+                        "            {");
+                    _source.println(
+                        "                (th.handle()).invokeExact(this);");
+                    _source.println(
+                        "            }");
+                    _source.println(
+                        "            else");
+                    _source.println(
+                        "            {");
+                    _source.print(
+                        "                (th.handle()).invokeExact(this");
+
+                    for (pit = params.iterator();
+                         pit.hasNext() == true;
+                        )
+                    {
+                        _source.print(", ");
+                        _source.print((pit.next()).getName());
+                    }
+                    _source.println(");");
+                    _source.println(
+                        "            }");
+                }
+
                 _source.println("        }");
                 _source.println("        catch (Throwable tex)");
                 _source.println("        {");
@@ -1164,6 +1234,13 @@ public final class SmcJava7Generator
         // 5.2.6. Output the class static initialization block.
         outputClassInit(fsm);
 
+        // 5.2.7 If -reflection is set, then output the map
+        //       classes containing the state instances.
+        if (_reflectFlag == true)
+        {
+            outputMapClasses(fsm);
+        }
+
         return;
     } // end of outputData(SmcFSM)
 
@@ -1191,7 +1268,9 @@ public final class SmcJava7Generator
                         state.getClassName(),
                         STATE_ID_SUFFIX);
 
-                _source.print("    private static final int ");
+                _source.print("    ");
+                _source.print(_accessLevel);
+                _source.print(" static final int ");
                 _source.print(stateIdName);
                 _source.print(" = ");
                 _source.print(stateId);
@@ -1561,10 +1640,9 @@ public final class SmcJava7Generator
         _source.println("        String transName;");
         _source.println("        String methodName;");
         _source.println("        MethodType transType;");
-        _source.println("        MethodHandle mh;");
         _source.println("        MethodHandle entryHandle;");
         _source.println("        MethodHandle exitHandle;");
-        _source.println("        MethodHandle[] transitions;");
+        _source.println("        TransitionHandle[] transitions;");
         _source.println();
 
         return;
@@ -1582,11 +1660,8 @@ public final class SmcJava7Generator
         _source.println(
             "                stateName = STATE_NAMES[mapIndex][stateIndex];");
         _source.println(
-            "                mh = findDefault(lookup, clazz, mapName, stateName);");
-        _source.println(
-            "                transitions = new MethodHandle[TRANSITION_COUNT];");
-        _source.println(
-            "                Arrays.fill(transitions, mh);");
+            "                transitions = new TransitionHandle[TRANSITION_COUNT];");
+        _source.println();
         _source.println(
             "                methodName = String.format(ENTRY_NAME, mapName, stateName);");
         _source.println(
@@ -1629,35 +1704,72 @@ public final class SmcJava7Generator
             "                    transName = TRANSITION_NAMES[transIndex];");
         _source.println(
             "                    transType = TRANSITION_TYPES[transIndex];");
-        _source.println("                    methodName =");
         _source.println(
-            "                        String.format(");
+            "                    transitions[transIndex] =");
         _source.println(
-            "                            TRANSITION_NAME_FORMAT, mapName, stateName, transName);");
-        _source.println(
-            "                    mh = lookupMethod(lookup, clazz, methodName, transType);");
-        _source.println();
-        _source.println(
-            "                    if (mh == null)");
-        _source.println("                    {");
-        _source.println("                        methodName =");
-        _source.println(
-            "                            String.format(");
-        _source.println(
-            "                                TRANSITION_NAME_FORMAT, mapName, DEFAULT_NAME, transName);");
-        _source.println(
-            "                        mh = lookupMethod(lookup, clazz, methodName, transType);");
-        _source.println("                    }");
-        _source.println();
-        _source.println("                    if (mh != null)");
-        _source.println("                    {");
-        _source.println("                        transitions[transIndex] = mh;");
-        _source.println("                    }");
+            "                        lookupTransition(lookup, clazz, mapName, stateName, transName, transType);");
         _source.println("                }");
         _source.println();
 
         return;
     } // end of outputClassInitTransitions()
+
+    /**
+     * Writes the map classes containing a public static field
+     * named for each map's states.
+     * @param fsm the FSM model.
+     */
+    private void outputMapClasses(final SmcFSM fsm)
+    {
+        for (SmcMap map : fsm.getMaps())
+        {
+            _source.println();
+            outputMapClass(map);
+        }
+
+        return;
+    } // end of outputMapClasses(SmcFSM)
+
+    /**
+     * Writes a particular map class.
+     * @param map the map model.
+     */
+    private void outputMapClass(final SmcMap map)
+    {
+        final String mapName = map.getName();
+        String stateName;
+
+        _source.print("    public static final class ");
+        _source.println(mapName);
+        _source.println("    {");
+
+        // Private default constructor to prevent instantiation.
+        _source.print("        private ");
+        _source.print(mapName);
+        _source.println("()");
+        _source.println("        {}");
+        _source.println();
+
+        // Map state instances.
+        for (SmcState state : map.getStates())
+        {
+            stateName = state.getClassName();
+
+            _source.print("        public static final State7 ");
+            _source.print(stateName);
+            _source.print(" = _States[");
+            _source.format("%s_%s%s",
+                           mapName,
+                           stateName,
+                           STATE_ID_SUFFIX);
+            _source.println("];");
+        }
+
+        // End of class.
+        _source.println("    }");
+
+        return;
+    } // end of outputMapClass(SmcMap)
 
     /**
      * Writes the class closing brace and ending read-only
@@ -1774,7 +1886,6 @@ public final class SmcJava7Generator
         else if (_guardCount > 1)
         {
             _source.println();
-            _source.println();
         }
 
         return;
@@ -1783,8 +1894,20 @@ public final class SmcJava7Generator
     /**
      * If a state defines a transition using guard conditions
      * only, then SMC must generate the final "else" (unguarded)
-     * transition for the programmer. This else body calls the
-     * default state's definition of this transition.
+     * transition for the programmer. This else body calls:
+     * <ol>
+     *   <li>
+     *     the default state's definition of this transition, or
+     *   </li>
+     *   <li>
+     *     the current state's default transition, or
+     *   </li>
+     *   <li>
+     *     the default state's default transition.
+     *   </li>
+     * </ol>
+     *  the
+     * current
      * @param transition default unguarded "else" clause is for
      * this transition.
      * @param mapName the transition resides in this map.
@@ -1792,20 +1915,69 @@ public final class SmcJava7Generator
     private void outputElseGuard(final SmcTransition transition,
                                  final String mapName)
     {
+        final SmcState currState = transition.getState();
+        final SmcState defaultState =
+            (currState.getMap()).getDefaultState();
+        List<SmcParameter> params = transition.getParameters();
+        String methodName;
         String sep = "";
+
+        // Does the default state define this transition?
+        if (defaultState.findTransition(
+                transition.getName(), params) != null)
+        {
+            // Yes. Call that transition method.
+            methodName = mapName +
+                         "_" +
+                         DEFAULT_NAME +
+                         "_" +
+                         transition.getName();
+        }
+        // No, the default state does not define that transition.
+        // Does the current state have a default transition?
+        else if (currState.findTransition(
+                     DEFAULT_NAME, DEFAULT_PARAMETERS) != null)
+        {
+            // Yes, use the current state default transition.
+            methodName = mapName +
+                         "_" +
+                         currState.getClassName() +
+                         "_" +
+                         DEFAULT_NAME;
+            params = DEFAULT_PARAMETERS;
+        }
+        // No, the current state does not have a default
+        // transition.
+        // Does the default state have a default transition?
+        else if (defaultState.findTransition(
+                     DEFAULT_NAME, DEFAULT_PARAMETERS) != null)
+        {
+            // Yes, use the default state default transition.
+            methodName = mapName +
+                         "_" +
+                         DEFAULT_NAME +
+                         "_" +
+                         DEFAULT_NAME;
+            params = DEFAULT_PARAMETERS;
+        }
+        // No, the default state does not hava a default
+        // transition.
+        // Call the system default transition which throws a
+        // TransitionUndefinedException.
+        else
+        {
+            methodName = SYSTEM_DEFAULT;
+            params = DEFAULT_PARAMETERS;
+        }
 
         _source.println();
         _source.println("        else");
         _source.println("        {");
         _source.print("            ");
-        _source.print(mapName);
-        _source.print("_");
-        _source.print(DEFAULT_NAME);
-        _source.print("_");
-        _source.print(transition.getName());
+        _source.print(methodName);
         _source.print("(");
 
-        for (SmcParameter param : transition.getParameters())
+        for (SmcParameter param : params)
         {
             _source.print(sep);
             _source.print(param.getName());
@@ -2163,17 +2335,30 @@ public final class SmcJava7Generator
      * must be the last name in the string and the names are
      * separated by a space, search for the last blank in the
      * string and use the substring in front of the blank.
+     * <p>
+     * If the Java type name is a generic
+     * (e.g. {@code List<Integer>}), then the generic is removed
+     * from the returned type name.
+     * </p>
      * @param s extract the Java type name from this string.
      * @return a Java type name.
      */
     private String getJavaType(final String s)
     {
-        final int index = s.lastIndexOf(' ');
+        int index = s.lastIndexOf(' ');
         String retval = s;
 
         if (index >= 0)
         {
             retval = s.substring(index + 1);
+        }
+
+        // Is this a generic Java type.
+        index = retval.lastIndexOf('<');
+        if (index > 0)
+        {
+            // Yes. Remove the generic portion.
+            retval = retval.substring(0, index);
         }
 
         return (retval);
@@ -2191,6 +2376,19 @@ public final class SmcJava7Generator
      * The default state and transition name is "Default".
      */
     private static final String DEFAULT_NAME = "Default";
+
+    /**
+     * The ultimate system default transition method is
+     * "defaultTransition".
+     */
+    private static final String SYSTEM_DEFAULT =
+        "defaultTransition";
+
+    /**
+     * The default transition has no parameters.
+     */
+    private static final List<SmcParameter> DEFAULT_PARAMETERS =
+        new ArrayList<>();
 
     /**
      * Loop back transitions use a "nil" end state.

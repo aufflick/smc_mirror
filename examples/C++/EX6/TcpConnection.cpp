@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2015/08/02 19:44:35  cwrapp
+// Release 6.6.0 commit.
+//
 // Revision 1.8  2014/09/06 09:04:29  fperrad
 // pragma only for MS compiler
 //
@@ -139,7 +142,11 @@ void TcpConnection::transmit(const char *data,
                              int offset,
                              int size)
 {
+#ifdef CRTP
+    Transmit(data, offset, size);
+#else
     _fsm.Transmit(data, offset, size);
+#endif
     return;
 } // end of TcpConnection::transmit(const unsigned char*, int, int)
 
@@ -149,7 +156,11 @@ void TcpConnection::transmit(const char *data,
 //
 void TcpConnection::doClose()
 {
+#ifdef CRTP
+    Close();
+#else
     _fsm.Close();
+#endif
     return;
 } // end of TcpConnection::doClose()
 
@@ -235,7 +246,7 @@ void TcpConnection::handleReceive(int)
                                  _buffer,
                                  totalBytesRead);
 
-#if defined(SMC_DEBUG)
+#if defined(FSM_DEBUG)
         cout << "**** Received segment:"
              << endl
              << *segment
@@ -248,47 +259,91 @@ void TcpConnection::handleReceive(int)
         switch(flags)
         {
             case TcpSegment::FIN:
+#ifdef CRTP
+                FIN(*segment);
+#else
                 _fsm.FIN(*segment);
+#endif
                 break;
 
             case TcpSegment::SYN:
+#ifdef CRTP
+                SYN(*segment);
+#else
                 _fsm.SYN(*segment);
+#endif
                 break;
 
             case TcpSegment::RST:
+#ifdef CRTP
+                RST(*segment);
+#else
                 _fsm.RST(*segment);
+#endif
                 break;
 
             case TcpSegment::PSH:
+#ifdef CRTP
+                PSH(*segment);
+#else
                 _fsm.PSH(*segment);
+#endif
                 break;
 
             case TcpSegment::ACK:
+#ifdef CRTP
+                ACK(*segment);
+#else
                 _fsm.ACK(*segment);
+#endif
                 break;
 
             case TcpSegment::URG:
+#ifdef CRTP
+                URG(*segment);
+#else
                 _fsm.URG(*segment);
+#endif
                 break;
 
             case TcpSegment::FIN_ACK:
+#ifdef CRTP
+                FIN_ACK(*segment);
+#else
                 _fsm.FIN_ACK(*segment);
+#endif
                 break;
 
             case TcpSegment::SYN_ACK:
+#ifdef CRTP
+                SYN_ACK(*segment);
+#else
                 _fsm.SYN_ACK(*segment);
+#endif
                 break;
 
             case TcpSegment::RST_ACK:
+#ifdef CRTP
+                RST_ACK(*segment);
+#else
                 _fsm.RST_ACK(*segment);
+#endif
                 break;
 
             case TcpSegment::PSH_ACK:
+#ifdef CRTP
+                PSH_ACK(*segment);
+#else
                 _fsm.PSH_ACK(*segment);
+#endif
                 break;
 
             default:
+#ifdef CRTP
+                UNDEF(*segment);
+#else
                 _fsm.UNDEF(*segment);
+#endif
                 break;
         }
     }
@@ -302,41 +357,73 @@ void TcpConnection::handleReceive(int)
 //
 void TcpConnection::handleTimeout(const char *name)
 {
-#if defined(SMC_DEBUG)
+#if defined(FSM_DEBUG)
     cout << "**** Timer " << name << " has expired." << endl;
 #endif
 
     if (strcmp(name, "ACK_TIMER") == 0)
     {
+#ifdef CRTP
+        AckTimeout();
+#else
         _fsm.AckTimeout();
+#endif
     }
     else if (strcmp(name, "CONN_ACK_TIMER") == 0)
     {
+#ifdef CRTP
+        ConnAckTimeout();
+#else
         _fsm.ConnAckTimeout();
+#endif
     }
     else if (strcmp(name, "TRANS_ACK_TIMER") == 0)
     {
+#ifdef CRTP
+        TransAckTimeout();
+#else
         _fsm.TransAckTimeout();
+#endif
     }
     else if (strcmp(name, "CLOSE_ACK_TIMER") == 0)
     {
+#ifdef CRTP
+        CloseAckTimeout();
+#else
         _fsm.CloseAckTimeout();
+#endif
     }
     else if (strcmp(name, "CLOSE_TIMER") == 0)
     {
+#ifdef CRTP
+        CloseTimeout();
+#else
         _fsm.CloseTimeout();
+#endif
     }
     else if (strcmp(name, "SERVER_OPENED") == 0)
     {
+#ifdef CRTP
+        ServerOpened();
+#else
         _fsm.ServerOpened();
+#endif
     }
     else if (strcmp(name, "CLIENT_OPENED") == 0)
     {
+#ifdef CRTP
+        ClientOpened(&_farAddress);
+#else
         _fsm.ClientOpened(&_farAddress);
+#endif
     }
     else if (strcmp(name, "OPEN_FAILED") == 0)
     {
+#ifdef CRTP
+        OpenFailed(_errorMessage);
+#else
         _fsm.OpenFailed(_errorMessage);
+#endif
         if (_errorMessage != NULL)
         {
             delete[] _errorMessage;
@@ -886,8 +973,8 @@ void TcpConnection::doSend(unsigned short flags,
     // Advance the sequence number depending on the message sent.
     // Don't do this if the message came from an interloper.
     if (recv_segment == NULL ||
-        (recv_segment->getSource()).sin_port == _farAddress.sin_port &&
-        (recv_segment->getSource()).sin_addr.s_addr == _farAddress.sin_addr.s_addr)
+        ((recv_segment->getSource()).sin_port == _farAddress.sin_port &&
+         (recv_segment->getSource()).sin_addr.s_addr == _farAddress.sin_addr.s_addr))
     {
         _sequence_number = getAck(*send_segment);
     }
@@ -898,7 +985,7 @@ void TcpConnection::doSend(unsigned short flags,
 
     if (packet != NULL && packet_size > 0)
     {
-#if defined(SMC_DEBUG)
+#if defined(FSM_DEBUG)
         cout << "**** Transmit segment:\n" << *send_segment << endl;
 #endif
 
@@ -939,7 +1026,7 @@ void TcpConnection::doSend(unsigned short flags,
 //
 void TcpConnection::startTimer(const char *name, long duration)
 {
-#if defined(SMC_DEBUG)
+#if defined(FSM_DEBUG)
     cout << "**** Starting timer "
          << name
          << ", duration: "
@@ -958,7 +1045,7 @@ void TcpConnection::startTimer(const char *name, long duration)
 //
 void TcpConnection::stopTimer(const char* name)
 {
-#if defined(SMC_DEBUG)
+#if defined(FSM_DEBUG)
     cout << "**** Stopping timer " << name << "." << endl;
 #endif
 
@@ -1028,16 +1115,23 @@ TcpConnection::TcpConnection(TcpConnectionListener& listener)
   _buffer(NULL),
   _bufferSize(0),
   _server(NULL),
-  _errorMessage(NULL),
-  _fsm(*this)
+  _errorMessage(NULL)
+#ifdef CRTP
+#else
+  , _fsm(*this)
+#endif
 {
     (void) memset(&_nearAddress, 0, sizeof(_nearAddress));
     (void) memset(&_farAddress, 0, sizeof(_farAddress));
     expandBuffer();
 
-#if defined(SMC_DEBUG)
+#if defined(FSM_DEBUG)
     // Turn on state map debug printout.
+#ifdef CRTP
+    setDebugFlag(true);
+#else
     _fsm.setDebugFlag(true);
+#endif
 #endif
 
     return;
@@ -1071,8 +1165,11 @@ TcpConnection::TcpConnection(const sockaddr_in& far_address,
   _buffer(NULL),
   _bufferSize(0),
   _server(&server),
-  _errorMessage(NULL),
-  _fsm(*this)
+  _errorMessage(NULL)
+#ifdef CRTP
+#else
+  , _fsm(*this)
+#endif
 {
     // Register the UDP socket with the event loop.
     Gevent_loop->addFD(_udp_socket, *this);
@@ -1083,9 +1180,13 @@ TcpConnection::TcpConnection(const sockaddr_in& far_address,
     // Set up the input buffer.
     expandBuffer();
 
-#if defined(SMC_DEBUG)
-    // Uncomment to turn on state map debug printout.
+#if defined(FSM_DEBUG)
+    // Turn on state map debug printout.
+#ifdef CRTP
+    setDebugFlag(true);
+#else
     _fsm.setDebugFlag(true);
+#endif
 #endif
 
     return;
@@ -1122,7 +1223,11 @@ TcpConnection::~TcpConnection()
 //
 void TcpConnection::passiveOpen(unsigned short port)
 {
+#ifdef CRTP
+    PassiveOpen(port);
+#else
     _fsm.PassiveOpen(port);
+#endif
     return;
 } // end of TcpConnection::passiveOpen(unsigned short)
 
@@ -1132,7 +1237,11 @@ void TcpConnection::passiveOpen(unsigned short port)
 //
 void TcpConnection::activeOpen(const sockaddr_in& address)
 {
+#ifdef CRTP
+    ActiveOpen(&address);
+#else
     _fsm.ActiveOpen(&address);
+#endif
     return;
 } // end of TcpConnection::activeOpen(const sockaddr_in&)
 
@@ -1142,7 +1251,11 @@ void TcpConnection::activeOpen(const sockaddr_in& address)
 //
 void TcpConnection::acceptOpen(const TcpSegment& segment)
 {
+#ifdef CRTP
+    AcceptOpen(segment);
+#else
     _fsm.AcceptOpen(segment);
+#endif
     return;
 } // end of TcpConnection::acceptOpen(const TcpSegment&)
 

@@ -26,7 +26,7 @@
 //   and examples/ObjC.
 //
 // RCS ID
-// $Id$
+// Id: SmcCppGenerator.java,v 1.16 2015/02/16 21:43:09 cwrapp Exp
 //
 // CHANGE LOG
 // (See the bottom of this file.)
@@ -95,17 +95,17 @@ public final class SmcCppGenerator
      * %{ %} raw source code - if any
      *
      * #include <i>%include header file</i>
-    // #include "<i>context</i>_sm.<i>hsuffix</i>"
-    // (If the -headerd option is used, then this is generated:
-    // #include "<i>header dir</i>/<i>context</i>.<i>hsuffix</i>")
-    //
-    // using namespace statemap;
-    // using namespace <i>%import namespace</i>
-    //
-    // (put namespace a { namespace b ... if %package defined.)
-    //
-    // Static class declarations.
-    // <i>map name</i>_<i>state name</i> <i>map name</i>::<i>state</i>("<i>map name</i>::<i>state name</i>", <i>index</i>)
+     * #include "<i>context</i>_sm.<i>hsuffix</i>"
+     * (If the -headerd option is used, then this is generated:
+     * #include "<i>header dir</i>/<i>context</i>.<i>hsuffix</i>")
+     * 
+     * using namespace statemap;
+     * using namespace <i>%import namespace</i>
+     * 
+     * (put namespace a { namespace b ... if %package defined.)
+     * 
+     * Static class declarations.
+     * <i>map name</i>_<i>state name</i> <i>map name</i>::<i>state</i>("<i>map name</i>::<i>state name</i>", <i>index</i>)
      *   </code>
      * </pre>
      * @param fsm emit C# code for this finite state machine.
@@ -257,19 +257,49 @@ public final class SmcCppGenerator
         {
             _source.println();
             _source.print(_indent);
+            if (_crtpFlag)
+            {
+                _source.print("template<> ");
+            }
             _source.print("const int ");
             _source.print(fsmClassName);
+            if (_crtpFlag)
+            {
+                _source.print("<");
+                _source.print(context);
+                _source.print(">");
+            }
             _source.println("::MIN_INDEX = 0;");
             _source.print(_indent);
+            if (_crtpFlag)
+            {
+                _source.print("template<> ");
+            }
             _source.print("const int ");
             _source.print(fsmClassName);
+            if (_crtpFlag)
+            {
+                _source.print("<");
+                _source.print(context);
+                _source.print(">");
+            }
             _source.print("::MAX_INDEX = ");
             _source.print(--index);
             _source.println(";");
             _source.print(_indent);
+            if (_crtpFlag)
+            {
+                _source.print("template<> ");
+            }
             _source.print(context);
             _source.print("State* ");
             _source.print(fsmClassName);
+            if (_crtpFlag)
+            {
+                _source.print("<");
+                _source.print(context);
+                _source.print(">");
+            }
             _source.println("::_States[] = ");
             _source.print(_indent);
             _source.print("{");
@@ -299,17 +329,23 @@ public final class SmcCppGenerator
             _source.println();
             _source.print(_indent);
             _source.println("};");
-        }
 
-        // If serialization is supported, then output the valueOf
-        // method now.
-        if (_serialFlag == true)
-        {
+            // Output the valueOf method.
             _source.println();
             _source.print(_indent);
+            if (_crtpFlag)
+            {
+                _source.print("template<> ");
+            }
             _source.print(context);
             _source.print("State& ");
             _source.print(fsmClassName);
+            if (_crtpFlag)
+            {
+                _source.print("<");
+                _source.print(context);
+                _source.print(">");
+            }
             _source.println("::valueOf(int stateId)");
             _source.print(_indent);
             _source.println("{");
@@ -370,6 +406,12 @@ public final class SmcCppGenerator
                 _source.print(trans.getName());
                 _source.print("(");
                 _source.print(fsmClassName);
+                if (_crtpFlag)
+                {
+                    _source.print("<");
+                    _source.print(context);
+                    _source.print(">");
+                }
                 _source.print("& context");
 
                 params = trans.getParameters();
@@ -397,6 +439,12 @@ public final class SmcCppGenerator
         _source.print(context);
         _source.print("State::Default(");
         _source.print(fsmClassName);
+        if (_crtpFlag)
+        {
+            _source.print("<");
+            _source.print(context);
+            _source.print(">");
+        }
         _source.println("& context)");
         _source.print(_indent);
         _source.println("{");
@@ -560,6 +608,12 @@ public final class SmcCppGenerator
             _source.print(className);
             _source.print("::Entry(");
             _source.print(fsmClassName);
+            if (_crtpFlag)
+            {
+                _source.print("<");
+                _source.print(context);
+                _source.print(">");
+            }
             _source.println("& context)");
             _source.println();
             _source.println("{");
@@ -596,6 +650,12 @@ public final class SmcCppGenerator
             _source.print(className);
             _source.print("::Exit(");
             _source.print(fsmClassName);
+            if (_crtpFlag)
+            {
+                _source.print("<");
+                _source.print(context);
+                _source.print(">");
+            }
             _source.println("& context)");
             _source.println();
             _source.println("{");
@@ -671,6 +731,12 @@ public final class SmcCppGenerator
         _source.print(transName);
         _source.print("(");
         _source.print(fsmClassName);
+        if (_crtpFlag)
+        {
+            _source.print("<");
+            _source.print(context);
+            _source.print(">");
+        }
         _source.print("& context");
 
         // Add user-defined parameters.
@@ -726,7 +792,7 @@ public final class SmcCppGenerator
                     "        str << \"LEAVING STATE   : ");
                 _source.print(fqStateName);
                 _source.println("\"");
-                _source.println("            << std::endl;");
+                _source.println("                << std::endl;");
             }
 
             _source.print(_indent);
@@ -1708,7 +1774,7 @@ public final class SmcCppGenerator
 
 //
 // CHANGE LOG
-// $Log$
+// Log: SmcCppGenerator.java,v
 // Revision 1.16  2015/02/16 21:43:09  cwrapp
 // SMC v. 6.5.0
 //

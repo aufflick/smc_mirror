@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2015/08/02 19:44:35  cwrapp
+// Release 6.6.0 commit.
+//
 // Revision 1.7  2009/03/27 09:41:46  cwrapp
 // Added F. Perrad changes back in.
 //
@@ -1299,8 +1302,8 @@ public final class Telephone
 
         // Fill in the static associations between timer names
         // and their transition.
-        Class context = TelephoneContext.class;
-        Class[] parameters = new Class[0];
+        Class<TelephoneContext> context = TelephoneContext.class;
+        Class<?>[] parameters = new Class<?>[0];
 
         try
         {

@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2015/08/02 19:44:35  cwrapp
+// Release 6.6.0 commit.
+//
 // Revision 1.6  2007/02/21 13:40:45  cwrapp
 // Moved Java code to release 1.5.0
 //
@@ -138,7 +141,7 @@ public final class TaskController
         // Send a message only if there is a message to send.
         while (notSent == true && _messageQueue.size() > 0)
         {
-            message = (Message) _messageQueue.remove(0);
+            message = _messageQueue.remove(0);
             listener = _objectMap.get(message._recepient);
             if (listener != null)
             {

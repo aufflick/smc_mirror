@@ -33,6 +33,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.7  2015/08/02 19:44:35  cwrapp
+// Release 6.6.0 commit.
+//
 // Revision 1.6  2009/03/27 09:41:45  cwrapp
 // Added F. Perrad changes back in.
 //
@@ -50,6 +53,7 @@ extern int EWGreenTimer;
 
 %start StopMap::NorthSouthGreen
 %class Stoplight
+%fsmclass StoplightContext
 %include "stoplightdefs.h"
 %header stoplight.h
 %package cpp_ex4

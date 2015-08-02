@@ -33,6 +33,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2015/08/02 19:44:35  cwrapp
+// Release 6.6.0 commit.
+//
 // Revision 1.9  2015/02/16 21:43:06  cwrapp
 // SMC v. 6.5.0
 //
@@ -117,13 +120,19 @@
 
 namespace cpp_ex4
 {
+#ifdef CRTP
+    class Stoplight : public StoplightContext<Stoplight>
+#else
     class Stoplight
+#endif
     {
     // Member data.
     public:
     protected:
     private:
+#ifndef CRTP
         StoplightContext _fsm;
+#endif
 
     // Member functions.
     public:
@@ -142,8 +151,14 @@ namespace cpp_ex4
 
         // This routine is called by SigalmHandler()
         // when a timer expires.
-        inline void Timeout()
-            { _fsm.Timeout(); };
+        inline void SigTimeout()
+            {
+#ifdef CRTP
+                Timeout();
+#else
+                _fsm.Timeout();
+#endif
+            };
 
         // Sets the initial state of the state map and the
         // initial timer.

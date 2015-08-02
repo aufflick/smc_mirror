@@ -190,6 +190,13 @@ class FSMContext {
     public function setState($state) {
         if (! $state instanceof State)
             throw new Exception('$state should be of class State');
+
+        // If _state is not null, then this means that
+        // clearState() was not called and _previous_state was
+        // not set. Do so now.
+        if ($this->_state != NULL)
+            $this->_previous_state = $this->_state;
+
         $this->_state = $state;
         if ($this->_debug_flag)
             fwrite($this->_debug_stream, "ENTER STATE     : {$this->_state->getName()}\n");
@@ -210,8 +217,15 @@ class FSMContext {
     public function pushState($state) {
         if (! $state instanceof State)
             throw new Exception('$state should be of class State');
-        if ($this->_state != NULL)
+        if ($this->_state != NULL) {
+            // If _state is not null, then this means that
+            // clearState() was not called and _previous_state was
+            // not set. Do so now.
+            $this->_previous_state = $this->_state;
+
             array_push($this->_state_stack, $this->_state);
+        }
+
         $this->_state = $state;
         if ($this->_debug_flag)
             fwrite($this->_debug_stream, "PUSH TO STATE   : {$this->_state->getName()}\n");
@@ -224,6 +238,12 @@ class FSMContext {
                 fwrite($this->_debug_stream, "POPPING ON EMPTY STATE STACK.\n");
             throw new Exception('empty state stack');
         } else {
+            // If _state is not null, then this means that
+            // clearState() was not called and _previous_state was
+            // not set. Do so now.
+            if ($this->_state != NULL)
+                $this->_previous_state = $this->_state;
+
             $this->_state = array_pop($this->_state_stack);
             if ($this->_debug_flag)
                 fwrite($this->_debug_stream, "POP TO STATE    : {$this->_state->getName()}\n");

@@ -680,6 +680,15 @@ public final class SmcJavaGenerator
             "    //-----------------------------------------------------------");
         _source.println("    // Member data.");
         _source.println("    //");
+        _source.println();
+        _source.println(
+            "        //-------------------------------------------------------");
+        _source.println("    // Constants.");
+        _source.println("    //");
+        _source.println();
+        _source.println(
+            "        private static final long serialVersionUID = 1L;");
+
         _source.println("    }");
 
         // Have each map print out its source code now.
@@ -1950,6 +1959,9 @@ public final class SmcJavaGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.14  2015/08/02 19:44:36  cwrapp
+// Release 6.6.0 commit.
+//
 // Revision 1.13  2013/09/02 14:45:58  cwrapp
 // SMC 6.3.0 commit.
 //

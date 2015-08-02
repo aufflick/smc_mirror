@@ -37,7 +37,8 @@ LIB_SOURCES=    FSMContext.java \
                 TransitionUndefinedException.java \
                 StateUndefinedException.java \
 		FSMContext7.java \
-		State7.java
+		State7.java \
+		TransitionHandle.java
 
 JAVAC_FLAGS=    -d . -g -source 1.7 -target 1.7
 JAR_FLAGS=      cvf

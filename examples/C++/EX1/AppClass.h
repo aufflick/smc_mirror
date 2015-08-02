@@ -33,6 +33,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.6  2015/08/02 19:44:34  cwrapp
+// Release 6.6.0 commit.
+//
 // Revision 1.5  2014/09/06 19:53:15  fperrad
 // remove hard tab
 //
@@ -45,10 +48,16 @@
 
 #include "AppClass_sm.h"
 
+#ifdef CRTP
+class AppClass : public AppClassContext<AppClass>
+#else
 class AppClass
+#endif
 {
 private:
+#ifndef CRTP
     AppClassContext _fsm;
+#endif
 
     bool isAcceptable;
         // If a string is acceptable, then this variable is set to YES;

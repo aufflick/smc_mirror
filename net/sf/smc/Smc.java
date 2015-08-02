@@ -128,9 +128,11 @@ public final class Smc
         _version = VERSION;
         _debugLevel = SmcCodeGenerator.NO_DEBUG_OUTPUT;
         _nostreams = false;
+        _crtp = false;
         _sync = false;
         _noex = false;
         _nocatch = false;
+        _stateStackSize = 0;
         _serial = false;
         _castType = "dynamic_cast";
         _graphLevel = SmcCodeGenerator.GRAPH_LEVEL_0;
@@ -146,6 +148,7 @@ public final class Smc
         _accessLevel = null;
         _generic = false;
         _java7Flag = false;
+        _protocol = false;
 
         // Process the command line.
         if (parseArgs(args) == false)
@@ -206,13 +209,13 @@ public final class Smc
                         System.out.println("ms]");
                     }
 
-					if ( parser.getMessages().size() > 0 )
-					{
+                    if ( parser.getMessages().size() > 0 )
+                    {
                         // Output the parser's messages.
                         _outputMessages(_sourceFileName,
                                         System.err,
                                         parser.getMessages());
-					}
+                    }
 
                     if (fsm == null)
                     {
@@ -532,6 +535,23 @@ public final class Smc
                     argsConsumed = 2;
                 }
             }
+            else if (args[i].startsWith("-crtp") == true)
+            {
+                if (_supportsOption(CRTP_FLAG) == false)
+                {
+                    retcode = false;
+                    _errorMsg =
+                        _targetLanguage.name() +
+                        " does not support " +
+                        CRTP_FLAG +
+                        ".";
+                }
+                else
+                {
+                    _crtp = true;
+                    argsConsumed = 1;
+                }
+            }
             else if (args[i].equals("-d") == true)
             {
                 // -d should be followed by a directory.
@@ -758,6 +778,70 @@ public final class Smc
                 else
                 {
                     _nocatch = true;
+                    argsConsumed = 1;
+                }
+            }
+            else if (args[i].startsWith("-stac") == true)
+            {
+                if (_supportsOption(STACK_FLAG) == false)
+                {
+                    retcode = false;
+                    _errorMsg =
+                        _targetLanguage.name() +
+                        " does not support " +
+                        STACK_FLAG +
+                        ".";
+                }
+                else if ((i + 1) == args.length ||
+                         args[i+1].startsWith("-") == true)
+                {
+                    retcode = false;
+                    _errorMsg =
+                        STACK_FLAG +
+                        " not followed by an integer value.";
+                }
+                else
+                {
+                    try
+                    {
+                        _stateStackSize =
+                            Integer.parseInt(args[i+1]);
+
+                        if (_stateStackSize <= 0)
+                        {
+                            retcode = false;
+                            _errorMsg =
+                                STACK_FLAG +
+                                " not followed by an integer value > 0.";
+                        }
+                        else
+                        {
+                            argsConsumed = 2;
+                        }
+                    }
+                    catch (NumberFormatException numberex)
+                    {
+                        retcode = false;
+                        _errorMsg =
+                            STACK_FLAG +
+                            " not followed by a valid integer.";
+                    }
+                }
+            }
+            else if (args[i].startsWith("-proto") == true)
+            {
+                if (_supportsOption(USE_PROTOCOL_FLAG) == false)
+                {
+                    retcode = false;
+                    _errorMsg =
+                        _targetLanguage.name() +
+                        " does not support " +
+                        USE_PROTOCOL_FLAG +
+                        ".";
+                }
+                else
+                {
+                    _protocol = true;
                     argsConsumed = 1;
                 }
             }
@@ -1104,6 +1188,7 @@ public final class Smc
         stream.print(" [-suffix suffix]");
         stream.print(" [-g | -g0 | -g1]");
         stream.print(" [-nostreams]");
+        stream.print(" [-crtp]");
         stream.print(" [-version]");
         stream.print(" [-verbose]");
         stream.print(" [-vverbose]");
@@ -1111,6 +1196,8 @@ public final class Smc
         stream.print(" [-sync]");
         stream.print(" [-noex]");
         stream.print(" [-nocatch]");
+        stream.print(" [-stack max-stack-depth]");
+        stream.print(" [-protocol]");
         stream.print(" [-serial]");
         stream.print(" [-return]");
         stream.print(" [-reflect]");
@@ -1141,7 +1228,10 @@ public final class Smc
             "\t-g1       Add level 1 debugging output to generated code");
         stream.println(
             "\t          (level 0 output plus state Entry and Exit actions)");
-        stream.println("\t-nostreams Do not use C++ iostreams ");
+        stream.println("\t-nostreams Do not use C++ iostreams");
+        stream.print("\t          ");
+        stream.println("(use with -c++ only)");
+        stream.println("\t-crtp     Generate state machine using CRTP");
         stream.print("\t          ");
         stream.println("(use with -c++ only)");
         stream.print("\t-version  Print smc version ");
@@ -1163,6 +1253,15 @@ public final class Smc
         stream.print(
             "\t-nocatch  Do not generate try/catch/rethrow ");
         stream.println("code (not recommended)");
+        stream.println("\t-stack    Specifies a fixed-size state stack");
+        stream.print("\t          ");
+        stream.println("using no dynamic memory allocation.");
+        stream.print("\t          ");
+        stream.println("(use with -c++ only)");
+        stream.println(
+            "\t-protocol FSM context extends a @protocol and referenced via protocol");
+        stream.print("\t          ");
+        stream.println("(use with -objc only)");
         stream.println(
             "\t-serial   Generate serialization code");
         stream.print("\t-return   ");
@@ -1319,7 +1418,9 @@ public final class Smc
         _java7Flag =
             (_targetLanguage.language() == TargetLanguage.JAVA7);
 
-        options = new SmcOptions(fsm.getSourceFileName(),
+        options = new SmcOptions(APP_NAME,
+                                 VERSION,
+                                 fsm.getSourceFileName(),
                                  srcFileBase,
                                  srcFilePath,
                                  headerPath,
@@ -1331,11 +1432,14 @@ public final class Smc
                                  _noex,
                                  _nocatch,
                                  _nostreams,
+                                 _crtp,
+                                 _stateStackSize,
                                  _reflection,
                                  _sync,
                                  _generic,
                                  _java7Flag,
-                                 _accessLevel);
+                                 _accessLevel,
+                                 _protocol);
 
         // Create the header file name and generator -
         // if the language uses a header file.
@@ -1634,6 +1738,11 @@ public final class Smc
     // the debug messages.
     private static boolean _nostreams;
 
+    // If true, then user supplied class has to be derived
+    // from state machine.
+    // See CRTP ("curiously recurring template pattern").
+    private static boolean _crtp;
+
     // If true, then generate thread-safe Java code.
     private static boolean _sync;
 
@@ -1642,6 +1751,9 @@ public final class Smc
 
     // If true, then do *not* generate try/catch/rethrow code.
     private static boolean _nocatch;
+
+    // If > 0, then this is the state stack's fixed-length.
+    private static int _stateStackSize;
 
     // If true, then generate unique integer IDs for each state.
     private static boolean _serial;
@@ -1676,6 +1788,11 @@ public final class Smc
     // Use this access identifier for the generated classes.
     private static String _accessLevel;
 
+    // Use-defined FSM context class extends a @protocol.
+    // Generated code references the context class via the
+    // protocol.
+    private static boolean _protocol;
+
     // Store command line error messages here.
     private static String _errorMsg;
 
@@ -1702,7 +1819,7 @@ public final class Smc
     /* package */ static Language _targetLanguage;
 
     private static final String APP_NAME = "smc";
-    private static final String VERSION = "v. 6.2.0";
+    private static final String VERSION = "v. 6.6.0";
 
     // Command line option flags.
     private static final String ACCESS_FLAG = "-access";
@@ -1720,6 +1837,8 @@ public final class Smc
     private static final String NO_CATCH_FLAG = "-nocatch";
     private static final String NO_EXCEPTIONS_FLAG = "-noex";
     private static final String NO_STREAMS_FLAG = "-nostreams";
+    private static final String CRTP_FLAG = "-crtp";
+    private static final String STACK_FLAG = "-static";
     private static final String REFLECT_FLAG = "-reflect";
     private static final String RETURN_FLAG = "-return";
     private static final String SERIAL_FLAG = "-serial";
@@ -1729,6 +1848,7 @@ public final class Smc
     private static final String VERBOSE_FLAG = "-verbose";
     private static final String VERSION_FLAG = "-version";
     private static final String VVERBOSE_FLAG = "-vverbose";
+    private static final String USE_PROTOCOL_FLAG = "-protocol";
 
     private static final String PACKAGE_LEVEL = "package";
 
@@ -1887,10 +2007,12 @@ public final class Smc
         // +   -nocatch:  all
         // +      -noex:  C++
         // + -nostreams:  C++
+        // +  -protocol:  Objective-C
         // +   -reflect:  C#, Java, JavaScript, TCL, VB, Lua, Perl,
         //                PHP, Python, Ruby, Groovy, Scala
         // +    -return:  all
         // +    -serial:  C#, C++, Java, Tcl, VB, Groovy, Scala
+        // +    -static:  C++
         // +    -suffix:  all
         // +      -sync:  C#, Java, VB, Groovy, Scala
         // +   -verbose:  all
@@ -1922,6 +2044,8 @@ public final class Smc
         _optionMap.put(CAST_FLAG, languages);
         _optionMap.put(NO_EXCEPTIONS_FLAG, languages);
         _optionMap.put(NO_STREAMS_FLAG, languages);
+        _optionMap.put(CRTP_FLAG, languages);
+        _optionMap.put(STACK_FLAG, languages);
 
         // The -access option.
         languages = new ArrayList<Language>();
@@ -1994,6 +2118,11 @@ public final class Smc
         languages.add(_languages[TargetLanguage.JAVA.ordinal()]);
         languages.add(_languages[TargetLanguage.JAVA7.ordinal()]);
         _optionMap.put(GENERIC7_FLAG, languages);
+
+        // The -protocol option.
+        languages = new ArrayList<Language>();
+        languages.add(_languages[TargetLanguage.OBJECTIVE_C.ordinal()]);
+        _optionMap.put(USE_PROTOCOL_FLAG, languages);
 
         // Define the allowed access level keywords for each language
         // which supports the -access option.

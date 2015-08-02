@@ -30,6 +30,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2015/08/02 19:44:35  cwrapp
+// Release 6.6.0 commit.
+//
 // Revision 1.7  2009/03/27 09:41:46  cwrapp
 // Added F. Perrad changes back in.
 //
@@ -86,10 +89,10 @@ public final class Stoplight
         //     x[0]   x[1] x[2]    x[3]
         //
         _positions = new Point[4];
-        _positions[0] = new Point((((int) (canvasWidth / 2)) -
-                                   ((int) (_size.width / 2)) - _size.height),
-                                  (((int) (canvasHeight / 2)) -
-                                   ((int) (_size.width / 2)) - _size.height));
+        _positions[0] = new Point(((canvasWidth / 2) -
+                                   (_size.width / 2) - _size.height),
+                                  ((canvasHeight / 2) -
+                                   (_size.width / 2) - _size.height));
         _positions[1] = new Point((_positions[0].x + _size.height),
                                   (_positions[0].y + _size.height));
         _positions[2] = new Point((_positions[1].x + _size.width),
@@ -148,8 +151,8 @@ public final class Stoplight
     {
         // If the vehicle is heading north, it will pass under
         // the east light.
-        if (direction.x == _owner.NORTH.x &&
-            direction.y == _owner.NORTH.y)
+        if (direction.x == TrafficCanvas.NORTH.x &&
+            direction.y == TrafficCanvas.NORTH.y)
         {            lightLocation.x = _positions[2].x;
             lightLocation.y = _positions[1].y;
             lightSize.width = _size.height;
@@ -157,8 +160,8 @@ public final class Stoplight
         }
         // If the vehicle is heading east, it will pass under the
         // south light.
-        else if (direction.x == _owner.EAST.x &&
-                 direction.y == _owner.EAST.y)
+        else if (direction.x == TrafficCanvas.EAST.x &&
+                 direction.y == TrafficCanvas.EAST.y)
         {
             lightLocation.x = _positions[1].x;
             lightLocation.y = _positions[2].y;
@@ -167,8 +170,8 @@ public final class Stoplight
         }
         // If the vehicle is heading south, it will pass under
         // the west light.
-        else if (direction.x == _owner.SOUTH.x &&
-                 direction.y == _owner.SOUTH.y)
+        else if (direction.x == TrafficCanvas.SOUTH.x &&
+                 direction.y == TrafficCanvas.SOUTH.y)
         {
             lightLocation.x = _positions[0].x;
             lightLocation.y = _positions[1].y;
@@ -177,8 +180,8 @@ public final class Stoplight
         }
         // If the vehicle is heading west, it will pass under the
         // north light.
-        else if (direction.x == _owner.WEST.x &&
-                 direction.y == _owner.WEST.y)
+        else if (direction.x == TrafficCanvas.WEST.x &&
+                 direction.y == TrafficCanvas.WEST.y)
         {
             lightLocation.x = _positions[1].x;
             lightLocation.y = _positions[0].y;

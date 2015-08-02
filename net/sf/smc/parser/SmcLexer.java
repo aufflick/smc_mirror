@@ -895,7 +895,8 @@ import java.util.Map;
     /* package */ static final int DOLLAR        = 29;
     /* package */ static final int JUMP          = 30;
     /* package */ static final int FSM_CLASS_NAME  = 31;
-    /* package */ static final int TOKEN_COUNT   = FSM_CLASS_NAME + 1;
+    /* package */ static final int FSM_FILE_NAME = 32;
+    /* package */ static final int TOKEN_COUNT   = FSM_FILE_NAME + 1;
 
     // There are four SMC keywords: entry, exit, push and pop.
     private static final int KEYWORD_COUNT = 4;
@@ -934,7 +935,8 @@ import java.util.Map;
         _TypeName[SmcLexer.HEADER_FILE]   = "HEADER_FILE";
         _TypeName[SmcLexer.INCLUDE_FILE]  = "INCLUDE_FILE";
         _TypeName[SmcLexer.PACKAGE_NAME]  = "PACKAGE_NAME";
-        _TypeName[SmcLexer.FSM_CLASS_NAME]  = "FSM_CLASS_NAME";
+        _TypeName[SmcLexer.FSM_CLASS_NAME] = "FSM_CLASS_NAME";
+        _TypeName[SmcLexer.FSM_FILE_NAME] = "FSM_FILE_NAME";
         _TypeName[SmcLexer.IMPORT]        = "IMPORT";
         _TypeName[SmcLexer.DECLARE]       = "DECLARE";
         _TypeName[SmcLexer.LEFT_BRACE]    = "LEFT_BRACE";
@@ -977,6 +979,8 @@ import java.util.Map;
                                SmcLexer.PACKAGE_NAME);
         _PercentKeywordMap.put("%fsmclass",
                                SmcLexer.FSM_CLASS_NAME);
+        _PercentKeywordMap.put("%fsmfile",
+                               SmcLexer.FSM_FILE_NAME);
         _PercentKeywordMap.put("%import", SmcLexer.IMPORT);
         _PercentKeywordMap.put("%declare", SmcLexer.DECLARE);
         _PercentKeywordMap.put("%access", SmcLexer.ACCESS);

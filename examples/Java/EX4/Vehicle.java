@@ -30,6 +30,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.8  2015/08/02 19:44:35  cwrapp
+// Release 6.6.0 commit.
+//
 // Revision 1.7  2009/03/27 09:41:46  cwrapp
 // Added F. Perrad changes back in.
 //
@@ -155,10 +158,10 @@ public final class Vehicle
         // on what direction this vehicle is moving.
         // For east and west, only check the x axis. For north
         // and south, only check the y axis.
-        if ((_direction.x == _owner.EAST.x &&
-             _direction.y == _owner.EAST.y) ||
-            (_direction.x == _owner.WEST.x &&
-             _direction.y == _owner.WEST.y))
+        if ((_direction.x == TrafficCanvas.EAST.x &&
+             _direction.y == TrafficCanvas.EAST.y) ||
+            (_direction.x == TrafficCanvas.WEST.x &&
+             _direction.y == TrafficCanvas.WEST.y))
         {
             // Is entire vehicle clear? It is if the vehicle's
             // left is to the light's right or the vehicle's

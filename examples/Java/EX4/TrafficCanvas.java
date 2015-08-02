@@ -29,6 +29,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.9  2015/08/02 19:44:35  cwrapp
+// Release 6.6.0 commit.
+//
 // Revision 1.8  2009/03/27 09:41:46  cwrapp
 // Added F. Perrad changes back in.
 //
@@ -793,6 +796,8 @@ public final class TrafficCanvas
     private static final int EASTLIGHT  = 2;
     private static final int WESTLIGHT  = 3;
 
+    private static final long serialVersionUID = 1L;
+
     static
     {
         // Speed is built into the direction.
@@ -811,8 +816,7 @@ public final class TrafficCanvas
         ROAD_WIDTH = CANVAS_SIZE.width - (FIELD_SIZE.width * 2);
         LANE_WIDTH = ROAD_WIDTH / 2;
         VEHICLE_SIZE = new Dimension(6, 6);
-        CURB_OFFSET =
-            (int) ((LANE_WIDTH - VEHICLE_SIZE.width) / 2);
+        CURB_OFFSET = ((LANE_WIDTH - VEHICLE_SIZE.width) / 2);
 
         RECT_CORNERS = new Point[5];
         RECT_CORNERS[0] = new Point(0, 0);

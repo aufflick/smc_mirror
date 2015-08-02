@@ -30,6 +30,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2015/08/02 19:44:35  cwrapp
+// Release 6.6.0 commit.
+//
 // Revision 1.9  2009/11/25 22:30:18  cwrapp
 // Fixed problem between %fsmclass and sm file names.
 //
@@ -475,8 +478,7 @@ public final class TaskManager
         {
             TaskController control = new TaskController();
 
-            _runningTask =
-                    (Task) _runnableTaskQueue.remove(taskIndex);
+            _runningTask = _runnableTaskQueue.remove(taskIndex);
              sendMessage(2,
                          "Attempting to run task " +
                          _runningTask.getName() +

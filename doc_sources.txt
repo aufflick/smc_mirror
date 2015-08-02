@@ -3,6 +3,7 @@
 ./lib/Java/State.java
 ./lib/Java/State7.java
 ./lib/Java/StateUndefinedException.java
+./lib/Java/TransitionHandle.java
 ./lib/Java/TransitionUndefinedException.java
 ./net/sf/smc/Smc.java
 ./net/sf/smc/SmcSyntaxChecker.java

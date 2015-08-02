@@ -881,7 +881,7 @@ public abstract class TcpConnection
         {
             Class<TcpConnectionContext> context =
                 TcpConnectionContext.class;
-            Class[] parameters = new Class[1];
+            Class<?>[] parameters = new Class<?>[1];
             Method undefined;
             int i;
 

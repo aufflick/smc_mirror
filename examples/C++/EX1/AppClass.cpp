@@ -30,6 +30,9 @@
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.10  2015/08/02 19:44:34  cwrapp
+// Release 6.6.0 commit.
+//
 // Revision 1.9  2014/09/07 17:16:44  fperrad
 // explicit condition
 //
@@ -59,15 +62,48 @@
 #include "AppClass.h"
 
 AppClass::AppClass()
+#ifdef CRTP
+: isAcceptable(false)
+#else
 : _fsm(*this),
   isAcceptable(false)
+#endif
 {
-    // Uncomment to see debug output.
-    // _fsm.setDebugFlag(true);
+#ifdef FSM_DEBUG
+#ifdef CRTP
+    setDebugFlag(true);
+#else
+    _fsm.setDebugFlag(true);
+#endif
+#endif
 }
 
 bool AppClass::CheckString(const char *theString)
 {
+#ifdef CRTP
+    enterStartState();
+    while(*theString != '\0')
+    {
+        switch(*theString)
+        {
+        case '0':
+            Zero();
+            break;
+
+        case '1':
+            One();
+            break;
+
+        default:
+            Unknown();
+            break;
+        }
+        ++theString;
+    }
+
+    // end of string has been reached - send the EOS transition.
+    EOS();
+#else
     _fsm.enterStartState();
     while(*theString != '\0')
     {
@@ -90,6 +126,7 @@ bool AppClass::CheckString(const char *theString)
 
     // end of string has been reached - send the EOS transition.
     _fsm.EOS();
+#endif
 
     return isAcceptable;
 }

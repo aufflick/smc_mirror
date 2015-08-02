@@ -39,6 +39,9 @@
  *
  * CHANGE LOG
  * $Log$
+ * Revision 1.10  2015/08/02 19:44:36  cwrapp
+ * Release 6.6.0 commit.
+ *
  * Revision 1.9  2013/12/15 16:31:20  fperrad
  * full refactor of JavaScript
  *
@@ -207,6 +210,12 @@ Start
 
 	FSM_CLASS_NAME(token: SmcLexer.Token)
 		FsmClassName
+		{
+            setHeaderLine(token.getLineNumber());
+		}
+
+	FSM_FILE_NAME(token: SmcLexer.Token)
+		FsmFileName
 		{
             setHeaderLine(token.getLineNumber());
 		}
@@ -393,7 +402,23 @@ FsmClassName
             error("Missing name after %FsmClassName.",
                   ctxt.getLineNumber());
         }
-} // end of state Context
+} // end of state FsmClassName
+
+FsmFileName
+{
+    WORD(token: SmcLexer.Token)
+        Start
+        {
+            setFsmFileName(token.getValue());
+        }
+
+    Default
+        StartError
+        {
+            error("Missing name after %FsmClassName.",
+                  ctxt.getLineNumber());
+        }
+} // end of state FsmFileName
 
 Import
     Entry
@@ -484,6 +509,12 @@ StartError
 
 	FSM_CLASS_NAME(token: SmcLexer.Token)
 		FsmClassName
+		{
+            setHeaderLine(token.getLineNumber());
+		}
+
+	FSM_FILE_NAME(token: SmcLexer.Token)
+		FsmFileName
 		{
             setHeaderLine(token.getLineNumber());
 		}

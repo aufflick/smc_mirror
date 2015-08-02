@@ -433,6 +433,13 @@ public final class SmcParser
         _fsm.setFsmClassName(name.trim());
         return;
     }
+
+    /* package */ void setFsmFileName(String name)
+    {
+        _fsm.setFsmTargetFile(name.trim());
+        return;
+    }
+
     /* package */ void setPackageName(String name)
     {
         String pkg = _fsm.getPackage();
@@ -450,7 +457,6 @@ public final class SmcParser
 
         return;
     }
-
 	
     /* package */ void addImport(String name)
     {
@@ -1806,6 +1812,10 @@ public final class SmcParser
             _TransMethod[SmcLexer.FSM_CLASS_NAME] =
                 fsmClass.getDeclaredMethod("FSM_CLASS_NAME",
                                            paramTypes);
+            transName = "FSM_FILE_NAME";
+            _TransMethod[SmcLexer.FSM_FILE_NAME] =
+                fsmClass.getDeclaredMethod("FSM_FILE_NAME",
+                                           paramTypes);
             transName = "IMPORT";
             _TransMethod[SmcLexer.IMPORT] =
                 fsmClass.getDeclaredMethod("IMPORT",
@@ -1894,6 +1904,9 @@ public final class SmcParser
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.13  2015/08/02 19:44:36  cwrapp
+// Release 6.6.0 commit.
+//
 // Revision 1.12  2015/02/16 21:43:09  cwrapp
 // SMC v. 6.5.0
 //

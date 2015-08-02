@@ -167,10 +167,7 @@ public final class SmcHeaderObjCGenerator
         _source.println(";");
 
         // Forward declare the application class.
-        _source.print(_indent);
-        _source.print("@class ");
-        _source.print(context);
-        _source.println(";");
+        printContextForwardDeclaration(context);
 
         // Do user-specified forward declarations now.
         for (String declaration: fsm.getDeclarations())
@@ -256,12 +253,6 @@ public final class SmcHeaderObjCGenerator
         }
 
         // Generate the FSM context class.
-        // class FooContext :
-        //     public statemap::FSMContext
-        // {
-        // public:
-        //     FOOContext(FOO& owner)
-        //
         _source.print(_indent);
         _source.print("@interface ");
         _source.print(fsmClassName);
@@ -271,28 +262,28 @@ public final class SmcHeaderObjCGenerator
 
         _source.print(_indent);
         _source.print("    __weak ");
-        _source.print(context);
-        _source.println(" *_owner;");
+        printContextType(context);
+        _source.println(" _owner;");
 
         _source.print(_indent);
         _source.println("}");
 
         _source.print(_indent);
         _source.print("- (id)initWithOwner:(");
-        _source.print(context);
-        _source.print("*)");
+        printContextType(context);
+        _source.print(")");
         _source.println("owner;");
 
         _source.print(_indent);
         _source.print("- (id)initWithOwner:(");
-        _source.print(context);
-        _source.print("*)");
+        printContextType(context);
+        _source.print(")");
         _source.println("owner state:(SMCState*)aState;");
 
         _source.print(_indent);
         _source.print("- (");
-        _source.print(context);
-        _source.println("*)owner;");
+        printContextType(context);
+        _source.println(")owner;");
 
         _source.print(_indent);
         _source.print("- (" );
@@ -564,6 +555,52 @@ public final class SmcHeaderObjCGenerator
     // end of SmcVisitor Abstract Method Impelementation.
     //-----------------------------------------------------------
 
+    /**
+     * Outputs either "@protocol" or "@class" based on whether
+     * the "-protocol" command line option was specified.
+     * @param context context class name.
+     */
+    private void printContextForwardDeclaration(final String context)
+    {
+        _source.print(_indent);
+        if (_useProtocolFlag == true)
+        {
+            _source.print("@protocol ");
+        }
+        else
+        {
+            _source.print("@class ");
+        }
+
+        _source.print(context);
+        _source.println(";");
+
+        return;
+    } // end of printContextForwardDeclaration(String)
+
+    /**
+     * Outputs the appropriate context declaration based on
+     * whether the "-protocol" command line option was specified
+     * or not.
+     * @param context context class name.
+     */
+    private void printContextType(final String context)
+    {
+        if (_useProtocolFlag == true)
+        {
+            _source.print("id<");
+            _source.print(context);
+            _source.print(">");
+        }
+        else
+        {
+            _source.print(context);
+            _source.print("*");
+        }
+
+        return;
+    } // end of printContextType(String)
+
 //---------------------------------------------------------------
 // Member data
 //
@@ -572,6 +609,9 @@ public final class SmcHeaderObjCGenerator
 //
 // CHANGE LOG
 // $Log$
+// Revision 1.11  2015/08/02 19:44:36  cwrapp
+// Release 6.6.0 commit.
+//
 // Revision 1.10  2015/02/16 21:43:09  cwrapp
 // SMC v. 6.5.0
 //
